@@ -58,6 +58,7 @@ import {DropdownDirective} from "./shared/dropdown.directive";
 import { HeaderComponent } from './header/header.component';
 import {AngularSplitModule} from 'angular-split';
 import { ScreenComponent } from './screen/screen.component';
+
 @NgModule({
   declarations: [
     AppComponent,

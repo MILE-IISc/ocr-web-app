@@ -1,0 +1,20 @@
+.navbar {
+    width: 100%;
+    background-color: gainsboro;
+    
+    height: 50px;
+  }
+  
+  
+  .toolbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    background-color: #1976d2;
+    color: white;
+    font-weight: 600;
+  }

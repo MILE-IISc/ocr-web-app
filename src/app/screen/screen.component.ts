@@ -9,7 +9,7 @@ import * as $ from 'jquery';
 })
 export class ScreenComponent implements OnInit {
   title = 'Layout';
-  
+  value = 'horizontal';
 
   constructor() { }
 
@@ -30,7 +30,13 @@ export class ScreenComponent implements OnInit {
     }
 }
 
-  
+asVertical(){
+  this.value='horizontal';
+}
+
+asHorizontal(){
+  this.value='vertical';
+}
 
 drag(){
   var isResizing = false;
