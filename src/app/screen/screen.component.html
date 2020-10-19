@@ -1,0 +1,68 @@
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+
+
+
+<style>
+
+    .toolbar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        background-color: #1976d2;
+        color: white;
+        font-weight: 600;
+      }
+    
+      .toolbar img {
+        margin: 0 16px;
+      }
+    </style>
+     
+    
+    <div class="toolbar" role="banner">
+      <span>LipiGnani - The Kannada OCR</span>
+        <div class="spacer"></div>
+        <a aria-label="Angular on twitter" target="_blank" rel="noopener" href="https://twitter.com/angular" title="Twitter">
+          <svg id="twitter-logo" height="24" data-name="Logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+            <rect width="400" height="400" fill="none"/>
+            </svg>
+        </a>
+    </div>
+    <input #fileUpload type="file" (click)="fileUpload.value = null"(change)="importFile($event)" style="display:none"
+  accept="image/*">
+  <button id="butGetImage" (click)="fileUpload.click()"  ></button>
+  <div  style="width: 2000px; height: 1000px;  background-color: aqua; ">
+    <as-split direction="horizontal">
+                      <as-split-area size="40">
+                         
+                           
+                           
+                           <div id = "wrapper" >
+                            <div id = "imageForOCR" >
+                              <div class = "zoomContainer">
+                                  <div id = "zoomButContainer">
+                                    <button id = "butZoomIn" (click) = "zoomInFun()"><span>Zoom in</span></button>
+                                    <button id = "butZoomOut" (click) = "zoomOutFun()"><span>Zoom out</span></button>
+                                  </div>
+                              </div>
+                             <img [src]="localUrl" [style.width]="imgWidth" *ngIf="localUrl" id="imgToRead" /></div>
+                            <!--<div id = "grabber" (mousemove)="drag()"></div>-->
+                            <!--<div id = "textFromOCR"  contenteditable="true">
+                              <textarea rows="10" cols="40"></textarea>  </div>-->
+                          </div>
+
+                         
+                         
+                      </as-split-area>
+                      <as-split-area size="60" >
+                          <p> hello second block!!</p>
+                      </as-split-area>
+                  </as-split>
+  </div>

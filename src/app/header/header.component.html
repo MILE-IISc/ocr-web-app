@@ -1,0 +1,92 @@
+<nav class= "navbar navbar-default" > 
+    <div class = "container-fluid">
+      
+  <div class = "collapse navbar-collapse" >
+    <ul class="nav navbar-nav navbar-left" >
+      <li class= "dropdown" appDropdown>
+        <a href= '#' class = "dropdown-toggle" role = "button">File<span class="caret"></span></a>
+        <ul class= "dropdown-menu">
+
+          
+<input #fileUpload type="file" (click)="fileUpload.value = null"(change)="importFile($event)" style="display:none"
+  accept="image/*">
+          <li><a href = "#" id="butGetImage" (click)="fileUpload.click()" 
+            
+
+
+            >Open Image</a></li>
+          <li><a href = "#">Open Directory</a></li>
+          <li><a href = "#">Save</a></li>
+          <li><a href = "#">Export As</a></li>
+          <li><a href = "#">Export Setting</a></li>
+          <li><a href = "#">Close</a></li>
+          <li><a href = "#">Exit</a></li>
+        </ul>
+      </li>
+    </ul>
+    <ul class="nav navbar-nav navbar-left" >
+      <li class= "dropdown" >
+        <a href= '#' class = "dropdown-toggle" role = "button">Run<span class="caret"></span></a>
+        <ul class= "dropdown-menu">
+          <li><a href = "#">Language</a></li>
+          <li><a href = "#">Scanning Resolution</a></li>
+          <li><a href = "#">Rotate Image</a></li>
+          <li><a href = "#">Run OCR</a></li>
+          <li><a href = "#">Word Correct</a></li>
+          <li><a href = "#">Detect paragraphs</a></li>
+          <li><a href = "#">PrineLine/word Boundaries</a></li>
+          <li><a href = "#">Refactor Filenames</a></li>
+          <li><a href = "#">Create Git Repo</a></li>
+          <li><a href = "#">Find and Replace</a></li>
+          <li><a href = "#">OCR Setting</a></li>
+        </ul>
+      </li>
+    </ul>
+    <ul class="nav navbar-nav navbar-left" >
+      <li class= "dropdown" >
+        <a href= '#' class = "dropdown-toggle" role = "button">View<span class="caret"></span></a>
+        <ul class= "dropdown-menu">
+          <li><a href = "#">Image Layout</a></li>
+          <li><a href = "#">Text Editor</a></li>
+          <li><a href = "#">Selection Mode</a></li>
+          <li><a href = "#">Show File Link</a></li>
+          <li><a href = "#">Show Line Number</a></li>
+         
+        </ul>
+      </li>
+    </ul>
+    <ul class="nav navbar-nav navbar-left" >
+      <li class= "dropdown" >
+        <a href= '#' class = "dropdown-toggle" role = "button">Layout<span class="caret"></span></a>
+        <ul class= "dropdown-menu">
+          <li><a href = "#">Single column</a></li>
+          <li><a href = "#">Two column</a></li>
+          <li><a href = "#">IEEE Layout</a></li>
+          <li><a href = "#">Save as New layout</a></li>
+          <li><a href = "#">Clear Text Book Selection</a></li>
+          
+        </ul>
+      </li>
+    </ul>
+    <ul class="nav navbar-nav navbar-left" >
+      <li class= "dropdown" >
+        <a href= '#' class = "dropdown-toggle" role = "button">Window<span class="caret"></span></a>
+        <ul class= "dropdown-menu">
+          <li><a href = "#">First page</a></li>
+          <li><a href = "#">previous Page</a></li>
+          <li><a href = "#">Next page</a></li>
+          <li><a href = "#">Last page</a></li>
+          <li><a href = "#">Goto page</a></li>
+          <li><a href = "#">Fit width</a></li>
+          <li><a href = "#">Fit Height</a></li>
+        </ul>
+      </li>
+    </ul>
+    
+    
+  </div>
+  </div>
+  </nav>
+  
+  
+  
