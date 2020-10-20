@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import * as $ from 'jquery';
 import {ScreenComponent} from '../screen/screen.component';
 import { Input} from '@angular/core';
@@ -14,6 +14,7 @@ export class HeaderComponent implements OnInit {
 
   @Input()
  screen: ScreenComponent;
+ 
 
   constructor() { }
 
@@ -22,15 +23,17 @@ export class HeaderComponent implements OnInit {
   anotherTryVisible: boolean;
   localUrl: any[];
 
-  
+ 
+
   importFile(event) {
+
     this.anotherTryVisible = true;
     if (event.target.files && event.target.files[0]) {
             var reader = new FileReader();
             reader.onload = (event: any) => {
                 this.localUrl = event.target.result;
             }
-            reader.readAsDataURL(event.target.files[0]);
+             reader.readAsDataURL(event.target.files[0]);
     }
 }
 

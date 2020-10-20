@@ -11,10 +11,6 @@ import { HeaderComponent } from '../header/header.component';
 export class ScreenComponent implements OnInit {
   title = 'Layout';
   value = 'horizontal';
-  
-  @Input()
-  header:HeaderComponent
-
 
   constructor() { }
 
@@ -31,7 +27,7 @@ export class ScreenComponent implements OnInit {
             reader.onload = (event: any) => {
                 this.localUrl = event.target.result;
             }
-            reader.readAsDataURL(event.target.files[0]);
+            return reader.readAsDataURL(event.target.files[0]);
     }
 }
 
