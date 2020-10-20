@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import * as $ from 'jquery';
+import { HeaderComponent } from '../header/header.component';
 
 
 @Component({
@@ -10,6 +11,10 @@ import * as $ from 'jquery';
 export class ScreenComponent implements OnInit {
   title = 'Layout';
   value = 'horizontal';
+  
+  @Input()
+  header:HeaderComponent
+
 
   constructor() { }
 
