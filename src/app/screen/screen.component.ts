@@ -1,34 +1,52 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit} from '@angular/core';
 import * as $ from 'jquery';
-import { HeaderComponent } from '../header/header.component';
+
+import { HeaderService } from '../services/header.service';
 
 
 @Component({
   selector: 'app-screen',
   templateUrl: './screen.component.html',
-  styleUrls: ['./screen.component.css']
+  styleUrls: ['./screen.component.css'],
 })
-export class ScreenComponent implements OnInit {
+export class ScreenComponent implements OnInit{
   title = 'Layout';
   value = 'horizontal';
 
-  constructor() { }
+  selectedImage: string;
+  anotherTryVisible: boolean;
+  localUrl: any;
+  public headUrl;
+  url;
+  
+
+  constructor(private headerService: HeaderService) { }
 
   ngOnInit(): void {
-  }selectedImage: string;
-  anotherTryVisible: boolean;
-  localUrl: any[];
 
-  
+    this.headUrl =this.headerService.getUrl();
+    this.headerService.urlChanged
+    .subscribe(
+      (url: any) => {
+        console.log("Inside subscribe");
+        this.headUrl = url;
+      }
+    );
+  }
+
+
   importFile(event) {
     this.anotherTryVisible = true;
     if (event.target.files && event.target.files[0]) {
             var reader = new FileReader();
             reader.onload = (event: any) => {
                 this.localUrl = event.target.result;
+                //console.log(this.localUrl);
             }
             return reader.readAsDataURL(event.target.files[0]);
+            
     }
+    
 }
 
 asVertical(){
@@ -72,7 +90,7 @@ drag(){
   zoomInFun(){
     var myImg = document.getElementById("imgToRead");
   var currWidth = myImg.clientWidth;
-  if (currWidth == 2500) return false;
+  if (currWidth == 100) return false;
   else {
     myImg.style.width = (currWidth + 100) + "px";
   }

@@ -58,6 +58,7 @@ import {DropdownDirective} from "./shared/dropdown.directive";
 import { HeaderComponent } from './header/header.component';
 import {AngularSplitModule} from 'angular-split';
 import { ScreenComponent } from './screen/screen.component';
+import { HeaderService }  from './services/header.service';
 
 @NgModule({
   declarations: [
@@ -124,8 +125,8 @@ import { ScreenComponent } from './screen/screen.component';
     MatNativeDateModule
   ],
   providers: [
-    { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'fill' } },
-  ],
+    {  provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'fill' } }
+  , HeaderService ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

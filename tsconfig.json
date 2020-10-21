@@ -3,7 +3,14 @@
   It is not intended to be used to perform a compilation.
 
   To learn more about this file see: https://angular.io/config/solution-tsconfig.
-*/
+*/{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "allowJs": true
+}
+}
+
+
 {
   "files": [],
   "references": [

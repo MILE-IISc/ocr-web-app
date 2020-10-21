@@ -12,9 +12,11 @@
   
           
 <input #fileUpload type="file" (click)="fileUpload.value = null"(change)="importFile($event)" style="display:none"
-  accept="image/*">       
-          <li><a href = "#" id="butGetImage" (click)="fileUpload.click()">Open Image</a></li>
+  accept="image/*" multiple>       
+          <li><a href = "#" id="butGetImage" (click)="fileUpload.click('image')">Open Image</a></li>
           
+          
+
           <li><a href = "#">Open Directory</a></li>
           <li><a href = "#">Save</a></li>
           <li><a href = "#">Export As</a></li>
