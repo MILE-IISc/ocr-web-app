@@ -67,10 +67,14 @@ export class ScreenComponent implements OnInit{
             
             else {
               var reader = new FileReader();
+              reader.onload = (event: any) => {
+                this.isTiff = false;
               this.localUrl = event.target.result;
               console.log(this.localUrl);
-            }
+              }
             return reader.readAsDataURL(fileRead);
+          }
+
     }
 
 
