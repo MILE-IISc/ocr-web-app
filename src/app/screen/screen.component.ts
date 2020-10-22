@@ -40,39 +40,48 @@ export class ScreenComponent implements OnInit{
       }
     );
   }
+ 
     
   importFile(event) {
     this.anotherTryVisible = true;
+    var filreRead = event.target.files[0];
+    if (event.target.files && filreRead) {
 
-    if (event.target.files && event.target.files[0]) {
-
-      console.log("event.target.files[0].type : "+event.target.files[0].type);
+      console.log("event.target.files[0].type : "+filreRead.type);
             var reader = new FileReader();
             reader.onload = (event: any) => {
                 this.localUrl = event.target.result;
-              
+                 if(filreRead.type == 'image/tif'){  
                   var image = new Tiff({ buffer: this.localUrl });
                   console.log('width = ' + image.width() + ', height = ' + image.height());
                   var canvas = image.toCanvas();
                   $("#imgToRead").append(canvas);
+                 }else {
+                   this.localUrl = event.target.result;
+                   console.log(this.localUrl);
+                 }
                
             } 
-            return reader.readAsArrayBuffer(event.target.files[0]);
+            return reader.readAsArrayBuffer(filreRead);
             
     }
 
 
-    // for(var i = 0; i < files.length; i++) {
-    //   fileReader = new FileReader();
-    //   fileReader.onload = handler;
-    //   fileReader.readAsArrayBuffer(files[i]);            // convert selected file
-    // }
-    
-    // function handler() {                                 // file is now ArrayBuffer:
-    //   var tiff = new Tiff({buffer: this.result});        // parse and convert
-    //   var canvas = tiff.toCanvas();                      // convert to canvas
-    //   document.querySelector("div").appendChild(canvas); // show canvas with content
-    // };
+  //   importFile(event) {
+  //     this.anotherTryVisible = true;
+  //     if (event.target.files && event.target.files[0]) {
+  //             var reader = new FileReader();
+  //             reader.onload = (event: any) => {
+  //                 this.localUrl = event.target.result;
+  //                 //console.log(this.localUrl);
+  //             }
+  //             return reader.readAsDataURL(event.target.files[0]);
+              
+  //     }
+      
+  // }
+  
+
 
     
   }
