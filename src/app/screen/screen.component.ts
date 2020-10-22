@@ -22,7 +22,7 @@ export class ScreenComponent implements OnInit{
   public localUrl: any;
   //public headUrl ;
   url;
-  isTiff :boolean =false;
+  isTiff = false;
 
   
 
@@ -44,25 +44,28 @@ export class ScreenComponent implements OnInit{
     
   importFile(event) {
     this.anotherTryVisible = true;
-    var filreRead = event.target.files[0];
-    if (event.target.files && filreRead) {
+    var fileRead = event.target.files[0];
+    if (event.target.files && fileRead) {
 
-      console.log("event.target.files[0].type : "+filreRead.type);
+      console.log("event.target.files[0].type : "+fileRead.type);
             var reader = new FileReader();
             reader.onload = (event: any) => {
                 this.localUrl = event.target.result;
-                 if(filreRead.type == 'image/tif'){  
+                 if(fileRead.type == 'image/tiff'){  
                   var image = new Tiff({ buffer: this.localUrl });
+                  console.log(this.localUrl);
                   console.log('width = ' + image.width() + ', height = ' + image.height());
                   var canvas = image.toCanvas();
-                  $("#imgToRead").append(canvas);
+                  this.isTiff = true;
+                  console.log("this.isTiff: "+this.isTiff);
+                  $("#tiffToRead").append(canvas);
                  }else {
                    this.localUrl = event.target.result;
                    console.log(this.localUrl);
                  }
                
             } 
-            return reader.readAsArrayBuffer(filreRead);
+            return reader.readAsArrayBuffer(fileRead);
             
     }
 

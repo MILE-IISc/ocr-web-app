@@ -27,15 +27,15 @@ export class HeaderComponent implements OnInit {
   importFile(event) {
 
     this.anotherTryVisible = true;
-    var filreRead = event.target.files[0];
-    if (event.target.files && filreRead.type) {
+    var fileRead = event.target.files[0];
+    if (event.target.files && fileRead.type) {
             var reader = new FileReader();
             reader.onload = (event: any) => {
                 this.localUrl = event.target.result;
                 //console.log(this.headerUrl);
                 this.headerService.setUrl(this.localUrl);
             }
-             reader.readAsDataURL(filreRead);
+             reader.readAsDataURL(fileRead);
              
     }
 }
