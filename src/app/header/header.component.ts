@@ -1,27 +1,26 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit,Input } from '@angular/core';
 import * as $ from 'jquery';
 import {ScreenComponent} from '../screen/screen.component';
-import { Input} from '@angular/core';
+import {HeaderService} from '../services/header.service';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.css']
+  styleUrls: ['./header.component.css'],
 })
 export class HeaderComponent implements OnInit {
-
+  
   inputValue:String 
 
-  @Input()
- screen: ScreenComponent;
  
 
-  constructor() { }
+  constructor(private headerService : HeaderService) { }
 
   ngOnInit(): void {
   }selectedImage: string;
   anotherTryVisible: boolean;
-  localUrl: any[];
+
+  public headerUrl: string;
 
  
 
@@ -31,9 +30,12 @@ export class HeaderComponent implements OnInit {
     if (event.target.files && event.target.files[0]) {
             var reader = new FileReader();
             reader.onload = (event: any) => {
-                this.localUrl = event.target.result;
+                this.headerUrl = event.target.result;
+                //console.log(this.headerUrl);
+                this.headerService.setUrl(this.headerUrl);
             }
              reader.readAsDataURL(event.target.files[0]);
+             
     }
 }
 
