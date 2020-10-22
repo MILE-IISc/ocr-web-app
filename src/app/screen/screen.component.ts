@@ -48,10 +48,12 @@ export class ScreenComponent implements OnInit{
     if (event.target.files && fileRead) {
 
       console.log("event.target.files[0].type : "+fileRead.type);
+      if(fileRead.type == 'image/tiff'){  
+
             var reader = new FileReader();
             reader.onload = (event: any) => {
                 this.localUrl = event.target.result;
-                 if(fileRead.type == 'image/tiff'){  
+                
                   var image = new Tiff({ buffer: this.localUrl });
                   console.log(this.localUrl);
                   console.log('width = ' + image.width() + ', height = ' + image.height());
@@ -59,14 +61,16 @@ export class ScreenComponent implements OnInit{
                   this.isTiff = true;
                   console.log("this.isTiff: "+this.isTiff);
                   $("#tiffToRead").append(canvas);
-                 }else {
-                   this.localUrl = event.target.result;
-                   console.log(this.localUrl);
                  }
-               
+                 return reader.readAsArrayBuffer(fileRead);
             } 
-            return reader.readAsArrayBuffer(fileRead);
             
+            else {
+              var reader = new FileReader();
+              this.localUrl = event.target.result;
+              console.log(this.localUrl);
+            }
+            return reader.readAsDataURL(fileRead);
     }
 
 
