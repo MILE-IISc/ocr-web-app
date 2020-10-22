@@ -23,11 +23,13 @@
     "@angular/router": "~10.0.6",
     "angular-split": "^4.0.0",
     "bootstrap": "^3.4.1",
+    "file-system": "^2.2.2",
     "jquery": "^3.5.1",
     "ng2-file-upload": "^1.4.0",
     "rxjs": "~6.5.5",
     "rxjs-compat": "^6.6.3",
     "save": "^2.4.0",
+    "tiff.js": "^1.0.0",
     "tslib": "^2.0.0",
     "zone.js": "~0.10.3"
   },
@@ -50,5 +52,11 @@
     "ts-node": "~8.3.0",
     "tslint": "~6.1.0",
     "typescript": "~3.9.5"
+  },
+  "browser": {
+    "crypto": false,
+    "fs": false,
+    "path": false,
+    "os": false
   }
 }

@@ -1,5 +1,9 @@
 import { Component, OnInit} from '@angular/core';
 import * as $ from 'jquery';
+// import * as Tiff from 'tiff.js';
+// import * as fs from 'file-system';
+
+declare var Tiff: any; 
 
 import { HeaderService } from '../services/header.service';
 
@@ -15,39 +19,64 @@ export class ScreenComponent implements OnInit{
 
   selectedImage: string;
   anotherTryVisible: boolean;
-  localUrl: any;
-  public headUrl;
+  public localUrl: any;
+  //public headUrl ;
   url;
+  isTiff :boolean =false;
+
   
 
   constructor(private headerService: HeaderService) { }
 
   ngOnInit(): void {
 
-    this.headUrl =this.headerService.getUrl();
+    this.localUrl =this.headerService.getUrl();
     this.headerService.urlChanged
     .subscribe(
       (url: any) => {
         console.log("Inside subscribe");
-        this.headUrl = url;
+        console.log("url: "+url);
+        this.localUrl = url;
       }
     );
   }
-
-
+    
   importFile(event) {
     this.anotherTryVisible = true;
+
     if (event.target.files && event.target.files[0]) {
+
+      console.log("event.target.files[0].type : "+event.target.files[0].type);
             var reader = new FileReader();
             reader.onload = (event: any) => {
                 this.localUrl = event.target.result;
-                //console.log(this.localUrl);
-            }
-            return reader.readAsDataURL(event.target.files[0]);
+              
+                  var image = new Tiff({ buffer: this.localUrl });
+                  console.log('width = ' + image.width() + ', height = ' + image.height());
+                  var canvas = image.toCanvas();
+                  $("#imgToRead").append(canvas);
+               
+            } 
+            return reader.readAsArrayBuffer(event.target.files[0]);
             
     }
+
+
+    // for(var i = 0; i < files.length; i++) {
+    //   fileReader = new FileReader();
+    //   fileReader.onload = handler;
+    //   fileReader.readAsArrayBuffer(files[i]);            // convert selected file
+    // }
     
-}
+    // function handler() {                                 // file is now ArrayBuffer:
+    //   var tiff = new Tiff({buffer: this.result});        // parse and convert
+    //   var canvas = tiff.toCanvas();                      // convert to canvas
+    //   document.querySelector("div").appendChild(canvas); // show canvas with content
+    // };
+
+    
+  }
+
 
 asVertical(){
   this.value='horizontal';

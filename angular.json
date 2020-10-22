@@ -27,7 +27,11 @@
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [ 
+              "node_modules/tiff.js/tiff.min.js",
+              "node_modules/file-system/file-system.js"
+            ]
+
           },
           "configurations": {
             "production": {

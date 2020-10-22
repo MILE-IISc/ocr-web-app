@@ -4,8 +4,8 @@ export class HeaderService{
     urlChanged = new EventEmitter<string>();
     url:string;
 
-    setUrl(headerUrl){
-        this.url=headerUrl;
+    setUrl(localUrl){
+        this.url=localUrl;
         //console.log('setting',this.url);
         this.urlChanged.emit(this.url);
     }
