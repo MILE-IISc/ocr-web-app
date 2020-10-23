@@ -10,10 +10,10 @@ declare var Tiff: any;
   styleUrls: ['./header.component.css'],
 })
 export class HeaderComponent implements OnInit {
-  
+
   inputValue:String ;
   isTiff=false;
- 
+
 
   constructor(private headerService : HeaderService) { }
 
@@ -22,8 +22,7 @@ export class HeaderComponent implements OnInit {
   anotherTryVisible: boolean;
 
   public localUrl: string;
-  public tiffUrl: any;
- 
+
 
   importFile(event) {
     this.anotherTryVisible = true;
@@ -31,28 +30,28 @@ export class HeaderComponent implements OnInit {
     if (event.target.files && fileRead) {
 
       console.log("event.target.files[0].type : "+fileRead.type);
-      if(fileRead.type == 'image/tiff'){  
+      if(fileRead.type == 'image/tiff'){
 
             var reader = new FileReader();
             reader.onload = (event: any) => {
                 this.localUrl = event.target.result;
-                
+
                   var image = new Tiff({ buffer: this.localUrl });
                   //console.log(this.localUrl);
                   console.log('width = ' + image.width() + ', height = ' + image.height());
                   var canvas = image.toCanvas();
-                  
-                  
+
+
                   this.isTiff = true;
                   console.log("this.isTiff: "+this.isTiff);
                   var img = convertCanvasToImage(canvas) ;
 
-                  this.tiffUrl = img.src;
-                  this.headerService.setUrl(this.tiffUrl);
+                  this.localUrl = img.src;
+                  this.headerService.setUrl(this.localUrl);
                  }
                  return reader.readAsArrayBuffer(fileRead);
-            } 
-            
+            }
+
             else {
               var reader = new FileReader();
               reader.onload = (event: any) => {

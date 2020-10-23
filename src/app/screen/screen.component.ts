@@ -1,7 +1,7 @@
 import { Component, OnInit} from '@angular/core';
 import * as $ from 'jquery';
 
-declare var Tiff: any; 
+declare var Tiff: any;
 
 import { HeaderService } from '../services/header.service';
 
@@ -23,7 +23,7 @@ export class ScreenComponent implements OnInit{
   url;
   isTiff = false;
 
-  
+
 constructor(private headerService: HeaderService) { }
 
   ngOnInit(): void {
@@ -38,20 +38,20 @@ constructor(private headerService: HeaderService) { }
       }
     );
   }
- 
-    
+
+
   importFile(event) {
     this.anotherTryVisible = true;
     var fileRead = event.target.files[0];
     if (event.target.files && fileRead) {
 
       console.log("event.target.files[0].type : "+fileRead.type);
-      if(fileRead.type == 'image/tiff'){  
+      if(fileRead.type == 'image/tiff'){
 
             var reader = new FileReader();
             reader.onload = (event: any) => {
                 this.localUrl = event.target.result;
-                
+
                   var image = new Tiff({ buffer: this.localUrl });
                   console.log("tiff file url",this.localUrl);
                   console.log('width = ' + image.width() + ', height = ' + image.height());
@@ -60,11 +60,11 @@ constructor(private headerService: HeaderService) { }
                   console.log("this.isTiff: "+this.isTiff);
                   var img = convertCanvasToImage(canvas) ;
 
-                  this.tiffUrl = img.src;
+                  this.localUrl = img.src;
                  }
                  return reader.readAsArrayBuffer(fileRead);
-            } 
-            
+            }
+
             else {
               var reader = new FileReader();
               reader.onload = (event: any) => {
@@ -146,8 +146,8 @@ asHorizontal(){
       if (currWidth == 100) return false;
       else {
         myImg.style.width = (currWidth - 100) + "px";
-        } 
-    } 
+        }
+    }
 }
 function convertCanvasToImage(canvas) {
   console.log("in convert................")
