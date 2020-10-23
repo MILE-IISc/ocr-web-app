@@ -22,9 +22,15 @@ export class ScreenComponent implements OnInit{
   public tiffUrl: any;
   url;
   isTiff = false;
+  localUrlArray: any[]=[];
+  multipleImages = true;
+  multipleImage=true;
+  loaded = false;
+  imgFileCount = 0;
+  imgWidth;
 
 
-constructor(private headerService: HeaderService) { }
+  constructor(private headerService: HeaderService) { }
 
   ngOnInit(): void {
 
@@ -75,47 +81,16 @@ constructor(private headerService: HeaderService) { }
              return reader.readAsDataURL(fileRead);
           }
         }
- }
+  }
 
 
-asVertical(){
-  this.value='horizontal';
-}
+  asVertical(){
+    this.value='horizontal';
+  }
 
-asHorizontal(){
-  this.value='vertical';
-}
-
-// drag(){
-//   var isResizing = false;
-//   $(function () {
-//     var container = $('#wrapper'),
-//         left = $('#imageForOCR'),
-//         right = $('#textFromOCR'),
-//         handle = $('#grabber');
-
-//     handle.on('mousedown', function (e) {
-//         isResizing = true;
-//         lastDownX = e.clientX;
-//     });
-
-//     $(document).on('mousemove', function (e) {
-//         // we don't want to do anything if we aren't resizing.
-//         if (!isResizing)
-//             return;
-
-//         var offsetRight = container.width() - (e.clientX - container.offset().left);
-//         left.css('right', offsetRight);
-//         right.css('width', offsetRight);
-
-//     }).on('mouseup', function (e) {
-//         // stop resizing
-//         isResizing = false;
-//     });
-//     //$( "#imageForOCR" ).resizable({ ghost: true });
-// })
-
-// }
+  asHorizontal(){
+    this.value='vertical';
+  }
 
   zoomInFun(){
    var myImg;
@@ -126,11 +101,11 @@ asHorizontal(){
       console.log("istiff",this.isTiff)
       myImg= document.getElementById("imgToRead");
     }
-  var currWidth = myImg.clientWidth;
-  if (currWidth == 100) return false;
-  else {
-    myImg.style.width = (currWidth + 100) + "px";
-  }
+    var currWidth = myImg.clientWidth;
+    if (currWidth == 100) return false;
+    else {
+      myImg.style.width = (currWidth + 100) + "px";
+    }
   }
 
   zoomOutFun(){
@@ -138,28 +113,99 @@ asHorizontal(){
     if(this.isTiff==true){
       console.log("istiff",this.isTiff)
       myImg= document.getElementById("tiffToRead");
-    }else{
+    }
+    else{
       console.log("istiff",this.isTiff)
       myImg= document.getElementById("imgToRead");
     }
-      var currWidth = myImg.clientWidth;
-      if (currWidth == 100) return false;
-      else {
-        myImg.style.width = (currWidth - 100) + "px";
-        }
+    var currWidth = myImg.clientWidth;
+    if (currWidth == 100) return false;
+    else {
+      myImg.style.width = (currWidth - 100) + "px";
     }
+  }
+
+  NextImage()
+  {
+
+    this.imgFileCount++;
+    console.log("localUrlArray.length: "+this.localUrlArray.length+"imgCount: "+this.imgFileCount);
+    this.localUrl = this.localUrlArray[this.imgFileCount];
+    console.log("localUrl: "+this.localUrl);
+    if(this.localUrlArray.length -1 == this.imgFileCount)
+    {
+      this.multipleImages = true;
+    }
+    if( this.imgFileCount>0)
+    {
+      this.multipleImage = false;
+    }
+
+  }
+
+  previousImage()
+  {
+    this.imgFileCount--;
+    console.log("localUrlArray.length: "+this.localUrlArray.length+"imgCount: "+this.imgFileCount);
+    this.localUrl = this.localUrlArray[this.imgFileCount];
+    console.log("localUrl: "+this.localUrl);
+    console.log("localUrl: "+this.localUrl);
+    if(this.localUrlArray.length-1 == this.imgFileCount)
+    {
+      this.multipleImages = false;
+    }
+    if( this.imgFileCount==0)
+    {
+      this.multipleImage = true;
+    }
+  }
+
+
+
+  uploadFolder(event) {
+    let output = document.getElementById("listing");
+    let files = event.target.files;
+
+    if(files.length > 0)
+    {
+      this.multipleImages = false;
+    }
+
+
+
+    for (let i=0; i<files.length; i++) {
+      let item = document.createElement("li");
+      item.innerHTML = files[i].webkitRelativePath;
+
+      console.log("webkitRelativePath: "+ files[i].webkitRelativePath);
+        var reader = new FileReader();
+        reader.onload = (event: any) => {
+
+            this.localUrlArray[i] = event.target.result;
+            console.log(event.target.result);
+            console.log("localUrlArray.length: "+this.localUrlArray.length+"imgCount: "+this.imgFileCount);
+            this.localUrl = this.localUrlArray[this.imgFileCount];
+            console.log("localUrl: "+this.localUrl);
+            this.loaded = true;
+        }
+        reader.readAsDataURL(files[i]);
+
+    }
+  }
+
 }
+
+
 function convertCanvasToImage(canvas) {
   console.log("in convert................")
-	var image = new Image();
+  var image = new Image();
   image.src = canvas.toDataURL("image/png");
   console.log(image.src);
   // this.tiffUrl = image.src;
 
   //console.log("extension",image.);
-	return image;
+  return image;
 }
-
 
 declare var lastDownX: number;
 
