@@ -1,7 +1,5 @@
 import { Component, OnInit} from '@angular/core';
 import * as $ from 'jquery';
-// import * as Tiff from 'tiff.js';
-// import * as fs from 'file-system';
 
 declare var Tiff: any; 
 
@@ -16,17 +14,17 @@ import { HeaderService } from '../services/header.service';
 export class ScreenComponent implements OnInit{
   title = 'Layout';
   value = 'horizontal';
+  imagewidth;
 
   selectedImage: string;
   anotherTryVisible: boolean;
   public localUrl: any;
-  //public headUrl ;
+  public tiffUrl: any;
   url;
   isTiff = false;
 
   
-
-  constructor(private headerService: HeaderService) { }
+constructor(private headerService: HeaderService) { }
 
   ngOnInit(): void {
 
@@ -55,12 +53,14 @@ export class ScreenComponent implements OnInit{
                 this.localUrl = event.target.result;
                 
                   var image = new Tiff({ buffer: this.localUrl });
-                  console.log(this.localUrl);
+                  console.log("tiff file url",this.localUrl);
                   console.log('width = ' + image.width() + ', height = ' + image.height());
                   var canvas = image.toCanvas();
                   this.isTiff = true;
                   console.log("this.isTiff: "+this.isTiff);
-                  $("#tiffToRead").append(canvas);
+                  var img = convertCanvasToImage(canvas) ;
+
+                  this.tiffUrl = img.src;
                  }
                  return reader.readAsArrayBuffer(fileRead);
             } 
@@ -72,30 +72,10 @@ export class ScreenComponent implements OnInit{
               this.localUrl = event.target.result;
               console.log(this.localUrl);
               }
-            return reader.readAsDataURL(fileRead);
+             return reader.readAsDataURL(fileRead);
           }
-
-    }
-
-
-  //   importFile(event) {
-  //     this.anotherTryVisible = true;
-  //     if (event.target.files && event.target.files[0]) {
-  //             var reader = new FileReader();
-  //             reader.onload = (event: any) => {
-  //                 this.localUrl = event.target.result;
-  //                 //console.log(this.localUrl);
-  //             }
-  //             return reader.readAsDataURL(event.target.files[0]);
-              
-  //     }
-      
-  // }
-  
-
-
-    
-  }
+        }
+ }
 
 
 asVertical(){
@@ -106,38 +86,46 @@ asHorizontal(){
   this.value='vertical';
 }
 
-drag(){
-  var isResizing = false;
-  $(function () {
-    var container = $('#wrapper'),
-        left = $('#imageForOCR'),
-        right = $('#textFromOCR'),
-        handle = $('#grabber');
+// drag(){
+//   var isResizing = false;
+//   $(function () {
+//     var container = $('#wrapper'),
+//         left = $('#imageForOCR'),
+//         right = $('#textFromOCR'),
+//         handle = $('#grabber');
 
-    handle.on('mousedown', function (e) {
-        isResizing = true;
-        lastDownX = e.clientX;
-    });
+//     handle.on('mousedown', function (e) {
+//         isResizing = true;
+//         lastDownX = e.clientX;
+//     });
 
-    $(document).on('mousemove', function (e) {
-        // we don't want to do anything if we aren't resizing.
-        if (!isResizing)
-            return;
+//     $(document).on('mousemove', function (e) {
+//         // we don't want to do anything if we aren't resizing.
+//         if (!isResizing)
+//             return;
 
-        var offsetRight = container.width() - (e.clientX - container.offset().left);
-        left.css('right', offsetRight);
-        right.css('width', offsetRight);
+//         var offsetRight = container.width() - (e.clientX - container.offset().left);
+//         left.css('right', offsetRight);
+//         right.css('width', offsetRight);
 
-    }).on('mouseup', function (e) {
-        // stop resizing
-        isResizing = false;
-    });
-    //$( "#imageForOCR" ).resizable({ ghost: true });
-})
+//     }).on('mouseup', function (e) {
+//         // stop resizing
+//         isResizing = false;
+//     });
+//     //$( "#imageForOCR" ).resizable({ ghost: true });
+// })
 
-}
+// }
+
   zoomInFun(){
-    var myImg = document.getElementById("imgToRead");
+   var myImg;
+    if(this.isTiff==true){
+      console.log("istiff",this.isTiff)
+      myImg= document.getElementById("tiffToRead");
+    }else{
+      console.log("istiff",this.isTiff)
+      myImg= document.getElementById("imgToRead");
+    }
   var currWidth = myImg.clientWidth;
   if (currWidth == 100) return false;
   else {
@@ -146,16 +134,35 @@ drag(){
   }
 
   zoomOutFun(){
-    var myImg = document.getElementById("imgToRead");
-  var currWidth = myImg.clientWidth;
-  if (currWidth == 100) return false;
-  else {
-    myImg.style.width = (currWidth - 100) + "px";
-  }
-  }
+    var myImg;
+    if(this.isTiff==true){
+      console.log("istiff",this.isTiff)
+      myImg= document.getElementById("tiffToRead");
+    }else{
+      console.log("istiff",this.isTiff)
+      myImg= document.getElementById("imgToRead");
+    }
+      var currWidth = myImg.clientWidth;
+      if (currWidth == 100) return false;
+      else {
+        myImg.style.width = (currWidth - 100) + "px";
+        } 
+    } 
+}
+function convertCanvasToImage(canvas) {
+  console.log("in convert................")
+	var image = new Image();
+  image.src = canvas.toDataURL("image/png");
+  console.log(image.src);
+  // this.tiffUrl = image.src;
+
+  //console.log("extension",image.);
+	return image;
 }
 
+
 declare var lastDownX: number;
+
 
 
 
