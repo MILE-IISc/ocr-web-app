@@ -1,8 +1,8 @@
 import { Directive, HostListener, HostBinding} from  '@angular/core';
-@Directive({ 
+@Directive({
     selector: '[appDropdown]'
 
-    
+
 })
 export class DropdownDirective {
     @HostBinding('class.open') isOpen = false;
@@ -10,7 +10,7 @@ export class DropdownDirective {
 
 
      this.isOpen =  !this.isOpen ;
-       
+
     }
-    
+
 }

@@ -1,36 +1,51 @@
 
 
 
-    <script src="https://cdn.rawgit.com/seikichi/tiff.js/master/tiff.min.js"></script>
+  <script src="https://cdn.rawgit.com/seikichi/tiff.js/master/tiff.min.js"></script>
 
- <!-- task Bar -->
-  <div class="navbar">
-      <input #fileUpload type="file" (click)="fileUpload.value = null"(change)="importFile($event)" style="display:none"
-        accept="image/*"   >
-       <button><img src="assets/images/open_file.jpg" type="button" (click)="fileUpload.click()" width="20px" height="20px"></button>
-       <input #folderUpload  type="file" name="fileList" (click)="folderUpload.value = null" webkitdirectory multiple (change) ="uploadFolder($event)" style="display:none"/>
-     <button data-toggle="tooltip" title="open folder" (click)="folderUpload.click()" width="50px" height="50px">add folder</button>
+  <!-- task Bar -->
+   <div>
+
+       <input #fileUpload type="file" (click)="fileUpload.value = null"(change)="importFile($event)" style="display:none"
+         accept="image/*"   >
+        <button data-toggle="tooltip" title="open image"><img src="assets/images/open_file.jpg" type="button" (click)="fileUpload.click()" width="20px" height="20px"></button>
+        <input #folderUpload  type="file" name="fileList" (click)="folderUpload.value = null" webkitdirectory multiple (change)="importFile($event)" style="display:none"/>
+        <button data-toggle="tooltip" title="open directory" ><img  src="assets/images/open_folder.png" type= "button" (click)="folderUpload.click()" width="20px" height="20px"></button>
+        <button data-toggle="tooltip" title="open Image-Text Layout:Left-Right" [disabled]="nextImage"><img src="assets/images/vertical.jpg" type="button" (click)="asVertical()" width="20px" height="20px"></button>
+        <button data-toggle="tooltip" title="open Image-Text Layout:Top-Bottom" [disabled]="nextImage"><img src="assets/images/horizontal.jpg" type="button" (click)="asHorizontal()" width="20px" height="20px"></button>
+      </div>
 
 
-       <button><img src="assets/images/vertical.jpg" type="button" (click)="asVertical()" width="20px" height="20px"></button>
-       <button><img src="assets/images/horizontal.jpg" type="button" (click)="asHorizontal()" width="20px" height="20px"></button>
-       <button id = "butZoomIn" (click) = "zoomInFun()"><span><img src="assets/images/zoomIn.jpg" height="20px" width="20px"></span></button>
-       <button id = "butZoomOut" (click) = "zoomOutFun()"><span><img src="assets/images/zoomOut.jpg" height="20px" width="20px"></span></button>
-       <button [disabled]="multipleImages" (click)="NextImage()">Next Image</button>
-              <button [disabled]="multipleImage" (click)="previousImage()">previous Image</button>
+  <!--Two containers-->
+  <div  class="container" style="width: 100%; height:805px;  background-color: gainsboro; ">
+   <as-split [direction]=value >
+                     <as-split-area style="width:50%; ">
+                      <a href="" target = "_self"><div class="top-left">{{ fileName }}</div></a>
+                     <img [src]="localUrl"  *ngIf="localUrl" id="imgToRead" />
 
-<!--Two containers-->
-<div  style="width: 100%; height: 1000px;  background-color: gainsboro; ">
-  <as-split [direction]=value>
-                    <as-split-area size="40">
-                    <!-- <img [src]="localUrl" style="width:100%; height:100%"  *ngIf="localUrl && !isTiff" id="imgToRead" /> -->
-                    <img [src]="localUrl" style="width:100%; height:100%"  *ngIf="localUrl" id="imgToRead" />
+                      </as-split-area>
+                     <as-split-area >
+                         <p> hello second block!!</p>
                      </as-split-area>
-                    <as-split-area size="60" >
-                        <p> hello second block!!</p>
-                    </as-split-area>
-                </as-split>
-</div>
+                 </as-split>
+  </div>
+
+  <div class="footer">
+      <button data-toggle="tooltip" title="First-Page"  [disabled]="previousImages" (click)="firstImage()" ><img src="assets/images/first_page.png" type="button"width="20px" height="20px"></button>
+      <button data-toggle="tooltip" title="Previous-Page" [disabled]="previousImages" (click)="previousImage()"><img src="assets/images/previous.jpeg" type="button"width="20px" height="20px"></button>
+      <button data-toggle="tooltip" title="Next-Page" [disabled]="nextImage" (click)="NextImage()" ><img src="assets/images/next.png" type="button" width="20px" height="20px"></button>
+       <button data-toggle="tooltip" title="Last-Page"  [disabled]="nextImage" (click)="lastImage()"><img src="assets/images/last_page.png" type="button"width="20px" height="20px"></button>&nbsp;&nbsp;&nbsp;
+       <input type="checkbox" id="skipPage" value="skipPage" ><label for="Skip Page"> Skip Page</label>&nbsp;&nbsp;&nbsp;
+      <button data-toggle="tooltip" title="Zoom-In" id = "butZoomIn" (click) = "zoomInFun()"><span><img src="assets/images/zoomIn.jpg" height="20px" width="20px"></span></button>
+      <button data-toggle="tooltip" title="Zoom-Out" id = "butZoomOut" (click) = "zoomOutFun()"><span><img src="assets/images/zoomOut.jpg" height="20px" width="20px"></span></button>
+
+      <button data-toggle="tooltip" title="Last-Page"  (click)="rotateImage()" >rotate</button>
+      <button data-toggle="tooltip" title="Last-Page"  (click)="rotateImageanti()" >rotateopp</button>
+      <input style="width: 30px;" #box (keyup.enter)="onEnter(box.value)" value="{{angle}}">
+
+      <button data-toggle="tooltip" title="Last-Page"  (click)="imgSize()" >IMGsize</button>
+      <button data-toggle="tooltip" title="Last-Page"  (click)="orginalsize()" >orginalsize</button>
+      <button data-toggle="tooltip" title="Last-Page"  (click)="fitwidth()" >FIT WIDTH</button>
+      <button data-toggle="tooltip" title="Last-Page"  (click)="fitheight()" >FIT height</button>
+      zoom:<input style="width: 30px;" #bo (keyup.enter)="onZoom(bo.value)" value="{{percentage}}">%
     </div>
-
-

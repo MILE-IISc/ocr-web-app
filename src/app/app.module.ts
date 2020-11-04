@@ -59,6 +59,7 @@ import { HeaderComponent } from './header/header.component';
 import {AngularSplitModule} from 'angular-split';
 import { ScreenComponent } from './screen/screen.component';
 import { HeaderService }  from './services/header.service';
+import { ImageService } from './services/images.service';
 
 @NgModule({
   declarations: [
@@ -120,13 +121,13 @@ import { HeaderService }  from './services/header.service';
     HttpClientModule,
     ReactiveFormsModule,
     AngularSplitModule,
-    
-    
+
+
     MatNativeDateModule
   ],
   providers: [
     {  provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'fill' } }
-  , HeaderService ],
+  , HeaderService, ImageService ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
