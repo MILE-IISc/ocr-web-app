@@ -36,7 +36,8 @@ export class ScreenComponent implements OnInit{
   fit:string;
   percentage:number;
   angle=0;
-
+  btnImgArray: any[] = [];
+  display;
   images :Images[];
 
 
@@ -64,6 +65,43 @@ export class ScreenComponent implements OnInit{
      });
 
   }
+  openModalDialog(){
+    this.images = this.imageService.getImages();
+    console.log("images count inside subscribe: "+this.images.length);
+    this.btnImgArray.splice(0,this.btnImgArray.length);
+    for(let i=0; i < this.images.length; i++) {
+      // var btnImgId = "btnImgId" +this.images[i].id;
+      var btnImgEle = "<button  style=\"width: 100%; border: none;\" (click)=\"openThisImage()\" class=\"btnImg\" value=\""+this.images[i].fileName+"\"  id=\""+this.images[i].id+"\">"+this.images[i].fileName+"</button>";
+      console.log("btnImgEle: "+btnImgEle);
+      this.btnImgArray.push(btnImgEle);
+    }
+    console.log("images count inside btnImgArray: "+this.btnImgArray.length);
+    $(".modal-body").empty();
+    for(let i=0; i < this.btnImgArray.length; i++) {
+        $(".modal-body").append(this.btnImgArray[i]);
+    }
+  console.log("opening........")
+  this.display='block'; //Set block css
+ }
+
+ openThisImage(event) {
+  console.log("inside open this image");
+   var id = event.target.value;
+   console.log("id : "+id);
+    this.images = this.imageService.getImages();
+    for(let i=0; i < this.images.length; i++) {
+      if(this.images[i].fileName == id) {
+        this.localUrl = this.images[i].imagePath;
+        this.fileName= this.images[i].fileName;
+        this.imgFileCount = i;
+      }
+  }
+  this.closeModalDialog();
+ }
+
+ closeModalDialog(){
+  this.display='none'; //set none css after close dialog
+ }
 
 
   importFile(event) {
