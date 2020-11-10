@@ -5,6 +5,7 @@ export class HeaderService{
     multileImages:boolean;
     multiImageChange = new EventEmitter<boolean>();
 
+
     setMultipleImages(setimage){
         this.multileImages = setimage;
     }
@@ -12,4 +13,29 @@ export class HeaderService{
     getMultipleImage(){
         return this.multileImages;
     }
+
+    percentage:number;
+    percentageChange = new EventEmitter<number>();
+
+    setpercentagevary(imagezoomlevel){
+        this.percentage = imagezoomlevel;
+        this.percentageChange.emit(this.percentage);
+    }
+
+    getpercentagevary(){
+        return this.percentage;
+    }
+
+    headerValueChange=new EventEmitter<string>();
+    headerValue:string;
+
+    setHeaderValue(setimage){
+      this.headerValue = setimage;
+      this.headerValueChange.emit(this.headerValue);
+  }
+
+  getHeaderValue(){
+      return this.headerValue;
+  }
+
 }

@@ -1,7 +1,58 @@
 .navbar {
     width: 100%;
     background-color: gainsboro;
-    
+
   }
-  
-  
+
+  .container{
+    position: relative;
+  }
+  .btn-group button {
+
+    height: 20px;
+
+    color: white; /* White text */
+
+    /* cursor: pointer; */
+     /* Pointer/hand icon */
+
+    display: block; /* Make the buttons appear below each other */
+  }
+
+  .btn-group button:not(:last-child) {
+    border-bottom: none; /* Prevent double borders */
+  }
+
+  /* Add a background color on hover */
+  /* .btn-group button:hover {
+    background-color: #3e8e41;
+  }
+ */
+ #wrapper {
+  /* position:relative; */
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.modal-content{
+  height: 700px;
+  overflow: auto;
+}
+.modal-footer{
+position: fixed;
+}
+.topleft {
+  position: absolute;
+  top: 8px;
+  left: 16px;
+  font-size: 18px;
+  color: blue
+}
+
+.container.img {
+  width: 100%;
+  height: auto;
+  opacity: 0.3;
+}

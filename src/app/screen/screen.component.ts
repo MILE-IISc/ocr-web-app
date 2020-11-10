@@ -7,6 +7,7 @@ import { HeaderService } from '../services/header.service';
 import { ImageService } from '../services/images.service';
 import { Images } from '../shared/images.model';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+import { ViewerService } from '../services/viewer.service';
 
 
 @Component({
@@ -16,7 +17,7 @@ import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 })
 export class ScreenComponent implements OnInit{
   title = 'Layout';
-  value = 'horizontal';
+  public value:string;
   imagewidth;
 
   selectedImage: string;
@@ -27,24 +28,31 @@ export class ScreenComponent implements OnInit{
   fileName : any;
   localUrlArray: any[]=[];
   files: any[] = []
-   nextImage = true;
+ nextImage = true;
    previousImages=true;
   loaded = false;
   imgFileCount = 0;
   imgWidth;
   isTiff=false;
   fit:string;
-  percentage:number;
-  angle=0;
+  public percentage=0;
+  public angle=0;
   btnImgArray: any[] = [];
   display;
   images :Images[];
 
 
-  constructor(private headerService: HeaderService,private imageService:ImageService,
+  constructor(private headerService: HeaderService,private imageService:ImageService,private viewerService:ViewerService,
     private renderer: Renderer2) { }
 
   ngOnInit(): void {
+    this.value= this.headerService.getHeaderValue();
+    this.headerService.headerValueChange
+    .subscribe(
+      (val:string)=>{
+        this.value=val;
+      }
+      );
 
      this.nextImage = this.headerService.getMultipleImage();
      this.headerService.multiImageChange
@@ -61,8 +69,28 @@ export class ScreenComponent implements OnInit{
       console.log("inside foooor");
       this.localUrl = images[0].imagePath;
       this.fileName=images[0].fileName;
-      setTimeout(() => this.fitwidth(),50);
+      setTimeout(() => this.viewerService.fitwidth(),50);
+      setTimeout(() => this.setpercentage(),60);
      });
+
+     this.imageService.displayChange.subscribe((display:any)=>{
+      this.display=display;
+     });
+
+     this.localUrl =this.imageService.getUrl();
+     this.imageService.urlChanged
+     .subscribe(
+       (url: any) => {
+         console.log("Inside subscribe");
+         console.log("url: "+url);
+         this.localUrl = url;
+       }
+     );
+
+     this.imageService.fileNameChange.subscribe( (fileName: any) => {
+      console.log("nextImages inside footer: "+fileName);
+      this.fileName = fileName;
+   });
 
   }
   openModalDialog(){
@@ -108,14 +136,16 @@ export class ScreenComponent implements OnInit{
     this.anotherTryVisible = true;
     var fileRead = event.target.files;
     var filesCount = event.target.files.length;
-    if(filesCount > 0)
-      {
-        this.nextImage = false;
-      }
+
     if (event.target.files && fileRead) {
       this.imageService.addImage(fileRead);
     }
-    setTimeout(() => this.fitwidth(),50);
+    setTimeout(() => this. fitwidth(),50);
+    setTimeout(() => this.setpercentage(),60);
+
+    var element = document.getElementById("content");
+    console.log("documents----"+element)
+    this.imageService.setDocumentId(element);
   }
 
 
@@ -196,150 +226,80 @@ export class ScreenComponent implements OnInit{
 
    onEnter(value: number) {
     this.angle = value;
-    var myImg;
+    this.viewerService.angle = this.angle;
+    this.viewerService.onEnter();
 
-    var degree = this.angle;
-     myImg= document.getElementById("imgToRead");
-    this.renderer.setStyle(
-      myImg,
-      'transform',
-      `rotate(${degree}deg)`
-    ) }
+  }
 
 
     onZoom(value:number){
+
       this.percentage=value;
-     var myImg;
-
-     var zoomlevel= this.percentage
-     console.log("istiff",this.isTiff)
-     myImg= document.getElementById("imgToRead");
-     var realWidth = myImg.naturalWidth;
-   var realHeight = myImg.naturalHeight;
+      this.viewerService.percentage= this.percentage;
+      this.viewerService.onZoom();
 
 
-   var currWidth = myImg.clientWidth;
-   var currHeight = myImg.clientHeight;
-
-     myImg.style.width = (realWidth * zoomlevel/100) + "px";
-     console.log("currwidth"+currWidth)
-     myImg.style.height = (realHeight * zoomlevel/100) + "px";
-     console.log("currheight"+currHeight)
 
     }
 
     asVertical(){
-      this.value='horizontal';
-      if(this.fit =='width'){
-     setTimeout(() => this.fitwidth(),50);}
-     else if(this.fit=='height'){
-     setTimeout(() => this.fitheight(),50);}
-     else if (this.fit=='orginalsize'){
-     setTimeout(() => this.orginalsize(),50);}
+      this.viewerService.asVertical();
+      this.value=this.viewerService.value;
+
+      // this.viewerService.asVertical();
+      console.log("asVertical has been invoked from screen");
+      setTimeout(() => this.setpercentage(),50);
+
+
     }
 
     asHorizontal(){
-      this.value='vertical';
-      if(this.fit =='width'){
-        setTimeout(() => this.fitwidth(),50);}
-        else if(this.fit=='height'){
-        setTimeout(() => this.fitheight(),50);}
-        else if (this.fit=='orginalsize'){
-        setTimeout(() => this.orginalsize(),50);}
+      this.viewerService.asHorizontal();
+      this.value=this.viewerService.value;
+      // this.viewerService.asHorizontal();
+      this.headerService.setpercentagevary(this.percentage);
+
+
+      setTimeout(() => this.setpercentage(),50);
+
+
+    }
+
+    setpercentage(){
+      this.percentage=  this.viewerService.getpercentage();
+
+      this.headerService.setpercentagevary(this.percentage);
+
     }
 
     fitheight(){
-      this.fit= 'height';
-      var myImg;
-    myImg= document.getElementById("imgToRead");
+      this.viewerService.fitheight();
+      this.percentage=this.viewerService.percentage;
 
-
-      myImg.style.height = 100+"%";
-      var currHeight = myImg.clientHeight;
-      var realHeight = myImg.naturalHeight;
-      var realWidth = myImg.naturalWidth;
-      this.percentage=currHeight/realHeight*100;
-      myImg.style.width = (realWidth * this.percentage/100) + "px";
     }
 
     fitwidth(){
-      this.fit= 'width';
-      var myImg;
-    myImg= document.getElementById("imgToRead");
+      this.viewerService.fitwidth();
+    this.percentage=this.viewerService.percentage;
 
-
-      myImg.style.width = 100+"%";
-      var currWidth = myImg.clientWidth;
-       var realHeight = myImg.naturalHeight;
-      var realWidth = myImg.naturalWidth;
-      this.percentage=(currWidth/realWidth)*100;
-      myImg.style.height = (realHeight* this.percentage/100) + "px";
     }
 
     zoomInFun(){
 
-     var myImg;
-     this.percentage = this.percentage + 7.2;
-
-        console.log("istiff",this.isTiff)
-        myImg= document.getElementById("imgToRead");
-        var realWidth = myImg.naturalWidth;
-      var realHeight = myImg.naturalHeight;
-
-
-      var currWidth = myImg.clientWidth;
-      var currHeight = myImg.clientHeight;
-
-        myImg.style.width = (realWidth * this.percentage/100) + "px";
-        console.log("currwidth"+currWidth)
-        myImg.style.height = (realHeight * this.percentage/100) + "px";
-        console.log("currheight"+currHeight)
+     this.viewerService.zoomInFun();
       }
 
     zoomOutFun(){
 
-      var myImg;
-      this.percentage = this.percentage -7.2;
-
-         console.log("istiff",this.isTiff)
-         myImg= document.getElementById("imgToRead");
-         var realWidth = myImg.naturalWidth;
-       var realHeight = myImg.naturalHeight;
-
-
-       var currWidth = myImg.clientWidth;
-       var currHeight = myImg.clientHeight;
-
-         myImg.style.width = (realWidth * this.percentage/100) + "px";
-         console.log("currwidth"+currWidth)
-         myImg.style.height = (realHeight * this.percentage/100) + "px";
-         console.log("currheight"+currHeight)
+             this.viewerService.zoomOutFun();
        }
-       rotateImage()
+  rotateImage()
   {
-    this.angle++;
-  var myImg;
-
-    var degree = this.angle;
-     myImg= document.getElementById("imgToRead");
-    this.renderer.setStyle(
-      myImg,
-      'transform',
-      `rotate(${degree}deg)`
-    )
+   this.viewerService.rotateImage();
   }
   rotateImageanti()
   {
-    this.angle--;
-  var myImg;
-
-    var degree = this.angle;
-     myImg= document.getElementById("imgToRead");
-    this.renderer.setStyle(
-      myImg,
-      'transform',
-      `rotate(${degree}deg)`
-    )
+    this.viewerService.rotateImageanti();
   }
  imgSize(){
   var myImg;
@@ -350,14 +310,9 @@ export class ScreenComponent implements OnInit{
     alert("Original width=" + realWidth + ", " + "Original height=" + realHeight);
  }
  orginalsize(){
-   this.fit='orginalsize';
-  var myImg;
-  myImg= document.getElementById("imgToRead");
-  myImg.style.width = myImg.naturalWidth+"px";
-      console.log("currwidth"+myImg.naturalWidth)
-      myImg.style.height = myImg.naturalHeight+ "px";
-      console.log("currheight"+myImg.naturalHeight)
-      this.percentage=100;
+
+  this.viewerService.orginalsize();
+  this.percentage=this.viewerService.percentage;
 
  }
 

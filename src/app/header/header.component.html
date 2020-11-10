@@ -1,16 +1,15 @@
-<!-- <nav class= "navbar navbar-default" > -->
-  <div class = "container-fluid">
+<h4>LipiGnani - The Kannada OCR</h4><!-- <nav class= "navbar navbar-default" > -->
+  <div class = "container-fluid" >
 
 <div class = "collapse navbar-collapse" >
-  <div class="toolbar" role="banner">
+  <!-- <div class="toolbar" role="banner">
     <span>LipiGnani - The Kannada OCR</span>
-     </div>
+     </div> -->
+
   <ul class="nav navbar-nav navbar-left" >
     <li class= "dropdown" appDropdown>
       <a href= '#' class = "dropdown-toggle" role = "button">File<span class="caret"></span></a>
       <ul class= "dropdown-menu">
-
-
 <input #fileUpload type="file" (click)="fileUpload.value = null"(change)="importFile($event)" style="display:none"
 accept="image/*">
         <li><a href = "#" id="butGetImage" (click)="fileUpload.click('image')">Open Image</a></li>
@@ -25,8 +24,9 @@ accept="image/*">
       </ul>
     </li>
   </ul>
+
   <ul class="nav navbar-nav navbar-left" >
-    <li class= "dropdown" >
+    <li class= "dropdown" appDropdown>
       <a href= '#' class = "dropdown-toggle" role = "button">Run<span class="caret"></span></a>
       <ul class= "dropdown-menu">
         <li><a href = "#">Language</a></li>
@@ -43,11 +43,22 @@ accept="image/*">
       </ul>
     </li>
   </ul>
+
   <ul class="nav navbar-nav navbar-left" >
-    <li class= "dropdown" >
+    <li class= "dropdown" appDropdown>
       <a href= '#' class = "dropdown-toggle" role = "button">View<span class="caret"></span></a>
       <ul class= "dropdown-menu">
-        <li><a href = "#">Image Layout</a></li>
+        <li class="dropdown-item dropdown-submenu p-0">
+            <a href="#" data-toggle="dropdown" class="dropdown-toggle dropdown-item w-100">Image-Text Layout</a>
+            <ul  class="dropdown-menu mr-2 rounded-0  white border-0 z-depth-1 r-100">
+                <li class="dropdown-item p-0">
+                    <a href="#" class="dropdown-item w-100" (click)="asVertical()">Left-Right</a>
+                  </li>
+                  <li class="dropdown-item p-0">
+                    <a href="#" class="dropdown-item w-100"(click)="asHorizontal()">Top-Bottom</a>
+                  </li>
+          </ul>
+        </li>
         <li><a href = "#">Text Editor</a></li>
         <li><a href = "#">Selection Mode</a></li>
         <li><a href = "#">Show File Link</a></li>
@@ -56,6 +67,7 @@ accept="image/*">
       </ul>
     </li>
   </ul>
+
   <ul class="nav navbar-nav navbar-left" >
     <li class= "dropdown" >
       <a href= '#' class = "dropdown-toggle" role = "button">Layout<span class="caret"></span></a>
@@ -69,24 +81,64 @@ accept="image/*">
       </ul>
     </li>
   </ul>
+
   <ul class="nav navbar-nav navbar-left" >
-    <li class= "dropdown" >
+    <li class= "dropdown" appDropdown>
       <a href= '#' class = "dropdown-toggle" role = "button">Window<span class="caret"></span></a>
       <ul class= "dropdown-menu">
-        <li><a href = "#">First page</a></li>
-        <li><a href = "#">previous Page</a></li>
-        <li><a href = "#">Next page</a></li>
-        <li><a href = "#">Last page</a></li>
-        <li><a href = "#">Goto page</a></li>
-        <li><a href = "#">Fit width</a></li>
-        <li><a href = "#">Fit Height</a></li>
+        <li><a href = "#" ><button style="border: none;" [disabled]="previousImages" (click)="FirstImage()" >First page</button></a></li>
+        <li><a href = "#" ><button  style="border: none;" [disabled]="previousImages"(click)="previousImage()">previous Page</button></a></li>
+        <li><a href = "#" ><button  style="border: none;" [disabled]="nextImages" (click)="NextImage()">Next page</button></a></li>
+        <li><a href = "#" ><button  style="border: none;" [disabled]="nextImages" (click)="lastImage()">Last page</button></a></li>
+        <li><a href = "#" ><button  style="border: none;" (click)="openModalDialog()">Goto page</button></a></li>
+        <li><a href = "#" (click)=" zoomInFun()">Zoom in</a></li>
+        <li><a href = "#"  (click)=" zoomOutFun()">Zoom out</a></li>
+        <li><a href = "#" (click)="fitwidth()">Fit width</a></li>
+        <li><a href = "#" (click)=" fitheight()">Fit Height</a></li>
+        <li><a href = "#"  (click)=" orginalsize()">zoom 100%</a></li>
+        <li><a href = "#" (click)="scrollUp()" >Scroll Up</a></li>
+        <li><a href = "#"(click)="scrollDown()">Scroll Down</a></li>
+        <li><a href = "#"(click)="scrollLeft()">Scroll Left</a></li>
+        <li><a href = "#"(click)="scrollRight()">Scroll Right</a></li>
       </ul>
     </li>
   </ul>
 
+  <ul class="nav navbar-nav navbar-left" >
+    <li class= "dropdown" appDropdown>
+      <a href= '#' class = "dropdown-toggle" role = "button">Help<span class="caret"></span></a>
+      <ul class= "dropdown-menu">
+
+        <li><a href = "#" ><button  style="border: none;" (click)="openModalHelp()">About</button></a></li>
+        <li><a href = "#">Help Topics</a></li>
+
+      </ul>
+    </li>
+  </ul>
 
 </div>
 </div>
+
+<div class="modal" tabindex="-1" role="dialog"  [ngStyle]="{'display':display}">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+
+      <div class="modal-header">
+          <h4 class="modal-title">Please select the page that you want to be displayed:</h4>
+      </div>
+
+      <div >
+        <p>help is here!!!</p>
+      </div>
+
+      <div class="modal-footer">
+        <!-- <button type="button" class="btn btn-default" (click)="closeModalDialog()" >Close</button> -->
+        <button type="button" class="btn btn-default" data-dismiss="modal" (click)="closeModalDialog()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- </nav> -->
 
 

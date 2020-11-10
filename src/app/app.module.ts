@@ -60,13 +60,17 @@ import {AngularSplitModule} from 'angular-split';
 import { ScreenComponent } from './screen/screen.component';
 import { HeaderService }  from './services/header.service';
 import { ImageService } from './services/images.service';
+import{ViewerService} from './services/viewer.service';
 
+import { FooterComponent } from './footer/footer.component';
 @NgModule({
   declarations: [
     AppComponent,
     DropdownDirective,
     HeaderComponent,
-    ScreenComponent
+    ScreenComponent,
+
+    FooterComponent
     //FileSelectDirective
   ],
   imports: [
@@ -127,7 +131,7 @@ import { ImageService } from './services/images.service';
   ],
   providers: [
     {  provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'fill' } }
-  , HeaderService, ImageService ],
+  , HeaderService, ImageService,ViewerService ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
