@@ -1,17 +1,17 @@
 <h4>LipiGnani - The Kannada OCR</h4><!-- <nav class= "navbar navbar-default" > -->
   <div class = "container-fluid" >
 
-<div class = "collapse navbar-collapse" >
-  <!-- <div class="toolbar" role="banner">
+     <div class = "collapse navbar-collapse" >
+     <!-- <div class="toolbar" role="banner">
     <span>LipiGnani - The Kannada OCR</span>
      </div> -->
 
-  <ul class="nav navbar-nav navbar-left" >
+      <ul class="nav navbar-nav navbar-left" >
     <li class= "dropdown" appDropdown>
       <a href= '#' class = "dropdown-toggle" role = "button">File<span class="caret"></span></a>
       <ul class= "dropdown-menu">
-<input #fileUpload type="file" (click)="fileUpload.value = null"(change)="importFile($event)" style="display:none"
-accept="image/*">
+       <input #fileUpload type="file" (click)="fileUpload.value = null"(change)="importFile($event)" style="display:none"
+         accept="image/*">
         <li><a href = "#" id="butGetImage" (click)="fileUpload.click('image')">Open Image</a></li>
 
         <input #folderUpload  type="file" name="fileList" (click)="folderUpload.value = null" webkitdirectory multiple (change) ="importFile($event)" style="display:none"/>
@@ -21,14 +21,14 @@ accept="image/*">
         <li><a href = "#">Export Setting</a></li>
         <li><a href = "#">Close</a></li>
         <li><a href = "#">Exit</a></li>
-      </ul>
-    </li>
-  </ul>
+          </ul>
+       </li>
+       </ul>
 
-  <ul class="nav navbar-nav navbar-left" >
-    <li class= "dropdown" appDropdown>
-      <a href= '#' class = "dropdown-toggle" role = "button">Run<span class="caret"></span></a>
-      <ul class= "dropdown-menu">
+       <ul class="nav navbar-nav navbar-left" >
+         <li class= "dropdown" appDropdown>
+          <a href= '#' class = "dropdown-toggle" role = "button">Run<span class="caret"></span></a>
+         <ul class= "dropdown-menu">
         <li><a href = "#">Language</a></li>
         <li><a href = "#">Scanning Resolution</a></li>
         <li><a href = "#">Rotate Image</a></li>
@@ -42,10 +42,10 @@ accept="image/*">
         <li><a href = "#">OCR Setting</a></li>
       </ul>
     </li>
-  </ul>
+     </ul>
 
-  <ul class="nav navbar-nav navbar-left" >
-    <li class= "dropdown" appDropdown>
+       <ul class="nav navbar-nav navbar-left" >
+       <li class= "dropdown" appDropdown>
       <a href= '#' class = "dropdown-toggle" role = "button">View<span class="caret"></span></a>
       <ul class= "dropdown-menu">
         <li class="dropdown-item dropdown-submenu p-0">
@@ -119,7 +119,7 @@ accept="image/*">
 </div>
 </div>
 
-<div class="modal" tabindex="-1" role="dialog"  [ngStyle]="{'display':display}">
+<!-- <div class="modal" tabindex="-1" role="dialog"  [ngStyle]="{'display':display}">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
 
@@ -132,13 +132,13 @@ accept="image/*">
       </div>
 
       <div class="modal-footer">
-        <!-- <button type="button" class="btn btn-default" (click)="closeModalDialog()" >Close</button> -->
-        <button type="button" class="btn btn-default" data-dismiss="modal" (click)="closeModalDialog()">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
+        <button type="button" class="btn btn-default" (click)="closeModalDialog()" >Close</button> -->
+        <!-- <button type="button" class="btn btn-default" data-dismiss="modal" (click)="closeModalDialog()">Close</button> -->
+      <!-- </div> -->
+    <!-- </div> -->
+      <!-- </div> -->
+     <!-- </div> -->
 
-<!-- </nav> -->
+     <!-- </nav> -->
 
 

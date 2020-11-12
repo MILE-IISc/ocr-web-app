@@ -45,38 +45,50 @@ fitheight(){
   console.log("inside fitheight of Viewer");
   this.fit= 'height';
   var myImg;
+  var falseimg;
 myImg= document.getElementById("imgToRead");
+falseimg=document.getElementById("image")
 console.log("myImg: "+myImg);
 
 
   myImg.style.height = 100+"%";
+  falseimg.style.height= myImg.style.height;
   var currHeight = myImg.clientHeight;
   var realHeight = myImg.naturalHeight;
   var realWidth = myImg.naturalWidth;
   this.percentage=currHeight/realHeight*100;
   myImg.style.width = (realWidth * this.percentage/100) + "px";
+  falseimg.style.width = myImg.style.width;
 }
 
 fitwidth(){
   this.fit= 'width';
   var myImg;
+  var falseimg;
 myImg= document.getElementById("imgToRead");
+falseimg=document.getElementById("image")
 
 
   myImg.style.width = 100+"%";
+  falseimg.style.width= myImg.style.width;
   var currWidth = myImg.clientWidth;
    var realHeight = myImg.naturalHeight;
   var realWidth = myImg.naturalWidth;
   this.percentage=(currWidth/realWidth)*100;
   myImg.style.height = (realHeight* this.percentage/100) + "px";
+  falseimg.style.height= myImg.style.height;
 }
 orginalsize(){
   this.fit='orginalsize';
  var myImg;
+ var falseimg;
+ falseimg=document.getElementById("image")
  myImg= document.getElementById("imgToRead");
  myImg.style.width = myImg.naturalWidth+"px";
+ falseimg.style.width = myImg.style.width;
      console.log("currwidth"+myImg.naturalWidth)
      myImg.style.height = myImg.naturalHeight+ "px";
+     falseimg.style.height= myImg.style.height;
      console.log("currheight"+myImg.naturalHeight)
      this.percentage=100;
 
@@ -97,6 +109,8 @@ orginalsize(){
    var zoomlevel= this.percentage
 
    myImg= document.getElementById("imgToRead");
+   var falseimg;
+   falseimg=document.getElementById("image")
    var realWidth = myImg.naturalWidth;
  var realHeight = myImg.naturalHeight;
 
@@ -108,6 +122,8 @@ orginalsize(){
    console.log("currwidth"+currWidth)
    myImg.style.height = (realHeight * zoomlevel/100) + "px";
    console.log("currheight"+currHeight)
+   falseimg.style.width = myImg.style.width;
+   falseimg.style.height= myImg.style.height;
 
   }
 
@@ -118,6 +134,8 @@ orginalsize(){
 
 
        myImg= document.getElementById("imgToRead");
+       var falseimg;
+         falseimg=document.getElementById("image")
        var realWidth = myImg.naturalWidth;
      var realHeight = myImg.naturalHeight;
 
@@ -129,6 +147,8 @@ orginalsize(){
        console.log("currwidth"+currWidth)
        myImg.style.height = (realHeight * this.percentage/100) + "px";
        console.log("currheight"+currHeight)
+       falseimg.style.width = myImg.style.width;
+        falseimg.style.height= myImg.style.height;
      }
 
    zoomOutFun(){
@@ -138,6 +158,8 @@ orginalsize(){
 
 
         myImg= document.getElementById("imgToRead");
+        var falseimg;
+             falseimg=document.getElementById("image")
         var realWidth = myImg.naturalWidth;
       var realHeight = myImg.naturalHeight;
 
@@ -149,6 +171,8 @@ orginalsize(){
         console.log("currwidth"+currWidth)
         myImg.style.height = (realHeight * this.percentage/100) + "px";
         console.log("currheight"+currHeight)
+        falseimg.style.width = myImg.style.width;
+         falseimg.style.height= myImg.style.height;
       }
       rotateImage()
       {

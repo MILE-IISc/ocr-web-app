@@ -80,14 +80,21 @@ export class ImageService implements OnInit{
       }
     console.log("file count"+filesCount);
     for (let i=0; i<filesCount; i++){
+      var isImage = fileRead[i].type.includes("image");
+
+
+      if (isImage){
       console.log("fileRead.type : "+fileRead[i].type);
       console.log("fileRead["+i+"].name : "+fileRead[i].name);
+      console.log("Inside service when pdf is selected length"+this.images.length)
       let dataURL = await this.loadArray(fileRead,i);
       const imgValue = new Images(i, fileRead[i].type, dataURL,fileRead[i].name);
       this.images.push(imgValue);
       console.log("after sorting"+this.images[0].fileName);
       console.log("addImage: "+dataURL);
     }
+
+  }
 
     this.images.sort( (a, b) => {
       var x = a.fileName.toLowerCase();

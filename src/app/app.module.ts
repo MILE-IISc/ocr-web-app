@@ -62,6 +62,7 @@ import { HeaderService }  from './services/header.service';
 import { ImageService } from './services/images.service';
 import{ViewerService} from './services/viewer.service';
 
+
 import { FooterComponent } from './footer/footer.component';
 @NgModule({
   declarations: [
