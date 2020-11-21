@@ -18,7 +18,7 @@
 
   <!--Two containers-->
  <!--Two containers-->
-<div  class="container" style="width: 100%; height:765px;background-color: whitesmoke;">
+<div  class="container" style="width: 100%; height:750px;background-color: whitesmoke;">
   <as-split [direction]=value >
    <as-split-area id="content" [lockSize]=true style="overflow-x: auto; overflow-y: auto;" (scroll)="updateScroll(scrollOne, scrollTwo)" #scrollOne >
 
@@ -29,9 +29,23 @@
                     <mat-spinner *ngIf="isLoading"></mat-spinner>
                      </as-split-area>
                      <as-split-area  style="overflow-x: auto; overflow-y: auto;" (scroll)="updatescroll(scrollOne, scrollTwo)" #scrollTwo>
-                     <div id="image">
-                        <!-- <input id="xmlInput" placeholder="Hello" style="width: 100%;"/> -->
+                      <div id="image" [style.position]="'relative'">
+                        <!-- <input style="width: 500px; height: 38px; top: 190px; left: 271px; position: relative" value="Hello"> -->
+                    <span *ngFor="let text of words">
+                          <input  id="text_input"   [value] = "text.unicode"  [style.width.px]="text.txtwidth" [style.position]="'absolute'" [style.border]="'none'" [style.font-size.px]="30"
+                          [style.top.px]="text.lineRowStart"   [style.left.px]="text.lineColStart"   [style.margin-inline-start.px]="text.lineRowStart"   [style.height.px]="text.txtHeight" >
+
+                        </span>
                       </div>
+                      <!-- <div id="image">
+                        <style= "margin-left: 70px;" style="margin-left: 200px;"<input style="width: 500px; height: 38px; top: 190px; left: 271px; position: relative" value="Hello"[style.left.px]="text.wordColStart"> -->
+                        <!-- <span  *ngFor="let text of words" > -->
+                          <!-- <input   *ngFor="let text of words"  [value] = "text.unicode" [style.width.px]="text.txtwidth" [style.position]="'relative'" [style.border]="'none'"
+                          [style.margin-inline-start.px]="text.wordRowStart" [style.font-size.px]="30"  [style.height.px]="text.txtHeight"> -->
+                          <!-- <input *ngFor="let text of words"   id="text_input" [value] = "text.unicode"  [style.border]="'none'" [style.width.px]="text.txtwidth"  [style.position]="'relative'"
+                         [style.top.px]="text.wordRowStart"   [style.margin-inline-start.px]="text.wordRowStart"  [style.font-size.px]="30" [style.left.px]="text.wordColStart" [style.height.px]="text.txtHeight" >
+                         </span> -->
+                      <!-- </div> -->
                     </as-split-area>
                 </as-split>
  </div>

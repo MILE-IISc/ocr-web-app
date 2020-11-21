@@ -38,4 +38,14 @@ export class HeaderService{
       return this.headerValue;
   }
 
+   loadingvaluechage=new EventEmitter<boolean>();
+     loadingvalue:boolean;
+
+     setloadingvalue(load){
+       this.loadingvalue = load;
+       this.loadingvaluechage.emit(this.loadingvalue)
+     }
+     getloadingvalue(){
+       return this.loadingvalue;
+     }
 }

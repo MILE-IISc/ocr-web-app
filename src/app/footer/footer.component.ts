@@ -9,6 +9,7 @@ import { ImageService } from '../services/images.service';
 import { Images } from '../shared/images.model';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { ViewerService } from '../services/viewer.service';
+import { XmlModel } from '../shared/xml-model';
 
 @Component({
   selector: 'app-footer',
@@ -156,16 +157,12 @@ export class FooterComponent implements OnInit {
 
 NextImage(){
     this.imageService.nextPage();
-    // console.log("inside footer nextImage: "+this.imageService.nextImages);
-    // this.nextImages = this.imageService.nextImages;
-    // console.log("next Images"+this.nextImages);
+
   }
 
   previousImage(){
     this.imageService.previousPage();
-    // console.log("inside footer previousImage: "+this.imageService.previousImages);
-    // this.previousImages = this.imageService.previousImages;
-    // console.log("previous Images"+this.previousImages);
+
  }
 
  lastImage(){
@@ -178,6 +175,17 @@ NextImage(){
   //this.localUrl = this.localUrlArray[this.imgFileCount];
 }
 
+loadXMLDoc() {
+  var xmlhttp = new XMLHttpRequest();
+  xmlhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      myFunction(this);
+    }
+  };
+  xmlhttp.open("GET", "assets/BaahyaakaashayaanigaluTelaaduvudeke_0015.xml", true);
+  xmlhttp.send();
+
+}
 
 }
 
@@ -189,3 +197,34 @@ function convertCanvasToImage(canvas) {
   return image;
 }
 
+function myFunction(xml){
+  var xmlDoc = xml.responseXML;
+  var block = xmlDoc.getElementsByTagName("block");
+  console.log("length ====="+block.length);
+  for (let i = 0; i <block.length; i++) {
+    if(block[i].children != null){
+      for(let j= 0; j <  block[i].children.length;j++){
+        if(block[i].children[j].children != null){
+          var txt= "";
+          for(let k=0;k < block[i].children[j].children.length;k++){
+
+              txt = txt + " " +block[i].children[j].children[k].getAttribute('unicode');
+              console.log("text-----"+txt);
+
+           }
+
+           var lineRowStart = (block[i].children[j].getAttribute('rowStart'));
+
+              var lineRowEnd = (block[i].children[j].getAttribute('rowEnd'));
+              var lineColStart = (block[i].children[j].getAttribute('colStart'));
+              var lineColEnd = (block[i].children[j].getAttribute('colEnd'));
+              var txtwidth = (lineColEnd - lineColStart);
+              var txtHeight = (lineRowEnd - lineRowStart);
+           var wordValue = new XmlModel(txt,lineRowStart,lineRowEnd,lineColStart,lineColEnd,txtwidth,txtHeight);
+           XmlModel.textArray.push(wordValue);
+        }
+   }
+}
+}
+
+}

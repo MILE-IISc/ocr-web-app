@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<page xmlns="http://mile.ee.iisc.ernet.in/schemas/ocr_output">
+    <block type="Text" BlockNumber="1" SubType="pageHeader" rowStart="405" rowEnd="523" colStart="193" colEnd="1305">
+        <line LineNumber="1" rowStart="438" rowEnd="510" colStart="499" colEnd="1272">
+            <word unicode="3." WordNumber="1" confidenceLevel="93.0" rowStart="448" rowEnd="489" colStart="499" colEnd="553"/>
+            <word unicode="ಮಡಕೆಗಳಂದ" WordNumber="2" confidenceLevel="87.0" rowStart="438" rowEnd="489" colStart="590" colEnd="943"/>
+            <word unicode="ರೆಫ್ರಿಜರೇಟ್‌" WordNumber="3" confidenceLevel="85.0" rowStart="438" rowEnd="510" colStart="979" colEnd="1272"/>
+        </line>
+    </block>
+    <block type="Text" BlockNumber="2" SubType="paragraphProse" rowStart="524" rowEnd="1196" colStart="193" colEnd="1305">
+        <line LineNumber="2" rowStart="557" rowEnd="613" colStart="271" colEnd="1275">
+            <word unicode="ಕಿಟ್ಟಣ್ಣ" WordNumber="1" confidenceLevel="55.0" rowStart="561" rowEnd="613" colStart="271" colEnd="367"/>
+            <word unicode="ಹೊರಗಡೆ" WordNumber="2" confidenceLevel="94.0" rowStart="557" rowEnd="593" colStart="403" colEnd="557"/>
+            <word unicode="ಬಿಸಿಲಲ್ಲಿ" WordNumber="3" confidenceLevel="95.0" rowStart="558" rowEnd="608" colStart="598" colEnd="724"/>
+            <word unicode="ಸುತ್ತಾಡಿ" WordNumber="4" confidenceLevel="96.0" rowStart="559" rowEnd="611" colStart="763" colEnd="884"/>
+            <word unicode="ಬಂದು" WordNumber="5" confidenceLevel="84.0" rowStart="559" rowEnd="593" colStart="925" colEnd="1031"/>
+            <word unicode="ಹಾಲ್‌ನಲ್ಲಿದ್ದ" WordNumber="6" confidenceLevel="90.0" rowStart="558" rowEnd="612" colStart="1072" colEnd="1275"/>
+        </line>
+        <line LineNumber="3" rowStart="630" rowEnd="686" colStart="212" colEnd="1270">
+            <word unicode="ಸೋಫಾದ" WordNumber="1" confidenceLevel="95.0" rowStart="630" rowEnd="674" colStart="212" colEnd="376"/>
+            <word unicode="ಮೇಲೆ" WordNumber="2" confidenceLevel="96.0" rowStart="630" rowEnd="665" colStart="426" colEnd="522"/>
+            <word unicode="ಕುಳಿತ." WordNumber="3" confidenceLevel="96.0" rowStart="631" rowEnd="666" colStart="571" colEnd="673"/>
+            <word unicode="ಅದನ್ನು" WordNumber="4" confidenceLevel="95.0" rowStart="631" rowEnd="685" colStart="723" colEnd="846"/>
+            <word unicode="ಕಂಡು" WordNumber="5" confidenceLevel="76.0" rowStart="631" rowEnd="665" colStart="889" colEnd="983"/>
+            <word unicode="ಅಮ್ಮ" WordNumber="6" confidenceLevel="95.0" rowStart="631" rowEnd="686" colStart="1033" colEnd="1124"/>
+            <word unicode="ಅಡುಗೆ" WordNumber="7" confidenceLevel="96.0" rowStart="630" rowEnd="665" colStart="1164" colEnd="1270"/>
+        </line>
+        <line LineNumber="4" rowStart="703" rowEnd="759" colStart="212" colEnd="1270">
+            <word unicode="ಮನೆಯೊಳಗೆ" WordNumber="1" confidenceLevel="96.0" rowStart="703" rowEnd="741" colStart="212" colEnd="420"/>
+            <word unicode="ಇಟ್ಟಿದ್ದ" WordNumber="2" confidenceLevel="92.0" rowStart="704" rowEnd="757" colStart="460" colEnd="566"/>
+            <word unicode="ಮಡಕೆಯಿಂದ" WordNumber="3" confidenceLevel="67.0" rowStart="703" rowEnd="738" colStart="600" colEnd="818"/>
+            <word unicode="ತಣ್ಣನೆಯ" WordNumber="4" confidenceLevel="94.0" rowStart="703" rowEnd="759" colStart="858" colEnd="1006"/>
+            <word unicode="ನೀರು" WordNumber="5" confidenceLevel="96.0" rowStart="704" rowEnd="741" colStart="1045" colEnd="1132"/>
+            <word unicode="ತಂದು" WordNumber="6" confidenceLevel="96.0" rowStart="704" rowEnd="738" colStart="1172" colEnd="1270"/>
+        </line>
+        <line LineNumber="5" rowStart="776" rowEnd="832" colStart="212" colEnd="1270">
+            <word unicode="ಕೊಟ್ಟಳು." WordNumber="1" confidenceLevel="96.0" rowStart="776" rowEnd="830" colStart="212" colEnd="354"/>
+            <word unicode="ಕಿಟ್ಟಣ್ಣ" WordNumber="2"   confidenceLevel="32.0" rowStart="780" rowEnd="832" colStart="385" colEnd="480"/>
+            <word unicode="ಯಾವಾಗಲೂ" WordNumber="3" confidenceLevel="96.0" rowStart="777" rowEnd="811" colStart="506" colEnd="730"/>
+            <word unicode="ಮಡಕೆ" WordNumber="4" confidenceLevel="96.0" rowStart="776" rowEnd="811" colStart="761" colEnd="863"/>
+            <word unicode="ನೀರನ್ನೇ" WordNumber="5" confidenceLevel="96.0" rowStart="776" rowEnd="831" colStart="893" colEnd="1021"/>
+            <word unicode="ಕುಡಿಯುತ್ತಿದ್ದ." WordNumber="6" confidenceLevel="96.0" rowStart="777" rowEnd="830" colStart="1052" colEnd="1270"/>
+        </line>
+        <line LineNumber="6" rowStart="849" rowEnd="905" colStart="212" colEnd="1277">
+            <word unicode="ಫ್ರಿಜ್‌ನಲ್ಲಿ" WordNumber="1" confidenceLevel="90.0" rowStart="850" rowEnd="900" colStart="212" colEnd="354"/>
+            <word unicode="ಇನ್ನೂ" WordNumber="2" confidenceLevel="95.0" rowStart="850" rowEnd="904" colStart="419" colEnd="527"/>
+            <word unicode="ತಣ್ಣನೆಯ" WordNumber="3" confidenceLevel="84.0" rowStart="849" rowEnd="905" colStart="588" colEnd="736"/>
+            <word unicode="ನೀರು" WordNumber="4" confidenceLevel="95.0" rowStart="850" rowEnd="887" colStart="803" colEnd="890"/>
+            <word unicode="ಇದ್ದರೂ" WordNumber="5" confidenceLevel="95.0" rowStart="850" rowEnd="903" colStart="958" colEnd="1087"/>
+            <word unicode="ಅದನ್ನು" WordNumber="6" confidenceLevel="95.0" rowStart="850" rowEnd="904" colStart="1154" colEnd="1277"/>
+        </line>
+        <line LineNumber="7" rowStart="922" rowEnd="978" colStart="212" colEnd="1273">
+            <word unicode="ಕುಡಿಯುತ್ತಿರಲಿಲ್ಲ." WordNumber="1" confidenceLevel="91.0" rowStart="923" rowEnd="975" colStart="212" colEnd="488"/>
+            <word unicode="ಫ್ರಿಜ್‌" WordNumber="2" confidenceLevel="92.0" rowStart="926" rowEnd="971" colStart="535" colEnd="612"/>
+            <word unicode="ನೀರು" WordNumber="3" confidenceLevel="96.0" rowStart="923" rowEnd="960" colStart="657" colEnd="744"/>
+            <word unicode="ನೈಸರ್ಗಿಕವಾಗಿ" WordNumber="4" confidenceLevel="92.0" rowStart="922" rowEnd="978" colStart="790" colEnd="1015"/>
+            <word unicode="ತಂಪಾದದ್ದಲ್ಲ" WordNumber="5" confidenceLevel="87.0" rowStart="923" rowEnd="976" colStart="1062" colEnd="1273"/>
+        </line>
+        <line LineNumber="8" rowStart="995" rowEnd="1051" colStart="212" colEnd="1272">
+            <word unicode="ಮತ್ತು" WordNumber="1" confidenceLevel="96.0" rowStart="996" rowEnd="1048" colStart="212" colEnd="305"/>
+            <word unicode="ಆರೋಗ್ಯಕ್ಕೂ" WordNumber="2" confidenceLevel="96.0" rowStart="995" rowEnd="1051" colStart="323" colEnd="531"/>
+            <word unicode="ಅಷ್ಟು" WordNumber="3" confidenceLevel="96.0" rowStart="996" rowEnd="1049" colStart="548" colEnd="632"/>
+            <word unicode="ಒಳ್ಳೆಯದಲ್ಲ" WordNumber="4" confidenceLevel="96.0" rowStart="995" rowEnd="1051" colStart="650" colEnd="834"/>
+            <word unicode="ಎಂದು" WordNumber="5" confidenceLevel="85.0" rowStart="996" rowEnd="1030" colStart="855" colEnd="960"/>
+            <word unicode="ಹೇಳುತ್ತಿದ್ದ." WordNumber="6" confidenceLevel="94.0" rowStart="995" rowEnd="1049" colStart="983" colEnd="1153"/>
+            <word unicode="ಹಣ್ಣು." WordNumber="7" confidenceLevel="96.0" rowStart="996" rowEnd="1051" colStart="1176" colEnd="1272"/>
+        </line>
+        <line LineNumber="9" rowStart="1067" rowEnd="1124" colStart="212" colEnd="1272">
+            <word unicode="ತರಕಾರಿಗಳು" WordNumber="1" confidenceLevel="96.0" rowStart="1069" rowEnd="1103" colStart="212" colEnd="407"/>
+            <word unicode="ಹೆಚ್ಚು" WordNumber="2" confidenceLevel="95.0" rowStart="1067" rowEnd="1124" colStart="457" colEnd="543"/>
+            <word unicode="ದಿನ" WordNumber="3" confidenceLevel="95.0" rowStart="1069" rowEnd="1105" colStart="588" colEnd="647"/>
+            <word unicode="ಕೆಡದಂತೆ" WordNumber="4" confidenceLevel="91.0" rowStart="1067" rowEnd="1103" colStart="698" colEnd="838"/>
+            <word unicode="ಇಡಲು" WordNumber="5" confidenceLevel="95.0" rowStart="1069" rowEnd="1107" colStart="889" colEnd="1000"/>
+            <word unicode="ಮಾತ್ರ" WordNumber="6" confidenceLevel="96.0" rowStart="1069" rowEnd="1116" colStart="1051" colEnd="1148"/>
+            <word unicode="ಫ್ರಿಜ್‌" WordNumber="7" confidenceLevel="90.0" rowStart="1072" rowEnd="1116" colStart="1195" colEnd="1272"/>
+        </line>
+        <line LineNumber="10" rowStart="1140" rowEnd="1196" colStart="212" colEnd="1188">
+            <word unicode="ಉಪಯೋಗಿಸಬೇಕು" WordNumber="1" confidenceLevel="95.0" rowStart="1140" rowEnd="1176" colStart="212" colEnd="533"/>
+            <word unicode="ಎಂಬುದು" WordNumber="2" confidenceLevel="88.0" rowStart="1142" rowEnd="1176" colStart="556" colEnd="712"/>
+            <word unicode="ಕಿಟ್ಟಣ್ಣನ" WordNumber="3" confidenceLevel="92.0" rowStart="1142" rowEnd="1196" colStart="735" colEnd="855"/>
+            <word unicode="ಅಭಿಪ್ರಾಯವಾಗಿತ್ತು." WordNumber="4" confidenceLevel="96.0" rowStart="1142" rowEnd="1194" colStart="878" colEnd="1188"/>
+        </line>
+    </block>
+    <block type="Text" BlockNumber="3" SubType="paragraphProse" rowStart="1199" rowEnd="1419" colStart="193" colEnd="1305">
+        <line LineNumber="11" rowStart="1211" rowEnd="1273" colStart="256" colEnd="1270">
+            <word unicode="ಕಿಟ್ಟಣ್ಣ" WordNumber="1" confidenceLevel="96.0" rowStart="1211" rowEnd="1273" colStart="256" colEnd="366"/>
+            <word unicode="ನೀರನ್ನು" WordNumber="2" confidenceLevel="96.0" rowStart="1211" rowEnd="1273" colStart="403" colEnd="534"/>
+            <word unicode="ಕುಡಿದು" WordNumber="3" confidenceLevel="96.0" rowStart="1215" rowEnd="1249" colStart="568" colEnd="685"/>
+            <word unicode="ಸಮಾಧಾನ" WordNumber="4" confidenceLevel="92.0" rowStart="1215" rowEnd="1257" colStart="726" colEnd="903"/>
+            <word unicode="ಚಿತ್ತದಿಂದ" WordNumber="5" confidenceLevel="88.0" rowStart="1215" rowEnd="1267" colStart="944" colEnd="1095"/>
+            <word unicode="ಸುತ್ತಲೂ" WordNumber="6" confidenceLevel="95.0" rowStart="1215" rowEnd="1267" colStart="1136" colEnd="1270"/>
+        </line>
+        <line LineNumber="12" rowStart="1286" rowEnd="1341" colStart="212" colEnd="1272">
+            <word unicode="ನೋಡಿದ." WordNumber="1" confidenceLevel="96.0" rowStart="1286" rowEnd="1324" colStart="212" colEnd="368"/>
+            <word unicode="ಎದುರಿಗೆ" WordNumber="2" confidenceLevel="96.0" rowStart="1286" rowEnd="1322" colStart="403" colEnd="537"/>
+            <word unicode="ಪುಟ್ಟ" WordNumber="3" confidenceLevel="96.0" rowStart="1288" rowEnd="1341" colStart="573" colEnd="648"/>
+            <word unicode="ಕುಳಿತಿದ್ದ" WordNumber="4" confidenceLevel="96.0" rowStart="1288" rowEnd="1341" colStart="679" colEnd="818"/>
+            <word unicode="ಏನೋ" WordNumber="5" confidenceLevel="94.0" rowStart="1286" rowEnd="1324" colStart="853" colEnd="965"/>
+            <word unicode="ಆಲೋಚನೆಯಲ್ಲಿ" WordNumber="6" confidenceLevel="85.0" rowStart="1286" rowEnd="1337" colStart="1000" colEnd="1272"/>
+        </line>
+        <line LineNumber="13" rowStart="1359" rowEnd="1415" colStart="212" colEnd="821">
+            <word unicode="ಮಗ್ನನಾಗಿದ್ದ." WordNumber="1" confidenceLevel="60.0" rowStart="1361" rowEnd="1415" colStart="212" colEnd="419"/>
+            <word unicode="ಕಿಟ್ಟಣ್ಣ" WordNumber="2" confidenceLevel="93.0" rowStart="1363" rowEnd="1415" colStart="441" colEnd="537"/>
+            <word unicode="ಏನೆಂದು" WordNumber="3" confidenceLevel="86.0" rowStart="1359" rowEnd="1397" colStart="554" colEnd="688"/>
+            <word unicode="ಕೇಳಿದ." WordNumber="4" confidenceLevel="96.0" rowStart="1359" rowEnd="1395" colStart="711" colEnd="821"/>
+        </line>
+    </block>
+    <block type="Text" BlockNumber="4" SubType="paragraphProse" rowStart="1420" rowEnd="1931" colStart="193" colEnd="1305">
+        <line LineNumber="14" rowStart="1432" rowEnd="1488" colStart="271" colEnd="1270">
+            <word unicode="“ನಮ್ಮ" WordNumber="1" confidenceLevel="95.0" rowStart="1432" rowEnd="1488" colStart="271" colEnd="378"/>
+            <word unicode="ಶಾಲೆಗೆ" WordNumber="2" confidenceLevel="94.0" rowStart="1432" rowEnd="1467" colStart="423" colEnd="526"/>
+            <word unicode="ಒಬ್ಬ" WordNumber="3" confidenceLevel="94.0" rowStart="1441" rowEnd="1488" colStart="581" colEnd="650"/>
+            <word unicode="ಹುಡುಗ" WordNumber="4" confidenceLevel="95.0" rowStart="1433" rowEnd="1467" colStart="699" colEnd="823"/>
+            <word unicode="ಹಳ್ಳಿಯಿಂದ" WordNumber="5" confidenceLevel="86.0" rowStart="1433" rowEnd="1488" colStart="877" colEnd="1053"/>
+            <word unicode="ಬರುತ್ತಾನೆ." WordNumber="6" confidenceLevel="95.0" rowStart="1432" rowEnd="1485" colStart="1108" colEnd="1270"/>
+        </line>
+        <line LineNumber="15" rowStart="1505" rowEnd="1561" colStart="212" colEnd="1270">
+            <word unicode="ಅದೊಂದು" WordNumber="1" confidenceLevel="94.0" rowStart="1505" rowEnd="1540" colStart="212" colEnd="385"/>
+            <word unicode="ಗುಡ್ಡಗಾಡು" WordNumber="2" confidenceLevel="93.0" rowStart="1506" rowEnd="1559" colStart="411" colEnd="581"/>
+            <word unicode="ಪ್ರದೇಶವಂತೆ." WordNumber="3" confidenceLevel="92.0" rowStart="1505" rowEnd="1554" colStart="606" colEnd="813"/>
+            <word unicode="ಅಲ್ಲಿ" WordNumber="4" confidenceLevel="93.0" rowStart="1506" rowEnd="1556" colStart="839" colEnd="904"/>
+            <word unicode="ವಿದ್ಯುತ್ತೇ" WordNumber="5" confidenceLevel="92.0" rowStart="1505" rowEnd="1561" colStart="927" colEnd="1057"/>
+            <word unicode="ಇಲ್ಲ." WordNumber="6" confidenceLevel="96.0" rowStart="1514" rowEnd="1556" colStart="1082" colEnd="1155"/>
+            <word unicode="ಅಂಥ" WordNumber="7" confidenceLevel="96.0" rowStart="1506" rowEnd="1549" colStart="1181" colEnd="1270"/>
+        </line>
+        <line LineNumber="16" rowStart="1578" rowEnd="1634" colStart="212" colEnd="1275">
+            <word unicode="ಕಡೆ" WordNumber="1" confidenceLevel="97.0" rowStart="1578" rowEnd="1613" colStart="212" colEnd="265"/>
+            <word unicode="ಬೇಸಿಗೆಯಲ್ಲಿ" WordNumber="2" confidenceLevel="96.0" rowStart="1578" rowEnd="1629" colStart="289" colEnd="488"/>
+            <word unicode="ತಣ್ಣನೆಯ" WordNumber="3" confidenceLevel="95.0" rowStart="1578" rowEnd="1634" colStart="510" colEnd="658"/>
+            <word unicode="ನೀರು" WordNumber="4" confidenceLevel="96.0" rowStart="1579" rowEnd="1616" colStart="682" colEnd="769"/>
+            <word unicode="ಸಿಗುವುದೇ" WordNumber="5" confidenceLevel="96.0" rowStart="1578" rowEnd="1622" colStart="794" colEnd="954"/>
+            <word unicode="ಇಲ್ಲ." WordNumber="6" confidenceLevel="95.0" rowStart="1587" rowEnd="1629" colStart="979" colEnd="1052"/>
+            <word unicode="ನಾವು" WordNumber="7" confidenceLevel="97.0" rowStart="1579" rowEnd="1622" colStart="1076" colEnd="1162"/>
+            <word unicode="ಹಣ್ಣು" WordNumber="8" confidenceLevel="96.0" rowStart="1579" rowEnd="1634" colStart="1187" colEnd="1275"/>
+        </line>
+        <line LineNumber="17" rowStart="1651" rowEnd="1707" colStart="212" colEnd="1272">
+            <word unicode="ತರಕಾರಿಗಳನ್ನು" WordNumber="1" confidenceLevel="96.0" rowStart="1652" rowEnd="1706" colStart="212" colEnd="451"/>
+            <word unicode="ಹೆಚ್ಚು" WordNumber="2" confidenceLevel="96.0" rowStart="1651" rowEnd="1707" colStart="474" colEnd="559"/>
+            <word unicode="ಸಮಯ" WordNumber="3" confidenceLevel="95.0" rowStart="1652" rowEnd="1686" colStart="584" colEnd="716"/>
+            <word unicode="ಕೆಡದಂತೆ" WordNumber="4" confidenceLevel="95.0" rowStart="1651" rowEnd="1686" colStart="746" colEnd="886"/>
+            <word unicode="ಇಟ್ಟುಕೊಳ್ಳಲು" WordNumber="5" confidenceLevel="96.0" rowStart="1651" rowEnd="1707" colStart="916" colEnd="1130"/>
+            <word unicode="ನಮ್ಮಲ್ಲಿ" WordNumber="6" confidenceLevel="96.0" rowStart="1652" rowEnd="1707" colStart="1160" colEnd="1272"/>
+        </line>
+        <line LineNumber="18" rowStart="1724" rowEnd="1778" colStart="212" colEnd="1270">
+            <word unicode="ಫ್ರಿಜ್‌" WordNumber="1" confidenceLevel="94.0" rowStart="1728" rowEnd="1773" colStart="212" colEnd="289"/>
+            <word unicode="ಇದೆ." WordNumber="2" confidenceLevel="93.0" rowStart="1724" rowEnd="1763" colStart="330" colEnd="404"/>
+            <word unicode="ಪಾಪ।" WordNumber="3" confidenceLevel="44.0" rowStart="1725" rowEnd="1766" colStart="446" colEnd="539"/>
+            <word unicode="ಅವರಲ್ಲಿ" WordNumber="4" confidenceLevel="96.0" rowStart="1725" rowEnd="1775" colStart="582" colEnd="708"/>
+            <word unicode="ಅಂಥದ್ದೇನೂ" WordNumber="5" confidenceLevel="70.0" rowStart="1724" rowEnd="1778" colStart="748" colEnd="958"/>
+            <word unicode="ಇಲ್ಲ." WordNumber="6" confidenceLevel="96.0" rowStart="1733" rowEnd="1775" colStart="1001" colEnd="1073"/>
+            <word unicode="ಅವರೇನು" WordNumber="7" confidenceLevel="96.0" rowStart="1724" rowEnd="1762" colStart="1116" colEnd="1270"/>
+        </line>
+        <line LineNumber="19" rowStart="1793" rowEnd="1855" colStart="212" colEnd="1196">
+            <word unicode="ಮಾಡಬೇಕು?”" WordNumber="1" confidenceLevel="89.0" rowStart="1797" rowEnd="1839" colStart="212" colEnd="451"/>
+            <word unicode="ಎಂದು" WordNumber="2" confidenceLevel="93.0" rowStart="1798" rowEnd="1832" colStart="470" colEnd="575"/>
+            <word unicode="ಯೋಚಿಸುತ್ತಿದ್ದೆ" WordNumber="3" confidenceLevel="96.0" rowStart="1793" rowEnd="1855" colStart="577" colEnd="836"/>
+            <word unicode="ಎಂದು" WordNumber="4" confidenceLevel="95.0" rowStart="1798" rowEnd="1832" colStart="854" colEnd="959"/>
+            <word unicode="ಹೇಳಿದ" WordNumber="5" confidenceLevel="95.0" rowStart="1797" rowEnd="1832" colStart="981" colEnd="1093"/>
+            <word unicode="ಪುಟ್ಟ." WordNumber="6" confidenceLevel="97.0" rowStart="1794" rowEnd="1855" colStart="1100" colEnd="1196"/>
+        </line>
+        <line LineNumber="20" rowStart="1869" rowEnd="1926" colStart="271" colEnd="1248">
+            <word unicode="“ಎದ್ಕುತ್ತಿಲ್ಲದೆ" WordNumber="1" confidenceLevel="72.0" rowStart="1869" rowEnd="1926" colStart="271" colEnd="470"/>
+            <word unicode="ಫ್ರಿಜ್‌" WordNumber="2" confidenceLevel="95.0" rowStart="1874" rowEnd="1918" colStart="492" colEnd="569"/>
+            <word unicode="ಇಲ್ಲ" WordNumber="3" confidenceLevel="96.0" rowStart="1879" rowEnd="1920" colStart="590" colEnd="654"/>
+            <word unicode="ಎಂದು" WordNumber="4" confidenceLevel="85.0" rowStart="1871" rowEnd="1905" colStart="674" colEnd="779"/>
+            <word unicode="ತಿಳಿದಿದ್ದೀಯ?" WordNumber="5" confidenceLevel="88.0" rowStart="1871" rowEnd="1924" colStart="801" colEnd="1027"/>
+            <word unicode="ಹೌದಲ್ಲವೆ?”" WordNumber="6" confidenceLevel="79.0" rowStart="1869" rowEnd="1920" colStart="1049" colEnd="1248"/>
+        </line>
+    </block>
+    <block type="Text" BlockNumber="5" SubType="paragraphProse" rowStart="1934" rowEnd="2042" colStart="193" colEnd="1305">
+        <line LineNumber="21" rowStart="1963" rowEnd="2023" colStart="583" colEnd="1275">
+            <word unicode="ಬಾಹ್ಯಾಕಾಶಯಾನಿಗಳು" WordNumber="1" confidenceLevel="91.0" rowStart="1963" rowEnd="2023" colStart="583" colEnd="932"/>
+            <word unicode="ತೇಲಾಡುವುದೇಕೆ9/15" WordNumber="2" confidenceLevel="57.0" rowStart="1963" rowEnd="2012" colStart="952" colEnd="1275"/>
+        </line>
+    </block>
+</page>

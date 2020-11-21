@@ -29,6 +29,7 @@ export class HeaderComponent implements OnInit {
   previousImages = true;
   public element:any;
   percentage:number;
+  isLoading =false;
 
 
 
@@ -64,6 +65,8 @@ export class HeaderComponent implements OnInit {
       {
         this.nextImage = false;
         this.headerService.setMultipleImages(this.nextImage);
+        this.isLoading = true;
+        this.headerService. setloadingvalue(this.isLoading);
       }
     if (event.target.files && fileRead) {
       this.imageService.addImage(fileRead);
@@ -129,15 +132,14 @@ asHorizontal(){
   openModalHelp(){
     this.display='block';
   }
-  scrollUp(){
 
+  scrollUp(){
     console.log("in header element==="+this.element);
     console.log("inside scroll up")
     this.element.scrollBy(0,-50)
   }
 
   scrollDown(){
-
     console.log("in header element==="+this.element);
     console.log("inside scroll down")
     this.element.scrollBy(0, 50);

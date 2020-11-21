@@ -10,6 +10,7 @@ import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { ViewerService } from '../services/viewer.service';
 import xml2js from 'xml2js';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { XmlModel } from '../shared/xml-model';
 
 @Component({
   selector: 'app-screen',
@@ -23,7 +24,7 @@ export class ScreenComponent implements OnInit{
   public value:string;
   imagewidth;
   xmlItems;
-
+  words:any= XmlModel.textArray;
   selectedImage: string;
   anotherTryVisible: boolean;
   public localUrl: any;
@@ -51,6 +52,14 @@ export class ScreenComponent implements OnInit{
     private renderer: Renderer2) { }
 
   ngOnInit(): void {
+    this.isLoading = this.headerService.getloadingvalue();
+    this.headerService.loadingvaluechage
+    .subscribe(
+      (spin:boolean)=>{
+        this.isLoading=spin;
+      }
+    );
+
     this.value= this.headerService.getHeaderValue();
     this.headerService.headerValueChange
     .subscribe(
@@ -72,10 +81,11 @@ export class ScreenComponent implements OnInit{
       this.imageService.imagesModified.subscribe( (images:Images[]) => {
       console.log("inside service subscribe....");
       console.log("inside foooor");
+      this.isLoading = true;
       if(images.length > 0){
       this.localUrl = images[0].imagePath;
       this.fileName=images[0].fileName;
-      this.isLoading = false;
+      this.isLoading =false;
 
       this.ImageIs = true;
       setTimeout(() => this.viewerService.fitwidth(),50);
@@ -105,6 +115,10 @@ export class ScreenComponent implements OnInit{
       console.log("nextImages inside footer: "+fileName);
       this.fileName = fileName;
    });
+
+   var element = document.getElementById("content");
+    console.log("documents----"+element)
+    this.imageService.setDocumentId(element);
 
   }
   openModalDialog(){
@@ -151,7 +165,7 @@ export class ScreenComponent implements OnInit{
     var fileRead = event.target.files;
     var filesCount = event.target.files.length;
     console.log("isLoading before calling importFile: "+this.isLoading);
-    this.isLoading = true;
+    this.isLoading =true;
     console.log("isLoading after calling importFile: "+this.isLoading);
     if (event.target.files && fileRead) {
       this.imageService.addImage(fileRead);
@@ -159,9 +173,7 @@ export class ScreenComponent implements OnInit{
     setTimeout(() => this. fitwidth(),50);
     setTimeout(() => this.setpercentage(),60);
 
-    var element = document.getElementById("content");
-    console.log("documents----"+element)
-    this.imageService.setDocumentId(element);
+
   }
 
 
@@ -342,47 +354,7 @@ updatescroll(scrollOne: HTMLElement, scrollTwo: HTMLElement){
   scrollOne.scrollTop = scrollTwo.scrollTop;
 
 }
-// loadXML() {
-//   this._http.get('assets/images/New.xml',
-//     {
-//       headers: new HttpHeaders()
-//         .set('Content-Type', 'text/xml')
-//         .append('Access-Control-Allow-Methods', 'GET')
-//         .append('Access-Control-Allow-Origin', '*')
-//         .append('Access-Control-Allow-Headers', "Access-Control-Allow-Headers, Access-Control-Allow-Origin, Access-Control-Request-Method"),
-//       responseType: 'text'
-//     })
-//     .subscribe((data) => {
-//       this.parseXML(data)
-//         .then((data) => {
-//           this.xmlItems = data;
-//         });
-//     });
-// }
-// parseXML(data) {
-//   return new Promise(resolve => {
-//     var k: string | number,
-//       arr = [],
-//       parser = new xml2js.Parser(
-//         {
-//           trim: true,
-//           explicitArray: true
-//         });
-//     parser.parseString(data, function (err, result) {
-//       var obj = result.Employee;
-//       for (k in obj.emp) {
-//         var item = obj.emp[k];
-//         arr.push({
-//           id: item.id[0],
-//           name: item.name[0],
-//           gender: item.gender[0],
-//           mobile: item.mobile[0]
-//         });
-//       }
-//       resolve(arr);
-//     });
-//   });
-// }
+
 
 
 }
