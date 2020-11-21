@@ -219,8 +219,8 @@ function myFunction(xml){
               var lineColStart = (block[i].children[j].getAttribute('colStart'));
               var lineColEnd = (block[i].children[j].getAttribute('colEnd'));
               var txtwidth = (lineColEnd - lineColStart);
-              var txtHeight = (lineRowEnd - lineRowStart);
-           var wordValue = new XmlModel(txt,lineRowStart,lineRowEnd,lineColStart,lineColEnd,txtwidth,txtHeight);
+              var txtheight = (lineRowEnd - lineRowStart);
+           var wordValue = new XmlModel(txt,lineRowStart,lineRowEnd,lineColStart,lineColEnd,txtwidth,txtheight);
            XmlModel.textArray.push(wordValue);
         }
    }
