@@ -52,6 +52,14 @@ export class ScreenComponent implements OnInit{
     private renderer: Renderer2) { }
 
   ngOnInit(): void {
+    this.percentage= this.headerService.getpercentagevary();
+    this.headerService.percentageChange
+    .subscribe(
+      (percent:number)=>{
+        this.percentage=percent;
+      }
+    );
+
     this.isLoading = this.headerService.getloadingvalue();
     this.headerService.loadingvaluechage
     .subscribe(

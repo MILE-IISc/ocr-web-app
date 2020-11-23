@@ -82,6 +82,7 @@ export class FooterComponent implements OnInit {
       this.percentage=value;
       this.viewerService.percentage= this.percentage;
       this.viewerService.onZoom();
+      this.headerService.setpercentagevary(this.percentage);
 
 
     }
@@ -106,12 +107,14 @@ export class FooterComponent implements OnInit {
     fitheight(){
       this.viewerService.fitheight();
       this.percentage=this.viewerService.percentage;
+      this.headerService.setpercentagevary(this.percentage);
     }
 
     fitwidth(){
       // this.viewerService.fitwidth();
     this.viewerService.fitwidth()
     this.percentage=this.viewerService.percentage;
+    this.headerService.setpercentagevary(this.percentage);
 
     }
 
@@ -119,12 +122,14 @@ export class FooterComponent implements OnInit {
 
      this.viewerService.zoomInFun();
      this.percentage=this.viewerService.percentage;
+     this.headerService.setpercentagevary(this.percentage);
       }
 
     zoomOutFun(){
 
              this.viewerService.zoomOutFun();
              this.percentage=this.viewerService.percentage;
+             this.headerService.setpercentagevary(this.percentage);
        }
   rotateImage()
   {
@@ -148,6 +153,7 @@ export class FooterComponent implements OnInit {
 
   this.viewerService.orginalsize();
   this.percentage=this.viewerService.percentage;
+  this.headerService.setpercentagevary(this.percentage);
 
  }
  openModalDialog(){

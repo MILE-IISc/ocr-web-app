@@ -32,8 +32,8 @@
                       <div id="image" [style.position]="'relative'">
 
                     <span *ngFor="let text of words">
-                          <input  id="text_input"   [value] = "text.unicode"   [style.position]="'absolute'" [style.border]="'none'" [style.font-size.px]="30"
-                          [style.top.px]="text.lineRowStart" [style.height.px]="text.txtheight" [style.width.px]="text.txtwidth"  [style.left.px]="text.lineColStart"   [style.margin-inline-start.px]="text.lineRowStart"   >
+                      <input  id="text_input"   [value] = "text.unicode"  [style.width.px]="text.txtwidth*(this.percentage/100)" [style.position]="'absolute'" [style.border]="'none'" [style.font-size.px]="30*(this.percentage/100)"
+                      [style.top.px]="text.lineRowStart*(this.percentage/100)"   [style.left.px]="text.lineColStart*(this.percentage/100)"   [style.margin-inline-start.px]="text.lineRowStart*(this.percentage/100)"   [style.height.px]="text.txtheight*(this.percentage/100)" >
 
                         </span>
                       </div>
