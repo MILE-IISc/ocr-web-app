@@ -26,6 +26,7 @@
     "bootstrap": "^3.4.1",
     "file-system": "^2.2.2",
     "jquery": "^3.5.1",
+    "jquery-select-areas": "^0.1.0",
     "ng2-file-upload": "^1.4.0",
     "rxjs": "~6.5.5",
     "rxjs-compat": "^6.6.3",

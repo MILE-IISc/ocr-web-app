@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "OCR-WEB": {
+    "OCR-WEB-UI": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/OCR-WEB",
+            "outputPath": "dist/OCR-WEB-UI",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -24,13 +24,14 @@
               "src/assets"
             ],
             "styles": [
+              "node_modules/jquery-select-areas/resources/jquery.selectareas.css",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "src/styles.css"
             ],
             "scripts": [
               "node_modules/tiff.js/tiff.min.js",
-              "node_modules/file-system/file-system.js",
-              "./src/CanvasInput-master/CanvasInput.min.js"
+              "node_modules/jquery/dist/jquery.js",
+              "node_modules/jquery-select-areas/jquery.selectareas.js"
             ]
 
           },
@@ -68,18 +69,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "OCR-WEB:build"
+            "browserTarget": "OCR-WEB-UI:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "OCR-WEB:build:production"
+              "browserTarget": "OCR-WEB-UI:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "OCR-WEB:build"
+            "browserTarget": "OCR-WEB-UI:build"
           }
         },
         "test": {
@@ -116,18 +117,18 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "OCR-WEB:serve"
+            "devServerTarget": "OCR-WEB-UI:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "OCR-WEB:serve:production"
+              "devServerTarget": "OCR-WEB-UI:serve:production"
             }
           }
         }
       }
     }
   },
-  "defaultProject": "OCR-WEB",
+  "defaultProject": "OCR-WEB-UI",
   "cli": {
     "analytics": "ed935d99-0f95-41bb-836a-5848250f47be"
   }

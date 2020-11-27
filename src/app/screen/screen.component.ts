@@ -1,5 +1,11 @@
 import { Component, OnInit,Renderer2} from '@angular/core';
+declare var $:any;
+
+
 import * as $ from 'jquery';
+
+// import * as $ from 'jquery';
+declare var $:any
 
 declare var Tiff: any;
 
@@ -362,6 +368,21 @@ updatescroll(scrollOne: HTMLElement, scrollTwo: HTMLElement){
   scrollOne.scrollTop = scrollTwo.scrollTop;
 
 }
+
+selectBlock(){
+  console.log("inside script");
+    // $(document).ready( () => {
+      $('img#imgToRead').selectAreas({
+        minSize: [10, 10],
+        onChanged : debugQtyAreas,
+        width: 500,
+      });
+    // });
+
+    function debugQtyAreas (event, id, areas) {
+      console.log(areas.length + " areas", arguments);
+    };
+  }
 
 
 
