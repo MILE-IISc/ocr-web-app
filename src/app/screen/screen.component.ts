@@ -375,7 +375,7 @@ selectBlock(){
       $('img#imgToRead').selectAreas({
         minSize: [10, 10],
         onChanged : debugQtyAreas,
-        width: 500,
+        // width: 500,
       });
     // });
 

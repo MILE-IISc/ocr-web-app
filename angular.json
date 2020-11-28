@@ -24,7 +24,7 @@
               "src/assets"
             ],
             "styles": [
-              "node_modules/jquery-select-areas/resources/jquery.selectareas.css",
+              "src/jquery.selectareas.css",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "src/styles.css"
             ],

@@ -13,14 +13,13 @@
         <button data-toggle="tooltip" title="open directory" (click)="folderUpload.click()" ><img  src="assets/images/open_folder.png" type= "button"  width="20px" height="20px"></button>
         <button data-toggle="tooltip" title="open Image-Text Layout:Left-Right"(click)="asVertical()"  [disabled]="nextImage"><img src="assets/images/vertical.jpg" type="button" width="20px" height="20px"></button>
         <button data-toggle="tooltip" title="open Image-Text Layout:Top-Bottom" (click)="asHorizontal()" [disabled]="nextImage"><img src="assets/images/horizontal.jpg" type="button"  width="20px" height="20px"></button>
-        <button data-toggle="tooltip" title="Select Block" (click)="selectBlock()">
-          Select Block</button>
+        <button data-toggle="tooltip" title="Select Block" (click)="selectBlock()"><img src="assets/images/selectBlock.png" type="button" width="20px" height="20px"></button>
       </div>
 
 
 
 
-<div  class="container" style="width: 100%; height:750px;background-color: whitesmoke;">
+<div  class="container" style="width: 100%; height:768px;background-color: whitesmoke;">
   <as-split [direction]=value >
    <as-split-area id="content" [lockSize]=true style="overflow-x: auto; overflow-y: auto;" (scroll)="updateScroll(scrollOne, scrollTwo)" #scrollOne >
 
