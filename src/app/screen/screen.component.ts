@@ -1,5 +1,7 @@
 import { Component, OnInit,Renderer2} from '@angular/core';
 declare var $:any;
+import { fromEvent } from 'rxjs'; 
+import { map, buffer, filter, debounceTime } from 'rxjs/operators';
 
 
 import * as $ from 'jquery';
@@ -25,6 +27,7 @@ import { XmlModel } from '../shared/xml-model';
 })
 export class ScreenComponent implements OnInit{
 
+  displayarea:any ;
   isLoading = false;
   title = 'Layout';
   public value:string;
@@ -371,18 +374,20 @@ updatescroll(scrollOne: HTMLElement, scrollTwo: HTMLElement){
 
 selectBlock(){
   console.log("inside script");
-    // $(document).ready( () => {
-      $('img#imgToRead').selectAreas({
-        minSize: [10, 10],
-        onChanged : debugQtyAreas,
-        // width: 500,
-      });
-    // });
+  
+  $('img#imgToRead').selectAreas({
+    minSize: [100, 100],
+    onChanged : debugQtyAreas,
+    // width: 500,
+  });
 
-    function debugQtyAreas (event, id, areas) {
-      console.log(areas.length + " areas", arguments);
-    };
-  }
+  function debugQtyAreas (event, id, areas) {
+  console.log(areas.length + " areas", arguments);
+  this.displayarea = areas;
+  };
+
+  $('')
+}
 
 
 

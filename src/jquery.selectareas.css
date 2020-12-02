@@ -3,6 +3,7 @@
 	/* overflow: hidden; */
 	position: absolute;
 	/* opacity: 0.01; */
+	cursor: pointer;
 }
 /* .blurred {
 	filter: url("/filters.svg#blur3px");

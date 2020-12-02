@@ -31,7 +31,7 @@
             "scripts": [
               "node_modules/tiff.js/tiff.min.js",
               "node_modules/jquery/dist/jquery.js",
-              "node_modules/jquery-select-areas/jquery.selectareas.js"
+             "src/jquery.selectareas.js"
             ]
 
           },
