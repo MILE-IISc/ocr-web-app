@@ -39,3 +39,14 @@
 	cursor: pointer;
 	padding: 5px;
 }
+.select-areas-blockNumber-area {
+  position: absolute;
+  color:blue;
+
+  padding: 5px;
+  /* color: 3px solid blue; */
+
+
+	height: fit-content;
+	width: fit-content;
+}

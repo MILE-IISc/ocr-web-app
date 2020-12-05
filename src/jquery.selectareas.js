@@ -1,17 +1,23 @@
-/* global window, Image, jQuery */
-/**
- * @author 360Learning
- * @author Catalin Dogaru (https://github.com/cdog - http://code.tutsplus.com/tutorials/how-to-create-a-jquery-image-cropping-plugin-from-scratch-part-i--net-20994)
- * @author Adrien David-Sivelle (https://github.com/AdrienDS - Refactoring, Multiselections & Mobile compatibility)
- */
+// * @author 360Learning
+//  * @author Catalin Dogaru (https://github.com/cdog - http://code.tutsplus.com/tutorials/how-to-create-a-jquery-image-cropping-plugin-from-scratch-part-i--net-20994)
+//  * @author Adrien David-Sivelle (https://github.com/AdrienDS - Refactoring, Multiselections & Mobile compatibility)
+//  * <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+//  */
+
 (function($) {
-    var originX;
+        // $blockNumber
+        var $x=1;
+        var originX;
     var originY;
+
     $.imageArea = function(parent, id) {
-        var options = parent.options,
+      // var $x=0,
+          var options = parent.options,
             $image = parent.$image,
             $trigger = parent.$trigger,
             $outline,
+          //  $BlockNumber = 0;
+           $blockNumber,
             $selection,
             $resizeHandlers = {},
             $btDelete,
@@ -41,6 +47,8 @@
             },
             fireEvent = function (event) {
                 $image.trigger(event, [area.id, parent.areas()]);
+                //1
+                console.log("indexnumber"+area.id)
             },
             cancelEvent = function (e) {
                 var event = e || window.event || {};
@@ -100,6 +108,7 @@
                     "z-index": area.z + 2
                 });
             },
+
             updateResizeHandlers = function (show) {
                 if (! options.allowResize) {
                     return;
@@ -156,6 +165,17 @@
                     });
                 }
             },
+            updateblockNumber = function (visible) {
+              if ($blockNumber){
+                $blockNumber.css({
+                  display: "block" ,
+                        left: area.x - 20,
+                        top: area.y ,
+                        "z-index": area.z + 2
+
+                })
+              }
+            },
             updateCursor = function (cursorType) {
                 $outline.css({
                     cursor: cursorType
@@ -172,6 +192,8 @@
                         updateSelection();
                         updateResizeHandlers();
                         updateBtDelete(true);
+                        updateblockNumber(true);
+
                         break;
 
                     case "pickSelection":
@@ -184,6 +206,7 @@
                         updateResizeHandlers();
                         updateCursor("crosshair");
                         updateBtDelete(true);
+                        updateblockNumber(true);
                         break;
 
                     case "moveSelection":
@@ -191,12 +214,14 @@
                         updateResizeHandlers();
                         updateCursor("move");
                         updateBtDelete(true);
+                        updateblockNumber(true);
                         break;
 
                     case "blur":
                         updateSelection();
                         updateResizeHandlers();
                         updateBtDelete();
+                        updateblockNumber();
                         break;
 
                     //case "releaseSelection":
@@ -204,16 +229,20 @@
                         updateSelection();
                         updateResizeHandlers(true);
                         updateBtDelete(true);
+                        updateblockNumber(true);
                 }
             },
             startSelection  = function (event) {
                 cancelEvent(event);
+                $x = $x + 1;
+                console.log("$xvalue"+$x)
 
                 // Reset the selection size
                 area.width = options.minSize[0];
                 area.height = options.minSize[1];
                 focus();
                 on("move", resizeSelection);
+
 
                 // Get the selection origin
                 selectionOrigin = getMousePosition(event);
@@ -235,7 +264,7 @@
                 console.log("area.x: "+originX);
                 console.log("area.y: "+originY);
                 on("stop", releaseSelection);
-                
+
                 refresh("startSelection");
             },
             pickSelection = function (event) {
@@ -243,12 +272,10 @@
                 focus();
                 on("move", moveSelection);
                 on("stop", releaseSelection);
+                // $x = $x + 1;
+                console.log("$xvalue"+$x)
 
                 var mousePosition = getMousePosition(event);
-
-                console.log("inside pick selection");
-                console.log("mousePosition[0] "+mousePosition[0]);
-                console.log("mousePosition[1] "+mousePosition[1]);
 
                 // Get the selection offset relative to the mouse position
                 selectionOffset[0] = mousePosition[0] - area.x;
@@ -259,6 +286,7 @@
             pickResizeHandler = function (event) {
                 cancelEvent(event);
                 focus();
+                // $x = $x + 1;
 
                 var card = event.target.className.split(" ")[1];
                 if (card[card.length - 1] === "w") {
@@ -431,28 +459,60 @@
 
                 releaseX = mousePosition[0];
                 releaseY = mousePosition[1];
-               
+
 
                 if(originX == releaseX && originY == releaseY) {
                     deleteSelection();
-                   
+
                 }
+
                 fireEvent("changed");
 
-                    refresh("releaseSelection");
+                refresh("releaseSelection");
             },
             deleteSelection = function (event) {
-                cancelEvent(event);
-                $selection.remove();
-                $outline.remove();
-                $.each($resizeHandlers, function(card, $handler) {
-                    $handler.remove();
-                });
-                if ($btDelete) {
-                    $btDelete.remove();    
-                } 
-                parent._remove(id);
-                fireEvent("changed");
+              //$BlockNumber--;
+
+              console.log("ondecrease"+$x)
+              cancelEvent(event);
+              $selection.remove();
+              $outline.remove();
+              $blockNumber.remove();
+              $.each($resizeHandlers, function(card, $handler) {
+                  $handler.remove();
+              });
+              // refresh(area.id)
+
+              //area.id=area.id-1;
+
+              console.log("deleted area id: "+area.id);
+              var blockNumberElems = $(".select-areas-blockNumber-area");
+              console.log("no. of blocks: "+blockNumberElems.length);
+              for(i=0; i < blockNumberElems.length; i++) {
+                console.log("id: "+blockNumberElems[i].id);
+                refresh(blockNumberElems[i].id);
+                // let number = blockNumberElems[i].id.substr(12);
+                // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!number : "+number);
+                console.log("value: "+document.getElementById(blockNumberElems[i].id).innerHTML);
+                console.log("i: "+i);
+                // if(number >blockNumberElems[i].id) {
+                  // for(j=0; j< blockNumberElems.length; j++){
+                  document.getElementById(blockNumberElems[i].id).innerHTML = blockNumberElems.length-i;
+                  refresh(i);
+
+                  // }
+                // }
+              }
+              $x = $x - 1
+              //  area.id=area.id-1;
+              console.log("area.idon -1"+ area.id)
+
+
+              if ($btDelete) {
+                  $btDelete.remove();
+              }
+              parent._remove(id);
+              fireEvent("changed");
             },
             getElementOffset = function (object) {
                 var offset = $(object).offset();
@@ -486,15 +546,18 @@
 
 
         // Initialize an outline layer and place it above the trigger layer
-        $outline = $("<div class=\"select-areas-outline\" />")
+        console.log("number"+ area.id);
+        $outline = $("<div class=\"select-areas-outline\" area-id=\""+area.id+"\" />")
             .css({
                 opacity : options.outlineOpacity,
                 position : "absolute"
             })
             .insertAfter($trigger);
+            //475
 
         // Initialize a selection layer and place it above the outline layer
         $selection = $("<div />")
+
             .addClass("select-areas-background-area")
             .css({
                 background : "#fff url(" + $image.attr("src") + ") no-repeat",
@@ -502,6 +565,7 @@
                 position : "absolute"
             })
             .insertAfter($outline);
+            console.log("console of div"+$selection)
 
         // Initialize all handlers
         if (options.allowResize) {
@@ -527,8 +591,20 @@
             };
             $btDelete = bindToDelete($("<div class=\"delete-area\" />"))
                 .append(bindToDelete($("<div class=\"select-areas-delete-area\" />")))
-                .insertAfter($selection);
+                .insertAfter($selection);id
+
+
+
         }
+
+        // setTimeout(() => {
+          //BlockNumber = $x;
+          $blockNumber = $("<div id=\"blockNumber_"+$x+"\" class=\"select-areas-blockNumber-area\">"+$x+"</div>")
+          .insertAfter( $btDelete);
+          console.log("$valueat assign"+$x);
+        // }
+        // ,5);
+
 
         if (options.allowMove) {
             $selection.mousedown(pickSelection).bind("touchstart", pickSelection);
@@ -845,7 +921,6 @@
     };
 
     $.selectAreas = function(object, options) {
-        console.log("entrance");
         var $object = $(object);
         if (! $object.data("mainImageSelectAreas")) {
             var mainImageSelectAreas = new $.imageSelectAreas();
@@ -882,5 +957,5 @@
         } else {
             $.error( "Method " +  customOptions + " does not exist on jQuery.selectAreas" );
         }
-    };
-}) (jQuery);
+      };
+    }) (jQuery);

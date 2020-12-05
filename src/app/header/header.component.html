@@ -1,5 +1,5 @@
 <h4>LipiGnani - The Kannada OCR</h4><!-- <nav class= "navbar navbar-default" > -->
-  <div class="dropdown">
+  <div class="dropdown" style= z-index:500;>
     &nbsp;&nbsp;&nbsp; <a href = "#" class="dropbtn">File<span class="caret"></span></a>
     <div class="dropdown-content">
       <input #fileUpload type="file" (click)="fileUpload.value = null" (change) ="importFile($event)" style="display:none"
@@ -15,7 +15,7 @@
     </div> &nbsp;&nbsp;&nbsp;
 
   </div>
-  <div class="dropdown">
+  <div class="dropdown" style= z-index:500;>
     <a href = "#"  class="dropbtn">Run<span class="caret"></span></a>
     <div class="dropdown-content">
       <a href = "#">Language</a>
@@ -32,7 +32,7 @@
     </div> &nbsp;&nbsp;&nbsp;
 
   </div>
-  <div class="dropdown">
+  <div class="dropdown" style= z-index:500;>
     <a href = "#"  class="dropbtn">View<span class="caret"></span></a>
     <div class="dropdown-content">
       <div class="dropdown-item dropdown-submenu p-0">
@@ -53,7 +53,7 @@
     </div> &nbsp;&nbsp;&nbsp;
 
   </div>
-  <div class="dropdown">
+  <div class="dropdown" style= z-index:500;>
     <a href = "#"  class="dropbtn">Layout<span class="caret"></span></a>
     <div class="dropdown-content">
       <a href = "#">Single column</a>
@@ -67,7 +67,7 @@
   </div>
 
 
-  <div class="dropdown">
+  <div class="dropdown" style= z-index:500;>
     <a href = "#" class="dropbtn">Window<span class="caret"></span></a>
     <div class="dropdown-content">
       <a href = "#" ><button style="border: none;" [disabled]="previousImages" (click)="FirstImage()" >First page</button></a>
@@ -88,7 +88,7 @@
 
   </div>
 
-  <div class="dropdown">
+  <div class="dropdown" style= z-index:500;>
     <a href = "#"  class="dropbtn">Help<span class="caret"></span></a>
     <div class="dropdown-content">
       <a href = "#" ><button  style="border: none;" (click)="openModalHelp()">About</button></a>
