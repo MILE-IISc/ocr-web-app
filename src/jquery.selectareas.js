@@ -461,7 +461,7 @@
                 releaseY = mousePosition[1];
 
 
-                if(originX == releaseX && originY == releaseY) {
+                if(originX == releaseX || originY == releaseY) {
                     deleteSelection();
 
                 }

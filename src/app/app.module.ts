@@ -6,7 +6,7 @@ import {MAT_FORM_FIELD_DEFAULT_OPTIONS} from '@angular/material/form-field';
 
 
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import {A11yModule} from '@angular/cdk/a11y';
@@ -61,6 +61,10 @@ import { ScreenComponent } from './screen/screen.component';
 import { HeaderService }  from './services/header.service';
 import { ImageService } from './services/images.service';
 import{ViewerService} from './services/viewer.service';
+import { AuthInterceptor } from "./auth/auth-interceptor";
+import { ErrorInterceptor } from "./error-interceptor";
+import { ErrorComponent } from "./error/error.component";
+import { HTTP_INTERCEPTORS } from "@angular/common/http";
 
 
 import { FooterComponent } from './footer/footer.component';
@@ -132,8 +136,12 @@ import { FooterComponent } from './footer/footer.component';
   ],
   providers: [
     {  provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'fill' } }
-  , HeaderService, ImageService,ViewerService ],
-  bootstrap: [AppComponent]
+  , HeaderService, ImageService,ViewerService,
+  { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+  { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true }, ],
+  bootstrap: [AppComponent],
+  entryComponents: [ErrorComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AppModule { }
 

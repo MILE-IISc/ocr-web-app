@@ -1,0 +1,30 @@
+<mat-card>
+  <mat-spinner *ngIf="isLoading"></mat-spinner>
+  <br>
+  <form (submit)="onSignup(signupForm)" #signupForm="ngForm" *ngIf="!isLoading">
+    <mat-form-field>
+      <input matInput name="email" ngModel type="email" placeholder="E-Mail" #emailInput="ngModel" required email>
+      <mat-error *ngIf="emailInput.invalid">Please enter a valid email.</mat-error>
+    </mat-form-field>
+    <br><br>
+    <!-- <mat-form-field>
+      <input type="text" name="type" ngModel matInput placeholder="type" #isAdminInout="ngModel" required>
+      <mat-error *ngIf="isAdminInput.invalid">Please mention the user type</mat-error>
+    </mat-form-field> -->
+    <div class="custom-control custom-radio">
+      <input id="admin" type="radio" class="custom-control-input" value="admin" name="type" ngModel required>
+      <label class="custom-control-label" for="male">Admin</label>
+    </div>
+    <div class="custom-control custom-radio">
+      <input id="annotator" type="radio" class="custom-control-input" value="annotator" name="type" ngModel required>
+      <label class="custom-control-label" for="female">Annotator</label>
+    </div>
+    <br><br>
+    <mat-form-field>
+      <input type="password" name="password" ngModel matInput placeholder="Password" #passwordInput="ngModel" required>
+      <mat-error *ngIf="passwordInput.invalid">Please enter a valid password.</mat-error>
+    </mat-form-field>
+    <br><br>
+    <button mat-raised-button color="accent" type="submit" *ngIf="!isLoading">Signup</button>
+  </form>
+</mat-card>

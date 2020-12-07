@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit,Input } from '@angular/core';
+import { Component, EventEmitter, OnInit,Input, OnDestroy } from '@angular/core';
 import * as $ from 'jquery';
 import {ScreenComponent} from '../screen/screen.component';
 import {HeaderService} from '../services/header.service';
@@ -6,13 +6,15 @@ import { ImageService } from '../services/images.service';
 import { Images } from '../shared/images.model';
 import { ViewerService } from '../services/viewer.service';
 declare var Tiff: any;
+import { AuthService } from "../auth/auth.service";
+import { Subscription } from "rxjs";
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css'],
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
 
   value:string;
   inputValue:String ;
@@ -31,11 +33,37 @@ export class HeaderComponent implements OnInit {
   percentage:number;
   isLoading =false;
 
+  // authenetication related
+  userName: string;
+  userIsAuthenticated = false;
+  isAdmin;
+  private authListenerSubs: Subscription;
 
 
-  constructor(private headerService : HeaderService,private imageService:ImageService,private viewerService:ViewerService) { }
+  constructor(private authService: AuthService, private headerService : HeaderService,private imageService:ImageService,private viewerService:ViewerService) { }
+
+  onLogout() {
+    this.authService.logout();
+  }
+
+  ngOnDestroy() {
+    this.authListenerSubs.unsubscribe();
+  }
 
   ngOnInit(): void {
+
+    // authentication related
+    this.userIsAuthenticated = this.authService.getIsAuth();
+    this.userName = this.authService.getUserName();
+    this.isAdmin = this.authService.getIsAdmin();
+    this.authListenerSubs = this.authService
+      .getAuthStatusListener()
+      .subscribe(isAuthenticated => {
+        this.userIsAuthenticated = isAuthenticated;
+        this.userName = this.authService.getUserName();
+        this.isAdmin = this.authService.getIsAdmin();
+      });
+
     this.imageService.nextImageChange.subscribe( (nextImages: boolean) => {
       console.log("nextImages inside footer: "+nextImages);
       this.nextImages = nextImages;
