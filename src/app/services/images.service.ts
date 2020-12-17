@@ -114,6 +114,7 @@ export class ImageService implements OnInit{
 async loadArray(fileRead:any,i:number) {
   const result = await new Promise((resolve) => {
     let reader = new FileReader();
+    // console.log("++++++++++++fileRead["+i+"]"+ fileRead[i]);
      if(fileRead[i].type == "image/tiff"){
         reader.onload = (event: any) => {
             var image = new Tiff({ buffer: event.target.result });

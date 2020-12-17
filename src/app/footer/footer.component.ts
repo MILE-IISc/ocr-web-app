@@ -174,6 +174,7 @@ NextImage(){
  lastImage(){
    this.imageService.LastImage();
  }
+ 
  firstImage(){
    this.imageService.firstImage();
  }
