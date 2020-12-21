@@ -68,6 +68,7 @@ import { HTTP_INTERCEPTORS } from "@angular/common/http";
 
 
 import { FooterComponent } from './footer/footer.component';
+import { AuthService } from './auth/auth.service';
 @NgModule({
   declarations: [
     AppComponent,
@@ -136,7 +137,7 @@ import { FooterComponent } from './footer/footer.component';
   ],
   providers: [
     {  provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'fill' } }
-  , HeaderService, ImageService,ViewerService,
+  , HeaderService, ImageService,ViewerService,AuthService,
   { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
   { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true }, ],
   bootstrap: [AppComponent],

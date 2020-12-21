@@ -3,7 +3,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 
-// const wavesRoutes = require("./routes/images");
+const imageRoutes = require("./routes/image");
 const userRoutes = require("./routes/user");
 
 const app = express();
@@ -21,7 +21,9 @@ mongoose
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use("/data", express.static(path.join("backend/data")));
+app.use("/images", express.static(path.join("backend/images")));
+app.use("/imagesxml", express.static(path.join("backend/imagesxml")));
+
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -36,7 +38,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// app.use("/api/images", imageRoutes);
+app.use("/api/image", imageRoutes);
 app.use("/api/user", userRoutes);
 
 module.exports = app;

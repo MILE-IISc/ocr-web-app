@@ -1,8 +1,8 @@
 export class Images {
   constructor(
-    public id: number,
-    public type: string,
+    public _id:any,
     public imagePath: any,
     public fileName: any,
+    public completed: string
   ) {}
 }

@@ -1,32 +1,41 @@
+import { HttpClient } from '@angular/common/http';
 import { EventEmitter, Injectable, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import * as $ from 'jquery';
-
+import { Subject, Subscription } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { AuthService } from '../auth/auth.service';
 import { Images } from '../shared/images.model';
 
 declare var Tiff: any;
 
+const BACKEND_URL = environment.apiUrl + "/image/";
+
 @Injectable()
-export class ImageService implements OnInit{
+export class ImageService implements OnInit {
   displayImages;
 
   ngOnInit(): void {
     this.imageLoaded
-    .subscribe(
-      (images: Images) => {
-        console.log("imageLoaded:+++++++++++++++++++++++++++++ ");
-      }
-    );
+      .subscribe(
+        (images: Images) => {
+          console.log("imageLoaded:+++++++++++++++++++++++++++++ ");
+        }
+      );
   }
 
-
-  fit:string;
+  private serverImages: Images[] = [];
+  private imagesUpdated = new Subject<{ serverImages: Images[] }>();
+  private waveSub: Subscription;
+  fit: string;
   fileName;
   public nextImages = false;
-  public previousImages=false;
+  public previousImages = false;
   btnImgArrayChange = new EventEmitter<any>();
   imageLoaded = new EventEmitter<Images>();
   imagesModified = new EventEmitter<Images[]>();
   nextImageChange = new EventEmitter<boolean>();
+  isSelectBlockChange = new EventEmitter<boolean>();
   displayChange = new EventEmitter<any>();
   nextValueChange = new EventEmitter<any>();
   previousImageChange = new EventEmitter<boolean>();
@@ -35,22 +44,62 @@ export class ImageService implements OnInit{
   images: Array<Images> = [];
   imgFileCount = 0;
   ready = false;
-  percentage:number;
+  percentage: number;
   btnImgArray: any[] = [];
-  public localUrl: string;
+  public localUrl: any;
   public documentElement;
   //display='none';
+  // public serverImages: any[] = [];
+  postedImages: any;
+  serverUrl: any
+  dataUrl: any;
+
+  constructor(private http: HttpClient, private router: Router, private authService: AuthService) { }
 
   getImages() {
-    return this.images.slice();
+    return this.serverImages.slice();
   }
 
-  getBtnImages(){
+  getBtnImages() {
     return this.btnImgArray.slice();
   }
 
-  setDocumentId(element){
-    this.documentElement=element;
+  async getServerImages() {
+    var user = this.authService.userName;
+    const queryParams = `?user=${user}`;
+    let promise = new Promise((resolve, reject) => {
+      this.http
+        .get<{ message: string; images: [] }>(
+          BACKEND_URL + queryParams
+        ).toPromise()
+        .then(responseData => {
+          const imageLength = responseData.images.length;
+          if (imageLength > 0) {
+            this.serverImages = responseData.images;
+            console.log("message" + responseData.message);
+            console.log("server images length--" + this.serverImages.length);
+            this.imagesUpdated.next({
+              serverImages: [...this.serverImages]
+            });
+          }
+          else {
+            this.serverImages = responseData.images;
+            this.imagesUpdated.next({
+              serverImages: []
+            });
+          }
+          resolve(this.serverImages);
+        });
+    });
+    return promise;
+  }
+
+  getWaveUpdateListener() {
+    return this.imagesUpdated.asObservable();
+  }
+
+  setDocumentId(element) {
+    this.documentElement = element;
     this.documentChange.emit(this.documentElement);
   }
 
@@ -59,140 +108,173 @@ export class ImageService implements OnInit{
   }
 
   urlChanged = new EventEmitter<string>();
-  url:string;
+  url: string;
 
-  setUrl(localUrl){
-      this.url=localUrl;
-      this.urlChanged.emit(this.url);
+  setUrl(localUrl) {
+    this.url = localUrl;
+    this.urlChanged.emit(this.url);
   }
 
-  getUrl(){
-
-      return this.url;
+  getUrl() {
+    return this.url;
   }
 
-  async addImage(fileRead){
-    this.images.splice(0,this.images.length);
-    var filesCount = fileRead.length;
-    if(filesCount > 1)
-      {
+  async addImage(fileRead) {
+    const imageData = new FormData();
+    imageData.append("email", this.authService.userName);
+    console.log("auth email+" + this.authService.userName);
+    for (let i = 0; i < fileRead.length; i++) {
+      var file = fileRead[i];
+      console.log(file)
+      console.log(fileRead.length)
+      imageData.append("image", file);
+    }
+    this.http
+      .post<{ message: string }>(
+        BACKEND_URL,
+        imageData
+      )
+      .subscribe(async responseData => {
+        console.log("image: " + responseData.message);
+        await this.getServerImages();
+      });
+    if (this.serverImages.length > 0) {
+      console.log("server images length===" + this.serverImages.length);
+      // this.images.splice(0, this.images.length);
+      var filesCount = this.serverImages.length;
+      if (filesCount > 1) {
         this.nextImages = false;
       }
-    console.log("file count"+filesCount);
-    for (let i=0; i<filesCount; i++){
-      var isImage = fileRead[i].type.includes("image");
-
-
-      if (isImage){
-      console.log("fileRead.type : "+fileRead[i].type);
-      console.log("fileRead["+i+"].name : "+fileRead[i].name);
-      console.log("Inside service when pdf is selected length"+this.images.length)
-      let dataURL = await this.loadArray(fileRead,i);
-      const imgValue = new Images(i, fileRead[i].type, dataURL,fileRead[i].name);
-      this.images.push(imgValue);
-      console.log("after sorting"+this.images[0].fileName);
-      console.log("addImage: "+dataURL);
-    }
-
-  }
-
-    this.images.sort( (a, b) => {
-      var x = a.fileName.toLowerCase();
-      var y = b.fileName.toLowerCase();
-      if (x < y) {return -1;}
-      if (x > y) {return 1;}
-      return 0;
-    });
-    this.imagesModified.emit(this.images.slice());
-    if(this.images.length > 1) {
-      this.nextImages = false;
-      this.nextImageChange.emit(this.nextImages);
+      console.log("file count" + filesCount);
+      let dataURL = await this.loadArray(this.serverImages[0].imagePath);
+      this.serverUrl = dataURL
+      console.log("server urlssssss" + this.serverUrl);
+      this.urlChanged.emit(this.serverUrl.slice());
+      console.log("(this.serverImages[0]: " + this.serverImages[0]);
+      if (this.serverImages.length > 1) {
+        this.nextImages = false;
+        this.nextImageChange.emit(this.nextImages);
+      }
     }
   }
 
+  getImage(imageUrl: any){
+    console.log("inside getImage"+imageUrl)
+    return this.http.get(imageUrl, { responseType: 'blob' });
+  }
 
-async loadArray(fileRead:any,i:number) {
-  const result = await new Promise((resolve) => {
-    let reader = new FileReader();
-     if(fileRead[i].type == "image/tiff"){
-        reader.onload = (event: any) => {
+  // async postImages() {
+  //   this.images.sort((a, b) => {
+  //     var x = a.fileName.toLowerCase();
+  //     var y = b.fileName.toLowerCase();
+  //     if (x < y) { return -1; }
+  //     if (x > y) { return 1; }
+  //     return 0;
+  //   });
+    
+  // }
+
+  async loadArray(serverImage: any) {
+    console.log("inside load array");
+    const result = await new Promise((resolve) => {
+      this.getImage(serverImage).subscribe(data => {
+        console.log("data----" + data.type);
+        let reader = new FileReader();
+        //if else condition comes here
+        if (data.type == "image/tiff") {
+          reader.onload = (event: any) => {
             var image = new Tiff({ buffer: event.target.result });
             var canvas = image.toCanvas();
-            var img = convertCanvasToImage(canvas) ;
+            var img = convertCanvasToImage(canvas);
             resolve(img.src);
-            }
-            reader.readAsArrayBuffer(fileRead[i]);
-        }else
-        {
-          reader.onload = (event: any) => {
-          resolve(event.target.result);
+          }
+          reader.readAsArrayBuffer(data);
         }
-        reader.readAsDataURL(fileRead[i]);
-      }
+        else {
+          reader.onload = (event: any) => {
+            console.log("data url=====================================" + event.target.result);
+            resolve(event.target.result);
+          }
+          reader.readAsDataURL(data);
+        }
+      });
     });
-    console.log(result);
     return result;
-}
-
-openModalDialog(images :Images[],display){
-  console.log("images count inside subscribe: "+images.length);
-  this.btnImgArray.splice(0,this.btnImgArray.length);
-  for(let i=0; i < images.length; i++) {
-    var btnImgEle = "<button  style=\"width: 100%; border: none;\" (click)=\"openThisImage()\" class=\"btnImg\" value=\""+images[i].fileName+"\"  id=\""+images[i].id+"\">"+images[i].fileName+"</button>";
-    console.log("btnImgEle: "+btnImgEle);
-    this.btnImgArray.push(btnImgEle);
-    this.btnImgArrayChange.emit(this.btnImgArray.slice());
   }
-  console.log("images count inside btnImgArray: "+this.btnImgArray.length);
-  $(".modal-body").empty();
-  for(let i=0; i < this.btnImgArray.length; i++) {
-    $(".modal-body").append(this.btnImgArray[i]);
 
+  updateXml(xmlString: any, fileName: any) {
+    let xmlData: any;
+    xmlData = {
+      xml: xmlString,
+      fileName: fileName,
+    };
+    this.http
+      .put<{ message: string, name: string, completed: string }>(BACKEND_URL + fileName, xmlData)
+      .subscribe(response => {
+        for (let i = 0; i < this.serverImages.length; i++) {
+          if (this.serverImages[i].fileName == response.name) {
+            console.log("name" + this.serverImages[i].fileName);
+            this.serverImages[i].completed = response.completed;
+            console.log("completed" + this.serverImages[i].completed);
+            // this.imagesUpdated({
+            //     serverImages: [...this.serverImages]
+            // });
+          }
+        }
+      });
   }
-  console.log("opening........")
-  display='block';
-  this.displayChange.emit(display);
-}
 
-nextPage()
-  {
-    this.images = this.getImages();
+  openModalDialog(images: Images[], display) {
+    console.log("images count inside subscribe: " + images.length);
+    this.btnImgArray.splice(0, this.btnImgArray.length);
+    for (let i = 0; i < images.length; i++) {
+      var btnImgEle = "<button  style=\"width: 100%; border: none;\" (click)=\"openThisImage()\" class=\"btnImg\" value=\"" + images[i].fileName + "\"  id=\"" + images[i]._id + "\">" + images[i].fileName + "</button>";
+      console.log("btnImgEle: " + btnImgEle);
+      this.btnImgArray.push(btnImgEle);
+      this.btnImgArrayChange.emit(this.btnImgArray.slice());
+    }
+    console.log("images count inside btnImgArray: " + this.btnImgArray.length);
+    $(".modal-body").empty();
+    for (let i = 0; i < this.btnImgArray.length; i++) {
+      $(".modal-body").append(this.btnImgArray[i]);
+
+    }
+    console.log("opening........")
+    display = 'block';
+    this.displayChange.emit(display);
+  }
+
+  async nextPage() {
     this.imgFileCount++;
-    console.log("next image length"+this.images.length);
-    this.localUrl = this.images[this.imgFileCount].imagePath;
-    this.urlChanged.emit(this.localUrl);
-    this.fileName = this.images[this.imgFileCount].fileName;
+    console.log("next image length" + this.serverImages.length);
+    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].imagePath);
+    this.urlChanged.emit(this.localUrl.slice());
+    this.fileName = this.serverImages[this.imgFileCount].fileName;
     this.fileNameChange.emit(this.fileName);
-    console.log("inside Next this.imgFileCount after incrementing: "+this.imgFileCount);
-    if(this.images.length -1 == this.imgFileCount)
-    {
+    console.log("inside Next this.imgFileCount after incrementing: " + this.imgFileCount);
+    if (this.serverImages.length - 1 == this.imgFileCount) {
       this.nextImages = true;
       this.nextImageChange.emit(this.nextImages);
     }
-    if( this.imgFileCount>0)
-    {
+    if (this.imgFileCount > 0) {
       this.previousImages = false;
       this.previousImageChange.emit(this.previousImages);
     }
-
   }
 
-previousPage()
-  {
-    this.images = this.getImages();
+  async previousPage() {
+    this.serverImages = this.getImages();
     this.imgFileCount--;
-    this.localUrl = this.images[this.imgFileCount].imagePath;
-    this.urlChanged.emit(this.localUrl);
-    this.fileName = this.images[this.imgFileCount].fileName;
+    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].imagePath);
+    this.urlChanged.emit(this.localUrl.slice());
+    this.fileName = this.serverImages[this.imgFileCount].fileName;
     this.fileNameChange.emit(this.fileName);
-    console.log("inside Next this.imgFileCount after decrementing: "+this.imgFileCount);
-    if(this.images.length-1 >this.imgFileCount)
-    {
+    console.log("inside Next this.imgFileCount after decrementing: " + this.imgFileCount);
+    if (this.serverImages.length - 1 > this.imgFileCount) {
       this.nextImages = false;
       this.nextImageChange.emit(this.nextImages);
     }
-    if( this.imgFileCount==0)
-    {
+    if (this.imgFileCount == 0) {
       this.previousImages = true;
       this.previousImageChange.emit(this.previousImages);
     }
@@ -200,15 +282,14 @@ previousPage()
 
 
 
-  LastImage(){
-    this.images = this.getImages();
-    this.imgFileCount=this.images.length-1;
-    this.localUrl = this.images[this.imgFileCount].imagePath;
-    this.urlChanged.emit(this.localUrl);
-    this.fileName = this.images[this.imgFileCount].fileName;
+  async LastImage() {
+    this.serverImages = this.getImages();
+    this.imgFileCount = this.serverImages.length - 1;
+    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].imagePath);
+    this.urlChanged.emit(this.localUrl.slice());
+    this.fileName = this.serverImages[this.imgFileCount].fileName;
     this.fileNameChange.emit(this.fileName);
-    if(this.images.length-1 == this.imgFileCount)
-    {
+    if (this.serverImages.length - 1 == this.imgFileCount) {
       this.nextImages = true;
       this.nextImageChange.emit(this.nextImages);
       this.previousImages = false;
@@ -216,20 +297,19 @@ previousPage()
     }
   }
 
-  firstImage(){
-    this.images = this.getImages();
-      this.imgFileCount=0;
-      this.localUrl = this.images[this.imgFileCount].imagePath;
-      this.urlChanged.emit(this.localUrl);
-      this.fileName = this.images[this.imgFileCount].fileName;
-      this.fileNameChange.emit(this.fileName);
-      if(this.imgFileCount==0)
-      {
-        this.previousImages=true;
-        this.previousImageChange.emit(this.previousImages);
-        this.nextImages=false;
-        this.nextImageChange.emit(this.nextImages);
-      }
+  async firstImage() {
+    this.serverImages = this.getImages();
+    this.imgFileCount = 0;
+    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].imagePath);
+    this.urlChanged.emit(this.localUrl.slice());
+    this.fileName = this.serverImages[this.imgFileCount].fileName;
+    this.fileNameChange.emit(this.fileName);
+    if (this.imgFileCount == 0) {
+      this.previousImages = true;
+      this.previousImageChange.emit(this.previousImages);
+      this.nextImages = false;
+      this.nextImageChange.emit(this.nextImages);
+    }
   }
 
 }
@@ -237,5 +317,6 @@ function convertCanvasToImage(canvas) {
   console.log("in convert................");
   var image = new Image();
   image.src = canvas.toDataURL("image/png");
+  console.log("image source"+image.src);
   return image;
 }

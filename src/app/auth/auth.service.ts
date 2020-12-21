@@ -14,9 +14,10 @@ export class AuthService {
   private token: string;
   private tokenTimer: any;
   private userId: string;
-  private userName: string;
+  public userName: string;
   private isAdmin: boolean;
   private isLoaded;
+  public email;
   
   private authStatusListener = new Subject<boolean>();
 
@@ -60,6 +61,8 @@ export class AuthService {
 
   login(email: string, password: string) {
     const authData: AuthData = { email: email, password: password };
+    // this.email = { email: email };
+    console.log("email in auth"+this.email);
     this.http
       .post<{ token: string; expiresIn: number; userId: string, email: string,type: string, isLoaded: string, files: any}>(
         BACKEND_URL + "/login",
