@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="true"?>
+<page xmlns="http://mile.ee.iisc.ernet.in/schemas/ocr_output">
+  <block xmlns="" type="Text" BlockNumber="1" SubType="paragraphProse" rowStart="171.48574146471526" rowEnd="262.03837304366266" colStart="325.5" colEnd="1155.157894736842"/>
+  <block xmlns="" type="Text" BlockNumber="2" SubType="paragraphProse" rowStart="301.19626778050474" rowEnd="607.1173204120837" colStart="597.1578947368421" colEnd="871.2631578947369"/>
+  <block xmlns="" type="Text" BlockNumber="3" SubType="paragraphProse" rowStart="629.1436362015573" rowEnd="731.9331098857679" colStart="310.8157894736842" colEnd="1204.1052631578948"/>
+  <block xmlns="" type="Text" BlockNumber="4" SubType="paragraphProse" rowStart="846.9594256752416" rowEnd="1204.2752151489258" colStart="345.07894736842104" colEnd="1240.8157894736842"/>
+  <block xmlns="" type="Text" BlockNumber="5" SubType="paragraphProse" rowStart="1250.7752151489258" rowEnd="1426.9857414647154" colStart="413.60526315789474" colEnd="1145.3684210526317"/>
+</page>

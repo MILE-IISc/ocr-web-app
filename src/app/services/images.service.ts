@@ -280,8 +280,6 @@ export class ImageService implements OnInit {
     }
   }
 
-
-
   async LastImage() {
     this.serverImages = this.getImages();
     this.imgFileCount = this.serverImages.length - 1;

@@ -3,6 +3,7 @@ export class Images {
     public _id:any,
     public imagePath: any,
     public fileName: any,
-    public completed: string
+    public completed: string,
+    public editor: string,
   ) {}
 }

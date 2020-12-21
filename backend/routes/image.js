@@ -8,7 +8,7 @@ const User = require("../models/user");
 
 const checkAuth = require("../middleware/check-auth");
 // const extractFile = require("../middleware/file"); extractFile, 
-let dir;
+// let dir;
 const router = express.Router();
 const multer = require('multer');
 const MIME_TYPE_MAP = {
@@ -34,7 +34,7 @@ const storage = multer.diskStorage({
         const image_wav_dir = './backend/images/' + req.body.email
         let error = new Error("Invalid mime type");
         var fs = require('fs');
-        dir = image_wav_dir;
+        let dir = image_wav_dir;
         if (!fs.existsSync(dir)) {
           fs.mkdirSync(dir);
         }
@@ -127,11 +127,22 @@ router.post("", checkAuth,
       });
   });
 
-router.put("/:id", (req, res, next) => {
+router.put("/:id", checkAuth, (req, res, next) => {
   console.log("fileName" + req.body.fileName)
   imageFileName = req.body.fileName;
+  editor = req.userData.email
+  // editorId = req.userData.userId;
+
+  // console.log("editorId" +editorid);
+
   xmlFileName = imageFileName.slice(0, -3) + 'xml';
-  const user_xml_dir = './backend/imagesxml/' + xmlFileName;
+
+  const user_xml_dir = './backend/imagesxml/'+editor+'/';
+  var fs = require('fs');
+  let dir = user_xml_dir;
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
+  }
   var xml = req.body.xml;
 
   var formattedXml = format(xml, {
@@ -142,7 +153,7 @@ router.put("/:id", (req, res, next) => {
   });
 
   console.log(formattedXml);
-  let writeStream = fs.createWriteStream(user_xml_dir);
+  let writeStream = fs.createWriteStream(dir+xmlFileName);
   writeStream.on('error', (err) => {
     console.log(err);
     writeStream.end();
@@ -153,11 +164,24 @@ router.put("/:id", (req, res, next) => {
   writeStream.write(formattedXml);
 
   writeStream.on('finish', () => {
-    res.status(200).json({ message: "Text File saved successfully!", name: imageFileName, completed: "Y" });
+    Image.findOneAndUpdate({fileName: imageFileName }, { completed: 'Y' }, { new: true })
+      .then(result => {
+        if (result.completed == "Y") {
+          res.status(200).json({ message: "XML File saved successfully!", name: imageFileName, completed: "Y" });
+        } else {
+          console.log("User FileList Status update failed. result: " + result);
+          res.status(401).json({ message: "Not authorized!" });
+        }
+      })
+      .catch(error => {
+        console.log("User FileList Status update failed. error: " + error);
+        res.status(500).json({
+          message: "User FileList Status update failed !!!"
+        });
+      });
   });
   writeStream.end();
 });
-
 
 router.get("", (req, res, next) => {
   const url = req.protocol + "://" + req.get("host");
