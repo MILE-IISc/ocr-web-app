@@ -1,3 +1,4 @@
+
 import { Component, OnInit,Renderer2} from '@angular/core';
 declare var $:any;
 import { fromEvent, Subscription } from 'rxjs'; 
@@ -14,9 +15,9 @@ import { XmlModel } from '../shared/xml-model';
 import { AuthService } from '../auth/auth.service';
 
 @Component({
-  selector: 'app-screen',
-  templateUrl: './screen.component.html',
-  styleUrls: ['./screen.component.css'],
+ selector: 'app-screen',
+ templateUrl: './screen.component.html',
+ styleUrls: ['./screen.component.css'],
 })
 
 export class ScreenComponent implements OnInit{
@@ -175,9 +176,6 @@ export class ScreenComponent implements OnInit{
     setTimeout(() => this.setpercentage(), 60);
   }
 
-  skipPage(){
-    //this.localUrl = this.localUrlArray[this.imgFileCount];
-  }
 
   onEnter(value: number) {
     this.angle = value;

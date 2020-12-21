@@ -882,6 +882,13 @@
         return ret;
     };
 
+    $.imageSelectAreas.prototype.reset = function () {
+        var that = this;
+        this._eachArea(function (area, id) {
+            that.remove(id);
+        });
+        this._refresh();
+    };
 
     $.imageSelectAreas.prototype.contains = function (point) {
         var res = false;
@@ -892,14 +899,6 @@
             }
         });
         return res;
-    };
-
-    $.imageSelectAreas.prototype.reset = function () {
-        var that = this;
-        this._eachArea(function (area, id) {
-            that.remove(id);
-        });
-        this._refresh();
     };
 
     $.selectAreas = function (object, options) {
@@ -941,3 +940,5 @@
         }
     };
 })(jQuery);
+
+

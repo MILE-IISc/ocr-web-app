@@ -1,6 +1,6 @@
 /* header mat css properties starts here */
 mat-toolbar {
-  background-color: darkcyan;
+  background-color:lightblue;
 }
 
 ul {
@@ -23,7 +23,7 @@ ul {
 }
 
 .header-text {
-  font-size: 30px
+  font-size: 20px;
 }
 
 .mat-button:hover {

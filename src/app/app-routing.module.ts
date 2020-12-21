@@ -6,7 +6,7 @@ import { AuthGuard } from "./auth/auth.guard";
 
 
 const appRoutes: Routes = [
-  { path: '', redirectTo: 'auth', pathMatch: 'full' },
+  { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
   { path: 'screen', component: ScreenComponent, canActivate: [AuthGuard] },
   // { path: "auth", loadChildren: "./auth/auth.module#AuthModule"},
   { path: 'auth', loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)}

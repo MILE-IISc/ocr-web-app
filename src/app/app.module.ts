@@ -3,8 +3,6 @@ import { ReactiveFormsModule} from '@angular/forms';
 import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
 import {MAT_FORM_FIELD_DEFAULT_OPTIONS} from '@angular/material/form-field';
 //import { FileSelectDirective } from 'ng2-file-upload';
-
-
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { AppRoutingModule } from './app-routing.module';
@@ -131,7 +129,7 @@ import { AuthService } from './auth/auth.service';
     HttpClientModule,
     ReactiveFormsModule,
     AngularSplitModule,
-
+   
 
     MatNativeDateModule
   ],

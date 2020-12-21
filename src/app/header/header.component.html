@@ -1,27 +1,12 @@
 <!-- rgb(35, 230, 28);  rgb(192, 238, 27); -->
-<mat-toolbar>
-  <span class="header-text">
-    LipiGnani - The Kannada OCR
-  </span>
-  <span class="spacer"></span>
-  <ul>
-    <li *ngIf="!userIsAuthenticated">
-      <a mat-button routerLink="/auth/login" routerLinkActive="mat-accent">Login</a>
-    </li>
-    <li *ngIf="userIsAuthenticated">
-      <a mat-button routerLink="/screen" routerLinkActive="mat-accent">Edit Image Content</a>
-    </li>
-    <li *ngIf="userIsAuthenticated && isAdmin">
-      <a mat-button routerLink="/auth/signup" routerLinkActive="mat-accent">Create User</a>
-    </li>
-    <li *ngIf="userIsAuthenticated">
-      <span>{{ userName }}</span>
-    </li>
-    <li *ngIf="userIsAuthenticated">
-      <button mat-button (click)="onLogout()">Logout</button>
-    </li>
-  </ul>
-</mat-toolbar>
+<div style="background-color:lightblue ;height: 20px;">
+<span class="header-text" >
+  LipiGnani - The Kannada OCR
+</span>
+</div>
+<span class="spacer"></span>
+<mat-toolbar class="toolbar">
+  <div> 
 
 <div class="dropdown" style= z-index:500; *ngIf="userIsAuthenticated">
   &nbsp;&nbsp;&nbsp; <a href = "#" class="dropbtn">File<span class="caret"></span></a>
@@ -120,6 +105,26 @@ accept="image/*">
   </div>
 
 </div>
-
-
+</div>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<div>
+  <ul>
+    <li *ngIf="!userIsAuthenticated">
+      <a mat-button routerLink="/auth/login" routerLinkActive="mat-accent">Login</a>
+    </li>
+    <li *ngIf="userIsAuthenticated">
+      <a mat-button routerLink="/screen" routerLinkActive="mat-accent">Edit Image Content</a>
+    </li>
+    <li *ngIf="userIsAuthenticated && isAdmin">
+      <a mat-button routerLink="/auth/signup" routerLinkActive="mat-accent">Create User</a>
+    </li>
+    <li *ngIf="userIsAuthenticated">
+      <span>{{ userName }}</span>
+    </li>
+    <li *ngIf="userIsAuthenticated">
+      <button mat-button (click)="onLogout()">Logout</button>
+    </li>
+  </ul>
+</div>
+</mat-toolbar>
 
