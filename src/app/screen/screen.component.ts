@@ -61,6 +61,7 @@ export class ScreenComponent implements OnInit{
 
   ngOnInit(): void {
     this.userName = this.authService.getUserName();
+    console.log("user name in screen "+this.userName)
     this.imageService.getServerImages();
     this.percentage = this.headerService.getpercentagevary();
     this.headerService.percentageChange
@@ -93,9 +94,11 @@ export class ScreenComponent implements OnInit{
     this.waveSub = this.imageService
       .getWaveUpdateListener()
       .subscribe(async (imageData: { serverImages: Images[] }) => {
+        console.log("inside subscribe in screen oninit")
         this.serverImages = imageData.serverImages;
         // this.isLoading = true;
         const imageLength = this.serverImages.length;
+        console.log("imageLength in screen onInit "+imageLength)
         if (imageLength > 0) {
           if (this.isDiv == true) {
             console.log("holder is there");

@@ -1,12 +1,17 @@
 /* header mat css properties starts here */
 mat-toolbar {
-  background-color:lightblue;
+  background-color:darkcyan;
 }
 
 ul {
   list-style: none;
   padding: 0;
   margin: 0;
+}
+
+.header-text{
+  color: black;
+  font-size: 30px
 }
 
 a {
@@ -37,10 +42,10 @@ ul {
   display: block;
 }
 /* header mat css properties ends here */
-  h4 {
+  /* h4 {
     background-color: lightblue;
 
-  }
+  } */
   .dropdown-submenu {
     position: relative;
 }

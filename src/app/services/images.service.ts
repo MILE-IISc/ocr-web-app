@@ -67,6 +67,7 @@ export class ImageService implements OnInit {
   async getServerImages() {
     var user = this.authService.userName;
     const queryParams = `?user=${user}`;
+    console.log("enter get server from screen")
     let promise = new Promise((resolve, reject) => {
       this.http
         .get<{ message: string; images: [] }>(
@@ -83,6 +84,7 @@ export class ImageService implements OnInit {
             });
           }
           else {
+            console.log("message" + responseData.message);
             this.serverImages = responseData.images;
             this.imagesUpdated.next({
               serverImages: []

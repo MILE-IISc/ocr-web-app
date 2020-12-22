@@ -217,6 +217,10 @@ router.get("", (req, res, next) => {
         fs.readdir(user_wav_dir, (err, filesList) => {
           if (err) {
             imageArray = "";
+             res.status(201).json({
+                  message: "Images fetched successfully!",
+                  images: fetchedImages
+                });
           }
           else {
             targetFiles = filesList;
