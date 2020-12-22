@@ -137,7 +137,7 @@ router.put("/:id", checkAuth, (req, res, next) => {
 
   xmlFileName = imageFileName.slice(0, -3) + 'xml';
 
-  const user_xml_dir = './backend/imagesxml/'+editor+'/';
+  const user_xml_dir = './backend/images/'+editor+'/';
   var fs = require('fs');
   let dir = user_xml_dir;
   if (!fs.existsSync(dir)) {
