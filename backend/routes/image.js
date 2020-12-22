@@ -177,7 +177,7 @@ router.put("/:id", checkAuth, (req, res, next) => {
         console.log("User FileList Status update failed. error: " + error);
         res.status(500).json({
           message: "User FileList Status update failed !!!"
-        });
+        }); 
       });
   });
   writeStream.end();
