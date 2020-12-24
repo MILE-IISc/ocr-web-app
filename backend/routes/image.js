@@ -254,7 +254,7 @@ router.get("", (req, res, next) => {
               }
               else {
                 fetchedImages.map((fetchedImage) => {
-                  delFiles.push(fetchedImage.name);
+                  delFiles.push(fetchedImage.fileName);
                 });
               }
               delFiles = delFiles.filter(delFiles => !oldFiles.includes(delFiles));
@@ -275,7 +275,7 @@ router.get("", (req, res, next) => {
               delFileId = [];
               delFiles.map((delFile) => {
                 fetchedImages.map((fetchedImage) => {
-                  if (delFile == fetchedImage.name) {
+                  if (delFile == fetchedImage.fileName) {
                     delFileId.push(fetchedImage.id);
                   }
                 });
