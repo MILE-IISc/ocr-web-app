@@ -294,7 +294,7 @@ export class ScreenComponent implements OnInit{
   onSave() {
     var areas = $('img#imgToRead').selectAreas('areas');
     console.log("area length" + areas.length);
-    var prolog = '<?xml version="1.0" encoding="UTF-8" standalone="true"?>';
+    var prolog = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
     var xmlDocument = document.implementation.createDocument('http://mile.ee.iisc.ernet.in/schemas/ocr_output', "page", null);
     for (let i = 0; i < areas.length; i++) {
       console.log("percentage" + this.percentage);
