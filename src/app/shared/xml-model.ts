@@ -12,3 +12,9 @@ export class XmlModel{
 
     public static textArray = [];
 }
+
+export class retain{
+  public static percentage;
+  public static xmlname;
+  public static imgname;
+}

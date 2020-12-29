@@ -14,9 +14,10 @@
     [disabled]="nextImage"><img src="assets/images/vertical.jpg" type="button" width="20px" height="20px"></button>
   <button data-toggle="tooltip" title="open Image-Text Layout:Top-Bottom" (click)="asHorizontal()"
     [disabled]="nextImage"><img src="assets/images/horizontal.jpg" type="button" width="20px" height="20px"></button>
-  <button data-toggle="tooltip" title="Select Block" (click)="selectBlock()"><img src="assets/images/selectBlock.png"
+    <button data-toggle="tooltip" title="Select Block" (click)="selectBlock()" class="xmlButton" id="buttonXml"><img src="assets/images/selectBlock.png"
       type="button" width="20px" height="20px"></button>
   <button (click)="onSave()">SavetoXML</button>
+
 </div>
 
 <div class="container" style="width: 100%; height:870px;background-color: whitesmoke;">

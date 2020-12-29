@@ -6,8 +6,12 @@ import { Subject, Subscription } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/auth.service';
 import { Images } from '../shared/images.model';
+import { HeaderService } from '../services/header.service';
+import { XmlModel,retain } from '../shared/xml-model';
 
 declare var Tiff: any;
+declare var $:any;
+
 
 const BACKEND_URL = environment.apiUrl + "/image/";
 
@@ -22,6 +26,12 @@ export class ImageService implements OnInit {
           console.log("imageLoaded:+++++++++++++++++++++++++++++ ");
         }
       );
+      this.percentage = this.headerService.getpercentagevary();
+      this.headerService.percentageChange
+        .subscribe(
+          (percent: number) => {
+            this.percentage = percent;
+          });
   }
 
   private serverImages: Images[] = [];
@@ -53,8 +63,9 @@ export class ImageService implements OnInit {
   postedImages: any;
   serverUrl: any
   dataUrl: any;
+  xmlFileName;
 
-  constructor(private http: HttpClient, private router: Router, private authService: AuthService) { }
+  constructor(private http: HttpClient, private router: Router, private authService: AuthService,private headerService: HeaderService) { }
 
   getImages() {
     return this.serverImages.slice();
@@ -169,15 +180,7 @@ export class ImageService implements OnInit {
     return this.http.get(imageUrl, { responseType: 'blob' });
   }
 
-  // async postImages() {
-  //   this.images.sort((a, b) => {
-  //     var x = a.fileName.toLowerCase();
-  //     var y = b.fileName.toLowerCase();
-  //     if (x < y) { return -1; }
-  //     if (x > y) { return 1; }
-  //     return 0;
-  //   });   
-  // }
+  
 
   async loadArray(serverImage: any) {
     console.log("inside load array");
@@ -222,9 +225,7 @@ export class ImageService implements OnInit {
             console.log("name" + this.serverImages[i].fileName);
             this.serverImages[i].completed = response.completed;
             console.log("completed" + this.serverImages[i].completed);
-            // this.imagesUpdated({
-            //     serverImages: [...this.serverImages]
-            // });
+      
           }
         }
       });
@@ -316,6 +317,32 @@ export class ImageService implements OnInit {
     }
   }
 
+  onXml(){
+
+
+this.serverImages = this.getImages();
+
+this.fileName = this.serverImages[this.imgFileCount].fileName;
+console.log("filename"+this.fileName)
+ 
+    this.xmlFileName = this.fileName.slice(0, -3) + 'xml';
+    console.log("xmlfilename"+this.xmlFileName)
+    var user = this.authService.userName;
+    console.log("user"+user)
+    var url = "http://localhost:4000/images/" +user+"\/"+this.xmlFileName;
+    console.log("url :"+url);
+    var xmlhttp = new XMLHttpRequest();
+    
+    xmlhttp.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+    
+    fromXml(this);
+    }
+    };
+    
+    xmlhttp.open("GET", url, true);
+    xmlhttp.send();
+    }
 }
 function convertCanvasToImage(canvas) {
   console.log("in convert................");
@@ -323,4 +350,63 @@ function convertCanvasToImage(canvas) {
   image.src = canvas.toDataURL("image/png");
   console.log("image source"+image.src);
   return image;
+}
+function fromXml(xml){
+  var arr=[];
+  
+console.log("the current percentage is "+retain.percentage)
+var xmlDoc = xml.responseXML;
+var block = xmlDoc.getElementsByTagName("block");
+console.log("length =====" + block.length);
+let areaarray=[];
+for (let i = 0; i < block.length; i++) {
+
+var blockNumber  = (block[i].getAttribute('BlockNumber'));
+console.log("blockNumber"+blockNumber);
+var blockRowStart = (block[i].getAttribute('rowStart'));
+var blockRowEnd = (block[i].getAttribute('rowEnd'));
+var blockColStart = (block[i].getAttribute('colStart'));
+var blockColEnd = (block[i].getAttribute('colEnd'));
+var blockwidth = (blockColEnd - blockColStart) * retain.percentage / 100;
+console.log("blockwidth"+blockwidth);
+var blockheight = (blockRowEnd - blockRowStart) * retain.percentage / 100;
+console.log("blockheight"+blockheight);
+var X = blockColStart * retain.percentage/ 100;
+console.log("blockX"+X);
+var Y = blockRowStart *  retain.percentage / 100;
+console.log("blockY"+Y);
+ areaarray[i] = { "id":blockNumber, "x":X,"y":Y,"width":blockwidth,"height":blockheight}
+
+ $('img#imgToRead').selectAreas('destroy');
+ $('img#imgToRead').selectAreas({
+ 
+ onChanged : debugQtyAreas,
+ 
+ areas:areaarray
+ 
+ });
+
+}
+
+$('#nextImg').click(function () {
+  console.log("onclick");
+  $('#imgToRead').selectAreas('destroy');
+});
+$('#previousImg').click(function () {
+  $('#imgToRead').selectAreas('destroy');
+});
+$('#firstImg').click(function () {
+  $('#imgToRead').selectAreas('destroy');
+});
+$('#lastImg').click(function () {
+  $('#imgToRead').selectAreas('destroy');
+});
+
+  
+
+function debugQtyAreas(event, id, areas) {
+console.log(areas.length + " areas", arguments);
+this.displayarea = areas;
+console.log(areas.length + " this.displayarea", arguments);
+};
 }

@@ -13,7 +13,7 @@ import { HeaderService } from '../services/header.service';
 import { ImageService } from '../services/images.service';
 import { Images } from '../shared/images.model';
 import { ViewerService } from '../services/viewer.service';
-import { XmlModel } from '../shared/xml-model';
+import { XmlModel,retain } from '../shared/xml-model';
 import { AuthService } from '../auth/auth.service';
 
 @Component({
@@ -40,7 +40,7 @@ export class ScreenComponent implements OnInit{
   public localUrl: any;
   public tiffUrl: any;
   isMenuOpen = false;
-
+  xmlFileName;
   url;
   fileName: any;
   localUrlArray: any[] = [];
@@ -65,7 +65,7 @@ export class ScreenComponent implements OnInit{
 
   ngOnInit(): void {
     this.userName = this.authService.getUserName();
-    console.log("user name in screen "+this.userName)
+    // console.log("user name in screen "+this.userName)
     this.imageService.getServerImages();
     this.percentage = this.headerService.getpercentagevary();
     this.headerService.percentageChange
@@ -73,6 +73,9 @@ export class ScreenComponent implements OnInit{
         (percent: number) => {
           this.percentage = percent;
         });
+
+        // retain.percentage = this.percentage;
+        // console.log("the current percentage is "+retain.percentage)
 
     this.isLoading = this.headerService.getloadingvalue();
     this.headerService.loadingvaluechage
@@ -98,14 +101,14 @@ export class ScreenComponent implements OnInit{
     this.waveSub = this.imageService
       .getWaveUpdateListener()
       .subscribe(async (imageData: { serverImages: Images[] }) => {
-        console.log("inside subscribe in screen oninit")
+        // console.log("inside subscribe in screen oninit")
         this.serverImages = imageData.serverImages;
         // this.isLoading = true;
         const imageLength = this.serverImages.length;
-        console.log("imageLength in screen onInit "+imageLength)
+        // console.log("imageLength in screen onInit "+imageLength)
         if (imageLength > 0) {
           if (this.isDiv == true) {
-            console.log("holder is there");
+            // console.log("holder is there");
             $('.holderClass').remove();
           }
           this.isLoading = true;
@@ -135,25 +138,25 @@ export class ScreenComponent implements OnInit{
     this.imageService.urlChanged
       .subscribe(
         (url: any) => {
-          console.log("Inside subscribe");
-          console.log("+++++++++url: " + url);
+          // console.log("Inside subscribe");
+          // console.log("+++++++++url: " + url);
           this.localUrl = url;
         });
 
     this.imageService.fileNameChange.subscribe((fileName: any) => {
-      console.log("nextImages inside footer: " + fileName);
+      // console.log("nextImages inside footer: " + fileName);
       this.fileName = fileName;
     });
 
     var element = document.getElementById("content");
-    console.log("documents----" + element)
+    // console.log("documents----" + element)
     this.imageService.setDocumentId(element);
   }
 
   async openThisImage(event) {
-    console.log("inside open this image");
+    // console.log("inside open this image");
     var id = event.target.value;
-    console.log("id : " + id);
+    // console.log("id : " + id);
     this.images = this.imageService.getImages();
     for (let i = 0; i < this.images.length; i++) {
       if (this.images[i].fileName == id) {
@@ -173,9 +176,9 @@ export class ScreenComponent implements OnInit{
     this.anotherTryVisible = true;
     var fileRead = (event.target as HTMLInputElement).files;
     var filesCount = event.target.files.length;
-    console.log("isLoading before calling importFile: " + this.isLoading);
+    // console.log("isLoading before calling importFile: " + this.isLoading);
     this.isLoading = true;
-    console.log("isLoading after calling importFile: " + this.isLoading);
+    // console.log("isLoading after calling importFile: " + this.isLoading);
     if (event.target.files && fileRead) {
       this.imageService.addImage(fileRead);
     }
@@ -200,7 +203,7 @@ export class ScreenComponent implements OnInit{
     this.viewerService.asVertical();
     this.value = this.viewerService.value;
     // this.viewerService.asVertical();
-    console.log("asVertical has been invoked from screen");
+    // console.log("asVertical has been invoked from screen");
     setTimeout(() => this.setpercentage(), 50);
   }
 
@@ -271,17 +274,10 @@ export class ScreenComponent implements OnInit{
     console.log("inside script");
     this.isDiv = true;
     this.viewerService. selectBlockservice();
-  //   $(document).ready(function () {
-
-  //   $('#imgToRead').selectAreas({
-  //     onChanged: debugQtyAreas,
-  //   });
-
-  //   function debugQtyAreas(event, id, areas) {
-  //     console.log(areas.length + " areas", arguments);
-  //   };
+    this.imageService.onXml();
+  
     $('#nextImg').click(function () {
-      console.log("onclick");
+      // console.log("onclick");
       $('#imgToRead').selectAreas('reset');
     });
     $('#previousImg').click(function () {
@@ -298,11 +294,11 @@ export class ScreenComponent implements OnInit{
 
   onSave() {
     var areas = $('img#imgToRead').selectAreas('areas');
-    console.log("area length" + areas.length);
+    // console.log("area length" + areas.length);
     var prolog = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
     var xmlDocument = document.implementation.createDocument('http://mile.ee.iisc.ernet.in/schemas/ocr_output', "page", null);
     for (let i = 0; i < areas.length; i++) {
-      console.log("percentage" + this.percentage);
+      // console.log("percentage" + this.percentage);
       var blockElem = xmlDocument.createElement("block");
       blockElem.setAttribute("type", "Text");
       var blockNumberElems = $(".select-areas-blockNumber-area");
@@ -343,4 +339,7 @@ export class ScreenComponent implements OnInit{
         // this.isMenuOpen = false;
         $("#menu").css("display", "none");
       }
+
+   
 }
+
