@@ -1,10 +1,12 @@
 
 import { Component, OnInit,Renderer2} from '@angular/core';
 declare var $:any;
-import { fromEvent, Subscription } from 'rxjs'; 
+import { fromEvent, Subscription } from 'rxjs';
 import { map, buffer, filter, debounceTime } from 'rxjs/operators';
 import * as $ from 'jquery';
 // import * as $ from 'jquery';
+
+import { BlockModel} from '../shared/block-model';
 declare var $:any
 declare var Tiff: any;
 import { HeaderService } from '../services/header.service';
@@ -37,6 +39,8 @@ export class ScreenComponent implements OnInit{
   anotherTryVisible: boolean;
   public localUrl: any;
   public tiffUrl: any;
+  isMenuOpen = false;
+
   url;
   fileName: any;
   localUrlArray: any[] = [];
@@ -266,15 +270,16 @@ export class ScreenComponent implements OnInit{
   selectBlock() {
     console.log("inside script");
     this.isDiv = true;
-    $(document).ready(function () {
+    this.viewerService. selectBlockservice();
+  //   $(document).ready(function () {
 
-    $('#imgToRead').selectAreas({
-      onChanged: debugQtyAreas,
-    });
+  //   $('#imgToRead').selectAreas({
+  //     onChanged: debugQtyAreas,
+  //   });
 
-    function debugQtyAreas(event, id, areas) {
-      console.log(areas.length + " areas", arguments);
-    };
+  //   function debugQtyAreas(event, id, areas) {
+  //     console.log(areas.length + " areas", arguments);
+  //   };
     $('#nextImg').click(function () {
       console.log("onclick");
       $('#imgToRead').selectAreas('reset');
@@ -288,9 +293,9 @@ export class ScreenComponent implements OnInit{
     $('#lastImg').click(function () {
       $('#imgToRead').selectAreas('reset');
     });
-  });
+  // });
   }
-   
+
   onSave() {
     var areas = $('img#imgToRead').selectAreas('areas');
     console.log("area length" + areas.length);
@@ -324,4 +329,18 @@ export class ScreenComponent implements OnInit{
     console.log("xml----" + xmlString);
     this.imageService.updateXml(xmlString, this.fileName);
   }
+  openMenu(event) {
+    this.isMenuOpen = true;
+    event. preventDefault();
+
+
+    $("#menu").css("display", "block");
+    $("#menu").css("left", event.clientX+"px");
+    $("#menu").css("top", event.clientY+"px");
+    }
+    closeMenu() {
+      // if(this.isMenuOpen == true) {
+        // this.isMenuOpen = false;
+        $("#menu").css("display", "none");
+      }
 }

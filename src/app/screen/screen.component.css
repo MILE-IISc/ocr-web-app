@@ -74,3 +74,80 @@ overflow:auto;
   padding: 0px !important;
 }
 /* div { position: relative; } */
+#menu {
+  position:absolute;
+  display: none;
+  width: fit-content;
+  height: fit-content;
+  background-color: none;
+  z-index: 500;
+  cursor: pointer;
+}
+
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #ccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+
+/* ::ng-deep .menu button {
+  /* background-color: #4CAF50; */
+  /* border: 1px solid green; */
+  /* color:brown; */
+  /* padding: 0px !important; */
+  /* cursor: pointer; */
+  /* display: inline-block; */
+  /* outline: none; */
+  /* margin: 0px !important; */
+  /* border-width: solid; */
+/* } */
+
+/* button[disabled] { */
+  /* filter: blur(1px); */
+  /* cursor: not-allowed; */
+/* } */
+.dropdown-content {
+  /* display: none; */
+  position: relative;
+  background-color: #f9f9f9;
+   min-width: 160px;
+   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  padding: 12px 16px;
+  /* z-index: 1;  */
+}
+
+
+
+.dropdown-content a {
+  color: black;
+  /* padding: 12px 16px; */
+  text-decoration: none;
+  display: block;
+  /* height: 40px; */
+  padding-bottom: 0px;
+  padding-top:0px
+}
+.list {
+  display: none;
+}
+.link:hover + .list {
+  display: block;
+}
+
+.dropdown-content a:hover {background-color: #f1f1f1}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+

@@ -1,5 +1,8 @@
 
 import { EventEmitter, Injectable, OnInit,Renderer2 ,RendererFactory2} from '@angular/core';
+declare var $:any;
+import * as $ from 'jquery';
+import { BlockModel} from '../shared/block-model';
 
 @Injectable()
 export class ViewerService implements OnInit{
@@ -8,6 +11,7 @@ export class ViewerService implements OnInit{
  public percentage:number;
  public angle:number=0;
  private renderer: Renderer2;
+ public clientpercent;
 
  constructor(rendererFactory: RendererFactory2) {
      this.renderer = rendererFactory.createRenderer(null, null);
@@ -42,6 +46,7 @@ asHorizontal(){
 
 
 fitheight(){
+  this.clientpercent = this.percentage;
   console.log("inside fitheight of Viewer");
   this.fit= 'height';
   var myImg;
@@ -51,17 +56,22 @@ falseimg=document.getElementById("image")
 console.log("myImg: "+myImg);
 
 
-  myImg.style.height = 100+"%";
+var divheight= document.getElementById("content").offsetHeight;
+console.log("divelementheight "+divheight)
+  myImg.style.height =  divheight+"px";
   falseimg.style.height= myImg.style.height;
   var currHeight = myImg.clientHeight;
   var realHeight = myImg.naturalHeight;
   var realWidth = myImg.naturalWidth;
   this.percentage=currHeight/realHeight*100;
+  this.blocksize();
+
   myImg.style.width = (realWidth * this.percentage/100) + "px";
   falseimg.style.width = myImg.style.width;
 }
 
 fitwidth(){
+  this.clientpercent = this.percentage;
   this.fit= 'width';
   var myImg;
   var falseimg;
@@ -69,16 +79,21 @@ myImg= document.getElementById("imgToRead");
 falseimg=document.getElementById("image")
 
 
-  myImg.style.width = 100+"%";
+var divwidth = document.getElementById('content').offsetWidth;
+console.log("divelementheight "+divwidth)
+  myImg.style.width =  divwidth+"px";
   falseimg.style.width= myImg.style.width;
   var currWidth = myImg.clientWidth;
    var realHeight = myImg.naturalHeight;
   var realWidth = myImg.naturalWidth;
   this.percentage=(currWidth/realWidth)*100;
+  this.blocksize();
+
   myImg.style.height = (realHeight* this.percentage/100) + "px";
   falseimg.style.height= myImg.style.height;
 }
 orginalsize(){
+  this.clientpercent = this.percentage;
   this.fit='orginalsize';
  var myImg;
  var falseimg;
@@ -91,6 +106,8 @@ orginalsize(){
      falseimg.style.height= myImg.style.height;
      console.log("currheight"+myImg.naturalHeight)
      this.percentage=100;
+     this.blocksize();
+
 
 }
   getpercentage(){
@@ -103,10 +120,13 @@ orginalsize(){
 
 
   onZoom(){
+    this.clientpercent = this.percentage;
 
    var myImg;
 
    var zoomlevel= this.percentage
+   this.blocksize();
+
 
    myImg= document.getElementById("imgToRead");
    var falseimg;
@@ -129,8 +149,11 @@ orginalsize(){
 
   zoomInFun(){
 
+    this.clientpercent = this.percentage;
     var myImg;
     this.percentage = this.percentage + 7.2;
+    this.blocksize();
+
 
 
        myImg= document.getElementById("imgToRead");
@@ -152,9 +175,12 @@ orginalsize(){
      }
 
    zoomOutFun(){
+    this.clientpercent = this.percentage;
 
      var myImg;
      this.percentage = this.percentage -7.2;
+     this.blocksize();
+
 
 
         myImg= document.getElementById("imgToRead");
@@ -176,7 +202,7 @@ orginalsize(){
       }
       rotateImage()
       {
-        this.angle++;
+        this.angle=this.angle+0.5;
       var myImg;
 
         var degree = this.angle;
@@ -189,7 +215,7 @@ orginalsize(){
       }
       rotateImageanti()
       {
-        this.angle--;
+        this.angle=this.angle-0.5;
       var myImg;
 
         var degree = this.angle;
@@ -201,9 +227,8 @@ orginalsize(){
         )
       }
       onEnter() {
-        // this.angle = value;
-        // this.viewerService.angle = this.angle;
-        // this.viewerService.onEnter();
+        
+
         var myImg;
 
         var degree = this.angle;
@@ -214,7 +239,84 @@ orginalsize(){
           `rotate(${degree}deg)`
         )
       }
+      selectBlockservice(){
+        console.log("inside script");
+        let areasarray =  BlockModel.blockArray;
+        console.log("block.model.arrray^^^^^^^"+JSON.stringify(areasarray));
 
+      // areasarray
+      $('img#imgToRead').selectAreas('destroy');
+        $('img#imgToRead').selectAreas({
+           position:"absolute",
+
+          onChanged : debugQtyAreas,
+          areas: areasarray
+
+        });
+
+           function debugQtyAreas (event, id, areas) {
+        console.log(areas.length + " areas", arguments);
+        this.displayarea = areas;
+        console.log(areas.length + " areas", arguments);
+        };
+
+
+
+        var elems = $('.select-areas-background-area');
+        var len = elems.length;
+        console.log("select-areas-background-area length: "+len);
+        if( len > 0) {
+          for (var i = 0; i < len; i++) {
+            console.log("elem["+i+"]"+elems[i]);
+            console.log("elem["+i+"]"+$('.select-areas-background-area').css("background"));
+            $('.select-areas-background-area').bind()
+          }
+        }
+
+      }
+
+      blocksize(){
+
+
+        if(this.percentage>1){
+          BlockModel.blockArray.length=0;
+            var block
+            block= document.getElementsByClassName("select-areas-outline");
+
+            for (var i = 0; i < block.length; i++) {
+              var blocktop = block[i].style.top;
+              blocktop = blocktop.substring(0, blocktop.length - 2);
+              var blockleft = block[i].style.left;
+              blockleft = blockleft.substring(0, blockleft.length - 2);
+
+              var constantfactortop = (blocktop/this.clientpercent);
+              var constantfactorwidth = (block[i].clientWidth/this.clientpercent);
+              var constantfactorheight = (block[i].clientHeight/this.clientpercent);
+              var constantfactorleft = (blockleft/this.clientpercent);
+          //     block[i].style.left = constantfactorleft*this.percentage+"px";
+          // block[i].style.top  = constantfactortop*this.percentage+"px";
+          //  block[i].style.width = constantfactorwidth*this.percentage+"px";
+          //  block[i].style.height = constantfactorheight*this.percentage+"px";
+
+
+
+                  var id= i;
+                  var x=constantfactorleft*this.percentage;
+                  var y=constantfactortop*this.percentage;
+                 var width= constantfactorwidth*this.percentage;
+                 var height = constantfactorheight*this.percentage;
+                  var z =0
+                  var blockValue = new BlockModel(height,id,width,x,y,z);
+                  BlockModel.blockArray.push(blockValue);
+
+
+                  // this.viewerService. selectBlockservice()
+                  setTimeout(() =>  this. selectBlockservice(),.001);
+
+            }
+          }
+
+        }
 
 
 // setTimeout(() => this.orginalsize(),50);}

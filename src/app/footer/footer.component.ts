@@ -8,6 +8,7 @@ import { ImageService } from '../services/images.service';
 import { Images } from '../shared/images.model';
 import { ViewerService } from '../services/viewer.service';
 import { XmlModel } from '../shared/xml-model';
+import { BlockModel} from '../shared/block-model';
 
 @Component({
   selector: 'app-footer',
@@ -23,6 +24,7 @@ export class FooterComponent implements OnInit {
   anotherTryVisible: boolean;
   public localUrl: any;
   public tiffUrl: any;
+  clientpercent;
   url;
   fileName: any;
   localUrlArray: any[] = [];
@@ -65,16 +67,19 @@ export class FooterComponent implements OnInit {
   }
 
   onEnter(value: number) {
+    this.clientpercent = this.percentage;
     this.angle = value;
     this.viewerService.angle = this.angle;
     this.viewerService.onEnter();
   }
 
   onZoom(value: number) {
+    this.clientpercent = this.percentage;
     this.percentage = value;
     this.viewerService.percentage = this.percentage;
     this.viewerService.onZoom();
     this.headerService.setpercentagevary(this.percentage);
+    this.blocksize();
   }
 
   asVertical() {
@@ -173,6 +178,47 @@ export class FooterComponent implements OnInit {
     xmlhttp.open("GET", "assets/BaahyaakaashayaanigaluTelaaduvudeke_0015.xml", true);
     xmlhttp.send();
   }
+  blocksize(){
+
+
+    if(this.percentage>1){
+      BlockModel.blockArray.length=0;
+        var block
+        block= document.getElementsByClassName("select-areas-outline");
+
+        for (var i = 0; i < block.length; i++) {
+          var blocktop = block[i].style.top;
+          blocktop = blocktop.substring(0, blocktop.length - 2);
+          var blockleft = block[i].style.left;
+          blockleft = blockleft.substring(0, blockleft.length - 2);
+
+          var constantfactortop = (blocktop/this.clientpercent);
+          var constantfactorwidth = (block[i].clientWidth/this.clientpercent);
+          var constantfactorheight = (block[i].clientHeight/this.clientpercent);
+          var constantfactorleft = (blockleft/this.clientpercent);
+      //     block[i].style.left = constantfactorleft*this.percentage+"px";
+      // block[i].style.top  = constantfactortop*this.percentage+"px";
+      //  block[i].style.width = constantfactorwidth*this.percentage+"px";
+      //  block[i].style.height = constantfactorheight*this.percentage+"px";
+
+
+
+              var id= i;
+              var x=constantfactorleft*this.percentage;
+              var y=constantfactortop*this.percentage;
+             var width= constantfactorwidth*this.percentage;
+             var height = constantfactorheight*this.percentage;
+              var z =0
+              var blockValue = new BlockModel(height,id,width,x,y,z);
+              BlockModel.blockArray.push(blockValue);
+
+
+              // this.viewerService. selectBlockservice()
+              setTimeout(() =>  this.viewerService. selectBlockservice(),.001);
+
+        }
+      }
+    }
 }
 
 function convertCanvasToImage(canvas) {

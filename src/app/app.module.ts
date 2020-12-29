@@ -67,12 +67,14 @@ import { HTTP_INTERCEPTORS } from "@angular/common/http";
 
 import { FooterComponent } from './footer/footer.component';
 import { AuthService } from './auth/auth.service';
+import { ClickOutsideDirective } from './shared/click-outside.directive';
 @NgModule({
   declarations: [
     AppComponent,
     DropdownDirective,
     HeaderComponent,
     ScreenComponent,
+    ClickOutsideDirective,
 
     FooterComponent
     //FileSelectDirective
@@ -129,7 +131,7 @@ import { AuthService } from './auth/auth.service';
     HttpClientModule,
     ReactiveFormsModule,
     AngularSplitModule,
-   
+
 
     MatNativeDateModule
   ],

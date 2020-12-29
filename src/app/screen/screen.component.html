@@ -32,16 +32,49 @@
     <as-split-area style="overflow-x: auto; overflow-y: auto;" (scroll)="updatescroll(scrollOne, scrollTwo)" #scrollTwo>
       <div id="image" [style.position]="'relative'">
         <span *ngFor="let text of words">
-          <input id="text_input" [value]="text.unicode" [style.width.px]="text.txtwidth*(this.percentage/100)"
-            [style.position]="'absolute'" [style.border]="'none'" [style.font-size.px]="30*(this.percentage/100)"
-            [style.top.px]="text.lineRowStart*(this.percentage/100)"
-            [style.left.px]="text.lineColStart*(this.percentage/100)"
-            [style.margin-inline-start.px]="text.lineRowStart*(this.percentage/100)"
-            [style.height.px]="text.txtheight*(this.percentage/100)">
+          <input  id="text_input"   [value] = "text.unicode"  [style.width.px]="text.txtwidth*(this.percentage/100)" [style.position]="'absolute'" [style.border]="'none'" [style.font-size.px]="text.txtheight*5/8*(this.percentage/100)"
+          [style.top.px]="text.lineRowStart*(this.percentage/100)"   [style.left.px]="text.lineColStart*(this.percentage/100)"   [style.margin-inline-start.px]="text.lineRowStart*(this.percentage/100)"   [style.height.px]="text.txtheight*(this.percentage/100)" >
         </span>
       </div>
     </as-split-area>
   </as-split>
+</div>
+<div  id="menu">
+  <div class="dropdown-content" (clickOutside)="closeMenu()">
+    <a  (click)="asHorizontal()">prose (..from prev page/block)</a>
+    <a   (click)="asVertical()" >Header</a>
+    <a>Figure Caption</a>
+    <a>Retain Graphic</a>
+    <a >Retain Graphic-Rotate</a>
+    <a>Retain graphic -Full page</a>
+    <a >Ignore Graphic</a>
+    <a >Part Heading</a>
+    <a >Chapter heading</a>
+    <a >section heading</a>
+    <a >Front Matter heading</a>
+    <a>prose</a>
+    <a>poem</a>
+    <a>poem(..from prevpage/block)</a>
+    <a>Book Name in Kannd</a>
+  </div>
+<!-- <button class="menuList" style="color: black;" id="PlayInLoop" (click)="asHorizontal()" (clickOutside)="closeMenu()">prose(...from prev page/block)</button>
+<button class="menuList" style="color: black;" id="mergeBefore"(click)="asVertical()"  (clickOutside)="closeMenu()">Header</button>
+<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Figure Caption</button>
+<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Retain Graphic</button>
+<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Retain Graphic-Rotate</button>
+<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">retain Graphic-full page</button>
+<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Ignore Graphic</button>
+<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Part Heading</button>
+<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Chapter Heading</button>
+<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Section Heading</button>
+<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Front Matter Heading</button>
+<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Prose</button>
+<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">poem</button>
+<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">poem(..from prev page/block)</button>
+<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Book name in kannada</button>
+<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Book name in english</button>
+<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Author name in Kannada</button>
+<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Author name in English</button> -->
 </div>
 
 <div class="modal" id="HI" tabindex="-1" role="dialog" [ngStyle]="{'display':display}">
