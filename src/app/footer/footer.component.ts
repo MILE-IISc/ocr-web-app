@@ -151,18 +151,22 @@ export class FooterComponent implements OnInit {
 
   NextImage() {
     this.imageService.nextPage();
+    this.imageService.onXml();
   }
 
   previousImage() {
     this.imageService.previousPage();
+    this.imageService.onXml();
   }
 
   lastImage() {
     this.imageService.LastImage();
+    this.imageService.onXml();
   }
 
   firstImage() {
     this.imageService.firstImage();
+    this.imageService.onXml();
   }
   skipPage() {
     //this.localUrl = this.localUrlArray[this.imgFileCount];
@@ -196,10 +200,7 @@ export class FooterComponent implements OnInit {
           var constantfactorwidth = (block[i].clientWidth/this.clientpercent);
           var constantfactorheight = (block[i].clientHeight/this.clientpercent);
           var constantfactorleft = (blockleft/this.clientpercent);
-      //     block[i].style.left = constantfactorleft*this.percentage+"px";
-      // block[i].style.top  = constantfactortop*this.percentage+"px";
-      //  block[i].style.width = constantfactorwidth*this.percentage+"px";
-      //  block[i].style.height = constantfactorheight*this.percentage+"px";
+     
 
 
 

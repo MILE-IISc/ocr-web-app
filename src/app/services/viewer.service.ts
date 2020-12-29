@@ -3,6 +3,10 @@ import { EventEmitter, Injectable, OnInit,Renderer2 ,RendererFactory2} from '@an
 declare var $:any;
 import * as $ from 'jquery';
 import { BlockModel} from '../shared/block-model';
+import { XmlModel,retain } from '../shared/xml-model';
+import { ImageService } from '../services/images.service';
+import { AuthService } from '../auth/auth.service';
+
 
 @Injectable()
 export class ViewerService implements OnInit{
@@ -12,11 +16,17 @@ export class ViewerService implements OnInit{
  public angle:number=0;
  private renderer: Renderer2;
  public clientpercent;
+ serverImages;
+ fileName;
+ xmlFileName;
+ imgFileCount;
 
- constructor(rendererFactory: RendererFactory2) {
+ constructor(private imageService: ImageService,public authService: AuthService,rendererFactory: RendererFactory2) {
      this.renderer = rendererFactory.createRenderer(null, null);
  }
-  ngOnInit() {}
+  ngOnInit() {
+    
+  }
 
 asVertical(){
   console.log("inside asVertical of Viewer");
@@ -64,6 +74,8 @@ console.log("divelementheight "+divheight)
   var realHeight = myImg.naturalHeight;
   var realWidth = myImg.naturalWidth;
   this.percentage=currHeight/realHeight*100;
+  retain.percentage = this.percentage;
+        console.log("the current percentage is "+retain.percentage)
   this.blocksize();
 
   myImg.style.width = (realWidth * this.percentage/100) + "px";
@@ -87,6 +99,8 @@ console.log("divelementheight "+divwidth)
    var realHeight = myImg.naturalHeight;
   var realWidth = myImg.naturalWidth;
   this.percentage=(currWidth/realWidth)*100;
+  retain.percentage = this.percentage;
+        console.log("the current percentage is "+retain.percentage)
   this.blocksize();
 
   myImg.style.height = (realHeight* this.percentage/100) + "px";
@@ -106,6 +120,8 @@ orginalsize(){
      falseimg.style.height= myImg.style.height;
      console.log("currheight"+myImg.naturalHeight)
      this.percentage=100;
+     retain.percentage = this.percentage;
+        console.log("the current percentage is "+retain.percentage)
      this.blocksize();
 
 
@@ -152,6 +168,8 @@ orginalsize(){
     this.clientpercent = this.percentage;
     var myImg;
     this.percentage = this.percentage + 7.2;
+    retain.percentage = this.percentage;
+        console.log("the current percentage is "+retain.percentage)
     this.blocksize();
 
 
@@ -179,6 +197,8 @@ orginalsize(){
 
      var myImg;
      this.percentage = this.percentage -7.2;
+     retain.percentage = this.percentage;
+        console.log("the current percentage is "+retain.percentage)
      this.blocksize();
 
 
@@ -293,11 +313,7 @@ orginalsize(){
               var constantfactorwidth = (block[i].clientWidth/this.clientpercent);
               var constantfactorheight = (block[i].clientHeight/this.clientpercent);
               var constantfactorleft = (blockleft/this.clientpercent);
-          //     block[i].style.left = constantfactorleft*this.percentage+"px";
-          // block[i].style.top  = constantfactortop*this.percentage+"px";
-          //  block[i].style.width = constantfactorwidth*this.percentage+"px";
-          //  block[i].style.height = constantfactorheight*this.percentage+"px";
-
+     
 
 
                   var id= i;
@@ -319,6 +335,6 @@ orginalsize(){
         }
 
 
-// setTimeout(() => this.orginalsize(),50);}
 
     }
+   
