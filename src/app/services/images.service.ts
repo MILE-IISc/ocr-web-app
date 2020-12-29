@@ -66,7 +66,9 @@ export class ImageService implements OnInit {
 
   async getServerImages() {
     var user = this.authService.userName;
+    
     const queryParams = `?user=${user}`;
+
     console.log("enter get server from screen")
     let promise = new Promise((resolve, reject) => {
       this.http
@@ -122,12 +124,14 @@ export class ImageService implements OnInit {
   }
 
   async addImage(fileRead) {
+    // console.log("fileRead"+fileRead);
     const imageData = new FormData();
     imageData.append("email", this.authService.userName);
-    console.log("auth email+" + this.authService.userName);
+    // console.log("file name before server call "+fileRead[0].name.slice(0,-9));
+    imageData.append("folderName",fileRead[0].name.slice(0,-9));
     for (let i = 0; i < fileRead.length; i++) {
       var file = fileRead[i];
-      console.log(file)
+      console.log(file.name);
       console.log(fileRead.length)
       imageData.append("image", file);
     }
@@ -172,8 +176,7 @@ export class ImageService implements OnInit {
   //     if (x < y) { return -1; }
   //     if (x > y) { return 1; }
   //     return 0;
-  //   });
-    
+  //   });   
   // }
 
   async loadArray(serverImage: any) {
@@ -209,6 +212,7 @@ export class ImageService implements OnInit {
     xmlData = {
       xml: xmlString,
       fileName: fileName,
+      folderName : fileName.slice(0,-9)
     };
     this.http
       .put<{ message: string, name: string, completed: string }>(BACKEND_URL + fileName, xmlData)

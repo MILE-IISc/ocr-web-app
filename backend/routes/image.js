@@ -8,7 +8,7 @@ const User = require("../models/user");
 
 const checkAuth = require("../middleware/check-auth");
 // const extractFile = require("../middleware/file"); extractFile, 
-// let dir;
+
 const router = express.Router();
 const multer = require('multer');
 const MIME_TYPE_MAP = {
@@ -17,6 +17,7 @@ const MIME_TYPE_MAP = {
   "image/jpg": "jpg",
   "image/tiff": "tif"
 };
+
   
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -31,12 +32,14 @@ const storage = multer.diskStorage({
         fetchedUser = user;
       }).then(() => {
         const isValid = MIME_TYPE_MAP[file.mimetype];
-        const image_wav_dir = './backend/images/' + req.body.email
+        // console.log("file name "+file.originalname);
+        // console.log("book name "+bookName);
+        const image_wav_dir = './backend/images/' + req.body.email +'/'
         let error = new Error("Invalid mime type");
         var fs = require('fs');
         let dir = image_wav_dir;
         if (!fs.existsSync(dir)) {
-          fs.mkdirSync(dir);
+          fs.mkdirSync(dir,{recursive: true});
         }
 
         if (isValid) {
@@ -72,7 +75,7 @@ router.post("", checkAuth,
         fetchedUser = user;
       }).then(() => {
         const url = req.protocol + "://" + req.get("host");
-        const user_wav_dir = './backend/images/' + req.body.email;
+        const user_wav_dir = './backend/images/' + req.body.email
         console.log("user wave directory " + user_wav_dir)
         fs.readdir(user_wav_dir, (err, filesList) => {
           if (err) {
@@ -82,13 +85,21 @@ router.post("", checkAuth,
             targetFiles = filesList;
             console.log("file list length " + filesList.length);
             targetFiles.forEach((file, i) => {
-
+              console.log("files---"+file);
               const image = {
                 fileName: file,
-                imagePath: url + '/images/' + req.body.email + '/' + file,
+                imagePath: url + '/images/' + req.body.email + '/'+ file,
                 completed: 'N',
                 editor: fetchedUser._id
               };
+
+              // Image.findOne({ editor: fetchedUser._id, fileName: file }).exec(function(err, result){
+              //   console.log("result===="+result)
+              //   if (result == null) {
+              //     imageList.push(image);
+              //     }
+              // });
+              // console.log("before pushing "+imageList.length);
               imageList.push(image);
             });
           }
@@ -177,7 +188,7 @@ router.put("/:id", checkAuth, (req, res, next) => {
         console.log("User FileList Status update failed. error: " + error);
         res.status(500).json({
           message: "User FileList Status update failed !!!"
-        });
+        }); 
       });
   });
   writeStream.end();
@@ -190,6 +201,7 @@ router.get("", (req, res, next) => {
   let fetchedUser;
   let imageArray = [];
   let imageList = [];
+  let xmlArrayList =[];
   User.findOne({ email: mail })
     .then(user => {
       if (!user) {
@@ -209,31 +221,35 @@ router.get("", (req, res, next) => {
         }
         fetchedImages = documents;
         fetchedImages.sort((a, b) => a.fileName.localeCompare(b.fileName));
-        console.log(fetchedImages.length);
+        // console.log(fetchedImages.length);
       }).then(fetchedImages => {
         // Get the list of files alloted to the user from storage directory
+        console.log("");
         const user_wav_dir = './backend/images/' + fetchedUser.email;
         var newFiles = [];
         fs.readdir(user_wav_dir, (err, filesList) => {
           if (err) {
             imageArray = "";
              res.status(201).json({
-                  message: "Images fetched successfully!",
-                  images: fetchedImages
+                  message: "No image files",
+                  images: imageArray
                 });
           }
           else {
             targetFiles = filesList;
             targetFiles.forEach(file => {
-              if (path.extname(file).toLowerCase() === ".tif") {
+              if (path.extname(file).toLowerCase() != ".xml") {
                 imageArray.push(file);
+              }else{
+                xmlArrayList.push(file);
               }
             });
-
+            console.log("xmlFile length "+xmlArrayList.length)
             let oldFiles = [];
             let delFiles = [];
             newFiles = imageArray.slice();
-
+            console.log("imageArray length "+imageArray.length);
+            console.log("fetched images length "+fetchedImages.length);
             if (fetchedImages.length > 0) {
 
               if (imageArray.length > 0) {
@@ -254,9 +270,10 @@ router.get("", (req, res, next) => {
               }
               else {
                 fetchedImages.map((fetchedImage) => {
-                  delFiles.push(fetchedImage.name);
+                  delFiles.push(fetchedImage.fileName);
                 });
               }
+              console.log("delete files "+delFiles.length);
               delFiles = delFiles.filter(delFiles => !oldFiles.includes(delFiles));
             }
             else {
@@ -275,7 +292,7 @@ router.get("", (req, res, next) => {
               delFileId = [];
               delFiles.map((delFile) => {
                 fetchedImages.map((fetchedImage) => {
-                  if (delFile == fetchedImage.name) {
+                  if (delFile == fetchedImage.fileName) {
                     delFileId.push(fetchedImage.id);
                   }
                 });
@@ -298,12 +315,13 @@ router.get("", (req, res, next) => {
 
             newFiles.forEach(file => {
               console.log("user email " + fetchedUser.email)
-              const path = url + '/images/' + fetchedUser.email + '/' + file;
+              const path = url + '/images/' + fetchedUser.email + '/'+ file;
               const image = {
                 _id: fetchedUser._id,
                 fileName: file,
                 imagePath: path,
                 completed: 'N',
+                folderName:file.slice(0,-9),
                 editor: fetchedUser._id
               };
               imageList.push(image);
@@ -330,7 +348,6 @@ router.get("", (req, res, next) => {
                 }
                 fetchedImages = documents;
                 fetchedImages.sort((a, b) => a.fileName.localeCompare(b.fileName));
-                console.log("Images fetched successfully");
 
                 res.status(201).json({
                   message: "Images fetched successfully!",
