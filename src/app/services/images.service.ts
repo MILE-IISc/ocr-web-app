@@ -434,6 +434,10 @@ $('#100zoom').click(function () {
 $('#zoom').click(function () {
   $('#imgToRead').selectAreas('destroy');
 });
+$('#buttonXml').click(function () {
+  console.log("onclick");
+  $('#imgToRead').selectAreas('destroy');
+});
   
 
 function debugQtyAreas(event, id, areas) {
