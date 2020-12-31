@@ -1,3 +1,5 @@
+import { Inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { EventEmitter, Injectable, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
@@ -11,9 +13,6 @@ import { XmlModel,retain } from '../shared/xml-model';
 
 declare var Tiff: any;
 declare var $:any;
-
-
-const BACKEND_URL = environment.apiUrl + "/image/";
 
 @Injectable()
 export class ImageService implements OnInit {
@@ -64,8 +63,13 @@ export class ImageService implements OnInit {
   serverUrl: any
   dataUrl: any;
   xmlFileName;
+  BACKEND_URL;
 
-  constructor(private http: HttpClient, private router: Router, private authService: AuthService,private headerService: HeaderService) { }
+  constructor(private http: HttpClient, private router: Router, private authService: AuthService,private headerService: HeaderService, @Inject(DOCUMENT) private document: Document) {
+    console.log("APP_BASE_HREF "+this.document.location.origin);
+    this.BACKEND_URL = this.document.location.origin + "/api/image/";
+    console.log("BACKEND_URL "+this.BACKEND_URL);
+  }
 
   getImages() {
     return this.serverImages.slice();
@@ -84,7 +88,7 @@ export class ImageService implements OnInit {
     let promise = new Promise((resolve, reject) => {
       this.http
         .get<{ message: string; images: [] }>(
-          BACKEND_URL + queryParams
+          this.BACKEND_URL + queryParams
         ).toPromise()
         .then(responseData => {
           const imageLength = responseData.images.length;
@@ -148,7 +152,7 @@ export class ImageService implements OnInit {
     }
     this.http
       .post<{ message: string }>(
-        BACKEND_URL,
+        this.BACKEND_URL,
         imageData
       )
       .subscribe(async responseData => {
@@ -218,7 +222,7 @@ export class ImageService implements OnInit {
       folderName : fileName.slice(0,-9)
     };
     this.http
-      .put<{ message: string, name: string, completed: string }>(BACKEND_URL + fileName, xmlData)
+      .put<{ message: string, name: string, completed: string }>(this.BACKEND_URL + fileName, xmlData)
       .subscribe(response => {
         for (let i = 0; i < this.serverImages.length; i++) {
           if (this.serverImages[i].fileName == response.name) {
@@ -321,27 +325,38 @@ export class ImageService implements OnInit {
 
 
 this.serverImages = this.getImages();
-
+var url
 this.fileName = this.serverImages[this.imgFileCount].fileName;
 console.log("filename"+this.fileName)
- 
-    this.xmlFileName = this.fileName.slice(0, -3) + 'xml';
-    console.log("xmlfilename"+this.xmlFileName)
-    var user = this.authService.userName;
-    console.log("user"+user)
-    var url = "http://localhost:4000/images/" +user+"\/"+this.xmlFileName;
-    console.log("url :"+url);
-    var xmlhttp = new XMLHttpRequest();
+ for (let i =0; i< this.serverImages.length;i++){
+   if (this.serverImages[i].fileName == this.fileName && this.serverImages[i].completed == 'Y'){
+  url = this.serverImages[i].imagePath.slice(0,-3)+ 'xml'
+  var xmlhttp = new XMLHttpRequest();
     
-    xmlhttp.onreadystatechange = function () {
-    if (this.readyState == 4 && this.status == 200) {
+  xmlhttp.onreadystatechange = function () {
+  if (this.readyState == 4 && this.status == 200) {
+  
+  fromXml(this);
+  }
+  };
+  
+  xmlhttp.open("GET", url, true);
+  xmlhttp.send();
+   }
+ }
+console.log("patth"+url)
+  
+    // var xmlhttp = new XMLHttpRequest();
     
-    fromXml(this);
-    }
-    };
+    // xmlhttp.onreadystatechange = function () {
+    // if (this.readyState == 4 && this.status == 200) {
     
-    xmlhttp.open("GET", url, true);
-    xmlhttp.send();
+    // fromXml(this);
+    // }
+    // };
+    
+    // xmlhttp.open("GET", url, true);
+    // xmlhttp.send();
     }
 }
 function convertCanvasToImage(canvas) {
@@ -401,7 +416,24 @@ $('#firstImg').click(function () {
 $('#lastImg').click(function () {
   $('#imgToRead').selectAreas('destroy');
 });
-
+$('#butZoomIn').click(function () {
+  $('#imgToRead').selectAreas('destroy');
+});
+$('#butZoomOut').click(function () {
+  $('#imgToRead').selectAreas('destroy');
+});
+$('#fitWidth').click(function () {
+  $('#imgToRead').selectAreas('destroy');
+});
+$('#fitHeigth').click(function () {
+  $('#imgToRead').selectAreas('destroy');
+});
+$('#100zoom').click(function () {
+  $('#imgToRead').selectAreas('destroy');
+});
+$('#zoom').click(function () {
+  $('#imgToRead').selectAreas('destroy');
+});
   
 
 function debugQtyAreas(event, id, areas) {

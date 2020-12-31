@@ -43,13 +43,13 @@
         src="assets/images/zoomIn.jpg" height="20px" width="20px"></span></button>
   <button data-toggle="tooltip" title="Zoom-Out" id="butZoomOut" (click)="zoomOutFun()"><span><img
         src="assets/images/zoomOut.jpg" height="20px" width="20px"></span></button>
-  <button data-toggle="tooltip" title="Fit-width" (click)="fitwidth()"><img src="assets/images/fitwidth (1).png"
+  <button data-toggle="tooltip" title="Fit-width" id="fitWidth" (click)="fitwidth()"><img src="assets/images/fitwidth (1).png"
       height="19px" width="30px"></button>
-  <button data-toggle="tooltip" title="Fit-height" (click)="fitheight()"><img src="assets/images/fitheight (1).png"
+  <button data-toggle="tooltip" title="Fit-height" id="fitHeigth" (click)="fitheight()"><img src="assets/images/fitheight (1).png"
       height="19px" width="30px"></button>
-  <button data-toggle="tooltip" title="100%-zoom" (click)="orginalsize()"><img src="assets/images/fitScrre (1).png"
+  <button data-toggle="tooltip" title="100%-zoom" id="100zoom" (click)="orginalsize()"><img src="assets/images/fitScrre (1).png"
       height="19px" width="30px"></button>
-  zoom:<input style="width: 30px;" #bo (keyup.enter)="onZoom(bo.value)" value="{{percentage}}">%
+  zoom:<input id="zoom" style="width: 30px;" #bo (keyup.enter)="onZoom(bo.value)" value="{{percentage}}">%
 </div>
 
 

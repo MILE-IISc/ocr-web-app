@@ -9,6 +9,7 @@ import { Images } from '../shared/images.model';
 import { ViewerService } from '../services/viewer.service';
 import { XmlModel } from '../shared/xml-model';
 import { BlockModel} from '../shared/block-model';
+import { AuthService } from '../auth/auth.service';
 
 @Component({
   selector: 'app-footer',
@@ -18,6 +19,7 @@ import { BlockModel} from '../shared/block-model';
 
 export class FooterComponent implements OnInit {
   title = 'Layout';
+  serverImages: Images[] = [];
   value = 'horizontal';
   imagewidth;
   selectedImage: string;
@@ -42,9 +44,11 @@ export class FooterComponent implements OnInit {
   display = "none";
   images: Images[];
   divelement = true;
+  xmlFileName;
+  urlOcr;
 
   constructor(private headerService: HeaderService, private imageService: ImageService, private viewerService: ViewerService,
-    private renderer: Renderer2) { }
+    private renderer: Renderer2,private authService:AuthService) { }
 
   ngOnInit(): void {
     this.percentage = this.headerService.getpercentagevary();
@@ -173,13 +177,26 @@ export class FooterComponent implements OnInit {
   }
 
   loadXMLDoc() {
+    this.serverImages = this.imageService.getImages();
+    
+    var urlOcr
+    this.fileName = this.serverImages[this.imgFileCount].fileName;
+    console.log("filename"+this.fileName)
+     for (let i =0; i< this.serverImages.length;i++){
+       if (this.serverImages[i].fileName == this.fileName && this.serverImages[i].completed == 'Y'){
+        urlOcr = this.serverImages[i].imagePath.slice(0,-3)+ 'xml'
+    
+       }
+     }
+    console.log("patth"+urlOcr)
+   
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function () {
       if (this.readyState == 4 && this.status == 200) {
         myFunction(this);
       }
     };
-    xmlhttp.open("GET", "assets/BaahyaakaashayaanigaluTelaaduvudeke_0015.xml", true);
+    xmlhttp.open("GET", urlOcr, true);
     xmlhttp.send();
   }
   blocksize(){
@@ -251,6 +268,9 @@ function myFunction(xml) {
           var txtheight = (lineRowEnd - lineRowStart);
           var wordValue = new XmlModel(txt, lineRowStart, lineRowEnd, lineColStart, lineColEnd, txtwidth, txtheight);
           XmlModel.textArray.push(wordValue);
+          console.log("textarray length"+XmlModel.textArray.length);
+          XmlModel.textArray.slice(0,XmlModel.textArray.length);
+          console.log("textarray after length"+XmlModel.textArray.length);
         }
       }
     }

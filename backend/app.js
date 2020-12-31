@@ -6,6 +6,8 @@ const mongoose = require("mongoose");
 const imageRoutes = require("./routes/image");
 const userRoutes = require("./routes/user");
 
+
+
 const app = express();
 //mongodb+srv://maithri:<password>@cluster0.xrhry.mongodb.net/<dbname>?retryWrites=true&w=majority
 mongoose
@@ -24,6 +26,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use("/images", express.static(path.join("backend/images")));
 app.use("/imagesxml", express.static(path.join("backend/imagesxml")));
 
+app.use("/", express.static(path.join(__dirname, "OCR-WEB-UI")));
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -40,5 +43,12 @@ app.use((req, res, next) => {
 
 app.use("/api/image", imageRoutes);
 app.use("/api/user", userRoutes);
+app.use((req, res, next) => {
+  res.sendFile(path.join(__dirname, "OCR-WEB-UI", "index.html"));
+});
 
 module.exports = app;
+
+
+
+

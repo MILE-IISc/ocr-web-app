@@ -1,9 +1,10 @@
 {
   "name": "my-app",
   "version": "0.0.0",
+  "main": "nodemon ./backend/server.js",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "nodemon ./backend/server.js",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
