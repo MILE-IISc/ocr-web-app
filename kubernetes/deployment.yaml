@@ -1,0 +1,31 @@
+# Update <REGISTRY> <NAMESPACE> values before use
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ocr-web-app
+  labels:
+    app: ocr-web-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ocr-web-app
+  template:
+    metadata:
+      labels:
+        app: ocr-web-app
+    spec:
+      containers:
+      - name: ocr-web-app
+        image: jp.icr.io/mile-iisc/ocr-web-app:v1.0.0
+        ports:
+        - containerPort: 8080
+        imagePullPolicy: Always
+        env:
+        - name: CLOUDANT_URL
+          valueFrom:
+            secretKeyRef:
+              name: cloudant
+              key: url
+              optional: true
+
