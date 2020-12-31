@@ -46,5 +46,5 @@ testem.log
 Thumbs.db
 
 !/backend/images/.gitkeep
-/backend/images/*
+# /backend/images/*
 /backend/OCR-WEB-UI/*
