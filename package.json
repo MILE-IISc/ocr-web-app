@@ -16,7 +16,7 @@
     "@angular/animations": "~10.0.6",
     "@angular/cdk": "^10.2.4",
     "@angular/common": "~10.0.6",
-    "@angular/compiler": "^10.0.14",
+    "@angular/compiler": "~10.0.3",
     "@angular/core": "~10.0.6",
     "@angular/forms": "~10.0.6",
     "@angular/material": "^10.2.4",
@@ -51,7 +51,7 @@
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.1000.5",
     "@angular/cli": "~10.0.5",
-    "@angular/compiler-cli": "~10.0.6",
+    "@angular/compiler-cli": "~10.0.3",
     "@types/jasmine": "~3.5.0",
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "^12.11.1",
