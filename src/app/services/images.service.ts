@@ -67,7 +67,12 @@ export class ImageService implements OnInit {
 
   constructor(private http: HttpClient, private router: Router, private authService: AuthService,private headerService: HeaderService, @Inject(DOCUMENT) private document: Document) {
     console.log("APP_BASE_HREF "+this.document.location.origin);
-    this.BACKEND_URL = this.document.location.origin + "/api/image/";
+    // if(environment.apiUrl && environment.apiUrl != "") {
+    //   this.BACKEND_URL = environment.apiUrl + "/image/";
+    // }
+    // else {
+      this.BACKEND_URL = this.document.location.origin + "/api/image/";
+    // }
     console.log("BACKEND_URL "+this.BACKEND_URL);
   }
 

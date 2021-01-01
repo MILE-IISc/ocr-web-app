@@ -61,7 +61,7 @@ const storage = multer.diskStorage({
   
 
 router.post("", checkAuth,
-  multer({ storage: storage }).array("image", 1000),
+  multer({ storage: storage }).array("image", 3000),
   (req, res, next) => {
     let imageList = [];
     let fetchedUser;

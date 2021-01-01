@@ -1,6 +1,7 @@
-/* header mat css properties starts here */
+
 mat-toolbar {
-  background-color:darkcyan;
+ 
+  height: 40px;
 }
 
 ul {
@@ -10,7 +11,7 @@ ul {
 }
 
 .header-text{
-  color: black;
+  color: white;
   font-size: 30px
 }
 
@@ -41,11 +42,7 @@ ul {
 .link:hover + .list {
   display: block;
 }
-/* header mat css properties ends here */
-  /* h4 {
-    background-color: lightblue;
 
-  } */
   .dropdown-submenu {
     position: relative;
 }
@@ -159,3 +156,4 @@ a {font-size: 15px}
     }
 
 
+/*  */

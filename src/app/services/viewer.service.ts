@@ -19,6 +19,7 @@ export class ViewerService implements OnInit{
  serverImages;
  fileName;
  xmlFileName;
+ Restric = false;
  imgFileCount;
 
  constructor(private imageService: ImageService,public authService: AuthService,rendererFactory: RendererFactory2) {
@@ -221,7 +222,8 @@ orginalsize(){
          falseimg.style.height= myImg.style.height;
       }
       rotateImage()
-      {
+      { 
+        
         this.angle=this.angle+0.5;
       var myImg;
 

@@ -4,15 +4,15 @@
   &nbsp;&nbsp;&nbsp;&nbsp;
   <input #fileUpload type="file" (click)="fileUpload.value = null" (change)="importFile($event)" style="display:none"
     accept="image/*">
-  <button data-toggle="tooltip" (click)="fileUpload.click()" title="open image"><img src="assets/images/open_file.jpg"
+  <button data-toggle="tooltip" (click)="fileUpload.click()" title="Upload Image"><img src="assets/images/open_file.jpg"
       type="button" width="20px" height="20px"></button>
   <input #folderUpload type="file" name="fileList" (click)="folderUpload.value = null" webkitdirectory multiple
     (change)="importFile($event)" style="display:none" />
-  <button data-toggle="tooltip" title="open directory" (click)="folderUpload.click()"><img
+  <button data-toggle="tooltip" title="Upload Directory" (click)="folderUpload.click()"><img
       src="assets/images/open_folder.png" type="button" width="20px" height="20px"></button>
-  <button data-toggle="tooltip" title="open Image-Text Layout:Left-Right" (click)="asVertical()"
+  <button data-toggle="tooltip" title="vertcal View" (click)="asVertical()"
     [disabled]="nextImage"><img src="assets/images/vertical.jpg" type="button" width="20px" height="20px"></button>
-  <button data-toggle="tooltip" title="open Image-Text Layout:Top-Bottom" (click)="asHorizontal()"
+  <button data-toggle="tooltip" title="Horizontal View" (click)="asHorizontal()"
     [disabled]="nextImage"><img src="assets/images/horizontal.jpg" type="button" width="20px" height="20px"></button>
     <button data-toggle="tooltip" title="Select Block" (click)="selectBlock()" class="xmlButton" id="buttonXml"><img src="assets/images/selectBlock.png"
       type="button" width="20px" height="20px"></button>

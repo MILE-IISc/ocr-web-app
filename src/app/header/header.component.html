@@ -1,13 +1,22 @@
 <!-- rgb(35, 230, 28);  rgb(192, 238, 27); -->
 
-<mat-toolbar class="toolbar">
+<mat-toolbar  style=" background-image:url('assets/images/background.jpg')" class="toolbar">
   <!-- <div>  -->
-    <div style="height: 20px;">
+    &nbsp;&nbsp;
+    <div class="toolbar" role="banner" style="padding-bottom: 5px; " >
+      <img
+        width="20"
+        alt="Angular Logo"
+        src="assets/images/mile_logo.png"
+      />
+      
+    </div>
+    <div >
       <span class="header-text" >
-        LipiGnani - The Kannada OCR
+        MILE lab IISc - The Kannada OCR
       </span>
       </div>
-      <span class="spacer"></span>
+    
 <!-- <div class="dropdown" style= z-index:500; *ngIf="userIsAuthenticated">
   &nbsp;&nbsp;&nbsp; <a href = "#" class="dropbtn">File<span class="caret"></span></a>
   <div class="dropdown-content">
@@ -110,19 +119,19 @@ accept="image/*">
 <div>
   <ul>
     <li *ngIf="!userIsAuthenticated">
-      <a mat-button routerLink="/auth/login" routerLinkActive="mat-accent">Login</a>
+      <a mat-button routerLink="/auth/login" routerLinkActive="mat-accent" style="color: white;">Login</a>
     </li>
-    <li *ngIf="userIsAuthenticated">
+    <!-- <li *ngIf="userIsAuthenticated">
       <a mat-button routerLink="/screen" routerLinkActive="mat-accent">Edit Image Content</a>
-    </li>
-    <li *ngIf="userIsAuthenticated && isAdmin">
+    </li> -->
+    <!-- <li *ngIf="userIsAuthenticated && isAdmin">
       <a mat-button routerLink="/auth/signup" routerLinkActive="mat-accent">Create User</a>
+    </li> -->
+    <li *ngIf="userIsAuthenticated">
+      <span style="color: white;">{{ userName }}</span>
     </li>
     <li *ngIf="userIsAuthenticated">
-      <span>{{ userName }}</span>
-    </li>
-    <li *ngIf="userIsAuthenticated">
-      <button mat-button (click)="onLogout()">Logout</button>
+      <button mat-button (click)="onLogout()" style="color: white;">Logout</button>
     </li>
   </ul>
 </div>

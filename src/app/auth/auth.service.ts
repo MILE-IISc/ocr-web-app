@@ -25,7 +25,12 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router, @Inject(DOCUMENT) private document: Document) {
     console.log("APP_BASE_HREF "+this.document.location.origin);
-    this.BACKEND_URL = this.document.location.origin + "/api/user/";
+    // if(environment.apiUrl && environment.apiUrl != "") {
+    //   this.BACKEND_URL = environment.apiUrl + "/user/";
+    // }
+    // else {
+      this.BACKEND_URL = this.document.location.origin + "/api/user/";
+    // }
     console.log("BACKEND_URL "+this.BACKEND_URL);
   }
 
