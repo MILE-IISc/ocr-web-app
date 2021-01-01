@@ -1,7 +1,7 @@
 FROM node:14.15.3 AS compile-image
 
 WORKDIR /opt/ng
-COPY package.json angular.json src backend nodeman.json ./
+COPY package.json angular.json src backend nodemon.json ./
 
 RUN npm install
 
