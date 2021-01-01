@@ -45,6 +45,6 @@ testem.log
 .DS_Store
 Thumbs.db
 
-!/backend/images/.gitkeep
 /backend/images/*
+!/backend/images/.gitkeep
 /backend/OCR-WEB-UI/*
