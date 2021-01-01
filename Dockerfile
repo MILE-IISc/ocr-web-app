@@ -12,8 +12,8 @@ RUN ng build --prod
 
 FROM node:14.15.3-alpine3.11
 
-COPY --from=compile-image /opt/ng/backend /app/backend
-COPY package.json /app
+COPY --from=compile-image /opt/ng/backend /app
+RUN cd /app; npm install
 
 ENV NODE_ENV production
 ENV PORT 8080
