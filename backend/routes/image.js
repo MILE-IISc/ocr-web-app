@@ -18,7 +18,7 @@ const MIME_TYPE_MAP = {
   "image/tiff": "tif"
 };
 
-  
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     let fetchedUser;
@@ -34,12 +34,12 @@ const storage = multer.diskStorage({
         const isValid = MIME_TYPE_MAP[file.mimetype];
         // console.log("file name "+file.originalname);
         // console.log("book name "+bookName);
-        const image_wav_dir = './backend/images/' + req.body.email +'/'
+        const image_wav_dir = './backend/images/' + req.body.email + '/'
         let error = new Error("Invalid mime type");
         var fs = require('fs');
         let dir = image_wav_dir;
         if (!fs.existsSync(dir)) {
-          fs.mkdirSync(dir,{recursive: true});
+          fs.mkdirSync(dir, { recursive: true });
         }
 
         if (isValid) {
@@ -58,10 +58,10 @@ const storage = multer.diskStorage({
     cb(null, name);
   }
 });
-  
+
 
 router.post("", checkAuth,
-  multer({ storage: storage }).array("image", 3000),
+  multer({ storage: storage }).array("image", 4000),
   (req, res, next) => {
     let imageList = [];
     let fetchedUser;
@@ -81,59 +81,16 @@ router.post("", checkAuth,
           if (err) {
             console.log("error in filelist  " + err);
             imageList = "";
+            res.status(500).json({
+              message: "error in adding images",
+            });
           } else {
             targetFiles = filesList;
             console.log("file list length " + filesList.length);
-            targetFiles.forEach((file, i) => {
-              console.log("files---"+file);
-              const image = {
-                fileName: file,
-                imagePath: url + '/images/' + req.body.email + '/'+ file,
-                completed: 'N',
-                editor: fetchedUser._id
-              };
-
-              // Image.findOne({ editor: fetchedUser._id, fileName: file }).exec(function(err, result){
-              //   console.log("result===="+result)
-              //   if (result == null) {
-              //     imageList.push(image);
-              //     }
-              // });
-              // console.log("before pushing "+imageList.length);
-              imageList.push(image);
+            res.status(201).json({
+              message: "Images added successfully",
             });
           }
-          console.log("before posting to db  " + imageList.length);
-          // Saving the ImageArray to the Database
-          Image.insertMany(imageList, function (err, data) {
-            if (err != null) {
-              console.log("Inserting ImageList documents failed. error: " + err);
-              res.status(500).json({
-                message: "Inserting ImageList documents failed !!!"
-              });
-            }
-            else {
-              //Updaing the filesListLoaded status in User's database
-              User.findOneAndUpdate({ email: fetchedUser.email }, { filesListLoaded: 'Y' }, { new: true })
-                .then(result => {
-                  if (result.filesListLoaded == "Y") {
-                    console.log("User FileList Status updated succesfully. result: " + result);
-                    res.status(201).json({
-                      message: "Images added successfully",
-                    });
-                  } else {
-                    console.log("User FileList Status update failed. result: " + result);
-                    res.status(401).json({ message: "Not authorized!" });
-                  }
-                })
-                .catch(error => {
-                  console.log("User FileList Status update failed. error: " + error);
-                  res.status(500).json({
-                    message: "User FileList Status update failed !!!"
-                  });
-                });
-            }
-          });
         });
       });
   });
@@ -148,7 +105,7 @@ router.put("/:id", checkAuth, (req, res, next) => {
 
   xmlFileName = imageFileName.slice(0, -3) + 'xml';
 
-  const user_xml_dir = './backend/images/'+editor+'/';
+  const user_xml_dir = './backend/images/' + editor + '/';
   var fs = require('fs');
   let dir = user_xml_dir;
   if (!fs.existsSync(dir)) {
@@ -164,7 +121,7 @@ router.put("/:id", checkAuth, (req, res, next) => {
   });
 
   console.log(formattedXml);
-  let writeStream = fs.createWriteStream(dir+xmlFileName);
+  let writeStream = fs.createWriteStream(dir + xmlFileName);
   writeStream.on('error', (err) => {
     console.log(err);
     writeStream.end();
@@ -175,21 +132,8 @@ router.put("/:id", checkAuth, (req, res, next) => {
   writeStream.write(formattedXml);
 
   writeStream.on('finish', () => {
-    Image.findOneAndUpdate({fileName: imageFileName }, { completed: 'Y' }, { new: true })
-      .then(result => {
-        if (result.completed == "Y") {
-          res.status(200).json({ message: "XML File saved successfully!", name: imageFileName, completed: "Y" });
-        } else {
-          console.log("User FileList Status update failed. result: " + result);
-          res.status(401).json({ message: "Not authorized!" });
-        }
-      })
-      .catch(error => {
-        console.log("User FileList Status update failed. error: " + error);
-        res.status(500).json({
-          message: "User FileList Status update failed !!!"
-        }); 
-      });
+    console.log("imageFileName-----" + imageFileName);
+    res.status(200).json({ message: "XML File saved successfully!", name: imageFileName, completed: "Y" });
   });
   writeStream.end();
 });
@@ -197,11 +141,12 @@ router.put("/:id", checkAuth, (req, res, next) => {
 router.get("", (req, res, next) => {
   const url = req.protocol + "://" + req.get("host");
   const mail = req.query.user;
-  var fetchedImages = "";
+  var fetchedImages = [];
   let fetchedUser;
   let imageArray = [];
   let imageList = [];
-  let xmlArrayList =[];
+  let xmlArrayList = [];
+  let completed;
   User.findOne({ email: mail })
     .then(user => {
       if (!user) {
@@ -211,152 +156,59 @@ router.get("", (req, res, next) => {
       }
       console.log("user in get" + user.email)
       fetchedUser = user;
-      // Get the list of files alloted to the user from database
-      Image.find({ editor: fetchedUser._id }, function (err, documents) {
-        if (err != null) {
-          res.status(200).json({
-            message: "Fetching images failed!",
+      const user_wav_dir = './backend/images/' + fetchedUser.email;
+      var newFiles = [];
+      fs.readdir(user_wav_dir, (err, filesList) => {
+        if (err) {
+          fetchedImages = "";
+          res.status(201).json({
+            message: "No image files",
             images: fetchedImages
           });
         }
-        fetchedImages = documents;
-        fetchedImages.sort((a, b) => a.fileName.localeCompare(b.fileName));
-        // console.log(fetchedImages.length);
-      }).then(fetchedImages => {
-        // Get the list of files alloted to the user from storage directory
-        console.log("");
-        const user_wav_dir = './backend/images/' + fetchedUser.email;
-        var newFiles = [];
-        fs.readdir(user_wav_dir, (err, filesList) => {
-          if (err) {
-            imageArray = "";
-             res.status(201).json({
-                  message: "No image files",
-                  images: imageArray
-                });
-          }
-          else {
-            targetFiles = filesList;
-            targetFiles.forEach(file => {
-              if (path.extname(file).toLowerCase() != ".xml") {
-                imageArray.push(file);
-              }else{
-                xmlArrayList.push(file);
+        else {
+          targetFiles = filesList;
+          targetFiles.forEach(file => {
+            if (path.extname(file).toLowerCase() != ".xml") {
+              fetchedImages.push(file);
+            } else {
+              xmlArrayList.push(file);
+            }
+          });
+          console.log("fetchedImages length " + fetchedImages.length)
+          if (fetchedImages.length > 0) {
+            fetchedImages.forEach(files => {
+              const xmlFile = files.slice(0, -3) + 'xml';
+              if (xmlArrayList.includes(xmlFile)) {
+                completed = 'Y';
+              } else {
+                completed = 'N';
               }
-            });
-            console.log("xmlFile length "+xmlArrayList.length)
-            let oldFiles = [];
-            let delFiles = [];
-            newFiles = imageArray.slice();
-            console.log("imageArray length "+imageArray.length);
-            console.log("fetched images length "+fetchedImages.length);
-            if (fetchedImages.length > 0) {
-
-              if (imageArray.length > 0) {
-                fetchedImages.map((fetchedImage) => {
-                  absent = 0;
-                  imageArray.map((file) => {
-                    if (file == fetchedImage.fileName) {
-                      oldFiles.push(file);
-                    }
-                    else {
-                      absent++;
-                    }
-                    if (file != fetchedImage.fileName && absent == imageArray.length) {
-                      delFiles.push(fetchedImage.fileName);
-                    }
-                  })
-                });
-              }
-              else {
-                fetchedImages.map((fetchedImage) => {
-                  delFiles.push(fetchedImage.fileName);
-                });
-              }
-              console.log("delete files "+delFiles.length);
-              delFiles = delFiles.filter(delFiles => !oldFiles.includes(delFiles));
-            }
-            else {
-              if (imageArray.length > 0) {
-                newFiles = imageArray.slice();
-              }
-            }
-
-            if (imageArray.length > 0) {
-              newFiles = newFiles.filter(newFile => !oldFiles.includes(newFile));
-            }
-            else {
-              newFiles = [];
-            }
-            if (delFiles.length != 0) {
-              delFileId = [];
-              delFiles.map((delFile) => {
-                fetchedImages.map((fetchedImage) => {
-                  if (delFile == fetchedImage.fileName) {
-                    delFileId.push(fetchedImage.id);
-                  }
-                });
-              });
-              Image.deleteMany({
-                _id: {
-                  $in: delFileId
-                },
-                editor: fetchedUser._id
-              }).then(result => {
-                if (!result) {
-                  console.log("delete failed: " + err);
-                } else {
-                  if (result.n > 0) {
-                    console.log("delete success: " + result.n);
-                  }
-                }
-              });
-            }
-
-            newFiles.forEach(file => {
               console.log("user email " + fetchedUser.email)
-              const path = url + '/images/' + fetchedUser.email + '/'+ file;
+              const path = url + '/images/' + fetchedUser.email + '/' + files;
               const image = {
                 _id: fetchedUser._id,
-                fileName: file,
+                fileName: files,
                 imagePath: path,
-                completed: 'N',
-                folderName:file.slice(0,-9),
+                completed: completed,
                 editor: fetchedUser._id
               };
               imageList.push(image);
+              imageList.sort((a, b) => a.fileName.localeCompare(b.fileName));
             });
-
-            // Saving the new WaveList to the Database
-            Image.insertMany(imageList).then((data) => {
-              if (!data) {
-                console.log("Unable to insert data");
-              }
-              else {
-                console.log("inserted data successfully");
-              }
-            }).then(() => {
-              // Wave.find({editor: fetchedUser._id}).sort({"name": 1}).then(documents => 
-              Image.find({ editor: fetchedUser._id }, function (err, documents) {
-                // err = "";
-                if (err != null) {
-                  console.log(err);
-                  res.status(200).json({
-                    message: "Fetching images failed!",
-                    images: fetchedImages
-                  });
-                }
-                fetchedImages = documents;
-                fetchedImages.sort((a, b) => a.fileName.localeCompare(b.fileName));
-
-                res.status(201).json({
-                  message: "Images fetched successfully!",
-                  images: fetchedImages
-                });
-              });
-            })
+            res.status(201).json({
+              message: "Images fetched successfully!",
+              images: imageList
+            });
+            console.log("imageList length " + imageList.length);
+          } else {
+            imageList = "";
+            res.status(201).json({
+              message: "No image files",
+              images: imageList
+            });
           }
-        });
+        }
       });
     });
 });
