@@ -26,7 +26,7 @@ export class ViewerService implements OnInit{
      this.renderer = rendererFactory.createRenderer(null, null);
  }
   ngOnInit() {
-    
+
   }
 
 asVertical(){
@@ -222,8 +222,8 @@ orginalsize(){
          falseimg.style.height= myImg.style.height;
       }
       rotateImage()
-      { 
-        
+      {
+
         this.angle=this.angle+0.5;
       var myImg;
 
@@ -249,7 +249,7 @@ orginalsize(){
         )
       }
       onEnter() {
-        
+
 
         var myImg;
 
@@ -265,6 +265,11 @@ orginalsize(){
         console.log("inside script");
         let areasarray =  BlockModel.blockArray;
         console.log("block.model.arrray^^^^^^^"+JSON.stringify(areasarray));
+        areasarray.reverse();
+        if(areasarray.length % 2 == 0) {
+          areasarray.reverse();
+      }
+
 
       // areasarray
       $('img#imgToRead').selectAreas('destroy');
@@ -315,7 +320,7 @@ orginalsize(){
               var constantfactorwidth = (block[i].clientWidth/this.clientpercent);
               var constantfactorheight = (block[i].clientHeight/this.clientpercent);
               var constantfactorleft = (blockleft/this.clientpercent);
-     
+
 
 
                   var id= i;
@@ -339,4 +344,3 @@ orginalsize(){
 
 
     }
-   
