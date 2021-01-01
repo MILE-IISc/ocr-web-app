@@ -2,7 +2,7 @@
 import { Component, OnInit, Renderer2 } from '@angular/core';
 
 declare var Tiff: any;
-
+import * as $ from 'jquery';
 import { HeaderService } from '../services/header.service';
 import { ImageService } from '../services/images.service';
 import { Images } from '../shared/images.model';
@@ -154,21 +154,26 @@ export class FooterComponent implements OnInit {
   }
 
   NextImage() {
+  
+    this.onEnter(0);
     this.imageService.nextPage();
     this.imageService.onXml();
-  }
+ }
 
   previousImage() {
+    this.onEnter(0);
     this.imageService.previousPage();
     this.imageService.onXml();
   }
 
   lastImage() {
+    this.onEnter(0);
     this.imageService.LastImage();
     this.imageService.onXml();
   }
 
   firstImage() {
+    this.onEnter(0);
     this.imageService.firstImage();
     this.imageService.onXml();
   }
