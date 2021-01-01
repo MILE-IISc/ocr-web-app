@@ -10,7 +10,7 @@ RUN npm install -g @angular/cli@10.0.8
 
 RUN ng build --prod
 
-FROM 14.15.3-alpine3
+FROM node:14.15.3-alpine3.11
 
 COPY --from=compile-image /opt/ng/backend /app/backend
 COPY package.json /app
