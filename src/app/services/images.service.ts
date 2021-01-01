@@ -40,6 +40,7 @@ export class ImageService implements OnInit {
   fileName;
   public nextImages = false;
   public previousImages = false;
+  imageCountChange = new EventEmitter<Number>();
   btnImgArrayChange = new EventEmitter<any>();
   imageLoaded = new EventEmitter<Images>();
   imagesModified = new EventEmitter<Images[]>();
@@ -259,6 +260,7 @@ export class ImageService implements OnInit {
 
   async nextPage() {
     this.imgFileCount++;
+    this.imageCountChange.emit(this.imgFileCount);
     console.log("next image length" + this.serverImages.length);
     this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].imagePath);
     this.urlChanged.emit(this.localUrl.slice());
@@ -278,6 +280,7 @@ export class ImageService implements OnInit {
   async previousPage() {
     this.serverImages = this.getImages();
     this.imgFileCount--;
+    this.imageCountChange.emit(this.imgFileCount);
     this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].imagePath);
     this.urlChanged.emit(this.localUrl.slice());
     this.fileName = this.serverImages[this.imgFileCount].fileName;
@@ -296,6 +299,7 @@ export class ImageService implements OnInit {
   async LastImage() {
     this.serverImages = this.getImages();
     this.imgFileCount = this.serverImages.length - 1;
+    this.imageCountChange.emit(this.imgFileCount);
     this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].imagePath);
     this.urlChanged.emit(this.localUrl.slice());
     this.fileName = this.serverImages[this.imgFileCount].fileName;
@@ -311,6 +315,7 @@ export class ImageService implements OnInit {
   async firstImage() {
     this.serverImages = this.getImages();
     this.imgFileCount = 0;
+    this.imageCountChange.emit(this.imgFileCount);
     this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].imagePath);
     this.urlChanged.emit(this.localUrl.slice());
     this.fileName = this.serverImages[this.imgFileCount].fileName;

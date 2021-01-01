@@ -15,6 +15,8 @@ import { Images } from '../shared/images.model';
 import { ViewerService } from '../services/viewer.service';
 import { XmlModel,retain } from '../shared/xml-model';
 import { AuthService } from '../auth/auth.service';
+import * as fileSaver from 'file-saver';
+import { FileService } from '../services/file.service';
 
 @Component({
  selector: 'app-screen',
@@ -62,7 +64,7 @@ export class ScreenComponent implements OnInit{
   myHeight = ( window.innerHeight-105);
 
   constructor(private headerService: HeaderService, private imageService: ImageService, private viewerService: ViewerService
-    , public authService: AuthService) { }
+    , public authService: AuthService,private fileService:FileService) { }
 
   ngOnInit(): void {
     this.userName = this.authService.getUserName();
@@ -128,7 +130,7 @@ export class ScreenComponent implements OnInit{
         }
         else {
           this.ImageIs = false;
-          this.fileName = "No files alloted for you";
+          this.fileName = "No files have been Uploaded";
         }
       });
 
@@ -163,7 +165,9 @@ export class ScreenComponent implements OnInit{
       if (this.images[i].fileName == id) {
         this.localUrl = await this.imageService.loadArray(this.images[i].imagePath);
         this.fileName = this.images[i].fileName;
-        this.imgFileCount = i;
+        this.imageService.imgFileCount = i;
+        this.imageService.imageCountChange.emit(this.imgFileCount);
+        console.log("imgFileCount "+this.imgFileCount);
       }
     }
     this.closeModalDialog();
@@ -326,11 +330,31 @@ export class ScreenComponent implements OnInit{
     console.log("xml----" + xmlString);
     this.imageService.updateXml(xmlString, this.fileName);
   }
+
+  onSaveXml() {
+    console.log("in export")
+    this.images = this.imageService.getImages();
+    console.log("image length in export "+this.images.length);
+    for (let i = 0; i < this.images.length; i++) {
+      console.log("in export completed "+this.images[i].completed);
+      if (this.images[i].completed == "Y") {
+        var curImagePath = this.images[i].imagePath;
+        var curXmlFileName = curImagePath.slice(0, -3) + 'xml';
+        this.fileService.downloadFile(curXmlFileName).subscribe(response => {
+          let blob: any = new Blob([response], { type: 'text/xml; charset=utf-8' });
+          const url = window.URL.createObjectURL(blob);
+          //window.open(url);
+          // window.location.href = response.url;
+          fileSaver.saveAs(blob, this.images[i].fileName.slice(0,-3) + 'xml');
+        }), error => alert(error),
+          () => console.info('File downloaded successfully');
+      }
+    }
+  }
+
   openMenu(event) {
     this.isMenuOpen = true;
-    event. preventDefault();
-
-
+    event.preventDefault();
     $("#menu").css("display", "block");
     $("#menu").css("left", event.clientX+"px");
     $("#menu").css("top", event.clientY+"px");
