@@ -1,7 +1,7 @@
 FROM node:14.15.3 AS compile-image
 
 WORKDIR /opt/ng
-COPY package.json angular.json nodemon.json tsconfig.app.json tsconfig.base.json tsconfig.json tsconfig.spec.json tslint.json ./
+COPY package.json angular.json tsconfig.app.json tsconfig.base.json tsconfig.json tsconfig.spec.json tslint.json ./
 COPY src ./src
 COPY backend ./backend
 
