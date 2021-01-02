@@ -4,6 +4,7 @@ declare var $:any;
 import { fromEvent, Subscription } from 'rxjs';
 import { map, buffer, filter, debounceTime } from 'rxjs/operators';
 import * as $ from 'jquery';
+import * as JSZip from 'jszip';
 // import * as $ from 'jquery';
 
 import { BlockModel} from '../shared/block-model';
@@ -331,23 +332,34 @@ export class ScreenComponent implements OnInit{
     this.imageService.updateXml(xmlString, this.fileName);
   }
 
-  onSaveXml() {
+  async onSaveXml() {
     console.log("in export")
     this.images = this.imageService.getImages();
-    console.log("image length in export "+this.images.length);
+    console.log("image length in export " + this.images.length);
+    var folderName = this.fileName.slice(0, -9)
+    var zip = new JSZip();
+    let count = 0;
+    var folder = zip.folder(folderName);
     for (let i = 0; i < this.images.length; i++) {
-      console.log("in export completed "+this.images[i].completed);
+      console.log("in export completed " + this.images[i].completed);
       if (this.images[i].completed == "Y") {
         var curImagePath = this.images[i].imagePath;
         var curXmlFileName = curImagePath.slice(0, -3) + 'xml';
-        this.fileService.downloadFile(curXmlFileName).subscribe(response => {
-          let blob: any = new Blob([response], { type: 'text/xml; charset=utf-8' });
-          const url = window.URL.createObjectURL(blob);
-          //window.open(url);
-          // window.location.href = response.url;
-          fileSaver.saveAs(blob, this.images[i].fileName.slice(0,-3) + 'xml');
-        }), error => alert(error),
-          () => console.info('File downloaded successfully');
+        console.log("curXmlFileName " + curXmlFileName);
+        await this.fileService.downloadFile(curXmlFileName).then(response => {
+          let blob: any = new Blob([response], { type: 'text/xml' });
+          folder.file(this.images[i].fileName.slice(0, -3) + 'xml', blob);
+        }), error => {
+          console.log("error: " + error);
+          alert(error);
+        };
+      }
+      count++;
+      if (count === this.images.length - 1) {
+        zip.generateAsync({ type: "blob" })
+          .then(function (content) {
+            fileSaver.saveAs(content, folderName);
+          });
       }
     }
   }

@@ -8,6 +8,6 @@ export class FileService {
 
   downloadFile(fileName : any): any {
       console.log("file name in file service"+fileName);
-		return this.http.get(fileName, {responseType: 'blob'});
+		return this.http.get(fileName, {responseType: 'blob'}).toPromise();
   }
 }
