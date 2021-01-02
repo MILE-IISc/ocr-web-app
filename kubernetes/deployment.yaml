@@ -22,10 +22,16 @@ spec:
         - containerPort: 8080
         imagePullPolicy: Always
         env:
-        - name: CLOUDANT_URL
+        - name: MONGODB_ENDPOINT
           valueFrom:
             secretKeyRef:
-              name: cloudant
-              key: url
+              name: mongosecret
+              key: endpoint
+              optional: true
+        - name: JWT_KEY
+          valueFrom:
+            secretKeyRef:
+              name: jwtsecret
+              key: jwtkey
               optional: true
 

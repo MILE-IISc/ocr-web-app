@@ -9,9 +9,8 @@ const userRoutes = require("./routes/user");
 
 
 const app = express();
-//mongodb+srv://maithri:<password>@cluster0.xrhry.mongodb.net/<dbname>?retryWrites=true&w=majority
 mongoose
-  .connect("mongodb+srv://maithri:"+process.env.MONGO_ATLAS_PW+"@cluster0.xrhry.mongodb.net/<dbname>?retryWrites=true&w=majority",
+  .connect(process.env.MONGODB_ENDPOINT,
   { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false })
   .then(() => {
     console.log("Connected to database!");

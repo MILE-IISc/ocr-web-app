@@ -1,6 +1,6 @@
 {
     "env": {
-      "MONGO_ATLAS_PW": "BpYqxVmZW5kgEfdB",
+      "MONGODB_ENDPOINT": "mongodb://<username>:<password>@<dbaas_provider_url>/<dbname>",
       "JWT_KEY": "SECRET_HASH_KEY_FOR_JSON_WEBTOKEN"
     }
   }
