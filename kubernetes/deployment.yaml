@@ -1,4 +1,4 @@
-# Update <REGISTRY> <NAMESPACE> values before use
+# Deploy PODs
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -34,4 +34,23 @@ spec:
               name: jwtsecret
               key: jwtkey
               optional: true
-
+# Expose as service
+apiVersion: v1
+kind: Service
+metadata:
+  name: ocr-web-app
+  namespace: default
+  labels:
+    app: ocr-web-app
+spec:
+  type: LoadBalancer
+  selector:
+    app: ocr-web-app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+status:
+  loadBalancer:
+    ingress:
+      - ip: 169.38.86.210
