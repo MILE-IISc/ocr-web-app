@@ -83,7 +83,8 @@ export class FooterComponent implements OnInit {
     this.viewerService.percentage = this.percentage;
     this.viewerService.onZoom();
     this.headerService.setpercentagevary(this.percentage);
-    this.blocksize();
+    this.blocksize()
+
   }
 
   asVertical() {
@@ -154,7 +155,7 @@ export class FooterComponent implements OnInit {
   }
 
   NextImage() {
-  
+
     this.onEnter(0);
     this.imageService.nextPage();
     this.imageService.onXml();
@@ -183,18 +184,18 @@ export class FooterComponent implements OnInit {
 
   loadXMLDoc() {
     this.serverImages = this.imageService.getImages();
-    
+
     var urlOcr
     this.fileName = this.serverImages[this.imgFileCount].fileName;
     console.log("filename"+this.fileName)
      for (let i =0; i< this.serverImages.length;i++){
        if (this.serverImages[i].fileName == this.fileName && this.serverImages[i].completed == 'Y'){
         urlOcr = this.serverImages[i].imagePath.slice(0,-3)+ 'xml'
-    
+
        }
      }
     console.log("patth"+urlOcr)
-   
+
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function () {
       if (this.readyState == 4 && this.status == 200) {
@@ -222,7 +223,7 @@ export class FooterComponent implements OnInit {
           var constantfactorwidth = (block[i].clientWidth/this.clientpercent);
           var constantfactorheight = (block[i].clientHeight/this.clientpercent);
           var constantfactorleft = (blockleft/this.clientpercent);
-     
+
 
 
 
@@ -237,9 +238,10 @@ export class FooterComponent implements OnInit {
 
 
               // this.viewerService. selectBlockservice()
-              setTimeout(() =>  this.viewerService. selectBlockservice(),.001);
+              // setTimeout(() =>  this.viewerService. selectBlockservice(),.001);
 
         }
+          this.viewerService.selectBlockservice()
       }
     }
 }

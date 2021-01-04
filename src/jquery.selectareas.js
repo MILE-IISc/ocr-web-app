@@ -473,6 +473,11 @@ fireEvent("changed");
 
 refresh("releaseSelection");
 },
+blocknumberupdate= function(event){
+ var updatebutton = document.getElementById("blockno")
+ updatebutton.click();
+
+},
 deleteSelection = function (event) {
 //$BlockNumber--;
 
@@ -484,31 +489,8 @@ $blockNumber.remove();
 $.each($resizeHandlers, function(card, $handler) {
 $handler.remove();
 });
-// refresh(area.id)
 
-//area.id=area.id-1;
 
-console.log("deleted area id: "+area.id);
-var blockNumberElems = $(".select-areas-blockNumber-area");
-console.log("no. of blocks: "+blockNumberElems.length);
-for(i=0; i < blockNumberElems.length; i++) {
-console.log("id: "+blockNumberElems[i].id);
-refresh(blockNumberElems[i].id);
-// let number = blockNumberElems[i].id.substr(12);
-// console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!number : "+number);
-console.log("value: "+document.getElementById(blockNumberElems[i].id).innerHTML);
-console.log("i: "+i);
-// if(number >blockNumberElems[i].id) {
-// for(j=0; j< blockNumberElems.length; j++){
-document.getElementById(blockNumberElems[i].id).innerHTML = blockNumberElems.length-i;
-refresh(i);
-
-// }
-// }
-}
-if($x>blockNumberElems.length){
-$x = ($x - 1)}
-//  area.id=area.id-1;
 console.log("area.idon -1"+ area.id)
 
 
@@ -623,6 +605,7 @@ $resizeHandlers[card] =  $("<div class=\"select-areas-resize-handler " + card + 
 if (options.allowDelete) {
 var bindToDelete = function ($obj) {
 $obj.click(deleteSelection)
+$obj.click(blocknumberupdate)
   .bind("touchstart", deleteSelection)
   .bind("tap", deleteSelection);
 return $obj;
