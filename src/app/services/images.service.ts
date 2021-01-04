@@ -451,5 +451,9 @@ function debugQtyAreas(event, id, areas) {
 console.log(areas.length + " areas", arguments);
 this.displayarea = areas;
 console.log(areas.length + " this.displayarea", arguments);
+console.log("invoking saving to XML");
+var SaveToXML = document.getElementById("SaveToXML");
+console.log("SaveToXML: "+SaveToXML);
+SaveToXML.click();
 };
 }

@@ -72,6 +72,7 @@ export class ScreenComponent implements OnInit{
     // console.log("user name in screen "+this.userName)
     this.imageService.getServerImages();
     this.percentage = this.headerService.getpercentagevary();
+    $("#SaveToXML").hide();
     this.headerService.percentageChange
       .subscribe(
         (percent: number) => {
