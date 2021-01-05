@@ -46,6 +46,7 @@ export class FooterComponent implements OnInit {
   divelement = true;
   xmlFileName;
   urlOcr;
+  JsonObj;
 
   constructor(private headerService: HeaderService, private imageService: ImageService, private viewerService: ViewerService,
     private renderer: Renderer2,private authService:AuthService) { }
@@ -183,65 +184,39 @@ export class FooterComponent implements OnInit {
 
   loadXMLDoc() {
     this.serverImages = this.imageService.getImages();
-    
-    var urlOcr
-    this.fileName = this.serverImages[this.imgFileCount].fileName;
-    console.log("filename"+this.fileName)
-     for (let i =0; i< this.serverImages.length;i++){
-       if (this.serverImages[i].fileName == this.fileName && this.serverImages[i].completed == 'Y'){
-        urlOcr = this.serverImages[i].imagePath.slice(0,-3)+ 'xml'
-    
-       }
-     }
-    console.log("patth"+urlOcr)
-   
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function () {
-      if (this.readyState == 4 && this.status == 200) {
-        myFunction(this);
-      }
-    };
-    xmlhttp.open("GET", urlOcr, true);
-    xmlhttp.send();
+    this.fileName = this.serverImages[this.imageService.imgFileCount].fileName;
+    console.log("this.fileName==="+this.fileName);
+    this.imageService.getXmlFileAsJson(this.fileName);
+
   }
-  blocksize(){
 
-
-    if(this.percentage>1){
-      BlockModel.blockArray.length=0;
-        var block
-        block= document.getElementsByClassName("select-areas-outline");
-
-        for (var i = 0; i < block.length; i++) {
-          var blocktop = block[i].style.top;
-          blocktop = blocktop.substring(0, blocktop.length - 2);
-          var blockleft = block[i].style.left;
-          blockleft = blockleft.substring(0, blockleft.length - 2);
-
-          var constantfactortop = (blocktop/this.clientpercent);
-          var constantfactorwidth = (block[i].clientWidth/this.clientpercent);
-          var constantfactorheight = (block[i].clientHeight/this.clientpercent);
-          var constantfactorleft = (blockleft/this.clientpercent);
-     
-
-
-
-              var id= i;
-              var x=constantfactorleft*this.percentage;
-              var y=constantfactortop*this.percentage;
-             var width= constantfactorwidth*this.percentage;
-             var height = constantfactorheight*this.percentage;
-              var z =0
-              var blockValue = new BlockModel(height,id,width,x,y,z);
-              BlockModel.blockArray.push(blockValue);
-
-
-              // this.viewerService. selectBlockservice()
-              setTimeout(() =>  this.viewerService. selectBlockservice(),.001);
-
-        }
+  blocksize() {
+    if (this.percentage > 1) {
+      BlockModel.blockArray.length = 0;
+      var block
+      block = document.getElementsByClassName("select-areas-outline");
+      for (var i = 0; i < block.length; i++) {
+        var blocktop = block[i].style.top;
+        blocktop = blocktop.substring(0, blocktop.length - 2);
+        var blockleft = block[i].style.left;
+        blockleft = blockleft.substring(0, blockleft.length - 2);
+        var constantfactortop = (blocktop / this.clientpercent);
+        var constantfactorwidth = (block[i].clientWidth / this.clientpercent);
+        var constantfactorheight = (block[i].clientHeight / this.clientpercent);
+        var constantfactorleft = (blockleft / this.clientpercent);
+        var id = i;
+        var x = constantfactorleft * this.percentage;
+        var y = constantfactortop * this.percentage;
+        var width = constantfactorwidth * this.percentage;
+        var height = constantfactorheight * this.percentage;
+        var z = 0
+        var blockValue = new BlockModel(height, id, width, x, y, z);
+        BlockModel.blockArray.push(blockValue);
+        // this.viewerService. selectBlockservice()
+        setTimeout(() => this.viewerService.selectBlockservice(), .001);
       }
     }
+  }
 }
 
 function convertCanvasToImage(canvas) {
@@ -250,34 +225,4 @@ function convertCanvasToImage(canvas) {
   image.src = canvas.toDataURL("image/png");
   console.log("image.src: " + image.src);
   return image;
-}
-
-function myFunction(xml) {
-  var xmlDoc = xml.responseXML;
-  var block = xmlDoc.getElementsByTagName("block");
-  console.log("length =====" + block.length);
-  for (let i = 0; i < block.length; i++) {
-    if (block[i].children != null) {
-      for (let j = 0; j < block[i].children.length; j++) {
-        if (block[i].children[j].children != null) {
-          var txt = "";
-          for (let k = 0; k < block[i].children[j].children.length; k++) {
-            txt = txt + " " + block[i].children[j].children[k].getAttribute('unicode');
-            console.log("text-----" + txt);
-          }
-          var lineRowStart = (block[i].children[j].getAttribute('rowStart'));
-          var lineRowEnd = (block[i].children[j].getAttribute('rowEnd'));
-          var lineColStart = (block[i].children[j].getAttribute('colStart'));
-          var lineColEnd = (block[i].children[j].getAttribute('colEnd'));
-          var txtwidth = (lineColEnd - lineColStart);
-          var txtheight = (lineRowEnd - lineRowStart);
-          var wordValue = new XmlModel(txt, lineRowStart, lineRowEnd, lineColStart, lineColEnd, txtwidth, txtheight);
-          XmlModel.textArray.push(wordValue);
-          console.log("textarray length"+XmlModel.textArray.length);
-          XmlModel.textArray.slice(0,XmlModel.textArray.length);
-          console.log("textarray after length"+XmlModel.textArray.length);
-        }
-      }
-    }
-  }
 }

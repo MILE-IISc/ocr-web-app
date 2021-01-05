@@ -116,6 +116,56 @@ export class ImageService implements OnInit {
     return promise;
   }
 
+  getXmlFileAsJson(fileName : any) {
+    console.log("file name in run ocr "+ fileName)
+    var queryfileName = fileName.slice(0,-3) + 'xml';
+    let xmlFileName = queryfileName;
+      this.http
+        .get<{ message: string; json:any }>(
+          this.BACKEND_URL + queryfileName).subscribe(responseData => {
+          console.log("xml as json string "+JSON.stringify(responseData.json));
+          this.updateXmlModel(responseData.json);
+        });
+  }
+
+  updateXmlModel(jsonObj) {
+    
+    // var jsonObj = JSON.parse(json);
+    var blocks = jsonObj['page'].block;
+    console.log("block length " + blocks.length);
+    for (var i = 0; i < blocks.length; i++) {
+      if (blocks[i].line) {
+        var lines = blocks[i].line;
+        console.log("line====" + lines.length);
+        for (var j = 0; j < lines.length; j++) {
+          if (lines[j].word) {
+            var txt = "";
+            var words = lines[j].word;
+            console.log("words length " + words.length);
+            for (var k = 0; k < words.length; k++) {
+              // console.log("word:", words[k]["$"].unicode);
+              if (words[k]["$"].unicode != null) {
+                txt = txt + " " + words[k]["$"].unicode;
+              }
+            }
+            var lineRowStart = lines[j]["$"].rowStart;
+            var lineRowEnd = lines[j]["$"].rowEnd;
+            var lineColStart = lines[j]["$"].colStart;
+            var lineColEnd = lines[j]["$"].colEnd;
+            var txtwidth = (lineColEnd - lineColStart);
+            var txtheight = (lineRowEnd - lineRowStart);
+            var wordValue = new XmlModel(txt, lineRowStart, lineRowEnd, lineColStart, lineColEnd, txtwidth, txtheight);
+            XmlModel.textArray.push(wordValue);
+            console.log("textarray length" + XmlModel.textArray.length);
+            XmlModel.textArray.slice(0, XmlModel.textArray.length);
+            console.log("textarray after length" + XmlModel.textArray.length);
+            console.log("text " + txt);
+          }
+        }
+      }
+    }
+  }
+  
   getWaveUpdateListener() {
     return this.imagesUpdated.asObservable();
   }

@@ -49,6 +49,7 @@
     "timers": "^0.1.1",
     "tslib": "^2.0.0",
     "xml-formatter": "^2.4.0",
+    "xml2js": "^0.4.23",
     "zone.js": "~0.10.3"
   },
   "devDependencies": {
