@@ -72,6 +72,8 @@ export class ScreenComponent implements OnInit{
     // console.log("user name in screen "+this.userName)
     this.imageService.getServerImages();
     this.percentage = this.headerService.getpercentagevary();
+    $("#SaveToXML").hide();
+    $("#blockno").hide();
     this.headerService.percentageChange
       .subscribe(
         (percent: number) => {
@@ -393,6 +395,10 @@ export class ScreenComponent implements OnInit{
         }
         window.alert( 'Width = ' + myWidth );
         window.alert( 'Height = ' + myHeight );
+      }
+      blockupdate(){
+        this.viewerService.blocknumberupdate()
+
       }
 
 

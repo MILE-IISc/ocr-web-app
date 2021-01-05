@@ -137,12 +137,12 @@ orginalsize(){
 
 
   onZoom(){
-    this.clientpercent = this.percentage;
+    // this.clientpercent = this.percentage;
 
    var myImg;
 
-   var zoomlevel= this.percentage
-   this.blocksize();
+   var zoomlevel= this.percentage;
+
 
 
    myImg= document.getElementById("imgToRead");
@@ -161,7 +161,7 @@ orginalsize(){
    console.log("currheight"+currHeight)
    falseimg.style.width = myImg.style.width;
    falseimg.style.height= myImg.style.height;
-
+  //  this.blocksize();
   }
 
   zoomInFun(){
@@ -262,17 +262,16 @@ orginalsize(){
         )
       }
       selectBlockservice(){
+        $('img#imgToRead').selectAreas('destroy');
         console.log("inside script");
-        let areasarray =  BlockModel.blockArray;
-        console.log("block.model.arrray^^^^^^^"+JSON.stringify(areasarray));
-        areasarray.reverse();
-        if(areasarray.length % 2 == 0) {
-          areasarray.reverse();
-      }
+        let areasarray =  BlockModel.blockArray.reverse();
+        console.log("block.model.arrray^^^^   ^^"+JSON.stringify(areasarray));
+
+
 
 
       // areasarray
-      $('img#imgToRead').selectAreas('destroy');
+
         $('img#imgToRead').selectAreas({
            position:"absolute",
 
@@ -281,10 +280,13 @@ orginalsize(){
 
         });
 
-           function debugQtyAreas (event, id, areas) {
-        console.log(areas.length + " areas", arguments);
-        this.displayarea = areas;
-        console.log(areas.length + " areas", arguments);
+        function debugQtyAreas (event, id, areas) {
+          console.log(areas.length + " areas", arguments);
+          this.displayarea = areas;
+          console.log("invoking saving to XML");
+          var SaveToXML = document.getElementById("SaveToXML");
+          console.log("SaveToXML: "+SaveToXML);
+          SaveToXML.click();
         };
 
 
@@ -333,11 +335,17 @@ orginalsize(){
                   BlockModel.blockArray.push(blockValue);
 
 
-                  // this.viewerService. selectBlockservice()
-                  setTimeout(() =>  this. selectBlockservice(),.001);
+
 
             }
+            this. selectBlockservice()
+
           }
+
+        }
+        blocknumberupdate(){
+          this.clientpercent = this.percentage;
+          this.blocksize()
 
         }
 

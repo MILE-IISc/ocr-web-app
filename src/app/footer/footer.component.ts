@@ -84,7 +84,8 @@ export class FooterComponent implements OnInit {
     this.viewerService.percentage = this.percentage;
     this.viewerService.onZoom();
     this.headerService.setpercentagevary(this.percentage);
-    this.blocksize();
+    this.blocksize()
+
   }
 
   asVertical() {
@@ -155,7 +156,7 @@ export class FooterComponent implements OnInit {
   }
 
   NextImage() {
-  
+
     this.onEnter(0);
     this.imageService.nextPage();
     this.imageService.onXml();
