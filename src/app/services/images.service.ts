@@ -423,24 +423,24 @@ $('#firstImg').click(function () {
 $('#lastImg').click(function () {
   $('#imgToRead').selectAreas('destroy');
 });
-$('#butZoomIn').click(function () {
-  $('#imgToRead').selectAreas('destroy');
-});
-$('#butZoomOut').click(function () {
-  $('#imgToRead').selectAreas('destroy');
-});
-$('#fitWidth').click(function () {
-  $('#imgToRead').selectAreas('destroy');
-});
-$('#fitHeigth').click(function () {
-  $('#imgToRead').selectAreas('destroy');
-});
-$('#100zoom').click(function () {
-  $('#imgToRead').selectAreas('destroy');
-});
-$('#zoom').click(function () {
-  $('#imgToRead').selectAreas('destroy');
-});
+// $('#butZoomIn').click(function () {
+//   $('#imgToRead').selectAreas('destroy');
+// });
+// $('#butZoomOut').click(function () {
+//   $('#imgToRead').selectAreas('destroy');
+// });
+// $('#fitWidth').click(function () {
+//   $('#imgToRead').selectAreas('destroy');
+// });
+// $('#fitHeigth').click(function () {
+//   $('#imgToRead').selectAreas('destroy');
+// });
+// $('#100zoom').click(function () {
+//   $('#imgToRead').selectAreas('destroy');
+// });
+// $('#zoom').click(function () {
+//   $('#imgToRead').selectAreas('destroy');
+// });
 $('#buttonXml').click(function () {
   console.log("onclick");
   $('#imgToRead').selectAreas('destroy');
