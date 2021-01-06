@@ -68,9 +68,9 @@ export class ImageService implements OnInit {
 
   constructor(private http: HttpClient, private router: Router, private authService: AuthService,private headerService: HeaderService, @Inject(DOCUMENT) private document: Document) {
     console.log("APP_BASE_HREF "+this.document.location.origin);
-  
+
       this.BACKEND_URL = this.document.location.origin + "/api/image/";
-  
+
     console.log("BACKEND_URL "+this.BACKEND_URL);
   }
 
@@ -84,7 +84,7 @@ export class ImageService implements OnInit {
 
   async getServerImages() {
     var user = this.authService.userName;
-    
+
     const queryParams = `?user=${user}`;
 
     console.log("enter get server from screen")
@@ -116,6 +116,56 @@ export class ImageService implements OnInit {
     return promise;
   }
 
+  getXmlFileAsJson(fileName : any) {
+    console.log("file name in run ocr "+ fileName)
+    var queryfileName = fileName.slice(0,-3) + 'xml';
+    let xmlFileName = queryfileName;
+      this.http
+        .get<{ message: string; json:any }>(
+          this.BACKEND_URL + queryfileName).subscribe(responseData => {
+          console.log("xml as json string "+JSON.stringify(responseData.json));
+          this.updateXmlModel(responseData.json);
+        });
+  }
+
+  updateXmlModel(jsonObj) {
+    
+    // var jsonObj = JSON.parse(json);
+    var blocks = jsonObj['page'].block;
+    console.log("block length " + blocks.length);
+    for (var i = 0; i < blocks.length; i++) {
+      if (blocks[i].line) {
+        var lines = blocks[i].line;
+        console.log("line====" + lines.length);
+        for (var j = 0; j < lines.length; j++) {
+          if (lines[j].word) {
+            var txt = "";
+            var words = lines[j].word;
+            console.log("words length " + words.length);
+            for (var k = 0; k < words.length; k++) {
+              // console.log("word:", words[k]["$"].unicode);
+              if (words[k]["$"].unicode != null) {
+                txt = txt + " " + words[k]["$"].unicode;
+              }
+            }
+            var lineRowStart = lines[j]["$"].rowStart;
+            var lineRowEnd = lines[j]["$"].rowEnd;
+            var lineColStart = lines[j]["$"].colStart;
+            var lineColEnd = lines[j]["$"].colEnd;
+            var txtwidth = (lineColEnd - lineColStart);
+            var txtheight = (lineRowEnd - lineRowStart);
+            var wordValue = new XmlModel(txt, lineRowStart, lineRowEnd, lineColStart, lineColEnd, txtwidth, txtheight);
+            XmlModel.textArray.push(wordValue);
+            console.log("textarray length" + XmlModel.textArray.length);
+            XmlModel.textArray.slice(0, XmlModel.textArray.length);
+            console.log("textarray after length" + XmlModel.textArray.length);
+            console.log("text " + txt);
+          }
+        }
+      }
+    }
+  }
+  
   getWaveUpdateListener() {
     return this.imagesUpdated.asObservable();
   }
@@ -187,7 +237,7 @@ export class ImageService implements OnInit {
     return this.http.get(imageUrl, { responseType: 'blob' });
   }
 
-  
+
 
   async loadArray(serverImage: any) {
     console.log("inside load array");
@@ -232,7 +282,7 @@ export class ImageService implements OnInit {
             console.log("name" + this.serverImages[i].fileName);
             this.serverImages[i].completed = response.completed;
             console.log("completed" + this.serverImages[i].completed);
-      
+
           }
         }
       });
@@ -339,29 +389,29 @@ console.log("filename"+this.fileName)
    if (this.serverImages[i].fileName == this.fileName && this.serverImages[i].completed == 'Y'){
   url = this.serverImages[i].imagePath.slice(0,-3)+ 'xml'
   var xmlhttp = new XMLHttpRequest();
-    
+
   xmlhttp.onreadystatechange = function () {
   if (this.readyState == 4 && this.status == 200) {
-  
+
   fromXml(this);
   }
   };
-  
+
   xmlhttp.open("GET", url, true);
   xmlhttp.send();
    }
  }
 console.log("patth"+url)
-  
+
     // var xmlhttp = new XMLHttpRequest();
-    
+
     // xmlhttp.onreadystatechange = function () {
     // if (this.readyState == 4 && this.status == 200) {
-    
+
     // fromXml(this);
     // }
     // };
-    
+
     // xmlhttp.open("GET", url, true);
     // xmlhttp.send();
     }
@@ -375,7 +425,7 @@ function convertCanvasToImage(canvas) {
 }
 function fromXml(xml){
   var arr=[];
-  
+
 console.log("the current percentage is "+retain.percentage)
 var xmlDoc = xml.responseXML;
 var block = xmlDoc.getElementsByTagName("block");
@@ -401,11 +451,11 @@ console.log("blockY"+Y);
 
  $('img#imgToRead').selectAreas('destroy');
  $('img#imgToRead').selectAreas({
- 
+
  onChanged : debugQtyAreas,
- 
+
  areas:areaarray
- 
+
  });
 
 }
@@ -445,7 +495,7 @@ $('#buttonXml').click(function () {
   console.log("onclick");
   $('#imgToRead').selectAreas('destroy');
 });
-  
+
 
 function debugQtyAreas(event, id, areas) {
 console.log(areas.length + " areas", arguments);

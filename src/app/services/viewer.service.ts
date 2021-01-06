@@ -137,12 +137,12 @@ orginalsize(){
 
 
   onZoom(){
-    this.clientpercent = this.percentage;
+    // this.clientpercent = this.percentage;
 
    var myImg;
 
-   var zoomlevel= this.percentage
-   this.blocksize();
+   var zoomlevel= this.percentage;
+
 
 
    myImg= document.getElementById("imgToRead");
@@ -161,7 +161,7 @@ orginalsize(){
    console.log("currheight"+currHeight)
    falseimg.style.width = myImg.style.width;
    falseimg.style.height= myImg.style.height;
-
+  //  this.blocksize();
   }
 
   zoomInFun(){
@@ -263,15 +263,16 @@ orginalsize(){
       }
 
       selectBlockservice(){
-        console.log("inside script");
-        let areasarray =  BlockModel.blockArray;
-        console.log("block.model.arrray^^^^^^^"+JSON.stringify(areasarray));
-        areasarray.reverse();
-
-
-        // areasarray
-        console.log("invokiing jquery select areas from selectBlockservice");
         $('img#imgToRead').selectAreas('destroy');
+        console.log("inside script");
+        let areasarray =  BlockModel.blockArray.reverse();
+        console.log("block.model.arrray^^^^   ^^"+JSON.stringify(areasarray));
+
+
+
+
+      // areasarray
+
         $('img#imgToRead').selectAreas({
           position:"absolute",
           onChanged : debugQtyAreas,
@@ -336,6 +337,11 @@ orginalsize(){
             }
             this. selectBlockservice()
           }
+
+        }
+        blocknumberupdate(){
+          this.clientpercent = this.percentage;
+          this.blocksize()
 
         }
 

@@ -3,6 +3,10 @@ const fs = require("fs");
 var path = require('path');
 var async = require('async');
 var format = require('xml-formatter');
+var xml2js = require('xml2js');
+var parser = new xml2js.Parser();
+const WaveController = require("../controllers/waves");
+const Image = require("../models/image");
 const User = require("../models/user");
 const cloudStorage = require('ibm-cos-sdk');
 var util = require('util');
@@ -239,6 +243,7 @@ function cancelMultiPartUpload(bucketName, itemName, uploadID) {
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
 const checkAuth = require("../middleware/check-auth");
 // const extractFile = require("../middleware/file"); extractFile, 
 
@@ -376,7 +381,7 @@ router.put("/:id", checkAuth, (req, res, next) => {
   writeStream.end();
 });
 
-router.get("", (req, res, next) => {
+router.get("", checkAuth,(req, res, next) => {
   const url = req.protocol + "://" + req.get("host");
   const mail = req.query.user;
   var fetchedImages = [];
@@ -392,7 +397,7 @@ router.get("", (req, res, next) => {
           message: "Auth failed"
         });
       }
-      console.log("user in get" + user.email)
+      // console.log("user in get" + user.email)
       fetchedUser = user;
       const user_wav_dir = './backend/images/' + fetchedUser.email;
       var newFiles = [];
@@ -422,7 +427,7 @@ router.get("", (req, res, next) => {
               } else {
                 completed = 'N';
               }
-              console.log("user email " + fetchedUser.email)
+              // console.log("user email " + fetchedUser.email)
               const path = url + '/images/' + fetchedUser.email + '/' + files;
               const image = {
                 _id: fetchedUser._id,
@@ -449,5 +454,28 @@ router.get("", (req, res, next) => {
         }
       });
     });
+});
+
+router.get("/:fileName", (req, res, next) =>{
+  console.log("in run ocr get ")
+  const XmlfileName = req.params.fileName;
+  console.log("XmlfileName in get call "+XmlfileName);
+  const user_wav_dir = './backend/images/maithri@gmail.com/' + XmlfileName;
+  fs.readFile(user_wav_dir, "utf-8", function (error, text) {
+    if (error) {
+        throw error;
+    }else {
+        parser.parseString(text, function (err, result) {
+            // var books = result['bookstore']['book'];
+            var jsonString = JSON.stringify(result)
+            console.log("result as JSON "+jsonString);
+            res.status(201).json({
+              message: "xml read successfully",
+              json: result
+            });
+        });
+    }
+});
+
 });
 module.exports = router;
