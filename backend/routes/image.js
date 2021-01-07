@@ -5,14 +5,21 @@ var async = require('async');
 var format = require('xml-formatter');
 var xml2js = require('xml2js');
 var parser = new xml2js.Parser();
+const router = express.Router();
+const multer = require('multer');
+const { promise } = require("protractor");
+var util = require('util');
+const Tiff = require('tiff.js');
+
+const checkAuth = require("../middleware/check-auth");
+// const extractFile = require("../middleware/file"); extractFile,
 const WaveController = require("../controllers/waves");
 const Image = require("../models/image");
 const User = require("../models/user");
-const cloudStorage = require('ibm-cos-sdk');
-var util = require('util');
-const bucket = "my-bucket-sasi-dev-test-ahsdbasjhbdjash";
-const Tiff = require('tiff.js');
 
+const cloudStorage = require('ibm-cos-sdk');
+const multerS3 = require('multer-s3');
+const bucket = "my-bucket-sasi-dev-test-ahsdbasjhbdjash";
 var config = {
   endpoint: process.env.object_storage_endpoint,
   apiKeyId: process.env.object_storage_apiKeyId,
@@ -119,7 +126,7 @@ function getBucketContents(bucketName) {
               // }
               getItem(bucketName, itemKey);
           }
-      }    
+      }
   })
   .catch((e) => {
       console.error(`ERROR: ${e.code} - ${e.message}\n`);
@@ -130,7 +137,7 @@ function getBucketContents(bucketName) {
 function getItem(bucketName, itemName) {
   console.log(`Retrieving item from bucket: ${bucketName}, key: ${itemName}`);
   return cos.getObject({
-      Bucket: bucketName, 
+      Bucket: bucketName,
       Key: itemName
   }).promise()
   .then((data) => {
@@ -154,7 +161,7 @@ function getItem(bucketName, itemName) {
           else {
             console.log('File Contents:\n' + Buffer.from(data.Body).toString());
           }
-      }    
+      }
   })
   .catch((e) => {
       console.error(`ERROR: ${e.code} - ${e.message}\n`);
@@ -177,7 +184,7 @@ function multiPartUpload(bucketName, itemName, filePath) {
     .then((data) => {
         uploadID = data.UploadId;
 
-        //begin the file upload        
+        //begin the file upload
         fs.readFile(filePath, (e, fileData) => {
             //min 5MB part
             var partSize = 1024 * 1024 * 5;
@@ -189,7 +196,7 @@ function multiPartUpload(bucketName, itemName, filePath) {
 
                 partNum++;
 
-                console.log(`Uploading to ${itemName} (part ${partNum} of ${partCount})`);  
+                console.log(`Uploading to ${itemName} (part ${partNum} of ${partCount})`);
 
                 cos.uploadPart({
                     Body: fileData.slice(start, end),
@@ -241,15 +248,40 @@ function cancelMultiPartUpload(bucketName, itemName, uploadID) {
     });
 }
 
-// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+var upload = multer({
+  storage: multerS3({
+      s3: cos,
+      bucket: bucket,
+      acl: 'public-read',
+      metadata: function (req, file, cb) {
+          cb(null, {fieldName: file.fieldname});
+      },
+      key: function (req, file, cb) {
+          console.log(file.originalname , file);
+          cb(null, file.originalname);
+      }
+  })
+});
 
-const checkAuth = require("../middleware/check-auth");
-// const extractFile = require("../middleware/file"); extractFile, 
+router.post("", checkAuth,
+  upload.array("image", 4000),
+  (req, res, next) => {
 
-const router = express.Router();
-const multer = require('multer');
-const { promise } = require("protractor");
+  if (res.statusCode === 200 && req.files.length > 0) {
+    console.log("file list length " + req.files.length);
+    res.status(201).json({
+      message: "Images added successfully",
+    });
+  }
+  else {
+    console.log("error in filelist  " + err);
+    res.status(500).json({
+      message: "error in adding images",
+    });
+  }
+});
+
 const MIME_TYPE_MAP = {
   "image/png": "png",
   "image/jpeg": "jpg",
@@ -299,44 +331,44 @@ const storage = multer.diskStorage({
 });
 
 
-router.post("", checkAuth,
-  multer({ storage: storage }).array("image", 4000),
-  (req, res, next) => {
-    let imageList = [];
-    let fetchedUser;
-    User.findOne({ email: req.body.email })
-      .then(user => {
-        if (!user) {
-          return res.status(401).json({
-            message: "Auth failed"
-          });
-        }
-        fetchedUser = user;
-      }).then(() => {
-        const url = req.protocol + "://" + req.get("host");
-        const user_wav_dir = './backend/images/' + req.body.email;
-        // const filePath = './backend/images/' + req.body.email +"/balaaka_0001.tif";
-        // console.log("file Path " + filePath);
-        // console.log("calling multiPartUpload");
-        // multiPartUpload(bucket, "balaaka_0001.tif", filePath);
-        // console.log("completed multiPartUpload");
-        fs.readdir(user_wav_dir, (err, filesList) => {
-          if (err) {
-            console.log("error in filelist  " + err);
-            imageList = "";
-            res.status(500).json({
-              message: "error in adding images",
-            });
-          } else {
-            targetFiles = filesList;
-            console.log("file list length " + filesList.length);
-            res.status(201).json({
-              message: "Images added successfully",
-            });
-          }
-        });
-      });
-  });
+// router.post("", checkAuth,
+//   multer({ storage: storage }).array("image", 4000),
+//   (req, res, next) => {
+//     let imageList = [];
+//     let fetchedUser;
+//     User.findOne({ email: req.body.email })
+//       .then(user => {
+//         if (!user) {
+//           return res.status(401).json({
+//             message: "Auth failed"
+//           });
+//         }
+//         fetchedUser = user;
+//       }).then(() => {
+//         const url = req.protocol + "://" + req.get("host");
+//         const user_wav_dir = './backend/images/' + req.body.email;
+//         // const filePath = './backend/images/' + req.body.email +"/balaaka_0001.tif";
+//         // console.log("file Path " + filePath);
+//         // console.log("calling multiPartUpload");
+//         // multiPartUpload(bucket, "balaaka_0001.tif", filePath);
+//         // console.log("completed multiPartUpload");
+//         fs.readdir(user_wav_dir, (err, filesList) => {
+//           if (err) {
+//             console.log("error in filelist  " + err);
+//             imageList = "";
+//             res.status(500).json({
+//               message: "error in adding images",
+//             });
+//           } else {
+//             targetFiles = filesList;
+//             console.log("file list length " + filesList.length);
+//             res.status(201).json({
+//               message: "Images added successfully",
+//             });
+//           }
+//         });
+//       });
+//   });
 
 router.put("/:id", checkAuth, (req, res, next) => {
   console.log("fileName" + req.body.fileName)
@@ -456,11 +488,12 @@ router.get("", checkAuth,(req, res, next) => {
     });
 });
 
-router.get("/:fileName", (req, res, next) =>{
-  console.log("in run ocr get ")
+router.get("/:fileName", checkAuth, (req, res, next) =>{
+  editor = req.userData.email;
+  console.log("user in run ocr get "+editor)
   const XmlfileName = req.params.fileName;
   console.log("XmlfileName in get call "+XmlfileName);
-  const user_wav_dir = './backend/images/maithri@gmail.com/' + XmlfileName;
+  const user_wav_dir = './backend/images/'+editor+"/" + XmlfileName;
   fs.readFile(user_wav_dir, "utf-8", function (error, text) {
     if (error) {
         throw error;
