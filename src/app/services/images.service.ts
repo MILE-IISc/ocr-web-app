@@ -119,17 +119,20 @@ export class ImageService implements OnInit {
   getXmlFileAsJson(fileName : any) {
     console.log("file name in run ocr "+ fileName)
     var queryfileName = fileName.slice(0,-3) + 'xml';
-    let xmlFileName = queryfileName;
+    let userData : any;
+    userData = {
+      user : this.authService.userName
+    }
       this.http
         .get<{ message: string; json:any }>(
           this.BACKEND_URL + queryfileName).subscribe(responseData => {
           console.log("xml as json string "+JSON.stringify(responseData.json));
-          this.updateXmlModel(responseData.json);
+          XmlModel.jsonObject = responseData.json;
+          this.updateXmlModel(XmlModel.jsonObject);
         });
   }
 
   updateXmlModel(jsonObj) {
-    
     // var jsonObj = JSON.parse(json);
     var blocks = jsonObj['page'].block;
     console.log("block length " + blocks.length);
@@ -144,17 +147,19 @@ export class ImageService implements OnInit {
             console.log("words length " + words.length);
             for (var k = 0; k < words.length; k++) {
               // console.log("word:", words[k]["$"].unicode);
-              if (words[k]["$"].unicode != null) {
-                txt = txt + " " + words[k]["$"].unicode;
+              if (words[k].unicode != null) {
+                txt = txt + " " + words[k].unicode;
               }
             }
-            var lineRowStart = lines[j]["$"].rowStart;
-            var lineRowEnd = lines[j]["$"].rowEnd;
-            var lineColStart = lines[j]["$"].colStart;
-            var lineColEnd = lines[j]["$"].colEnd;
+            var lineRowStart = lines[j].rowStart;
+            var lineRowEnd = lines[j].rowEnd;
+            var lineColStart = lines[j].colStart;
+            var lineColEnd = lines[j].colEnd;
+            var lineNumber = lines[j].LineNumber;
+            var blockNumber = blocks[i].BlockNumber;
             var txtwidth = (lineColEnd - lineColStart);
             var txtheight = (lineRowEnd - lineRowStart);
-            var wordValue = new XmlModel(txt, lineRowStart, lineRowEnd, lineColStart, lineColEnd, txtwidth, txtheight);
+            var wordValue = new XmlModel(txt, lineRowStart, lineRowEnd, lineColStart, lineColEnd, txtwidth, txtheight,lineNumber,blockNumber);
             XmlModel.textArray.push(wordValue);
             console.log("textarray length" + XmlModel.textArray.length);
             XmlModel.textArray.slice(0, XmlModel.textArray.length);
@@ -282,9 +287,23 @@ export class ImageService implements OnInit {
             console.log("name" + this.serverImages[i].fileName);
             this.serverImages[i].completed = response.completed;
             console.log("completed" + this.serverImages[i].completed);
-
           }
         }
+      });
+  }
+
+  updateCorrectedXml(fileName:any) {
+    console.log("Corrected xml "+ JSON.stringify(XmlModel.jsonObject));
+    let jsonData : any;
+    jsonData = {
+      json:XmlModel.jsonObject,
+      XmlfileName:fileName.slice(0,-3)+'xml',
+      user : this.authService.userName
+    };
+    this.http
+      .put<{ message: string }>(this.BACKEND_URL, jsonData)
+      .subscribe(response => {
+        console.log("response message after correction "+response.message);
       });
   }
 
@@ -378,43 +397,26 @@ export class ImageService implements OnInit {
     }
   }
 
-  onXml(){
-
-
-this.serverImages = this.getImages();
-var url
-this.fileName = this.serverImages[this.imgFileCount].fileName;
-console.log("filename"+this.fileName)
- for (let i =0; i< this.serverImages.length;i++){
-   if (this.serverImages[i].fileName == this.fileName && this.serverImages[i].completed == 'Y'){
-  url = this.serverImages[i].imagePath.slice(0,-3)+ 'xml'
-  var xmlhttp = new XMLHttpRequest();
-
-  xmlhttp.onreadystatechange = function () {
-  if (this.readyState == 4 && this.status == 200) {
-
-  fromXml(this);
-  }
-  };
-
-  xmlhttp.open("GET", url, true);
-  xmlhttp.send();
-   }
- }
-console.log("patth"+url)
-
-    // var xmlhttp = new XMLHttpRequest();
-
-    // xmlhttp.onreadystatechange = function () {
-    // if (this.readyState == 4 && this.status == 200) {
-
-    // fromXml(this);
-    // }
-    // };
-
-    // xmlhttp.open("GET", url, true);
-    // xmlhttp.send();
+  onXml() {
+    this.serverImages = this.getImages();
+    var url
+    this.fileName = this.serverImages[this.imgFileCount].fileName;
+    console.log("filename" + this.fileName)
+    for (let i = 0; i < this.serverImages.length; i++) {
+      if (this.serverImages[i].fileName == this.fileName && this.serverImages[i].completed == 'Y') {
+        url = this.serverImages[i].imagePath.slice(0, -3) + 'xml'
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            fromXml(this);
+          }
+        };
+        xmlhttp.open("GET", url, true);
+        xmlhttp.send();
+      }
     }
+    console.log("patth" + url)
+  }
 }
 function convertCanvasToImage(canvas) {
   console.log("in convert................");
