@@ -19,6 +19,8 @@
   <button id="SaveToXML" (click)="onSave()">SaveToXML</button>
   <button (click)="onSaveXml()">extractXML</button>
   <button id="blockno" (click)="blockupdate()">blocknumberupdate</button>
+  <button  data-toggle="tooltip" title="Save Corrections" (click)="correctionUpdate()"><img
+    src="assets/images/saved-icon.jpg" type="button" width="20px" height="20px"></button>
 
 </div>
 
@@ -34,8 +36,8 @@
     </as-split-area>
     <as-split-area style="overflow-x: auto; overflow-y: auto;" (scroll)="updatescroll(scrollOne, scrollTwo)" #scrollTwo>
       <div id="image" [style.position]="'relative'">
-        <span *ngFor="let text of words">
-          <input  id="text_input"   [value] = "text.unicode"  [style.width.px]="text.txtwidth*(this.percentage/100)" [style.position]="'absolute'" [style.border]="'none'" [style.font-size.px]="text.txtheight*5/8*(this.percentage/100)"
+        <span *ngFor="let text of words;let i = index">
+          <input  class="text_input" id = "{{text.lineNumber}}" value = "{{text.unicode}}"  [style.width.px]="text.txtwidth*(this.percentage/100)" [style.position]="'absolute'" [style.border]="'none'" [style.font-size.px]="text.txtheight*5/8*(this.percentage/100)"
           [style.top.px]="text.lineRowStart*(this.percentage/100)"   [style.left.px]="text.lineColStart*(this.percentage/100)"   [style.margin-inline-start.px]="text.lineRowStart*(this.percentage/100)"   [style.height.px]="text.txtheight*(this.percentage/100)" >
         </span>
       </div>

@@ -3,7 +3,7 @@ const fs = require("fs");
 var path = require('path');
 var format = require('xml-formatter');
 var xml2js = require('xml2js');
-var parser = new xml2js.Parser();
+var js2xmlparser = require("js2xmlparser");
 const WaveController = require("../controllers/waves");
 const Image = require("../models/image");
 const User = require("../models/user");
@@ -141,6 +141,52 @@ router.put("/:id", checkAuth, (req, res, next) => {
   writeStream.end();
 });
 
+router.put("", checkAuth, (req, res, next) => {
+
+  xmlFileName = req.body.XmlfileName;
+  editor = req.userData.email
+
+  const user_xml_dir = './backend/images/' + editor + '/';
+  var fs = require('fs');
+  let dir = user_xml_dir;
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
+  }
+  var json = req.body.json;
+  
+  // console.log("converting this json "+js2xmlparser.parse("page",json));
+  var formattedXml = js2xmlparser.parse("page",json).split("\n");
+
+
+  formattedXml.splice(1, 1);
+  formattedXml.splice(-1, 1);
+  console.log(formattedXml.join("\n"));
+   // var formattedXml = format(js2xmlparser.parse("page",json), {
+  //   indentation: '  ',
+  //   filter: (node) => node.type !== 'Comment',
+  //   collapseContent: true,
+  //   lineSeparator: '\n'
+  // });
+
+  // console.log(formattedXml);
+
+  let writeStream = fs.createWriteStream(dir + xmlFileName);
+  writeStream.on('error', (err) => {
+    console.log(err);
+    writeStream.end();
+    res.status(500).json({
+      message: "Couldn't save Text File. err: " + err
+    });
+  });
+  writeStream.write(formattedXml.join("\n"));
+
+  writeStream.on('finish', () => {
+    console.log("imageFileName-----" + xmlFileName);
+    res.status(200).json({ message: "XML File saved successfully!"});
+  });
+  writeStream.end();
+});
+
 router.get("", checkAuth,(req, res, next) => {
   const url = req.protocol + "://" + req.get("host");
   const mail = req.query.user;
@@ -216,16 +262,17 @@ router.get("", checkAuth,(req, res, next) => {
     });
 });
 
-router.get("/:fileName", (req, res, next) =>{
+router.get("/:fileName", checkAuth,(req, res, next) =>{
   console.log("in run ocr get ")
+  editor = req.userData.email
   const XmlfileName = req.params.fileName;
   console.log("XmlfileName in get call "+XmlfileName);
-  const user_wav_dir = './backend/images/maithri@gmail.com/' + XmlfileName;
+  const user_wav_dir = './backend/images/'+ editor + '/' + XmlfileName;
   fs.readFile(user_wav_dir, "utf-8", function (error, text) {
     if (error) {
         throw error;
     }else {
-        parser.parseString(text, function (err, result) {
+      xml2js.parseString(text,{ mergeAttrs: true } ,function (err, result) {
             // var books = result['bookstore']['book'];
             var jsonString = JSON.stringify(result)
             console.log("result as JSON "+jsonString);
@@ -238,4 +285,6 @@ router.get("/:fileName", (req, res, next) =>{
 });
 
 });
+
+
 module.exports = router;
