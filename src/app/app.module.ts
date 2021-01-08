@@ -52,7 +52,7 @@ import {MatTreeModule} from '@angular/material/tree';
 import {OverlayModule} from '@angular/cdk/overlay';
 import { FormsModule } from '@angular/forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {DropdownDirective} from "./shared/dropdown.directive";
+// import {DropdownDirective} from "./shared/dropdown.directive";
 import { HeaderComponent } from './header/header.component';
 import {AngularSplitModule} from 'angular-split';
 import { ScreenComponent } from './screen/screen.component';
@@ -68,14 +68,16 @@ import { HTTP_INTERCEPTORS } from "@angular/common/http";
 import { FooterComponent } from './footer/footer.component';
 import { AuthService } from './auth/auth.service';
 import { ClickOutsideDirective } from './shared/click-outside.directive';
+import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
+
 @NgModule({
   declarations: [
     AppComponent,
-    DropdownDirective,
+    // DropdownDirective,
     HeaderComponent,
     ScreenComponent,
     ClickOutsideDirective,
-
+    CtrlsDetectorDirective,
     FooterComponent
     //FileSelectDirective
   ],

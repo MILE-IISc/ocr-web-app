@@ -37,7 +37,7 @@
     <as-split-area style="overflow-x: auto; overflow-y: auto;" (scroll)="updatescroll(scrollOne, scrollTwo)" #scrollTwo>
       <div id="image" [style.position]="'relative'">
         <span *ngFor="let text of words;let i = index">
-          <input  class="text_input" id = "{{text.lineNumber}}" value = "{{text.unicode}}"  [style.width.px]="text.txtwidth*(this.percentage/100)" [style.position]="'absolute'" [style.border]="'none'" [style.font-size.px]="text.txtheight*5/8*(this.percentage/100)"
+          <input  (ctrls)="showTooltip($event)" class="text_input" id = "{{text.lineNumber}}" value = "{{text.unicode}}"  [style.width.px]="text.txtwidth*(this.percentage/100)" [style.position]="'absolute'" [style.border]="'none'" [style.font-size.px]="text.txtheight*5/8*(this.percentage/100)"
           [style.top.px]="text.lineRowStart*(this.percentage/100)"   [style.left.px]="text.lineColStart*(this.percentage/100)"   [style.margin-inline-start.px]="text.lineRowStart*(this.percentage/100)"   [style.height.px]="text.txtheight*(this.percentage/100)" >
         </span>
       </div>

@@ -1,5 +1,5 @@
 
-import { Component, OnInit,Renderer2} from '@angular/core';
+import { Component, HostListener, OnInit,Renderer2} from '@angular/core';
 declare var $:any;
 import { fromEvent, Subscription } from 'rxjs';
 import { map, buffer, filter, debounceTime } from 'rxjs/operators';
@@ -401,6 +401,12 @@ export class ScreenComponent implements OnInit{
 
       }
 
+      showTooltip() {
+        console.log("inside show tool tip on save");
+        this.correctionUpdate();
+      }
+    
+
   correctionUpdate() {
     var texts = document.getElementsByClassName('text_input');
     console.log("texts length " + texts.length);
@@ -423,12 +429,26 @@ export class ScreenComponent implements OnInit{
                   console.log("text array length "+textArray.length)
                   if (words.length == textArray.length) {
                     for(let k=0;k<words.length;k++){
-                      words[k].unicode = textArray[k];
+                      words[k].unicode = textArray[k].trim();
+                    }
+                  }else if(textArray.length > words.length || textArray.length < words.length){
+                    console.log("in text array greater ");
+                    var txt = "";
+                    for(let m=0;m<textArray.length;m++){
+                     txt = txt + " " + textArray[m];
+                    }
+                    words[0].unicode = txt.trim();
+                    words[0].colEnd = words[words.length-1].colEnd;
+                    console.log("word[0] "+words[0].unicode);
+                    console.log("word[1] "+words[1].unicode);
+                    for(let n=1;n<words.length;n++){
+                      console.log("words.length",words.length,"n",n,"lines inndex",j)
+                      words[n].unicode = "";
                     }
                   }
                 } else {
                   console.log("in else block of update");
-                  words[0].unicode = text;
+                  words[0].unicode = text.trim();
                 }
               }
             }
