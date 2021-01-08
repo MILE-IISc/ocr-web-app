@@ -62,7 +62,7 @@ export class ScreenComponent implements OnInit{
   images: Images[];
   ImageIs = true;
   isDiv = false;
-  myHeight = ( window.innerHeight-105);
+  myHeight = ( window.innerHeight-125);
 
   constructor(private headerService: HeaderService, private imageService: ImageService, private viewerService: ViewerService
     , public authService: AuthService,private fileService:FileService) { }

@@ -38,6 +38,8 @@
     
     
   - The respective text output for the blocks selected will be displayed on the right side split screen and you can do text corrections if needed.
+   ![alt text](https://github.com/MILE-IISc/ocr-web-app/blob/main/Docs/ocr_ouput.png)
+  
   
   
   - While doing corrections you can view the screen in vertical or Horizontal view by selecting either `Horizontal view` or `vertical view`  buttons.
