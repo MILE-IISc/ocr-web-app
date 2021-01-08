@@ -261,6 +261,7 @@ orginalsize(){
           `rotate(${degree}deg)`
         )
       }
+
       selectBlockservice(){
         $('img#imgToRead').selectAreas('destroy');
         console.log("inside script");
@@ -273,11 +274,9 @@ orginalsize(){
       // areasarray
 
         $('img#imgToRead').selectAreas({
-           position:"absolute",
-
+          position:"absolute",
           onChanged : debugQtyAreas,
           areas: areasarray
-
         });
 
         function debugQtyAreas (event, id, areas) {
@@ -323,23 +322,20 @@ orginalsize(){
               var constantfactorheight = (block[i].clientHeight/this.clientpercent);
               var constantfactorleft = (blockleft/this.clientpercent);
 
+              var id= i;
+              var x=constantfactorleft*this.percentage;
+              var y=constantfactortop*this.percentage;
+              var width= constantfactorwidth*this.percentage;
+              var height = constantfactorheight*this.percentage;
+              var z =0
+              var blockValue = new BlockModel(height,id,width,x,y,z);
+              BlockModel.blockArray.push(blockValue);
 
-
-                  var id= i;
-                  var x=constantfactorleft*this.percentage;
-                  var y=constantfactortop*this.percentage;
-                 var width= constantfactorwidth*this.percentage;
-                 var height = constantfactorheight*this.percentage;
-                  var z =0
-                  var blockValue = new BlockModel(height,id,width,x,y,z);
-                  BlockModel.blockArray.push(blockValue);
-
-
-
+              // this.viewerService. selectBlockservice()
+              // setTimeout(() =>  this. selectBlockservice(),.001);
 
             }
             this. selectBlockservice()
-
           }
 
         }

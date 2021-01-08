@@ -6,11 +6,13 @@ export class XmlModel{
       public lineColStart: number,
       public lineColEnd:number,
       public txtwidth:number,
-      public txtheight:number
-
+      public txtheight:number,
+      public lineNumber:number,
+      public blockNumber:number
     ) {}
 
     public static textArray = [];
+    public static jsonObject;
 }
 
 export class retain{

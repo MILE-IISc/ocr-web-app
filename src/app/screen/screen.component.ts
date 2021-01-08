@@ -401,6 +401,44 @@ export class ScreenComponent implements OnInit{
 
       }
 
+  correctionUpdate() {
+    var texts = document.getElementsByClassName('text_input');
+    console.log("texts length " + texts.length);
+    for (var l = 0; l < texts.length; l++) {
+      // var jsonObj = XmlModel.jsonObject;
+      var blocks = XmlModel.jsonObject['page'].block;
+      for (var i = 0; i < blocks.length; i++) {
+        if (blocks[i].line) {
+          var lines = blocks[i].line;
+          for (var j = 0; j < lines.length; j++) {
+            if (lines[j].word) {
+              var words = lines[j].word;
+              // console.log("words length " + words.length);
+              if (lines[j].LineNumber == texts[l].getAttribute("id")) {
+                console.log((texts[l] as HTMLInputElement).value);
+                var text = (texts[l] as HTMLInputElement).value;
+                if (words.length > 1) {
+                  console.log("word array length "+words.length)
+                  var textArray = text.split(/(\s+)/).filter(function (e) { return e.trim().length > 0; });
+                  console.log("text array length "+textArray.length)
+                  if (words.length == textArray.length) {
+                    for(let k=0;k<words.length;k++){
+                      words[k].unicode = textArray[k];
+                    }
+                  }
+                } else {
+                  console.log("in else block of update");
+                  words[0].unicode = text;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    // console.log("final json  "+JSON.stringify(XmlModel.jsonObject));
+    this.imageService.updateCorrectedXml(this.fileName);
+  }
 
 }
 
