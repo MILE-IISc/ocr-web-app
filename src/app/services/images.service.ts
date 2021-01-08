@@ -64,14 +64,14 @@ export class ImageService implements OnInit {
   serverUrl: any
   dataUrl: any;
   xmlFileName;
-  BACKEND_URL;
+  IMAGE_BACKEND_URL;
+  XML_BACKEND_URL;
 
   constructor(private http: HttpClient, private router: Router, private authService: AuthService,private headerService: HeaderService, @Inject(DOCUMENT) private document: Document) {
-    console.log("APP_BASE_HREF "+this.document.location.origin);
-
-      this.BACKEND_URL = this.document.location.origin + "/api/image/";
-
-    console.log("BACKEND_URL "+this.BACKEND_URL);
+    this.IMAGE_BACKEND_URL = this.authService.BACKEND_URL + "/api/image/";
+    this.XML_BACKEND_URL = this.authService.BACKEND_URL + "/api/xml/";
+    console.log("IMAGE_BACKEND_URL "+this.IMAGE_BACKEND_URL);
+    console.log("XML_BACKEND_URL "+this.XML_BACKEND_URL);
   }
 
   getImages() {
@@ -91,7 +91,7 @@ export class ImageService implements OnInit {
     let promise = new Promise((resolve, reject) => {
       this.http
         .get<{ message: string; images: [] }>(
-          this.BACKEND_URL + queryParams
+          this.IMAGE_BACKEND_URL + queryParams
         ).toPromise()
         .then(responseData => {
           const imageLength = responseData.images.length;
@@ -125,7 +125,7 @@ export class ImageService implements OnInit {
     }
       this.http
         .get<{ message: string; json:any }>(
-          this.BACKEND_URL + queryfileName).subscribe(responseData => {
+          this.XML_BACKEND_URL + queryfileName).subscribe(responseData => {
           console.log("xml as json string "+JSON.stringify(responseData.json));
           XmlModel.jsonObject = responseData.json;
           this.updateXmlModel(XmlModel.jsonObject);
@@ -170,7 +170,7 @@ export class ImageService implements OnInit {
       }
     }
   }
-  
+
   getWaveUpdateListener() {
     return this.imagesUpdated.asObservable();
   }
@@ -210,7 +210,7 @@ export class ImageService implements OnInit {
     }
     this.http
       .post<{ message: string }>(
-        this.BACKEND_URL,
+        this.IMAGE_BACKEND_URL,
         imageData
       )
       .subscribe(async responseData => {
@@ -280,7 +280,7 @@ export class ImageService implements OnInit {
       folderName : fileName.slice(0,-9)
     };
     this.http
-      .put<{ message: string, name: string, completed: string }>(this.BACKEND_URL + fileName, xmlData)
+      .put<{ message: string, name: string, completed: string }>(this.XML_BACKEND_URL + fileName, xmlData)
       .subscribe(response => {
         for (let i = 0; i < this.serverImages.length; i++) {
           if (this.serverImages[i].fileName == response.name) {
@@ -301,7 +301,7 @@ export class ImageService implements OnInit {
       user : this.authService.userName
     };
     this.http
-      .put<{ message: string }>(this.BACKEND_URL, jsonData)
+      .put<{ message: string }>(this.IMAGE_BACKEND_URL, jsonData)
       .subscribe(response => {
         console.log("response message after correction "+response.message);
       });
