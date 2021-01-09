@@ -14,7 +14,7 @@ const checkAuth = require("../middleware/check-auth");
 const WaveController = require("../controllers/waves");
 const Image = require("../models/image");
 const User = require("../models/user");
-var bucketFilesList = [];
+const bucketFilesList = [];
 
 const cloudStorage = require('ibm-cos-sdk');
 const multerS3 = require('multer-s3');
@@ -54,12 +54,17 @@ function getBucketContents(bucketName) {
   ).promise()
   .then((data) => {
       if (data != null && data.Contents != null) {
+        // bucketFilesList = [];
+        bucketFilesList.splice(0,bucketFilesList.length);
+        console.log("inside getBucketContents Then function bucketFilesList.length:",bucketFilesList.length);
         console.log("data.Contents.length:",data.Contents.length);
           for (var i = 0; i < data.Contents.length; i++) {
             var itemKey = data.Contents[i].Key;
             var itemSize = data.Contents[i].Size;
             console.log(`Item: ${itemKey} (${itemSize} bytes).` +i);
             bucketFilesList.push(itemKey);
+
+
             // if(itemKey == "balaaka_0001.tif"){
             //   console.log("reached getItem: "+itemKey);
             //   continue;
@@ -67,7 +72,6 @@ function getBucketContents(bucketName) {
             // getItem(bucketName, itemKey);
           }
           console.log("bucketFilesList.length",bucketFilesList.length);
-          return(bucketFilesList);
       }
   })
   .catch((e) => {
@@ -146,6 +150,7 @@ router.post("", checkAuth,
 });
 
 router.get("", checkAuth,(req, res, next) => {
+  console.log("inside get request start");
   const url = req.protocol + "://" + req.get("host");
   const mail = req.query.user;
   var fetchedImages = [];
@@ -165,8 +170,8 @@ router.get("", checkAuth,(req, res, next) => {
       fetchedUser = user;
       const user_wav_dir = './backend/images/' + fetchedUser.email;
       var newFiles = [];
-      getBucketContents(bucket).then(totalFilesList => {
-        console.log("totalFilesList.length:",totalFilesList.length);
+      getBucketContents(bucket).then(() => {
+        console.log("totalFilesList.length:",bucketFilesList.length);
       });
       fs.readdir(user_wav_dir, (err, filesList) => {
         if (err) {

@@ -301,7 +301,7 @@ export class ImageService implements OnInit {
       user : this.authService.userName
     };
     this.http
-      .put<{ message: string }>(this.IMAGE_BACKEND_URL, jsonData)
+      .put<{ message: string }>(this.XML_BACKEND_URL, jsonData)
       .subscribe(response => {
         console.log("response message after correction "+response.message);
       });
@@ -344,6 +344,7 @@ export class ImageService implements OnInit {
       this.previousImages = false;
       this.previousImageChange.emit(this.previousImages);
     }
+    $('#imgToRead').selectAreas('destroy');
   }
 
   async previousPage() {

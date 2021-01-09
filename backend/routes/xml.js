@@ -97,7 +97,7 @@ router.put("/:id", checkAuth, (req, res, next) => {
   console.log("formattedXml\n",formattedXml);
   doCreateObject(xmlFileName, formattedXml).then(() => {
     console.log("saved xml file");
-    res.status(200).json({ message: "XML File saved successfully!", name: imageFileName, completed: "Y" });
+    res.status(200).json({ message: "XML File saved successfully!"});
   }).catch((err) => {
     console.log("error while saving xml file:",err);
     res.status(500).json({ message: "Couldn't save Text File. err: " + err });
