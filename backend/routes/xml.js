@@ -2,7 +2,7 @@ const express = require("express");
 const fs = require("fs");
 var path = require('path');
 var async = require('async');
-var format = require('xml-formatter');
+// var format = require('xml-formatter');
 var xml2js = require('xml2js');
 var js2xmlparser = require("js2xmlparser");
 const router = express.Router();
@@ -73,39 +73,6 @@ function getItem(bucketName, itemName) {
 }
 
 
-router.put("/:id", checkAuth, (req, res, next) => {
-  console.log("fileName" + req.body.fileName)
-  imageFileName = req.body.fileName;
-  editor = req.userData.email
-  xmlFileName = imageFileName.slice(0, -3) + 'xml';
-
-  const user_xml_dir = './backend/images/' + editor + '/';
-  var fs = require('fs');
-  let dir = user_xml_dir;
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
-  }
-  var xml = req.body.xml;
-
-  var formattedXml = format(xml, {
-    indentation: '  ',
-    filter: (node) => node.type !== 'Comment',
-    collapseContent: true,
-    lineSeparator: '\n'
-  });
-
-  console.log("formattedXml\n",formattedXml);
-  doCreateObject(xmlFileName, formattedXml).then(() => {
-    console.log("saved xml file");
-    res.status(200).json({ message: "XML File saved successfully!", name: imageFileName, completed: "Y" });
-  }).catch((err) => {
-    console.log("error while saving xml file:",err);
-    res.status(500).json({ message: "Couldn't save Text File. err: " + err });
-  });
-});
-
-
-
 router.put("", checkAuth, (req, res, next) => {
   xmlFileName = req.body.XmlfileName;
   editor = req.userData.email;
@@ -123,31 +90,14 @@ router.put("", checkAuth, (req, res, next) => {
 
   formattedXml.splice(1, 1);
   formattedXml.splice(-1, 1);
-  // console.log(formattedXml.join("\n"));
-   // var formattedXml = format(js2xmlparser.parse("page",json), {
-  //   indentation: '  ',
-  //   filter: (node) => node.type !== 'Comment',
-  //   collapseContent: true,
-  //   lineSeparator: '\n'
-  // });
 
-  // console.log(formattedXml);
-
-  let writeStream = fs.createWriteStream(dir + xmlFileName);
-  writeStream.on('error', (err) => {
-    console.log(err);
-    writeStream.end();
-    res.status(500).json({
-      message: "Couldn't save Text File. err: " + err
-    });
-  });
-  writeStream.write(formattedXml.join("\n"));
-
-  writeStream.on('finish', () => {
-    console.log("imageFileName-----" + xmlFileName);
+    doCreateObject(xmlFileName, formattedXml.join("\n")).then(() => {
+    console.log("saved xml file");
     res.status(200).json({ message: "XML File saved successfully!"});
+  }).catch((err) => {
+    console.log("error while saving xml file:",err);
+    res.status(500).json({ message: "Couldn't save Text File. err: " + err });
   });
-  writeStream.end();
 });
 
 router.get("/:fileName", checkAuth,(req, res, next) =>{

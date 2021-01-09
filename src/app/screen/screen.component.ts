@@ -6,7 +6,7 @@ import { map, buffer, filter, debounceTime } from 'rxjs/operators';
 import * as $ from 'jquery';
 import * as JSZip from 'jszip';
 // import * as $ from 'jquery';
-
+import * as xml2js from 'xml2js';
 import { BlockModel} from '../shared/block-model';
 declare var $:any
 declare var Tiff: any;
@@ -18,6 +18,8 @@ import { XmlModel,retain } from '../shared/xml-model';
 import { AuthService } from '../auth/auth.service';
 import * as fileSaver from 'file-saver';
 import { FileService } from '../services/file.service';
+// import * as format from 'xml-formatter';
+// import * as format from 'xml-formatter';
 
 @Component({
  selector: 'app-screen',
@@ -329,9 +331,16 @@ export class ScreenComponent implements OnInit{
       // pageElem.appendChild(blockElem);
       xmlDocument.documentElement.appendChild(blockElem);
     }
+
     var xmlString = prolog + new XMLSerializer().serializeToString(xmlDocument);
-    console.log("xml----" + xmlString);
-    this.imageService.updateXml(xmlString, this.fileName);
+
+    xml2js.parseString(xmlString,{ mergeAttrs: true } ,function (err, result) {
+      var jsonString = JSON.stringify(result)
+      XmlModel.jsonObject = result;
+      console.log("xml.js result as JSON "+jsonString);
+    });
+    
+    this.imageService.updateCorrectedXml(this.fileName);
   }
 
   async onSaveXml() {
