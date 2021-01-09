@@ -15,7 +15,6 @@ const WaveController = require("../controllers/waves");
 const Image = require("../models/image");
 const User = require("../models/user");
 const bucketFilesList = [];
-var bucketFilesList = [];
 const MIME_TYPE_MAP = {
   "image/png": "png",
   "image/jpeg": "jpg",

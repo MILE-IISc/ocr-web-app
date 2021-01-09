@@ -52,11 +52,13 @@ export class FooterComponent implements OnInit {
     private renderer: Renderer2,private authService:AuthService) { }
 
   ngOnInit(): void {
+    console.log("this.headerService.getpercentagevary()",this.headerService.getpercentagevary());
     this.percentage = this.headerService.getpercentagevary();
     this.headerService.percentageChange
       .subscribe(
         (percent: number) => {
           this.percentage = percent;
+          console.log("percent inside footeroninit on headerpercentacgehange",percent);
         }
       );
 
@@ -104,14 +106,18 @@ export class FooterComponent implements OnInit {
   fitheight() {
     this.viewerService.fitheight();
     this.percentage = this.viewerService.percentage;
+    console.log("this.percentage before header in fitheight",this.percentage);
     this.headerService.setpercentagevary(this.percentage);
+    console.log("this.percentage after header in fitheight",this.percentage);
   }
 
   fitwidth() {
     // this.viewerService.fitwidth();
     this.viewerService.fitwidth()
     this.percentage = this.viewerService.percentage;
+    console.log("this.percentage before header in fitwidth",this.percentage);
     this.headerService.setpercentagevary(this.percentage);
+    console.log("this.percentage after header in fitwidth",this.percentage);
   }
 
   zoomInFun() {
@@ -147,7 +153,9 @@ export class FooterComponent implements OnInit {
   orginalsize() {
     this.viewerService.orginalsize();
     this.percentage = this.viewerService.percentage;
+    console.log("this.percentage before header in orginalsize",this.percentage);
     this.headerService.setpercentagevary(this.percentage);
+    console.log("this.percentage after header in orginalsize",this.percentage);
   }
 
   openModalDialog() {
@@ -186,7 +194,8 @@ export class FooterComponent implements OnInit {
   loadXMLDoc() {
     this.serverImages = this.imageService.getImages();
     this.fileName = this.serverImages[this.imageService.imgFileCount].fileName;
-    console.log("this.fileName==="+this.fileName);
+    console.log("``````````````````````````````````````````````````this.fileName==="+this.fileName);
+    console.log("this.fileCompleted==="+this.serverImages[this.imageService.imgFileCount].completed);
     this.imageService.getXmlFileAsJson(this.fileName);
 
   }

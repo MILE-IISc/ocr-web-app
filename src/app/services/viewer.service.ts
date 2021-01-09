@@ -75,8 +75,8 @@ console.log("divelementheight "+divheight)
   var realHeight = myImg.naturalHeight;
   var realWidth = myImg.naturalWidth;
   this.percentage=currHeight/realHeight*100;
-  retain.percentage = this.percentage;
-        console.log("the current percentage is "+retain.percentage)
+  // retain.percentage = this.percentage;
+        // console.log("the current percentage is "+retain.percentage)
   this.blocksize();
 
   myImg.style.width = (realWidth * this.percentage/100) + "px";
@@ -100,9 +100,9 @@ console.log("divelementheight "+divwidth)
    var realHeight = myImg.naturalHeight;
   var realWidth = myImg.naturalWidth;
   this.percentage=(currWidth/realWidth)*100;
-  retain.percentage = this.percentage;
-        console.log("the current percentage is "+retain.percentage)
-  this.blocksize();
+  // retain.percentage = this.percentage;
+        // console.log("the current percentage is "+retain.percentage)
+  //this.blocksize();
 
   myImg.style.height = (realHeight* this.percentage/100) + "px";
   falseimg.style.height= myImg.style.height;
@@ -121,8 +121,8 @@ orginalsize(){
      falseimg.style.height= myImg.style.height;
      console.log("currheight"+myImg.naturalHeight)
      this.percentage=100;
-     retain.percentage = this.percentage;
-        console.log("the current percentage is "+retain.percentage)
+    //  retain.percentage = this.percentage;
+        // console.log("the current percentage is "+retain.percentage)
      this.blocksize();
 
 
@@ -169,8 +169,8 @@ orginalsize(){
     this.clientpercent = this.percentage;
     var myImg;
     this.percentage = this.percentage + 7.2;
-    retain.percentage = this.percentage;
-        console.log("the current percentage is "+retain.percentage)
+    // retain.percentage = this.percentage;
+        // console.log("the current percentage is "+retain.percentage)
     this.blocksize();
 
 
@@ -198,8 +198,8 @@ orginalsize(){
 
      var myImg;
      this.percentage = this.percentage -7.2;
-     retain.percentage = this.percentage;
-        console.log("the current percentage is "+retain.percentage)
+    //  retain.percentage = this.percentage;
+        // console.log("the current percentage is "+retain.percentage)
      this.blocksize();
 
 

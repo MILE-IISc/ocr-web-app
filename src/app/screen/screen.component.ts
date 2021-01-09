@@ -149,6 +149,8 @@ export class ScreenComponent implements OnInit{
           // console.log("Inside subscribe");
           // console.log("+++++++++url: " + url);
           this.localUrl = url;
+          setTimeout(() => this.viewerService.fitwidth(), 50);
+          setTimeout(() => this.setpercentage(), 60);
         });
 
     this.imageService.fileNameChange.subscribe((fileName: any) => {
@@ -339,7 +341,7 @@ export class ScreenComponent implements OnInit{
       XmlModel.jsonObject = result;
       console.log("xml.js result as JSON "+jsonString);
     });
-    
+
     this.imageService.updateCorrectedXml(this.fileName);
   }
 
@@ -414,7 +416,7 @@ export class ScreenComponent implements OnInit{
         console.log("inside show tool tip on save");
         this.correctionUpdate();
       }
-    
+
 
   correctionUpdate() {
     var texts = document.getElementsByClassName('text_input');

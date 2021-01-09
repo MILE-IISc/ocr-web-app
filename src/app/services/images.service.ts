@@ -401,7 +401,10 @@ export class ImageService implements OnInit {
   onXml() {
     this.serverImages = this.getImages();
     this.fileName = this.serverImages[this.imgFileCount].fileName;
-    this.getFileAsJson(this.fileName);
+    console.log("completion status: ",this.serverImages[this.imgFileCount].completed);
+    if(this.serverImages[this.imgFileCount].completed =="Y") {
+      this.getFileAsJson(this.fileName);
+    }
   }
 
   getFileAsJson(fileName : any) {
@@ -433,13 +436,13 @@ export class ImageService implements OnInit {
        var blockRowEnd = (blocks[i].rowEnd);
        var blockColStart = (blocks[i].colStart);
        var blockColEnd = (blocks[i].colEnd);
-       var blockwidth = (blockColEnd - blockColStart) * retain.percentage / 100;
+       var blockwidth = (blockColEnd - blockColStart) * this.percentage / 100;
        console.log("blockwidth" + blockwidth);
-       var blockheight = (blockRowEnd - blockRowStart) * retain.percentage / 100;
+       var blockheight = (blockRowEnd - blockRowStart) * this.percentage / 100;
        console.log("blockheight" + blockheight);
-       var X = blockColStart * retain.percentage / 100;
+       var X = blockColStart * this.percentage / 100;
        console.log("blockX" + X);
-       var Y = blockRowStart * retain.percentage / 100;
+       var Y = blockRowStart * this.percentage / 100;
        console.log("blockY" + Y);
        areaarray[i] = { "id": blockNumber, "x": X, "y": Y, "width": blockwidth, "height": blockheight };
      }
