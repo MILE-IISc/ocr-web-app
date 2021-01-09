@@ -15,6 +15,12 @@ const WaveController = require("../controllers/waves");
 const Image = require("../models/image");
 const User = require("../models/user");
 var bucketFilesList = [];
+const MIME_TYPE_MAP = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/jpg": "jpg",
+  "image/tiff": "tif"
+};
 
 const cloudStorage = require('ibm-cos-sdk');
 const multerS3 = require('multer-s3');
@@ -114,16 +120,22 @@ function getItem(bucketName, itemName) {
 
 var upload = multer({
   storage: multerS3({
-      s3: cos,
-      bucket: bucket,
-      acl: 'public-read',
-      metadata: function (req, file, cb) {
-          cb(null, {fieldName: file.fieldname});
-      },
-      key: function (req, file, cb) {
-          console.log(file.originalname , file);
-          cb(null, file.originalname);
+    s3: cos,
+    bucket: bucket,
+    acl: 'public-read',
+    metadata: function (req, file, cb) {
+      cb(null, { fieldName: file.fieldname });
+    },
+    key: function (req, file, cb) {
+      console.log("file.originalname"+file.originalName+"file.mimtype"+file.mimtype);
+      const isValid = MIME_TYPE_MAP[file.mimetype];
+      let error = new Error("Invalid mime type");
+      if (isValid) {
+        error = null;
       }
+      console.log(file.originalname, file);
+      cb(error, file.originalname);
+    }
   })
 });
 

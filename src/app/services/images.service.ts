@@ -399,23 +399,64 @@ export class ImageService implements OnInit {
 
   onXml() {
     this.serverImages = this.getImages();
-    var url
     this.fileName = this.serverImages[this.imgFileCount].fileName;
-    console.log("filename" + this.fileName)
-    for (let i = 0; i < this.serverImages.length; i++) {
-      if (this.serverImages[i].fileName == this.fileName && this.serverImages[i].completed == 'Y') {
-        url = this.serverImages[i].imagePath.slice(0, -3) + 'xml'
-        var xmlhttp = new XMLHttpRequest();
-        xmlhttp.onreadystatechange = function () {
-          if (this.readyState == 4 && this.status == 200) {
-            fromXml(this);
-          }
-        };
-        xmlhttp.open("GET", url, true);
-        xmlhttp.send();
-      }
+    this.getFileAsJson(this.fileName);
+  }
+
+  getFileAsJson(fileName : any) {
+    console.log("file name in run ocr "+ fileName)
+    var queryfileName = fileName.slice(0,-3) + 'xml';
+    let userData : any;
+    userData = {
+      user : this.authService.userName
     }
-    console.log("patth" + url)
+      this.http
+        .get<{ message: string; json:any }>(
+          this.XML_BACKEND_URL + queryfileName).subscribe(responseData => {
+          console.log("xml as json string "+JSON.stringify(responseData.json));
+          XmlModel.jsonObject = responseData.json;
+          this.retain(XmlModel.jsonObject);
+        });
+  }
+
+  retain(jsonObj){
+    let areaarray=[];
+     // var jsonObj = JSON.parse(json);
+     var blocks = jsonObj['page'].block;
+     console.log("block length " + blocks.length);
+     for (var i = 0; i < blocks.length; i++) {
+
+       var blockNumber = (blocks[i].BlockNumber);
+       console.log("blockNumber" + blockNumber);
+       var blockRowStart = (blocks[i].rowStart);
+       var blockRowEnd = (blocks[i].rowEnd);
+       var blockColStart = (blocks[i].colStart);
+       var blockColEnd = (blocks[i].colEnd);
+       var blockwidth = (blockColEnd - blockColStart) * retain.percentage / 100;
+       console.log("blockwidth" + blockwidth);
+       var blockheight = (blockRowEnd - blockRowStart) * retain.percentage / 100;
+       console.log("blockheight" + blockheight);
+       var X = blockColStart * retain.percentage / 100;
+       console.log("blockX" + X);
+       var Y = blockRowStart * retain.percentage / 100;
+       console.log("blockY" + Y);
+       areaarray[i] = { "id": blockNumber, "x": X, "y": Y, "width": blockwidth, "height": blockheight };
+     }
+     $('img#imgToRead').selectAreas('destroy');
+     $('img#imgToRead').selectAreas({
+      onChanged: debugQtyAreas,
+      areas: areaarray
+    });
+
+     function debugQtyAreas(event, id, areas) {
+      console.log(areas.length + " areas", arguments);
+      this.displayarea = areas;
+      console.log(areas.length + " this.displayarea", arguments);
+      console.log("invoking saving to XML");
+      var SaveToXML = document.getElementById("SaveToXML");
+      console.log("SaveToXML: "+SaveToXML);
+      SaveToXML.click();
+      };
   }
 }
 function convertCanvasToImage(canvas) {
@@ -501,12 +542,12 @@ $('#buttonXml').click(function () {
 
 
 function debugQtyAreas(event, id, areas) {
-console.log(areas.length + " areas", arguments);
-this.displayarea = areas;
-console.log(areas.length + " this.displayarea", arguments);
-console.log("invoking saving to XML");
-var SaveToXML = document.getElementById("SaveToXML");
-console.log("SaveToXML: "+SaveToXML);
-SaveToXML.click();
-};
+  console.log(areas.length + " areas", arguments);
+  this.displayarea = areas;
+  console.log(areas.length + " this.displayarea", arguments);
+  console.log("invoking saving to XML");
+  var SaveToXML = document.getElementById("SaveToXML");
+  console.log("SaveToXML: "+SaveToXML);
+  SaveToXML.click();
+  };
 }
