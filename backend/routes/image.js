@@ -19,7 +19,8 @@ const MIME_TYPE_MAP = {
   "image/png": "png",
   "image/jpeg": "jpg",
   "image/jpg": "jpg",
-  "image/tiff": "tif"
+  "image/tiff": "tif",
+  "image/bmp" : "bmp"
 };
 
 const cloudStorage = require('ibm-cos-sdk');
@@ -131,7 +132,7 @@ var upload = multer({
       cb(null, { fieldName: file.fieldname });
     },
     key: function (req, file, cb) {
-      console.log("file.originalname"+file.originalName+"file.mimtype"+file.mimtype);
+      console.log("file.originalname"+file.originalName+"file.mimetype"+file.mimetype);
       const isValid = MIME_TYPE_MAP[file.mimetype];
       let error = new Error("Invalid mime type");
       if (isValid) {
