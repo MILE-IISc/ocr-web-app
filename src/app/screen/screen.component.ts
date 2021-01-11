@@ -82,7 +82,7 @@ export class ScreenComponent implements OnInit{
           this.percentage = percent;
         });
 
-        // retain.percentage = this.percentage;
+        retain.percentage = this.percentage;
         // console.log("the current percentage is "+retain.percentage)
 
     this.isLoading = this.headerService.getloadingvalue();
