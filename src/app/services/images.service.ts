@@ -214,8 +214,8 @@ export class ImageService implements OnInit {
         imageData
       )
       .subscribe(async responseData => {
-        console.log("image: " + responseData.message);
         await this.getServerImages();
+        console.log("image added+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++: " + responseData.message);
       });
     if (this.serverImages.length > 0) {
       console.log("server images length===" + this.serverImages.length);

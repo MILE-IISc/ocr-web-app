@@ -23,6 +23,7 @@ const MIME_TYPE_MAP = {
   "image/bmp" : "bmp"
 };
 
+var invalid ="";
 const cloudStorage = require('ibm-cos-sdk');
 const multerS3 = require('multer-s3');
 const bucket = "my-bucket-sasi-dev-test-ahsdbasjhbdjash";
@@ -123,7 +124,18 @@ function getItem(bucketName, itemName) {
   });
 }
 
+const fileFilter = (req,file,cb)=>{
+  const isValid = MIME_TYPE_MAP[file.mimetype];
+  if(isValid){
+    cb(null,true);
+  }else{
+    invalid = "invalid mime types"
+    cb(null,false);
+  }
+}
+
 var upload = multer({
+  fileFilter,
   storage: multerS3({
     s3: cos,
     bucket: bucket,
@@ -133,13 +145,13 @@ var upload = multer({
     },
     key: function (req, file, cb) {
       console.log("file.originalname"+file.originalName+"file.mimetype"+file.mimetype);
-      const isValid = MIME_TYPE_MAP[file.mimetype];
-      let error = new Error("Invalid mime type");
-      if (isValid) {
-        error = null;
-      }
+      // const isValid = MIME_TYPE_MAP[file.mimetype];
+      // let error = new Error("Invalid mime type");
+      // if (isValid) {
+      //   error = null;
+      // }
       console.log(file.originalname, file);
-      cb(error, file.originalname);
+      cb(null, file.originalname);
     }
   })
 });
@@ -150,8 +162,9 @@ router.post("", checkAuth,
 
   if (res.statusCode === 200 && req.files.length > 0) {
     console.log("file list length " + req.files.length);
+    console.log("invalid "+invalid);
     res.status(201).json({
-      message: "Images added successfully",
+      message: "Images added successfully "+invalid,
     });
   }
   else {
