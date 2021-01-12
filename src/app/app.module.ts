@@ -63,6 +63,8 @@ import { AuthInterceptor } from "./auth/auth-interceptor";
 import { ErrorInterceptor } from "./error-interceptor";
 import { ErrorComponent } from "./error/error.component";
 import { HTTP_INTERCEPTORS } from "@angular/common/http";
+import { FlexLayoutModule } from '@angular/flex-layout';
+// import {MatIconModule} from '@angular/material/icon';
 
 
 import { FooterComponent } from './footer/footer.component';
@@ -86,6 +88,8 @@ import { ClickOutsideDirective } from './shared/click-outside.directive';
     CdkTableModule,
     CdkTreeModule,
     DragDropModule,
+    FlexLayoutModule,
+  
     MatAutocompleteModule,
     MatBadgeModule,
     MatBottomSheetModule,
@@ -100,7 +104,7 @@ import { ClickOutsideDirective } from './shared/click-outside.directive';
     MatDividerModule,
     MatExpansionModule,
     MatGridListModule,
-    MatIconModule,
+    // MatIconModule,
     MatInputModule,
     MatListModule,
     MatMenuModule,
@@ -134,6 +138,8 @@ import { ClickOutsideDirective } from './shared/click-outside.directive';
 
 
     MatNativeDateModule
+  ],exports:[
+    MatIconModule
   ],
   providers: [
     {  provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'fill' } }
@@ -144,7 +150,9 @@ import { ClickOutsideDirective } from './shared/click-outside.directive';
   entryComponents: [ErrorComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class AppModule { }
+export class AppModule {
+  
+ }
 
 platformBrowserDynamic().bootstrapModule(AppModule)
   .catch(err => console.error(err));

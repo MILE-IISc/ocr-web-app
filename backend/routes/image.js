@@ -124,7 +124,7 @@ function getBucketContents(bucketName) {
               //   console.log("reached getItem: "+itemKey);
               //   continue;
               // }
-              getItem(bucketName, itemKey);
+              // getItem(bucketName, itemKey);
           }
       }
   })

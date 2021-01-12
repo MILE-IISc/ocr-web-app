@@ -18,6 +18,7 @@ import { XmlModel,retain } from '../shared/xml-model';
 import { AuthService } from '../auth/auth.service';
 import * as fileSaver from 'file-saver';
 import { FileService } from '../services/file.service';
+import { MatIconRegistry } from "@angular/material/icon";
 
 @Component({
  selector: 'app-screen',
@@ -26,7 +27,8 @@ import { FileService } from '../services/file.service';
 })
 
 export class ScreenComponent implements OnInit{
-
+  opened: boolean;
+  events: string[] = [];
   private waveSub: Subscription;
   serverImages: Images[] = [];
   userName;
@@ -62,7 +64,15 @@ export class ScreenComponent implements OnInit{
   images: Images[];
   ImageIs = true;
   isDiv = false;
-  myHeight = ( window.innerHeight-125);
+  myHeight = ( window.innerHeight-109);
+
+  openLeftMenu() {
+    document.getElementById("leftMenu").style.display = "block";
+  }
+  
+ closeLeftMenu() {
+    document.getElementById("leftMenu").style.display = "none";
+  }
 
   constructor(private headerService: HeaderService, private imageService: ImageService, private viewerService: ViewerService
     , public authService: AuthService,private fileService:FileService) { }
@@ -179,6 +189,20 @@ export class ScreenComponent implements OnInit{
   closeModalDialog() {
     this.display = 'none'; //set none css after close dialog
   }
+
+  //*****************************************************darkMode */
+//  openNav() {
+//     document.getElementById("mySidenav").style.width = "1000px";
+//     console.log("opened")
+//   }
+  
+//  closeNav() {
+//     document.getElementById("mySidenav").style.width = "0";
+//   }
+  // darkMode(){
+  //   var element = document.body;
+  //   element.classList.toggle("darkMode");
+  // }
 
   importFile(event) {
     this.anotherTryVisible = true;

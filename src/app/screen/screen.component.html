@@ -1,40 +1,43 @@
 <script src="https://cdn.rawgit.com/seikichi/tiff.js/master/tiff.min.js"></script>
-
-<div>
-  &nbsp;&nbsp;&nbsp;&nbsp;
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    
+<mat-toolbar>
   <input #fileUpload type="file" (click)="fileUpload.value = null" (change)="importFile($event)" style="display:none"
     accept="image/*">
-  <button data-toggle="tooltip" (click)="fileUpload.click()" title="Upload Image"><img src="assets/images/open_file.jpg"
+  
+  <button mat-icon-button data-toggle="tooltip" (click)="fileUpload.click()" title="Upload Image"><img src="assets/images/open_file.svg"
       type="button" width="20px" height="20px"></button>
   <input #folderUpload type="file" name="fileList" (click)="folderUpload.value = null" webkitdirectory multiple
     (change)="importFile($event)" style="display:none" />
-  <button data-toggle="tooltip" title="Upload Directory" (click)="folderUpload.click()"><img
-      src="assets/images/open_folder.png" type="button" width="20px" height="20px"></button>
-  <button data-toggle="tooltip" title="vertcal View" (click)="asVertical()"
-    [disabled]="nextImage"><img src="assets/images/vertical.jpg" type="button" width="20px" height="20px"></button>
-  <button data-toggle="tooltip" title="Horizontal View" (click)="asHorizontal()"
-    [disabled]="nextImage"><img src="assets/images/horizontal.jpg" type="button" width="20px" height="20px"></button>
-    <button data-toggle="tooltip" title="Select Block" (click)="selectBlock()" class="xmlButton" id="buttonXml"><img src="assets/images/selectBlock.png"
+  <button mat-icon-button  color="primary"  data-toggle="tooltip" title="Upload Directory" (click)="folderUpload.click()"><img
+      src="assets/images/open_folder.svg" type="button" width="20px" height="20px"></button>
+  <button  mat-icon-button color="primary"  data-toggle="tooltip"   title="vertcal View" (click)="asVertical()"
+    [disabled]="nextImage"><img src="assets/images/horizontal_screen.svg" class="vertical" type="button" width="20px" height="20px"></button>
+  <button mat-icon-button color="primary"  data-toggle="tooltip" title="Horizontal View" (click)="asHorizontal()"
+    [disabled]="nextImage"><img src="assets/images/horizontal_screen.svg" type="button" width="20px" height="20px"></button>
+    <button mat-icon-button color="primary"  data-toggle="tooltip" title="Select Block" (click)="selectBlock()" class="xmlButton" id="buttonXml"><img src="assets/images/select_block.svg"
       type="button" width="20px" height="20px"></button>
   <button id="SaveToXML" (click)="onSave()">SaveToXML</button>
-  <button (click)="onSaveXml()">extractXML</button>
+  <button mat-icon-button  color="primary"   (click)="onSaveXml()"><img
+    src="assets/images/download.svg"  type="button" width="20px" height="20px"></button>
   <button id="blockno" (click)="blockupdate()">blocknumberupdate</button>
-  <button  data-toggle="tooltip" title="Save Corrections" (click)="correctionUpdate()"><img
+  <button  mat-icon-button color="primary"  data-toggle="tooltip" title="Save Corrections" (click)="correctionUpdate()"><img
     src="assets/images/saved-icon.jpg" type="button" width="20px" height="20px"></button>
+    <!-- <button class="w3-button w3-teal w3-xlarge w3-left" onclick="openLeftMenu()">&#9776;</button> -->
+  
+</mat-toolbar>
 
-</div>
 
-<div class="container" [style.height.px]="this.myHeight" style="width: 100%; background-color: whitesmoke;">
-  <as-split [direction]=value>
-    <as-split-area id="content" [lockSize]=true style="overflow-x: auto; overflow-y: auto;"
+
+  <as-split class="split"  [style.height.px]="this.myHeight" [direction]=value>
+    <as-split-area id="content" [lockSize]=true class="split1"
       (scroll)="updateScroll(scrollOne, scrollTwo)" #scrollOne>
       <img [src]="localUrl" *ngIf="localUrl && !isLoading" id="imgToRead" class="imgToRead" />
-      <!-- <div class="topleft" *ngIf="localUrl && ImageIs">{{ fileName }}</div> -->
-      <!-- <div  *ngIf="!ImageIs" ><h4> This is not an Image File!!! </h4></div> -->
-      <div class="topleft" *ngIf="!isLoading">{{ fileName }}</div>
+     <div class="topleft" *ngIf="!isLoading"><h5>{{ fileName }}</h5></div>
       <mat-spinner *ngIf="isLoading"></mat-spinner>
-    </as-split-area>
-    <as-split-area style="overflow-x: auto; overflow-y: auto;" (scroll)="updatescroll(scrollOne, scrollTwo)" #scrollTwo>
+   </as-split-area>
+    <as-split-area class="split2" (scroll)="updatescroll(scrollOne, scrollTwo)" #scrollTwo>
+      <mat-divider [vertical]="true"></mat-divider>
       <div id="image" [style.position]="'relative'">
         <span *ngFor="let text of words;let i = index">
           <input  class="text_input" id = "{{text.lineNumber}}" value = "{{text.unicode}}"  [style.width.px]="text.txtwidth*(this.percentage/100)" [style.position]="'absolute'" [style.border]="'none'" [style.font-size.px]="text.txtheight*5/8*(this.percentage/100)"
@@ -43,7 +46,24 @@
       </div>
     </as-split-area>
   </as-split>
+
+
+
+
+<app-footer></app-footer>
+
+
+ 
+<div class="w3-sidebar w3-bar-block w3-card w3-animate-left" style="display:none" id="leftMenu">
+  <button onclick="closeLeftMenu()" class="w3-bar-item w3-button w3-large">Close &times;</button>
+  <a href="#" class="w3-bar-item w3-button">Link 1</a>
+  <a href="#" class="w3-bar-item w3-button">Link 2</a>
+  <a href="#" class="w3-bar-item w3-button">Link 3</a>
 </div>
+  
+    
+
+
 <div  id="menu">
   <div class="dropdown-content" (clickOutside)="closeMenu()">
     <a  (click)="asHorizontal()">prose (..from prev page/block)</a>
@@ -62,24 +82,7 @@
     <a>poem(..from prevpage/block)</a>
     <a>Book Name in Kannd</a>
   </div>
-<!-- <button class="menuList" style="color: black;" id="PlayInLoop" (click)="asHorizontal()" (clickOutside)="closeMenu()">prose(...from prev page/block)</button>
-<button class="menuList" style="color: black;" id="mergeBefore"(click)="asVertical()"  (clickOutside)="closeMenu()">Header</button>
-<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Figure Caption</button>
-<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Retain Graphic</button>
-<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Retain Graphic-Rotate</button>
-<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">retain Graphic-full page</button>
-<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Ignore Graphic</button>
-<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Part Heading</button>
-<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Chapter Heading</button>
-<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Section Heading</button>
-<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Front Matter Heading</button>
-<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Prose</button>
-<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">poem</button>
-<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">poem(..from prev page/block)</button>
-<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Book name in kannada</button>
-<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Book name in english</button>
-<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Author name in Kannada</button>
-<button class="menuList" style="color: black;" id="mergeAfter" (clickOutside)="closeMenu()">Author name in English</button> -->
+
 </div>
 
 <div class="modal" id="HI" tabindex="-1" role="dialog" [ngStyle]="{'display':display}">
@@ -92,9 +95,8 @@
         <div class="modal-body" style="width: 90%;" (click)="openThisImage($event)"></div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal" (click)="closeModalDialog()">Close</button>
+        <button  mat-flat-button  color="warn"  type="button" class="btn btn-default" data-dismiss="modal" (click)="closeModalDialog()">Close</button>
       </div>
     </div>
   </div>
 </div>
-<app-footer></app-footer>

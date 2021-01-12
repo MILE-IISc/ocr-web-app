@@ -1,9 +1,21 @@
-<!-- rgb(35, 230, 28);  rgb(192, 238, 27); -->
+<!-- <mat-card>
+  <mat-card-title>
+    <img
+        width="20"
+        alt="Angular Logo"
+        src="assets/images/mile_logo.png"
+      />
+      <div> 
+    <h4>
+      MILE lab IISc - The Kannada OCR
+    
+    </h4>
+    </div>
 
-<mat-toolbar  style=" background-image:url('assets/images/background.jpg')" class="toolbar">
-  <!-- <div>  -->
-    &nbsp;&nbsp;
-    <div class="toolbar" role="banner" style="padding-bottom: 5px; " >
+   </mat-card-title> -->
+
+   
+    <!-- <div class="toolbar" role="banner" style="padding-bottom: 5px; " >
       <img
         width="20"
         alt="Angular Logo"
@@ -11,134 +23,62 @@
       />
       
     </div>
-    <div >
-      <span class="header-text" >
+     <h4>
         MILE lab IISc - The Kannada OCR
-      </span>
-      </div>
-    
-<!-- <div class="dropdown" style= z-index:500; *ngIf="userIsAuthenticated">
-  &nbsp;&nbsp;&nbsp; <a href = "#" class="dropbtn">File<span class="caret"></span></a>
-  <div class="dropdown-content">
-    <input #fileUpload type="file" (click)="fileUpload.value = null" (change) ="importFile($event)" style="display:none"
-accept="image/*">
-    <a href = "#" id="butGetImage" (click)="fileUpload.click('image')">Open Image</a>
-    <input #folderUpload  type="file" name="fileList" (click)="folderUpload.value = null" webkitdirectory multiple (change) ="importFile($event)" style="display:none"/>
-    <a href = "#" id="getFolder" (click)="folderUpload.click()" >Open Directory</a>
-    <a href = "#">Save</a>
-    <a href = "#">Export As</a>
-    <a href = "#">Export Setting</a>
-    <a href = "#">Close</a>
-    <a href = "#">Exit</a>
-  </div> &nbsp;&nbsp;&nbsp;
+      </h4>
+ 
 
-</div>
-<div class="dropdown" style= z-index:500; *ngIf="userIsAuthenticated">
-  <a href = "#"  class="dropbtn">Run<span class="caret"></span></a>
-  <div class="dropdown-content">
-    <a href = "#">Language</a>
-    <a href = "#">Scanning Resolution</a>
-    <a href = "#">Rotate Image</a>
-    <a href = "#">Run OCR</a>
-    <a href = "#">Word Correct</a>
-    <a href = "#">Detect paragraphs</a>
-    <a href = "#">PrineLine/word Boundaries</a>
-    <a href = "#">Refactor Filenames</a>
-    <a href = "#">Create Git Repo</a>
-    <a href = "#">Find and Replace</a>
-    <a href = "#">OCR Setting</a>
-  </div> &nbsp;&nbsp;&nbsp;
+<div> -->
 
-</div>
-<div class="dropdown" style= z-index:500; *ngIf="userIsAuthenticated">
-  <a href = "#"  class="dropbtn">View<span class="caret"></span></a>
-  <div class="dropdown-content">
-    <div class="dropdown-item dropdown-submenu p-0">
-      <a href="#" data-toggle="dropdown" class="dropdown-toggle dropdown-item w-100">Image-Text Layout</a>
-      <ul  class="dropdown-menu mr-2 rounded-0  white border-0 z-depth-1 r-100">
-          <div class="dropdown-item p-0">
-              <a href="#" class="dropdown-item w-100" (click)="asVertical()">Left-Right</a>
-          </div>
-            <div class="dropdown-item p-0">
-              <a href="#" class="dropdown-item w-100"(click)="asHorizontal()">Top-Bottom</a>
-            </div>
-    </ul>
-  </div>
-  <a href = "#">Text Editor</a>
-  <a href = "#">Selection Mode</a>
-  <a href = "#">Show File Link</a>
-  <a href = "#">Show Line Number</a>
-  </div> &nbsp;&nbsp;&nbsp;
-
-</div>
-<div class="dropdown" style= z-index:500; *ngIf="userIsAuthenticated">
-  <a href = "#"  class="dropbtn">Layout<span class="caret"></span></a>
-  <div class="dropdown-content">
-    <a href = "#">Single column</a>
-        <a href = "#">Two column</a>
-        <a href = "#">IEEE Layout</a>
-        <a href = "#">Save as New layout</a>
-        <a href = "#">Clear Text Book Selection</a>
-
-  </div> &nbsp;&nbsp;&nbsp;
-
-</div>
-
-
-<div class="dropdown" style= z-index:500; *ngIf="userIsAuthenticated">
-  <a href = "#" class="dropbtn">Window<span class="caret"></span></a>
-  <div class="dropdown-content">
-    <a href = "#" ><button style="border: none;" [disabled]="previousImages" (click)="FirstImage()" >First page</button></a>
-    <a href = "#" ><button  style="border: none;" [disabled]="previousImages"(click)="previousImage()">previous Page</button></a>
-    <a href = "#" ><button  style="border: none;" [disabled]="nextImages" (click)="NextImage()">Next page</button></a>
-    <a href = "#" ><button  style="border: none;" [disabled]="nextImages" (click)="lastImage()">Last page</button></a>
-    <a href = "#" ><button  style="border: none;" (click)="openModalDialog()">Goto page</button></a>
-    <a href = "#" (click)=" zoomInFun()">Zoom in</a>
-    <a href = "#"  (click)=" zoomOutFun()">Zoom out</a>
-    <a href = "#" (click)="fitwidth()">Fit width</a>
-    <a href = "#" (click)=" fitheight()">Fit Height</a>
-    <a href = "#"  (click)=" orginalsize()">zoom 100%</a>
-    <a href = "#" (click)="scrollUp()" >Scroll Up</a>
-    <a href = "#"(click)="scrollDown()">Scroll Down</a>
-    <a href = "#"(click)="scrollLeft()">Scroll Left</a>
-    <a href = "#"(click)="scrollRight()">Scroll Right</a>
-  </div> &nbsp;&nbsp;&nbsp;
-
-</div>
-
-<div class="dropdown" style= z-index:500; *ngIf="userIsAuthenticated">
-  <a href = "#"  class="dropbtn">Help<span class="caret"></span></a>
-  <div class="dropdown-content">
-    <a href = "#" ><button  style="border: none;" (click)="openModalHelp()">About</button></a>
-      <a href = "#">Help Topics</a>
-  </div>
-
-</div> -->
-<!-- </div> -->
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-<div>
-
-  <ul>
-    <li *ngIf="!userIsAuthenticated">
-      <a mat-button routerLink="/auth/login" routerLinkActive="mat-accent" style="color: white;">Login</a>
-    </li>
-    <!-- <li *ngIf="userIsAuthenticated">
+<!-- 
+   <div *ngIf="!userIsAuthenticated">
+      <a mat-button routerLink="/auth/login" routerLinkActive="mat-accent" >Login</a>
+   </div>
+ <div *ngIf="userIsAuthenticated">
       <a mat-button routerLink="/screen" routerLinkActive="mat-accent">Edit Image Content</a>
-    </li> -->
-    <!-- <li *ngIf="userIsAuthenticated && isAdmin">
+   </div> 
+<div *ngIf="userIsAuthenticated && isAdmin">
       <a mat-button routerLink="/auth/signup" routerLinkActive="mat-accent">Create User</a>
-    </li> -->
-    <li *ngIf="userIsAuthenticated">
-      <span style="color: white;">{{ userName }}</span>
-    </li>
-    <li *ngIf="userIsAuthenticated">
-      <button mat-button (click)="onLogout()" style="color: white;">Logout</button>
-    </li>
-  </ul>
+   </div>
+   <div *ngIf="userIsAuthenticated">
+      <h3> {{ userName }}</h3>
+   </div>
+   <div *ngIf="userIsAuthenticated">
+      <button mat-button (click)="onLogout()">Logout</button>
+   </div>
+  
 </div>
-<a href="https://github.com/MILE-IISc/ocr-web-app/blob/main/README.md"><img src="assets/images/help.jpg"
-  type="button" width="20px" height="20px"></a>
+<button mat-icon-button href="https://github.com/MILE-IISc/ocr-web-app/blob/main/README.md"><img src="assets/images/help.svg"
+  type="button" width="20px" height="20px"></button> -->
+<!-- </mat-card> -->
+<mat-toolbar class="header" color="primary">
+  <img
+  width="20"
+  alt="Angular Logo"
+  src="assets/images/mile_logo.png"
+/>
+  <span class = "gap"><h5> MILE lab IISc - The Kannada OCR</h5></span>
+  <span class = "filler"></span>
+
+  <div *ngIf="!userIsAuthenticated">
+    <a mat-button routerLink="/auth/login"><h5>Login</h5></a>
+ </div>
+<!-- <div *ngIf="userIsAuthenticated">
+    <a mat-button routerLink="/screen" routerLinkActive="mat-accent">Edit Image Content</a>
+ </div> 
+<div *ngIf="userIsAuthenticated && isAdmin">
+    <a mat-button routerLink="/auth/signup" routerLinkActive="mat-accent">Create User</a>
+ </div> -->
+ <div *ngIf="userIsAuthenticated">
+    <h5> {{ userName }}</h5>
+ </div>
+ <div *ngIf="userIsAuthenticated">
+    <button mat-stroked-button (click)="onLogout()"><h5>Logout</h5></button>
+ </div>
+
+
+<button mat-icon-button href="https://github.com/MILE-IISc/ocr-web-app/blob/main/README.md"><img src="assets/images/help.svg"
+type="button" width="20px" height="20px"></button>
+
 </mat-toolbar>
 

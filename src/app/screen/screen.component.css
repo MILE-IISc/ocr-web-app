@@ -1,3 +1,4 @@
+/* @import "../node_modules/@angular/material/prebuilt-themes/indigo-pink.css"; */
 .mat-spinner {
   position: relative;
   margin-left: 50%;
@@ -7,25 +8,15 @@
 }
 
 
-.navbar {
-    width: 100%;
-    background-color: gainsboro;
-
-  }
-
   .container{
     position: relative;
-
-  }
+    width: 100%; 
+    padding-bottom:5px ;
+    margin: 0%;
+  
+ }
   .btn-group button {
-
-    height: 20px;
-
-    color: white; /* White text */
-
-    /* cursor: pointer; */
-     /* Pointer/hand icon */
-
+    height: 10px;
     display: block; /* Make the buttons appear below each other */
   }
 
@@ -33,19 +24,6 @@
     border-bottom: none; /* Prevent double borders */
   }
 
-  /* Add a background color on hover */
-  /* .btn-group button:hover {
-    background-color: #3e8e41;
-  }
- */
- #wrapper {
-  /* position:relative; */
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 .modal-content{
   height: 700px;
   overflow: auto;
@@ -62,7 +40,25 @@ overflow:auto;
   font-size: 18px;
   color: blue
 }
-
+.split{
+  padding-bottom:5px ;
+  position: relative;
+  /* margin: 0%; */
+  /* margin-left:1px !important; */
+  width: 100%;
+  /* margin-right: 2px; */
+}
+.split1{
+ 
+  overflow-x: auto; 
+  overflow-y: auto;
+  border: 1px solid;
+}
+.split2{
+  overflow-x: auto;
+  overflow-y: auto;  
+  border: 1px solid;
+}
 .container.img {
   width: 100%;
   height: auto;
@@ -102,22 +98,6 @@ overflow:auto;
   margin-right: -10px;
 }
 
-/* ::ng-deep .menu button {
-  /* background-color: #4CAF50; */
-  /* border: 1px solid green; */
-  /* color:brown; */
-  /* padding: 0px !important; */
-  /* cursor: pointer; */
-  /* display: inline-block; */
-  /* outline: none; */
-  /* margin: 0px !important; */
-  /* border-width: solid; */
-/* } */
-
-/* button[disabled] { */
-  /* filter: blur(1px); */
-  /* cursor: not-allowed; */
-/* } */
 .dropdown-content {
   /* display: none; */
   position: relative;
@@ -139,14 +119,74 @@ overflow:auto;
   padding-bottom: 0px;
   padding-top:0px
 }
-.list {
-  display: none;
-}
-.link:hover + .list {
-  display: block;
-}
 
 .dropdown-content a:hover {background-color: #f1f1f1}
 .dropdown-submenu:hover>.dropdown-menu {
   display: block;
 }
+
+.mat-raised-button:hover {
+  font-size: 20px;
+
+}
+
+.mat-raised-button {
+  margin: 5px;
+/*  
+  color:white;
+  background-color: white; */
+}
+
+.darkMode{
+  margin: 5px;
+  background-color: black;
+  color:black;
+}
+
+.vertical{
+  /* transform: rotate(180deg); */
+  transform: rotate(90deg)
+}
+.gap {
+  margin-right: 40px;
+}
+
+::ng-deep .as-split-gutter-icon {
+  background-color:rgb(146, 144, 144);
+  cursor:none !important ;
+}
+.example-container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.example-events {
+  width: 300px;
+  height: 200px;
+  overflow: auto;
+  border: 1px solid #555;
+}
+.openside{
+  margin: 0;
+  position: absolute;
+  /* left: 50%; */
+  top: 50%;
+  width: fit-content;
+  /* margin-bottom:0px; */
+  /* height: 60px; */
+ -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+.mat-toolbar {
+  min-height: 30px !important; 
+  height: 30px !important;
+}
+
+.mat-toolbar-row {
+  min-height: 30px !important; 
+  height: 30px !important;
+}
+
