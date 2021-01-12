@@ -1,7 +1,10 @@
 {
-    "env": {
-      "MONGODB_ENDPOINT": "mongodb://<username>:<password>@<dbaas_provider_url>/<dbname>",
-      "JWT_KEY": "SECRET_HASH_KEY_FOR_JSON_WEBTOKEN"
-    }
+  "env": {
+    "MONGODB_ENDPOINT": "mongodb://<username>:<password>@<dbaas_provider_url>/<dbname>",
+    "JWT_KEY": "SECRET_HASH_KEY_FOR_JSON_WEBTOKEN",
+    "object_storage_endpoint": "<object_storage_endpoint>",
+    "object_storage_apiKeyId": "<object_storage_apiKeyId>",
+    "object_storage_ibmAuthEndpoint": "<object_storage_ibmAuthEndpoint>",
+    "object_storage_serviceInstanceId": "<object_storage_serviceInstanceId>"
   }
-  
+}

@@ -36,6 +36,7 @@
     "file-saver": "^2.0.5",
     "file-system": "^2.2.2",
     "ibm-cos-sdk": "^1.9.0",
+    "jimp": "^0.16.1",
     "jquery": "^3.5.1",
     "jquery-select-areas": "^0.1.0",
     "js2xmlparser": "^4.0.1",

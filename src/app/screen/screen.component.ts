@@ -1,12 +1,12 @@
 
-import { Component, OnInit,Renderer2} from '@angular/core';
+import { Component, HostListener, OnInit,Renderer2} from '@angular/core';
 declare var $:any;
 import { fromEvent, Subscription } from 'rxjs';
 import { map, buffer, filter, debounceTime } from 'rxjs/operators';
 import * as $ from 'jquery';
 import * as JSZip from 'jszip';
 // import * as $ from 'jquery';
-
+import * as xml2js from 'xml2js';
 import { BlockModel} from '../shared/block-model';
 declare var $:any
 declare var Tiff: any;
@@ -19,6 +19,8 @@ import { AuthService } from '../auth/auth.service';
 import * as fileSaver from 'file-saver';
 import { FileService } from '../services/file.service';
 import { MatIconRegistry } from "@angular/material/icon";
+// import * as format from 'xml-formatter';
+// import * as format from 'xml-formatter';
 
 @Component({
  selector: 'app-screen',
@@ -80,7 +82,9 @@ export class ScreenComponent implements OnInit{
   ngOnInit(): void {
     this.userName = this.authService.getUserName();
     // console.log("user name in screen "+this.userName)
-    this.imageService.getServerImages();
+    this.imageService.getServerImages().then(() => {
+      console.log("got serverImages in screen ngOnInit");
+    });
     this.percentage = this.headerService.getpercentagevary();
     $("#SaveToXML").hide();
     $("#blockno").hide();
@@ -90,7 +94,7 @@ export class ScreenComponent implements OnInit{
           this.percentage = percent;
         });
 
-        // retain.percentage = this.percentage;
+        retain.percentage = this.percentage;
         // console.log("the current percentage is "+retain.percentage)
 
     this.isLoading = this.headerService.getloadingvalue();
@@ -115,7 +119,7 @@ export class ScreenComponent implements OnInit{
         });
 
     this.waveSub = this.imageService
-      .getWaveUpdateListener()
+      .getImageUpdateListener()
       .subscribe(async (imageData: { serverImages: Images[] }) => {
         // console.log("inside subscribe in screen oninit")
         this.serverImages = imageData.serverImages;
@@ -133,9 +137,9 @@ export class ScreenComponent implements OnInit{
           this.imageService.nextImageChange.emit(this.nextImage);
           this.isLoading = false;
           // this.fileName = " The files alloted for you ";
-
-          this.localUrl = await this.imageService.loadArray(this.serverImages[0].imagePath);
-          this.imageService.urlChanged.emit(this.localUrl.slice());
+          console.log("this.serverImages[0].fileName: ------------_> ",this.serverImages[0].fileName);
+          this.localUrl = await this.imageService.loadArray(this.serverImages[0].fileName);
+          // this.imageService.urlChanged.emit(this.localUrl.slice());
           this.fileName = this.serverImages[0].fileName;
           setTimeout(() => this.viewerService.fitwidth(), 50);
           setTimeout(() => this.setpercentage(), 60);
@@ -157,6 +161,8 @@ export class ScreenComponent implements OnInit{
           // console.log("Inside subscribe");
           // console.log("+++++++++url: " + url);
           this.localUrl = url;
+          setTimeout(() => this.viewerService.fitwidth(), 50);
+          setTimeout(() => this.setpercentage(), 60);
         });
 
     this.imageService.fileNameChange.subscribe((fileName: any) => {
@@ -176,7 +182,7 @@ export class ScreenComponent implements OnInit{
     this.images = this.imageService.getImages();
     for (let i = 0; i < this.images.length; i++) {
       if (this.images[i].fileName == id) {
-        this.localUrl = await this.imageService.loadArray(this.images[i].imagePath);
+        this.localUrl = await this.imageService.loadArray(this.images[i].fileName);
         this.fileName = this.images[i].fileName;
         this.imageService.imgFileCount = i;
         this.imageService.imageCountChange.emit(this.imgFileCount);
@@ -353,9 +359,16 @@ export class ScreenComponent implements OnInit{
       // pageElem.appendChild(blockElem);
       xmlDocument.documentElement.appendChild(blockElem);
     }
+
     var xmlString = prolog + new XMLSerializer().serializeToString(xmlDocument);
-    console.log("xml----" + xmlString);
-    this.imageService.updateXml(xmlString, this.fileName);
+
+    xml2js.parseString(xmlString,{ mergeAttrs: true } ,function (err, result) {
+      var jsonString = JSON.stringify(result)
+      XmlModel.jsonObject = result;
+      console.log("xml.js result as JSON "+jsonString);
+    });
+
+    this.imageService.updateCorrectedXml(this.fileName);
   }
 
   async onSaveXml() {
@@ -369,9 +382,11 @@ export class ScreenComponent implements OnInit{
     for (let i = 0; i < this.images.length; i++) {
       console.log("in export completed " + this.images[i].completed);
       if (this.images[i].completed == "Y") {
-        var curImagePath = this.images[i].imagePath;
-        var curXmlFileName = curImagePath.slice(0, -3) + 'xml';
+        var curFileName = this.images[i].fileName;
+        var curXmlFileName = curFileName.slice(0, -3) + 'xml';
         console.log("curXmlFileName " + curXmlFileName);
+
+        //changes have to be made in file service to get the xml file from backend
         await this.fileService.downloadFile(curXmlFileName).then(response => {
           let blob: any = new Blob([response], { type: 'text/xml' });
           folder.file(this.images[i].fileName.slice(0, -3) + 'xml', blob);
@@ -425,6 +440,12 @@ export class ScreenComponent implements OnInit{
 
       }
 
+      showTooltip() {
+        console.log("inside show tool tip on save");
+        this.correctionUpdate();
+      }
+
+
   correctionUpdate() {
     var texts = document.getElementsByClassName('text_input');
     console.log("texts length " + texts.length);
@@ -447,12 +468,26 @@ export class ScreenComponent implements OnInit{
                   console.log("text array length "+textArray.length)
                   if (words.length == textArray.length) {
                     for(let k=0;k<words.length;k++){
-                      words[k].unicode = textArray[k];
+                      words[k].unicode = textArray[k].trim();
+                    }
+                  }else if(textArray.length > words.length || textArray.length < words.length){
+                    console.log("in text array greater ");
+                    var txt = "";
+                    for(let m=0;m<textArray.length;m++){
+                     txt = txt + " " + textArray[m];
+                    }
+                    words[0].unicode = txt.trim();
+                    words[0].colEnd = words[words.length-1].colEnd;
+                    console.log("word[0] "+words[0].unicode);
+                    console.log("word[1] "+words[1].unicode);
+                    for(let n=1;n<words.length;n++){
+                      console.log("words.length",words.length,"n",n,"lines inndex",j)
+                      words[n].unicode = "";
                     }
                   }
                 } else {
                   console.log("in else block of update");
-                  words[0].unicode = text;
+                  words[0].unicode = text.trim();
                 }
               }
             }

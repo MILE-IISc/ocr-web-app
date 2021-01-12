@@ -19,16 +19,16 @@ export class AuthService {
   private isAdmin: boolean;
   private isLoaded;
   public email;
-  BACKEND_URL;
+  public BACKEND_URL;
+  private AUTH_BACKEND_URL;
 
   private authStatusListener = new Subject<boolean>();
 
   constructor(private http: HttpClient, private router: Router, @Inject(DOCUMENT) private document: Document) {
     console.log("APP_BASE_HREF "+this.document.location.origin);
-
-      this.BACKEND_URL = this.document.location.origin + "/api/user/";
-    
-    console.log("BACKEND_URL "+this.BACKEND_URL);
+    this.BACKEND_URL = this.document.location.origin;
+    this.AUTH_BACKEND_URL = this.BACKEND_URL+ "/api/user/";
+    console.log("AUTH_BACKEND_URL "+this.AUTH_BACKEND_URL);
   }
 
   getToken() {
@@ -57,7 +57,7 @@ export class AuthService {
 
   createUser(email: string, password: string, type: string) {
     const authData: AuthData = { email: email, password: password, type: type};
-    this.http.post(this.BACKEND_URL + "/signup", authData).subscribe(
+    this.http.post(this.AUTH_BACKEND_URL + "/signup", authData).subscribe(
       () => {
         this.router.navigate(["/screen"]);
       },
@@ -73,7 +73,7 @@ export class AuthService {
     console.log("email in auth"+this.email);
     this.http
       .post<{ token: string; expiresIn: number; userId: string, email: string,type: string, isLoaded: string, files: any}>(
-        this.BACKEND_URL + "/login",
+        this.AUTH_BACKEND_URL + "/login",
         authData
       )
       .subscribe(

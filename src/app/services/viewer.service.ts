@@ -76,7 +76,7 @@ console.log("divelementheight "+divheight)
   var realWidth = myImg.naturalWidth;
   this.percentage=currHeight/realHeight*100;
   retain.percentage = this.percentage;
-        console.log("the current percentage is "+retain.percentage)
+        // console.log("the current percentage is "+retain.percentage)
   this.blocksize();
 
   myImg.style.width = (realWidth * this.percentage/100) + "px";
@@ -101,8 +101,8 @@ console.log("divelementheight "+divwidth)
   var realWidth = myImg.naturalWidth;
   this.percentage=(currWidth/realWidth)*100;
   retain.percentage = this.percentage;
-        console.log("the current percentage is "+retain.percentage)
-  this.blocksize();
+        // console.log("the current percentage is "+retain.percentage)
+  //this.blocksize();
 
   myImg.style.height = (realHeight* this.percentage/100) + "px";
   falseimg.style.height= myImg.style.height;
@@ -122,7 +122,7 @@ orginalsize(){
      console.log("currheight"+myImg.naturalHeight)
      this.percentage=100;
      retain.percentage = this.percentage;
-        console.log("the current percentage is "+retain.percentage)
+        // console.log("the current percentage is "+retain.percentage)
      this.blocksize();
 
 
@@ -170,7 +170,7 @@ orginalsize(){
     var myImg;
     this.percentage = this.percentage + 7.2;
     retain.percentage = this.percentage;
-        console.log("the current percentage is "+retain.percentage)
+        // console.log("the current percentage is "+retain.percentage)
     this.blocksize();
 
 
@@ -199,7 +199,7 @@ orginalsize(){
      var myImg;
      this.percentage = this.percentage -7.2;
      retain.percentage = this.percentage;
-        console.log("the current percentage is "+retain.percentage)
+        // console.log("the current percentage is "+retain.percentage)
      this.blocksize();
 
 

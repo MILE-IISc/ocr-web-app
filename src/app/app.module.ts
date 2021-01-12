@@ -52,14 +52,15 @@ import {MatTreeModule} from '@angular/material/tree';
 import {OverlayModule} from '@angular/cdk/overlay';
 import { FormsModule } from '@angular/forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {DropdownDirective} from "./shared/dropdown.directive";
+// import {DropdownDirective} from "./shared/dropdown.directive";
 import { HeaderComponent } from './header/header.component';
 import {AngularSplitModule} from 'angular-split';
 import { ScreenComponent } from './screen/screen.component';
 import { HeaderService }  from './services/header.service';
+import { AuthInterceptor } from "./auth/auth-interceptor";
+import { AuthService } from './auth/auth.service';
 import { ImageService } from './services/images.service';
 import{ViewerService} from './services/viewer.service';
-import { AuthInterceptor } from "./auth/auth-interceptor";
 import { ErrorInterceptor } from "./error-interceptor";
 import { ErrorComponent } from "./error/error.component";
 import { HTTP_INTERCEPTORS } from "@angular/common/http";
@@ -68,16 +69,17 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 
 
 import { FooterComponent } from './footer/footer.component';
-import { AuthService } from './auth/auth.service';
 import { ClickOutsideDirective } from './shared/click-outside.directive';
+import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
+
 @NgModule({
   declarations: [
     AppComponent,
-    DropdownDirective,
+    // DropdownDirective,
     HeaderComponent,
     ScreenComponent,
     ClickOutsideDirective,
-
+    CtrlsDetectorDirective,
     FooterComponent
     //FileSelectDirective
   ],
@@ -143,7 +145,7 @@ import { ClickOutsideDirective } from './shared/click-outside.directive';
   ],
   providers: [
     {  provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'fill' } }
-  , HeaderService, ImageService,ViewerService,AuthService,
+  , HeaderService,ViewerService,AuthService,ImageService,
   { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
   { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true }, ],
   bootstrap: [AppComponent],

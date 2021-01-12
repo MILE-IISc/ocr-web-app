@@ -64,14 +64,14 @@ export class ImageService implements OnInit {
   serverUrl: any
   dataUrl: any;
   xmlFileName;
-  BACKEND_URL;
+  IMAGE_BACKEND_URL;
+  XML_BACKEND_URL;
 
   constructor(private http: HttpClient, private router: Router, private authService: AuthService,private headerService: HeaderService, @Inject(DOCUMENT) private document: Document) {
-    console.log("APP_BASE_HREF "+this.document.location.origin);
-
-      this.BACKEND_URL = this.document.location.origin + "/api/image/";
-
-    console.log("BACKEND_URL "+this.BACKEND_URL);
+    this.IMAGE_BACKEND_URL = this.authService.BACKEND_URL + "/api/image/";
+    this.XML_BACKEND_URL = this.authService.BACKEND_URL + "/api/xml/";
+    console.log("IMAGE_BACKEND_URL "+this.IMAGE_BACKEND_URL);
+    console.log("XML_BACKEND_URL "+this.XML_BACKEND_URL);
   }
 
   getImages() {
@@ -91,7 +91,7 @@ export class ImageService implements OnInit {
     let promise = new Promise((resolve, reject) => {
       this.http
         .get<{ message: string; images: [] }>(
-          this.BACKEND_URL + queryParams
+          this.IMAGE_BACKEND_URL + queryParams
         ).toPromise()
         .then(responseData => {
           const imageLength = responseData.images.length;
@@ -125,7 +125,7 @@ export class ImageService implements OnInit {
     }
       this.http
         .get<{ message: string; json:any }>(
-          this.BACKEND_URL + queryfileName).subscribe(responseData => {
+          this.XML_BACKEND_URL + queryfileName).subscribe(responseData => {
           console.log("xml as json string "+JSON.stringify(responseData.json));
           XmlModel.jsonObject = responseData.json;
           this.updateXmlModel(XmlModel.jsonObject);
@@ -170,8 +170,8 @@ export class ImageService implements OnInit {
       }
     }
   }
-  
-  getWaveUpdateListener() {
+
+  getImageUpdateListener() {
     return this.imagesUpdated.asObservable();
   }
 
@@ -210,12 +210,12 @@ export class ImageService implements OnInit {
     }
     this.http
       .post<{ message: string }>(
-        this.BACKEND_URL,
+        this.IMAGE_BACKEND_URL,
         imageData
       )
       .subscribe(async responseData => {
-        console.log("image: " + responseData.message);
         await this.getServerImages();
+        console.log("image added+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++: " + responseData.message);
       });
     if (this.serverImages.length > 0) {
       console.log("server images length===" + this.serverImages.length);
@@ -225,7 +225,7 @@ export class ImageService implements OnInit {
         this.nextImages = false;
       }
       console.log("file count" + filesCount);
-      let dataURL = await this.loadArray(this.serverImages[0].imagePath);
+      let dataURL = await this.loadArray(this.serverImages[0].fileName);
       this.serverUrl = dataURL
       console.log("server urlssssss" + this.serverUrl);
       this.urlChanged.emit(this.serverUrl.slice());
@@ -239,37 +239,68 @@ export class ImageService implements OnInit {
 
   getImage(imageUrl: any){
     console.log("inside getImage"+imageUrl)
-    return this.http.get(imageUrl, { responseType: 'blob' });
+    return this.http.get("http://localhost:4000/images/sasiocr@gmail.com/birugali_0001.tif", { responseType: 'blob' });
   }
 
 
 
   async loadArray(serverImage: any) {
     console.log("inside load array");
-    const result = await new Promise((resolve) => {
-      this.getImage(serverImage).subscribe(data => {
-        console.log("data----" + data.type);
-        let reader = new FileReader();
-        //if else condition comes here
-        if (data.type == "image/tiff") {
+
+    // console.log("inside load array0000ooooooo((((((((((((((((((((((((((((((((((((((((((((",serverImage);
+    // const result = await new Promise((resolve) => {
+    //   this.getImage(serverImage).subscribe(data => {
+    //     console.log("dataType----" + data.type);
+    //     console.log("data----" + data);
+    //     let reader = new FileReader();
+    //     //if else condition comes here
+    //     if (data.type == "image/tiff") {
+    //       reader.onload = (event: any) => {
+    //         console.log("before tiff conversion",event.target.result);
+    //         var image = new Tiff({ buffer: event.target.result });
+    //         console.log("tiff before canvas",image);
+    //         var canvas = image.toCanvas();
+    //         var img = convertCanvasToImage(canvas);
+    //         resolve(img.src);
+    //       }
+    //       reader.readAsArrayBuffer(data);
+    //     }
+    //     else {
+    //       reader.onload = (event: any) => {
+    //         console.log("data url=====================================" + event.target.result);
+    //         resolve(event.target.result);
+    //       }
+    //       reader.readAsDataURL(data);
+    //     }
+    //   });
+    // });
+    // return result;
+
+    let promise = new Promise((resolve, reject) => {
+      this.http
+        .get<{ message: string; json: any }>(
+          this.IMAGE_BACKEND_URL + serverImage).subscribe(responseData => {
+          console.log("responseData.json",responseData.json);
+          // var tiffData = new Tiff({ buffer: responseData.json });
+          // console.log("tiff before canvas",tiffData);
+          // var canvas = tiffData.toCanvas();
+          // var img = convertCanvasToImage(canvas);
+          // console.log("tiffImage src",img.src);
+          // resolve(img.src);
+
+          let reader = new FileReader();
           reader.onload = (event: any) => {
+            console.log("before tiff conversion",event.target.result);
             var image = new Tiff({ buffer: event.target.result });
+            console.log("tiff before canvas",image);
             var canvas = image.toCanvas();
             var img = convertCanvasToImage(canvas);
             resolve(img.src);
           }
-          reader.readAsArrayBuffer(data);
-        }
-        else {
-          reader.onload = (event: any) => {
-            console.log("data url=====================================" + event.target.result);
-            resolve(event.target.result);
-          }
-          reader.readAsDataURL(data);
-        }
-      });
+          reader.readAsArrayBuffer(responseData.json.data);
+        });
     });
-    return result;
+    return promise;
   }
 
   updateXml(xmlString: any, fileName: any) {
@@ -280,7 +311,7 @@ export class ImageService implements OnInit {
       folderName : fileName.slice(0,-9)
     };
     this.http
-      .put<{ message: string, name: string, completed: string }>(this.BACKEND_URL + fileName, xmlData)
+      .put<{ message: string, name: string, completed: string }>(this.XML_BACKEND_URL + fileName, xmlData)
       .subscribe(response => {
         for (let i = 0; i < this.serverImages.length; i++) {
           if (this.serverImages[i].fileName == response.name) {
@@ -301,7 +332,7 @@ export class ImageService implements OnInit {
       user : this.authService.userName
     };
     this.http
-      .put<{ message: string }>(this.BACKEND_URL, jsonData)
+      .put<{ message: string }>(this.XML_BACKEND_URL, jsonData)
       .subscribe(response => {
         console.log("response message after correction "+response.message);
       });
@@ -331,7 +362,7 @@ export class ImageService implements OnInit {
     this.imgFileCount++;
     this.imageCountChange.emit(this.imgFileCount);
     console.log("next image length" + this.serverImages.length);
-    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].imagePath);
+    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
     this.urlChanged.emit(this.localUrl.slice());
     this.fileName = this.serverImages[this.imgFileCount].fileName;
     this.fileNameChange.emit(this.fileName);
@@ -344,13 +375,14 @@ export class ImageService implements OnInit {
       this.previousImages = false;
       this.previousImageChange.emit(this.previousImages);
     }
+    $('#imgToRead').selectAreas('destroy');
   }
 
   async previousPage() {
     this.serverImages = this.getImages();
     this.imgFileCount--;
     this.imageCountChange.emit(this.imgFileCount);
-    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].imagePath);
+    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
     this.urlChanged.emit(this.localUrl.slice());
     this.fileName = this.serverImages[this.imgFileCount].fileName;
     this.fileNameChange.emit(this.fileName);
@@ -369,7 +401,7 @@ export class ImageService implements OnInit {
     this.serverImages = this.getImages();
     this.imgFileCount = this.serverImages.length - 1;
     this.imageCountChange.emit(this.imgFileCount);
-    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].imagePath);
+    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
     this.urlChanged.emit(this.localUrl.slice());
     this.fileName = this.serverImages[this.imgFileCount].fileName;
     this.fileNameChange.emit(this.fileName);
@@ -385,7 +417,7 @@ export class ImageService implements OnInit {
     this.serverImages = this.getImages();
     this.imgFileCount = 0;
     this.imageCountChange.emit(this.imgFileCount);
-    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].imagePath);
+    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
     this.urlChanged.emit(this.localUrl.slice());
     this.fileName = this.serverImages[this.imgFileCount].fileName;
     this.fileNameChange.emit(this.fileName);
@@ -399,23 +431,110 @@ export class ImageService implements OnInit {
 
   onXml() {
     this.serverImages = this.getImages();
-    var url
     this.fileName = this.serverImages[this.imgFileCount].fileName;
-    console.log("filename" + this.fileName)
-    for (let i = 0; i < this.serverImages.length; i++) {
-      if (this.serverImages[i].fileName == this.fileName && this.serverImages[i].completed == 'Y') {
-        url = this.serverImages[i].imagePath.slice(0, -3) + 'xml'
-        var xmlhttp = new XMLHttpRequest();
-        xmlhttp.onreadystatechange = function () {
-          if (this.readyState == 4 && this.status == 200) {
-            fromXml(this);
-          }
-        };
-        xmlhttp.open("GET", url, true);
-        xmlhttp.send();
-      }
+    console.log("completion status: ",this.serverImages[this.imgFileCount].completed);
+    if(this.serverImages[this.imgFileCount].completed =="Y") {
+      this.getFileAsJson(this.fileName);
     }
-    console.log("patth" + url)
+  }
+
+  getFileAsJson(fileName : any) {
+    console.log("file name in run ocr "+ fileName)
+    var queryfileName = fileName.slice(0,-3) + 'xml';
+    let userData : any;
+    userData = {
+      user : this.authService.userName
+    }
+      this.http
+        .get<{ message: string; json:any }>(
+          this.XML_BACKEND_URL + queryfileName).subscribe(responseData => {
+          console.log("xml as json string "+JSON.stringify(responseData.json));
+          XmlModel.jsonObject = responseData.json;
+          this.retain(XmlModel.jsonObject);
+        });
+  }
+
+  retain(jsonObj){
+    let areaarray=[];
+     // var jsonObj = JSON.parse(json);
+     console.log("inside retain jsonObj: "+JSON.stringify(jsonObj));
+     if(jsonObj['page'].block){
+     var blocks = jsonObj['page'].block;
+    //  console.log("block length " + blocks.length);
+     
+     for (var i = 0; i < blocks.length; i++) {
+       var blockNumber = (blocks[i].BlockNumber);
+       console.log("blockNumber" + blockNumber);
+       console.log("blockRowStart from json "+blocks[i].rowStart);
+       var blockRowStart = blocks[i].rowStart;
+       var blockRowEnd = blocks[i].rowEnd;
+       var blockColStart = blocks[i].colStart;
+       var blockColEnd = blocks[i].colEnd;
+       var x = (blockColEnd - blockColStart);
+       console.log("x in retain "+x);
+       console.log("percentage in retain "+retain.percentage);
+       var blockwidth = (blockColEnd - blockColStart) * retain.percentage / 100;
+       console.log("blockwidth" + blockwidth);
+       var blockheight = (blockRowEnd - blockRowStart) * retain.percentage / 100;
+       console.log("blockheight" + blockheight);
+       var X = blockColStart * retain.percentage / 100;
+       console.log("blockX" + X);
+       var Y = blockRowStart * retain.percentage / 100;
+       console.log("blockY" + Y);
+       areaarray[i] = { "id": blockNumber, "x": X, "y": Y, "width": blockwidth, "height": blockheight };
+     }
+    }
+     $('img#imgToRead').selectAreas('destroy');
+     $('img#imgToRead').selectAreas({
+      onChanged: debugQtyAreas,
+      areas: areaarray
+    });
+
+    $('#nextImg').click(function () {
+      console.log("onclick");
+      $('#imgToRead').selectAreas('destroy');
+    });
+    $('#previousImg').click(function () {
+      $('#imgToRead').selectAreas('destroy');
+    });
+    $('#firstImg').click(function () {
+      $('#imgToRead').selectAreas('destroy');
+    });
+    $('#lastImg').click(function () {
+      $('#imgToRead').selectAreas('destroy');
+    });
+    // $('#butZoomIn').click(function () {
+    //   $('#imgToRead').selectAreas('destroy');
+    // });
+    // $('#butZoomOut').click(function () {
+    //   $('#imgToRead').selectAreas('destroy');
+    // });
+    // $('#fitWidth').click(function () {
+    //   $('#imgToRead').selectAreas('destroy');
+    // });
+    // $('#fitHeigth').click(function () {
+    //   $('#imgToRead').selectAreas('destroy');
+    // });
+    // $('#100zoom').click(function () {
+    //   $('#imgToRead').selectAreas('destroy');
+    // });
+    // $('#zoom').click(function () {
+    //   $('#imgToRead').selectAreas('destroy');
+    // });
+    $('#buttonXml').click(function () {
+      console.log("onclick");
+      $('#imgToRead').selectAreas('destroy');
+    });
+
+     function debugQtyAreas(event, id, areas) {
+      console.log(areas.length + " areas", arguments);
+      this.displayarea = areas;
+      console.log(areas.length + " this.displayarea", arguments);
+      console.log("invoking saving to XML");
+      var SaveToXML = document.getElementById("SaveToXML");
+      console.log("SaveToXML: "+SaveToXML);
+      SaveToXML.click();
+      };
   }
 }
 function convertCanvasToImage(canvas) {
@@ -424,88 +543,4 @@ function convertCanvasToImage(canvas) {
   image.src = canvas.toDataURL("image/png");
   console.log("image source"+image.src);
   return image;
-}
-function fromXml(xml){
-  var arr=[];
-
-console.log("the current percentage is "+retain.percentage)
-var xmlDoc = xml.responseXML;
-var block = xmlDoc.getElementsByTagName("block");
-console.log("length =====" + block.length);
-let areaarray=[];
-for (let i = 0; i < block.length; i++) {
-
-var blockNumber  = (block[i].getAttribute('BlockNumber'));
-console.log("blockNumber"+blockNumber);
-var blockRowStart = (block[i].getAttribute('rowStart'));
-var blockRowEnd = (block[i].getAttribute('rowEnd'));
-var blockColStart = (block[i].getAttribute('colStart'));
-var blockColEnd = (block[i].getAttribute('colEnd'));
-var blockwidth = (blockColEnd - blockColStart) * retain.percentage / 100;
-console.log("blockwidth"+blockwidth);
-var blockheight = (blockRowEnd - blockRowStart) * retain.percentage / 100;
-console.log("blockheight"+blockheight);
-var X = blockColStart * retain.percentage/ 100;
-console.log("blockX"+X);
-var Y = blockRowStart *  retain.percentage / 100;
-console.log("blockY"+Y);
- areaarray[i] = { "id":blockNumber, "x":X,"y":Y,"width":blockwidth,"height":blockheight}
-
- $('img#imgToRead').selectAreas('destroy');
- $('img#imgToRead').selectAreas({
-
- onChanged : debugQtyAreas,
-
- areas:areaarray
-
- });
-
-}
-
-$('#nextImg').click(function () {
-  console.log("onclick");
-  $('#imgToRead').selectAreas('destroy');
-});
-$('#previousImg').click(function () {
-  $('#imgToRead').selectAreas('destroy');
-});
-$('#firstImg').click(function () {
-  $('#imgToRead').selectAreas('destroy');
-});
-$('#lastImg').click(function () {
-  $('#imgToRead').selectAreas('destroy');
-});
-// $('#butZoomIn').click(function () {
-//   $('#imgToRead').selectAreas('destroy');
-// });
-// $('#butZoomOut').click(function () {
-//   $('#imgToRead').selectAreas('destroy');
-// });
-// $('#fitWidth').click(function () {
-//   $('#imgToRead').selectAreas('destroy');
-// });
-// $('#fitHeigth').click(function () {
-//   $('#imgToRead').selectAreas('destroy');
-// });
-// $('#100zoom').click(function () {
-//   $('#imgToRead').selectAreas('destroy');
-// });
-// $('#zoom').click(function () {
-//   $('#imgToRead').selectAreas('destroy');
-// });
-$('#buttonXml').click(function () {
-  console.log("onclick");
-  $('#imgToRead').selectAreas('destroy');
-});
-
-
-function debugQtyAreas(event, id, areas) {
-console.log(areas.length + " areas", arguments);
-this.displayarea = areas;
-console.log(areas.length + " this.displayarea", arguments);
-console.log("invoking saving to XML");
-var SaveToXML = document.getElementById("SaveToXML");
-console.log("SaveToXML: "+SaveToXML);
-SaveToXML.click();
-};
 }
