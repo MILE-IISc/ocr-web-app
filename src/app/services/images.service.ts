@@ -214,8 +214,8 @@ export class ImageService implements OnInit {
         imageData
       )
       .subscribe(async responseData => {
-        console.log("image: " + responseData.message);
         await this.getServerImages();
+        console.log("image added+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++: " + responseData.message);
       });
     if (this.serverImages.length > 0) {
       console.log("server images length===" + this.serverImages.length);
@@ -457,30 +457,73 @@ export class ImageService implements OnInit {
   retain(jsonObj){
     let areaarray=[];
      // var jsonObj = JSON.parse(json);
+     console.log("inside retain jsonObj: "+JSON.stringify(jsonObj));
+     if(jsonObj['page'].block){
      var blocks = jsonObj['page'].block;
-     console.log("block length " + blocks.length);
+    //  console.log("block length " + blocks.length);
+     
      for (var i = 0; i < blocks.length; i++) {
-
        var blockNumber = (blocks[i].BlockNumber);
        console.log("blockNumber" + blockNumber);
-       var blockRowStart = (blocks[i].rowStart);
-       var blockRowEnd = (blocks[i].rowEnd);
-       var blockColStart = (blocks[i].colStart);
-       var blockColEnd = (blocks[i].colEnd);
-       var blockwidth = (blockColEnd - blockColStart) * this.percentage / 100;
+       console.log("blockRowStart from json "+blocks[i].rowStart);
+       var blockRowStart = blocks[i].rowStart;
+       var blockRowEnd = blocks[i].rowEnd;
+       var blockColStart = blocks[i].colStart;
+       var blockColEnd = blocks[i].colEnd;
+       var x = (blockColEnd - blockColStart);
+       console.log("x in retain "+x);
+       console.log("percentage in retain "+retain.percentage);
+       var blockwidth = (blockColEnd - blockColStart) * retain.percentage / 100;
        console.log("blockwidth" + blockwidth);
-       var blockheight = (blockRowEnd - blockRowStart) * this.percentage / 100;
+       var blockheight = (blockRowEnd - blockRowStart) * retain.percentage / 100;
        console.log("blockheight" + blockheight);
-       var X = blockColStart * this.percentage / 100;
+       var X = blockColStart * retain.percentage / 100;
        console.log("blockX" + X);
-       var Y = blockRowStart * this.percentage / 100;
+       var Y = blockRowStart * retain.percentage / 100;
        console.log("blockY" + Y);
        areaarray[i] = { "id": blockNumber, "x": X, "y": Y, "width": blockwidth, "height": blockheight };
      }
+    }
      $('img#imgToRead').selectAreas('destroy');
      $('img#imgToRead').selectAreas({
       onChanged: debugQtyAreas,
       areas: areaarray
+    });
+
+    $('#nextImg').click(function () {
+      console.log("onclick");
+      $('#imgToRead').selectAreas('destroy');
+    });
+    $('#previousImg').click(function () {
+      $('#imgToRead').selectAreas('destroy');
+    });
+    $('#firstImg').click(function () {
+      $('#imgToRead').selectAreas('destroy');
+    });
+    $('#lastImg').click(function () {
+      $('#imgToRead').selectAreas('destroy');
+    });
+    // $('#butZoomIn').click(function () {
+    //   $('#imgToRead').selectAreas('destroy');
+    // });
+    // $('#butZoomOut').click(function () {
+    //   $('#imgToRead').selectAreas('destroy');
+    // });
+    // $('#fitWidth').click(function () {
+    //   $('#imgToRead').selectAreas('destroy');
+    // });
+    // $('#fitHeigth').click(function () {
+    //   $('#imgToRead').selectAreas('destroy');
+    // });
+    // $('#100zoom').click(function () {
+    //   $('#imgToRead').selectAreas('destroy');
+    // });
+    // $('#zoom').click(function () {
+    //   $('#imgToRead').selectAreas('destroy');
+    // });
+    $('#buttonXml').click(function () {
+      console.log("onclick");
+      $('#imgToRead').selectAreas('destroy');
     });
 
      function debugQtyAreas(event, id, areas) {
@@ -500,89 +543,4 @@ function convertCanvasToImage(canvas) {
   image.src = canvas.toDataURL("image/png");
   console.log("image source"+image.src);
   return image;
-}
-
-function fromXml(xml){
-  var arr=[];
-
-console.log("the current percentage is "+retain.percentage)
-var xmlDoc = xml.responseXML;
-var block = xmlDoc.getElementsByTagName("block");
-console.log("length =====" + block.length);
-let areaarray=[];
-for (let i = 0; i < block.length; i++) {
-
-var blockNumber  = (block[i].getAttribute('BlockNumber'));
-console.log("blockNumber"+blockNumber);
-var blockRowStart = (block[i].getAttribute('rowStart'));
-var blockRowEnd = (block[i].getAttribute('rowEnd'));
-var blockColStart = (block[i].getAttribute('colStart'));
-var blockColEnd = (block[i].getAttribute('colEnd'));
-var blockwidth = (blockColEnd - blockColStart) * retain.percentage / 100;
-console.log("blockwidth"+blockwidth);
-var blockheight = (blockRowEnd - blockRowStart) * retain.percentage / 100;
-console.log("blockheight"+blockheight);
-var X = blockColStart * retain.percentage/ 100;
-console.log("blockX"+X);
-var Y = blockRowStart *  retain.percentage / 100;
-console.log("blockY"+Y);
- areaarray[i] = { "id":blockNumber, "x":X,"y":Y,"width":blockwidth,"height":blockheight}
-
- $('img#imgToRead').selectAreas('destroy');
- $('img#imgToRead').selectAreas({
-
- onChanged : debugQtyAreas,
-
- areas:areaarray
-
- });
-
-}
-
-$('#nextImg').click(function () {
-  console.log("onclick");
-  $('#imgToRead').selectAreas('destroy');
-});
-$('#previousImg').click(function () {
-  $('#imgToRead').selectAreas('destroy');
-});
-$('#firstImg').click(function () {
-  $('#imgToRead').selectAreas('destroy');
-});
-$('#lastImg').click(function () {
-  $('#imgToRead').selectAreas('destroy');
-});
-// $('#butZoomIn').click(function () {
-//   $('#imgToRead').selectAreas('destroy');
-// });
-// $('#butZoomOut').click(function () {
-//   $('#imgToRead').selectAreas('destroy');
-// });
-// $('#fitWidth').click(function () {
-//   $('#imgToRead').selectAreas('destroy');
-// });
-// $('#fitHeigth').click(function () {
-//   $('#imgToRead').selectAreas('destroy');
-// });
-// $('#100zoom').click(function () {
-//   $('#imgToRead').selectAreas('destroy');
-// });
-// $('#zoom').click(function () {
-//   $('#imgToRead').selectAreas('destroy');
-// });
-$('#buttonXml').click(function () {
-  console.log("onclick");
-  $('#imgToRead').selectAreas('destroy');
-});
-
-
-function debugQtyAreas(event, id, areas) {
-  console.log(areas.length + " areas", arguments);
-  this.displayarea = areas;
-  console.log(areas.length + " this.displayarea", arguments);
-  console.log("invoking saving to XML");
-  var SaveToXML = document.getElementById("SaveToXML");
-  console.log("SaveToXML: "+SaveToXML);
-  SaveToXML.click();
-  };
 }
