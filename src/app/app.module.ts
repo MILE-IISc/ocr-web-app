@@ -64,6 +64,7 @@ import{ViewerService} from './services/viewer.service';
 import { ErrorInterceptor } from "./error-interceptor";
 import { ErrorComponent } from "./error/error.component";
 import { HTTP_INTERCEPTORS } from "@angular/common/http";
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 
 import { FooterComponent } from './footer/footer.component';
@@ -81,6 +82,10 @@ import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
     FooterComponent
     //FileSelectDirective
   ],
+  exports:[
+    MatIconModule
+
+  ],
   imports: [
     A11yModule,
     ClipboardModule,
@@ -88,6 +93,8 @@ import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
     CdkTableModule,
     CdkTreeModule,
     DragDropModule,
+    FlexLayoutModule,
+
     MatAutocompleteModule,
     MatBadgeModule,
     MatBottomSheetModule,
@@ -146,7 +153,9 @@ import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
   entryComponents: [ErrorComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class AppModule { }
+export class AppModule {
+
+ }
 
 platformBrowserDynamic().bootstrapModule(AppModule)
   .catch(err => console.error(err));

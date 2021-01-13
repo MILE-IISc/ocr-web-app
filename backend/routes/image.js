@@ -64,15 +64,16 @@ function getBucketContents(bucketName) {
   ).promise()
   .then((data) => {
       if (data != null && data.Contents != null) {
-        // bucketFilesList = [];
-        bucketFilesList.splice(0,bucketFilesList.length);
-        for (var i = 0; i < data.Contents.length; i++) {
-          var itemKey = data.Contents[i].Key;
-          var itemSize = data.Contents[i].Size;
-          console.log(`Item: ${itemKey} (${itemSize} bytes).` +i);
-          bucketFilesList.push(itemKey);
-        }
-        console.log("bucketFilesList.length",bucketFilesList.length);
+          for (var i = 0; i < data.Contents.length; i++) {
+              var itemKey = data.Contents[i].Key;
+              var itemSize = data.Contents[i].Size;
+              console.log(`Item: ${itemKey} (${itemSize} bytes).`);
+              // if(itemKey == "balaaka_0001.tif"){
+              //   console.log("reached getItem: "+itemKey);
+              //   continue;
+              // }
+              // getItem(bucketName, itemKey);
+          }
       }
   })
   .catch((e) => {
@@ -134,7 +135,7 @@ const fileFilter = (req,file,cb)=>{
   if(isValid){
     cb(null,true);
   }else{
-    invalid = "invalid mime types"
+    invalid = "And invalid file types were skipped. "
     cb(null,false);
   }
 }
@@ -151,7 +152,7 @@ var upload = multer({
     },
     key: function (req, file, cb) {
       console.log("file.originalname"+file.originalName+"file.mimetype"+file.mimetype);
-      console.log("upload file multer ",file.originalname, Date());
+      console.log(file.originalname, file);
       cb(null, file.originalname);
     }
   })
@@ -196,7 +197,7 @@ router.post("", checkAuth,
 
     console.log("invalid "+invalid);
     res.status(201).json({
-      message: "Images added successfully "+invalid,
+      message: "Images uploaded successfully!!! "+invalid,
     });
   }
   else {

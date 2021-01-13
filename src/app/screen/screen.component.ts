@@ -18,6 +18,7 @@ import { XmlModel,retain } from '../shared/xml-model';
 import { AuthService } from '../auth/auth.service';
 import * as fileSaver from 'file-saver';
 import { FileService } from '../services/file.service';
+import { MatIconRegistry } from "@angular/material/icon";
 // import * as format from 'xml-formatter';
 // import * as format from 'xml-formatter';
 
@@ -28,10 +29,11 @@ import { FileService } from '../services/file.service';
 })
 
 export class ScreenComponent implements OnInit{
-
+  opened: boolean;
+  events: string[] = [];
   private waveSub: Subscription;
   serverImages: Images[] = [];
-  userName;
+
   imageList = "";
   displayarea: any;
   isLoading = false;
@@ -60,17 +62,92 @@ export class ScreenComponent implements OnInit{
   public percentage = 0;
   public angle = 0;
   btnImgArray: any[] = [];
-  display;
+  display="none";
   images: Images[];
   ImageIs = true;
   isDiv = false;
-  myHeight = ( window.innerHeight-125);
+  myHeight = (window.innerHeight-30);
+  userName: string;
+  userIsAuthenticated = false;
+  isAdmin;
+  private authListenerSubs: Subscription;
+
+
+
+  clientpercent;
+
+  nextImages = true;
+
+
+
+
+
+
+
+
+  divelement = true;
+
+  urlOcr;
+  JsonObj;
+
+
+  sidesize1 = 0;
+  sidesize2 = 100;
+  area1 = 50;
+  area2 = 50;
+  size3 = 50;
+  Isopen = true;
+  invalidMessage ="";
+
+sideOpen(){
+  if(this.Isopen == true){
+    this.sidesize1 = 50;
+    this.sidesize2 = 50;
+    this.size3 = 35;
+    this.images = this.imageService.getImages();
+    this.imageService.openModalDialog(this.images);
+    this.Isopen = false;
+  }
+  else{
+    this.sidesize1 = 0;
+  this.sidesize2 = 100;
+  this.size3 = 50
+  this.Isopen = true;
+  }
+ }
+sideClose(){
+  this.sidesize1 = 0;
+  this.sidesize2 = 100;
+  this.size3 = 50
+}
 
   constructor(private headerService: HeaderService, private imageService: ImageService, private viewerService: ViewerService
     , public authService: AuthService,private fileService:FileService) { }
+    onLogout() {
+      this.authService.logout();
+    }
+
+    ngOnDestroy() {
+      this.authListenerSubs.unsubscribe();
+    }
+
 
   ngOnInit(): void {
+ // authentication related
+ this.userIsAuthenticated = this.authService.getIsAuth();
+ this.userName = this.authService.getUserName();
+ this.isAdmin = this.authService.getIsAdmin();
+ this.authListenerSubs = this.authService
+   .getAuthStatusListener()
+   .subscribe(isAuthenticated => {
+     this.userIsAuthenticated = isAuthenticated;
+     this.userName = this.authService.getUserName();
+     this.isAdmin = this.authService.getIsAdmin();
+   });
+
+
     this.userName = this.authService.getUserName();
+    // this.imageService.getServerImages();
     // console.log("user name in screen "+this.userName)
     this.imageService.getServerImages().then(() => {
       console.log("got serverImages in screen ngOnInit");
@@ -84,8 +161,7 @@ export class ScreenComponent implements OnInit{
           this.percentage = percent;
         });
 
-        retain.percentage = this.percentage;
-        // console.log("the current percentage is "+retain.percentage)
+    retain.percentage = this.percentage;
 
     this.isLoading = this.headerService.getloadingvalue();
     this.headerService.loadingvaluechage
@@ -108,17 +184,32 @@ export class ScreenComponent implements OnInit{
           this.nextImage = multiImage;
         });
 
+
+    this.imageService.invalidMessageChange
+      .subscribe(
+        (invalidMessage: string) => {
+
+          console.log("invalid mes in screen======== " + invalidMessage);
+          this.invalidMessage = invalidMessage;
+          if (this.invalidMessage != "") {
+            var x = document.getElementById("snackbar");
+            console.log("x in screen " + x);
+            x.className = "show";
+            setTimeout(() => {
+              x.className = x.className.replace("show", "");
+            }, 5000);
+          }
+        });
+
+
+
     this.waveSub = this.imageService
       .getImageUpdateListener()
       .subscribe(async (imageData: { serverImages: Images[] }) => {
-        // console.log("inside subscribe in screen oninit")
         this.serverImages = imageData.serverImages;
-        // this.isLoading = true;
         const imageLength = this.serverImages.length;
-        // console.log("imageLength in screen onInit "+imageLength)
         if (imageLength > 0) {
           if (this.isDiv == true) {
-            // console.log("holder is there");
             $('.holderClass').remove();
           }
           this.isLoading = true;
@@ -148,27 +239,41 @@ export class ScreenComponent implements OnInit{
     this.imageService.urlChanged
       .subscribe(
         (url: any) => {
-          // console.log("Inside subscribe");
-          // console.log("+++++++++url: " + url);
           this.localUrl = url;
           setTimeout(() => this.viewerService.fitwidth(), 50);
           setTimeout(() => this.setpercentage(), 60);
         });
 
     this.imageService.fileNameChange.subscribe((fileName: any) => {
-      // console.log("nextImages inside footer: " + fileName);
       this.fileName = fileName;
     });
 
     var element = document.getElementById("content");
-    // console.log("documents----" + element)
     this.imageService.setDocumentId(element);
+
+    console.log("this.headerService.getpercentagevary()",this.headerService.getpercentagevary());
+    this.percentage = this.headerService.getpercentagevary();
+    this.headerService.percentageChange
+      .subscribe(
+        (percent: number) => {
+          this.percentage = percent;
+          console.log("percent inside footeroninit on headerpercentacgehange",percent);
+        }
+      );
+
+    this.imageService.nextImageChange.subscribe((nextImages: boolean) => {
+      console.log("nextImages inside footer: " + nextImages);
+      this.nextImages = nextImages;
+    });
+
+    this.imageService.previousImageChange.subscribe((previousImages: boolean) => {
+      console.log("nextImages inside footer: " + previousImages);
+      this.previousImages = previousImages;
+    });
   }
 
   async openThisImage(event) {
-    // console.log("inside open this image");
     var id = event.target.value;
-    // console.log("id : " + id);
     this.images = this.imageService.getImages();
     for (let i = 0; i < this.images.length; i++) {
       if (this.images[i].fileName == id) {
@@ -186,13 +291,25 @@ export class ScreenComponent implements OnInit{
     this.display = 'none'; //set none css after close dialog
   }
 
+  //*****************************************************darkMode */
+//  openNav() {
+//     document.getElementById("mySidenav").style.width = "1000px";
+//     console.log("opened")
+//   }
+
+//  closeNav() {
+//     document.getElementById("mySidenav").style.width = "0";
+//   }
+  // darkMode(){
+  //   var element = document.body;
+  //   element.classList.toggle("darkMode");
+  // }
+
   importFile(event) {
     this.anotherTryVisible = true;
     var fileRead = (event.target as HTMLInputElement).files;
     var filesCount = event.target.files.length;
-    // console.log("isLoading before calling importFile: " + this.isLoading);
     this.isLoading = true;
-    // console.log("isLoading after calling importFile: " + this.isLoading);
     if (event.target.files && fileRead) {
       this.imageService.addImage(fileRead);
     }
@@ -201,17 +318,9 @@ export class ScreenComponent implements OnInit{
   }
 
 
-  onEnter(value: number) {
-    this.angle = value;
-    this.viewerService.angle = this.angle;
-    this.viewerService.onEnter();
-  }
 
-  onZoom(value: number) {
-    this.percentage = value;
-    this.viewerService.percentage = this.percentage;
-    this.viewerService.onZoom();
-  }
+
+
 
   asVertical() {
     this.viewerService.asVertical();
@@ -220,6 +329,13 @@ export class ScreenComponent implements OnInit{
     // console.log("asVertical has been invoked from screen");
     setTimeout(() => this.setpercentage(), 50);
   }
+  // asVertical() {
+  //   this.value = 'horizontal';
+  //   this.viewerService.asVertical();
+  //   console.log("asVertical has been invoked from screen");
+  //   this.percentage = this.viewerService.percentage;
+  // }
+
 
   asHorizontal() {
     this.viewerService.asHorizontal();
@@ -228,37 +344,78 @@ export class ScreenComponent implements OnInit{
     this.headerService.setpercentagevary(this.percentage);
     setTimeout(() => this.setpercentage(), 50);
   }
+  // asHorizontal() {
+  //   this.value = 'vertical';
+  //   this.viewerService.asHorizontal();
+  //   this.percentage = this.viewerService.percentage;
+  // }
 
   setpercentage() {
     this.percentage = this.viewerService.getpercentage();
     this.headerService.setpercentagevary(this.percentage);
   }
 
+  // fitheight() {
+  //   this.viewerService.fitheight();
+  //   this.percentage = this.viewerService.percentage;
+  // }
   fitheight() {
     this.viewerService.fitheight();
     this.percentage = this.viewerService.percentage;
+    console.log("this.percentage before header in fitheight",this.percentage);
+    this.headerService.setpercentagevary(this.percentage);
+    console.log("this.percentage after header in fitheight",this.percentage);
   }
 
+  // fitwidth() {
+  //   this.viewerService.fitwidth();
+  //   this.percentage = this.viewerService.percentage;
+  // }
   fitwidth() {
-    this.viewerService.fitwidth();
+    // this.viewerService.fitwidth();
+    this.viewerService.fitwidth()
     this.percentage = this.viewerService.percentage;
+    console.log("this.percentage before header in fitwidth",this.percentage);
+    this.headerService.setpercentagevary(this.percentage);
+    console.log("this.percentage after header in fitwidth",this.percentage);
   }
 
+
+  // zoomInFun() {
+  //   this.viewerService.zoomInFun();
+  // }
   zoomInFun() {
     this.viewerService.zoomInFun();
+    this.percentage = this.viewerService.percentage;
+    this.headerService.setpercentagevary(this.percentage);
   }
 
+  // zoomOutFun() {
+  //   this.viewerService.zoomOutFun();
+  // }
   zoomOutFun() {
     this.viewerService.zoomOutFun();
+    this.percentage = this.viewerService.percentage;
+    this.headerService.setpercentagevary(this.percentage);
   }
 
+
+  // rotateImage() {
+  //   this.viewerService.rotateImage();
+  // }
   rotateImage() {
     this.viewerService.rotateImage();
+    this.angle = this.viewerService.angle;
   }
 
+  // rotateImageanti() {
+  //   this.viewerService.rotateImageanti();
+  // }
   rotateImageanti() {
     this.viewerService.rotateImageanti();
+    this.angle = this.viewerService.angle;
   }
+
 
   imgSize() {
     var myImg;
@@ -268,9 +425,120 @@ export class ScreenComponent implements OnInit{
     alert("Original width=" + realWidth + ", " + "Original height=" + realHeight);
   }
 
+
+  // orginalsize() {
+  //   this.viewerService.orginalsize();
+  //   this.percentage = this.viewerService.percentage;
+  // }
   orginalsize() {
     this.viewerService.orginalsize();
     this.percentage = this.viewerService.percentage;
+    console.log("this.percentage before header in orginalsize",this.percentage);
+    this.headerService.setpercentagevary(this.percentage);
+    console.log("this.percentage after header in orginalsize",this.percentage);
+  }
+
+  onEnter(value: number) {
+    this.clientpercent = this.percentage;
+    this.angle = value;
+    this.viewerService.angle = this.angle;
+    this.viewerService.onEnter();
+  }
+
+  onZoom(value: number) {
+    this.clientpercent = this.percentage;
+    this.percentage = value;
+    this.viewerService.percentage = this.percentage;
+    this.viewerService.onZoom();
+    this.headerService.setpercentagevary(this.percentage);
+    this.blocksize()
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  openModalDialog() {
+    this.images = this.imageService.getImages();
+    this.imageService.openModalDialog(this.images);
+  }
+
+  NextImage() {
+
+    this.onEnter(0);
+    this.imageService.nextPage();
+    this.imageService.onXml();
+ }
+
+  previousImage() {
+    this.onEnter(0);
+    this.imageService.previousPage();
+    this.imageService.onXml();
+  }
+
+  lastImage() {
+    this.onEnter(0);
+    this.imageService.LastImage();
+    this.imageService.onXml();
+  }
+
+  firstImage() {
+    this.onEnter(0);
+    this.imageService.firstImage();
+    this.imageService.onXml();
+  }
+  skipPage() {
+    //this.localUrl = this.localUrlArray[this.imgFileCount];
+  }
+
+  loadXMLDoc() {
+    this.serverImages = this.imageService.getImages();
+    this.fileName = this.serverImages[this.imageService.imgFileCount].fileName;
+    console.log("``````````````````````````````````````````````````this.fileName==="+this.fileName);
+    console.log("this.fileCompleted==="+this.serverImages[this.imageService.imgFileCount].completed);
+    this.imageService.getXmlFileAsJson(this.fileName);
+
+  }
+
+  blocksize() {
+    if (this.percentage > 1) {
+      BlockModel.blockArray.length = 0;
+      var block
+      block = document.getElementsByClassName("select-areas-outline");
+      for (var i = 0; i < block.length; i++) {
+        var blocktop = block[i].style.top;
+        blocktop = blocktop.substring(0, blocktop.length - 2);
+        var blockleft = block[i].style.left;
+        blockleft = blockleft.substring(0, blockleft.length - 2);
+        var constantfactortop = (blocktop / this.clientpercent);
+        var constantfactorwidth = (block[i].clientWidth / this.clientpercent);
+        var constantfactorheight = (block[i].clientHeight / this.clientpercent);
+        var constantfactorleft = (blockleft / this.clientpercent);
+        var id = i;
+        var x = constantfactorleft * this.percentage;
+        var y = constantfactortop * this.percentage;
+        var width = constantfactorwidth * this.percentage;
+        var height = constantfactorheight * this.percentage;
+        var z = 0
+        var blockValue = new BlockModel(height, id, width, x, y, z);
+        BlockModel.blockArray.push(blockValue);
+        // this.viewerService. selectBlockservice()
+        setTimeout(() => this.viewerService.selectBlockservice(), .001);
+      }
+    }
   }
 
   updateScroll(scrollOne: HTMLElement, scrollTwo: HTMLElement) {
@@ -475,5 +743,12 @@ export class ScreenComponent implements OnInit{
     this.imageService.updateCorrectedXml(this.fileName);
   }
 
+}
+function convertCanvasToImage(canvas) {
+  console.log("in convert................");
+  var image = new Image();
+  image.src = canvas.toDataURL("image/png");
+  console.log("image.src: " + image.src);
+  return image;
 }
 

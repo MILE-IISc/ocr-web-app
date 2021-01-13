@@ -149,10 +149,6 @@ asHorizontal(){
 
 
 
-  openModalDialog(){
-    this.images = this.imageService.getImages();
-    this.imageService.openModalDialog(this.images,this.display);
-  }
 
   closeModalDialog(){
     this.display='none';

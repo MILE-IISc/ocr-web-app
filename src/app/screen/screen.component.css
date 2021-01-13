@@ -1,3 +1,13 @@
+/* @import "../node_modules/@angular/material/prebuilt-themes/indigo-pink.css"; */
+input{
+
+  border-radius: 10px;
+  height: 30px !important;
+  color: black;
+}
+label{
+font-size: small;
+}
 .mat-spinner {
   position: relative;
   margin-left: 50%;
@@ -5,27 +15,58 @@
   transform: translateY(-50%); */
   margin-top: 50%;
 }
+.footer {
+  position: fixed;
+
+  width: 100%;
+  /* background-color: grey; */
+  /* color: white; */
+  text-align: center;
+  height:50px;
+}
+.example-spacer{
+  flex:5 auto;
+}
+.example-spacer1{
+  flex:3 auto;
+}
+.example-spacer2{
+  flex:2 auto;
+}
+.example-spacer3{
+  flex:.5 auto;
+
+}
+ .btn-group{
+  height:100%;
+ }
 
 
-.navbar {
-    width: 100%;
-    background-color: gainsboro;
+/* .arrowup{
+  height: .25em;
 
-  }
+}
+.arrowdown{
+  height: .15em;
+
+} */
+
+#fitWidth{
+  transform: rotate(90deg);
+
+}
+
+
 
   .container{
     position: relative;
+    width: 100%;
+    padding-bottom:5px ;
+    margin: 0%;
 
-  }
+ }
   .btn-group button {
-
-    height: 20px;
-
-    color: white; /* White text */
-
-    /* cursor: pointer; */
-     /* Pointer/hand icon */
-
+    height: 10px;
     display: block; /* Make the buttons appear below each other */
   }
 
@@ -33,19 +74,6 @@
     border-bottom: none; /* Prevent double borders */
   }
 
-  /* Add a background color on hover */
-  /* .btn-group button:hover {
-    background-color: #3e8e41;
-  }
- */
- #wrapper {
-  /* position:relative; */
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 .modal-content{
   height: 700px;
   overflow: auto;
@@ -62,7 +90,25 @@ overflow:auto;
   font-size: 18px;
   color: blue
 }
+.split{
+  padding-bottom:5px ;
+  position: relative;
+  /* margin: 0%; */
+  /* margin-left:1px !important; */
+  width: 100%;
+  /* margin-right: 2px; */
+}
+.split1{
 
+  overflow-x: auto;
+  overflow-y: auto;
+  border: 1px solid;
+}
+.split2{
+  overflow-x: auto;
+  overflow-y: auto;
+  border: 1px solid;
+}
 .container.img {
   width: 100%;
   height: auto;
@@ -87,7 +133,9 @@ overflow:auto;
 .dropdown-submenu:hover>.dropdown-menu {
   display: block;
 }
-
+.filler {
+  flex: 1 auto;
+}
 .dropdown-submenu>a:after {
   display: block;
   content: " ";
@@ -102,22 +150,6 @@ overflow:auto;
   margin-right: -10px;
 }
 
-/* ::ng-deep .menu button {
-  /* background-color: #4CAF50; */
-  /* border: 1px solid green; */
-  /* color:brown; */
-  /* padding: 0px !important; */
-  /* cursor: pointer; */
-  /* display: inline-block; */
-  /* outline: none; */
-  /* margin: 0px !important; */
-  /* border-width: solid; */
-/* } */
-
-/* button[disabled] { */
-  /* filter: blur(1px); */
-  /* cursor: not-allowed; */
-/* } */
 .dropdown-content {
   /* display: none; */
   position: relative;
@@ -126,6 +158,9 @@ overflow:auto;
    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
   padding: 12px 16px;
   /* z-index: 1;  */
+}
+.sideBar:hover{
+  font-size: large;
 }
 
 
@@ -139,14 +174,130 @@ overflow:auto;
   padding-bottom: 0px;
   padding-top:0px
 }
-.list {
-  display: none;
-}
-.link:hover + .list {
-  display: block;
-}
 
 .dropdown-content a:hover {background-color: #f1f1f1}
 .dropdown-submenu:hover>.dropdown-menu {
   display: block;
 }
+
+#snackbar {
+  visibility: hidden;
+  min-width: 250px;
+  margin-left: -125px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 2px;
+  padding: 16px;
+  position: fixed;
+  z-index: 1;
+  left: 50%;
+  bottom: 30px;
+  font-size: 17px;
+}
+
+#snackbar.show {
+  visibility: visible;
+  -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+  animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+@-webkit-keyframes fadein {
+  from {bottom: 0; opacity: 0;} 
+  to {bottom: 30px; opacity: 1;}
+}
+
+@keyframes fadein {
+  from {bottom: 0; opacity: 0;}
+  to {bottom: 30px; opacity: 1;}
+}
+
+@-webkit-keyframes fadeout {
+  from {bottom: 30px; opacity: 1;} 
+  to {bottom: 0; opacity: 0;}
+}
+
+@keyframes fadeout {
+  from {bottom: 30px; opacity: 1;}
+  to {bottom: 0; opacity: 0;}
+}
+.mat-raised-button:hover {
+  font-size: 20px;
+
+}
+
+.mat-raised-button {
+  margin: 5px;
+/*
+  color:white;
+  background-color: white; */
+}
+
+.darkMode{
+  margin: 5px;
+  background-color: black;
+  color:black;
+}
+
+.vertical{
+  /* transform: rotate(180deg); */
+  transform: rotate(90deg)
+}
+.gap {
+  margin-right: 40px;
+}
+
+::ng-deep .as-split-gutter-icon {
+  background-color:rgb(146, 144, 144);
+  width: 3px !important;
+/* cursor: pointer !important; */
+  
+}
+.example-container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.example-events {
+  width: 300px;
+  height: 200px;
+  overflow: auto;
+  border: 1px solid #555;
+}
+.openside{
+  margin: 0;
+  position: absolute;
+  /* left: 50%; */
+  top: 50%;
+  width: fit-content;
+  /* margin-bottom:0px; */
+  /* height: 60px; */
+ -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+.mat-toolbar {
+  min-height: 30px !important;
+  height: 30px !important;
+}
+
+.mat-toolbar-row {
+  min-height: 30px !important;
+  height: 30px !important;
+}
+.sidebar1{
+  position: absolute;
+
+  top: 50%;
+  margin: 0%;
+  /* left: 0%; */
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+.sideBody{
+  background-color: rgb(70, 68, 68);
+}
+
