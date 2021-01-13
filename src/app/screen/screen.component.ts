@@ -18,6 +18,7 @@ import { XmlModel,retain } from '../shared/xml-model';
 import { AuthService } from '../auth/auth.service';
 import * as fileSaver from 'file-saver';
 import { FileService } from '../services/file.service';
+import { MatIconRegistry } from "@angular/material/icon";
 // import * as format from 'xml-formatter';
 // import * as format from 'xml-formatter';
 
@@ -28,7 +29,8 @@ import { FileService } from '../services/file.service';
 })
 
 export class ScreenComponent implements OnInit{
-
+  opened: boolean;
+  events: string[] = [];
   private waveSub: Subscription;
   serverImages: Images[] = [];
   userName;
@@ -66,13 +68,26 @@ export class ScreenComponent implements OnInit{
   isDiv = false;
   myHeight = ( window.innerHeight-125);
   invalidMessage ="";
+  // myHeight = ( window.innerHeight-109);
+
+  openLeftMenu() {
+    document.getElementById("leftMenu").style.display = "block";
+  }
+  
+ closeLeftMenu() {
+    document.getElementById("leftMenu").style.display = "none";
+  }
 
   constructor(private headerService: HeaderService, private imageService: ImageService, private viewerService: ViewerService
     , public authService: AuthService,private fileService:FileService) { }
 
   ngOnInit(): void {
     this.userName = this.authService.getUserName();
-    this.imageService.getServerImages();
+    // this.imageService.getServerImages();
+    // console.log("user name in screen "+this.userName)
+    this.imageService.getServerImages().then(() => {
+      console.log("got serverImages in screen ngOnInit");
+    });
     this.percentage = this.headerService.getpercentagevary();
     $("#SaveToXML").hide();
     $("#blockno").hide();
@@ -125,7 +140,7 @@ export class ScreenComponent implements OnInit{
 
 
     this.waveSub = this.imageService
-      .getWaveUpdateListener()
+      .getImageUpdateListener()
       .subscribe(async (imageData: { serverImages: Images[] }) => {
         this.serverImages = imageData.serverImages;
         const imageLength = this.serverImages.length;
@@ -138,9 +153,10 @@ export class ScreenComponent implements OnInit{
           this.nextImage = false;
           this.imageService.nextImageChange.emit(this.nextImage);
           this.isLoading = false;
-
-          this.localUrl = await this.imageService.loadArray(this.serverImages[0].imagePath);
-          this.imageService.urlChanged.emit(this.localUrl.slice());
+          // this.fileName = " The files alloted for you ";
+          console.log("this.serverImages[0].fileName: ------------_> ",this.serverImages[0].fileName);
+          this.localUrl = await this.imageService.loadArray(this.serverImages[0].fileName);
+          // this.imageService.urlChanged.emit(this.localUrl.slice());
           this.fileName = this.serverImages[0].fileName;
           setTimeout(() => this.viewerService.fitwidth(), 50);
           setTimeout(() => this.setpercentage(), 60);
@@ -177,7 +193,7 @@ export class ScreenComponent implements OnInit{
     this.images = this.imageService.getImages();
     for (let i = 0; i < this.images.length; i++) {
       if (this.images[i].fileName == id) {
-        this.localUrl = await this.imageService.loadArray(this.images[i].imagePath);
+        this.localUrl = await this.imageService.loadArray(this.images[i].fileName);
         this.fileName = this.images[i].fileName;
         this.imageService.imgFileCount = i;
         this.imageService.imageCountChange.emit(this.imgFileCount);
@@ -190,6 +206,20 @@ export class ScreenComponent implements OnInit{
   closeModalDialog() {
     this.display = 'none'; //set none css after close dialog
   }
+
+  //*****************************************************darkMode */
+//  openNav() {
+//     document.getElementById("mySidenav").style.width = "1000px";
+//     console.log("opened")
+//   }
+  
+//  closeNav() {
+//     document.getElementById("mySidenav").style.width = "0";
+//   }
+  // darkMode(){
+  //   var element = document.body;
+  //   element.classList.toggle("darkMode");
+  // }
 
   importFile(event) {
     this.anotherTryVisible = true;
@@ -361,9 +391,11 @@ export class ScreenComponent implements OnInit{
     for (let i = 0; i < this.images.length; i++) {
       console.log("in export completed " + this.images[i].completed);
       if (this.images[i].completed == "Y") {
-        var curImagePath = this.images[i].imagePath;
-        var curXmlFileName = curImagePath.slice(0, -3) + 'xml';
+        var curFileName = this.images[i].fileName;
+        var curXmlFileName = curFileName.slice(0, -3) + 'xml';
         console.log("curXmlFileName " + curXmlFileName);
+
+        //changes have to be made in file service to get the xml file from backend
         await this.fileService.downloadFile(curXmlFileName).then(response => {
           let blob: any = new Blob([response], { type: 'text/xml' });
           folder.file(this.images[i].fileName.slice(0, -3) + 'xml', blob);

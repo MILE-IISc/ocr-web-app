@@ -8,6 +8,7 @@ const multer = require('multer');
 const { promise } = require("protractor");
 var util = require('util');
 const Tiff = require('tiff.js');
+const Jimp = require('jimp');
 
 const checkAuth = require("../middleware/check-auth");
 // const extractFile = require("../middleware/file"); extractFile,
@@ -62,28 +63,25 @@ function getBucketContents(bucketName) {
   ).promise()
   .then((data) => {
       if (data != null && data.Contents != null) {
-        // bucketFilesList = [];
-        bucketFilesList.splice(0,bucketFilesList.length);
-        console.log("inside getBucketContents Then function bucketFilesList.length:",bucketFilesList.length);
-        console.log("data.Contents.length:",data.Contents.length);
           for (var i = 0; i < data.Contents.length; i++) {
-            var itemKey = data.Contents[i].Key;
-            var itemSize = data.Contents[i].Size;
-            console.log(`Item: ${itemKey} (${itemSize} bytes).` +i);
-            bucketFilesList.push(itemKey);
-
-
-            // if(itemKey == "balaaka_0001.tif"){
-            //   console.log("reached getItem: "+itemKey);
-            //   continue;
-            // }
-            // getItem(bucketName, itemKey);
+              var itemKey = data.Contents[i].Key;
+              var itemSize = data.Contents[i].Size;
+              console.log(`Item: ${itemKey} (${itemSize} bytes).`);
+              // if(itemKey == "balaaka_0001.tif"){
+              //   console.log("reached getItem: "+itemKey);
+              //   continue;
+              // }
+              // getItem(bucketName, itemKey);
           }
-          console.log("bucketFilesList.length",bucketFilesList.length);
       }
   })
   .catch((e) => {
       console.error(`ERROR: ${e.code} - ${e.message}\n`);
+      fetchedImages = "";
+      res.status(201).json({
+        message: "No image files",
+        images: fetchedImages
+      });
   });
 }
 
@@ -96,31 +94,43 @@ function getItem(bucketName, itemName) {
   }).promise()
   .then((data) => {
       if (data != null) {
-          if(itemName == "test.jpg") {
-            let prefix = "data:image/jpg;base64,";
-            let base64 = Buffer.from(data.Body).toString('base64');
-            let jpgData = prefix + base64;
-            // console.log("jpgData: "+jpgData);
-          }
-          else if(itemName == "balaaka_0001.tif"){
-            console.log('reached balaaka_0001.tif in getItem\n');
+          if(path.extname(itemName).toLowerCase() == ".tif") {
+            console.log('reached getting tif data in getItem\n');
             let prefix = "data:tif;base64,";
             // let tiffData = prefix + base64;
             // console.log("tiffData: "+tiffData);
             const tiffArrayBuff = Buffer.from(data.Body).buffer;
-            console.log("tiffData: "+tiffArrayBuff);
-            var tiffImage = new Tiff({ buffer: tiffArrayBuff });
-            console.log("tiffImage: "+tiffImage);
+            console.log("tiff ",data.Metadata);
+            console.log("tiff ",data.ContentType);
+            console.log("tiffArrayBuff: "+tiffArrayBuff);
+
+            Jimp.read(Buffer.from(tiffArrayBuff, 'base64')).then(file => {
+              console.log("Jimp file ",file);
+              console.log("file width",file.getWidth());
+              file
+              .quality(75)
+              .write('example.jpg');
+            } );
+
+            // var tiffData = new Tiff({ buffer: Buffer.from(data.Body).buffer });
+            // console.log("tiffData: "+tiffData);
+            // var canvas = tiffData.toCanvas();
+            // console.log("tiffImage: "+tiffData);
+            // console.log("canvas: "+canvas);
+            return data.Body;
           }
-          else {
-            console.log('File Contents:\n' + Buffer.from(data.Body).toString());
-            return Buffer.from(data.Body).toString();
+          else if(path.extname(itemName).toLowerCase() == ".png" || path.extname(itemName).toLowerCase() == ".jpg" || path.extname(itemName).toLowerCase() == ".bmp"){
+            let prefix = "data:"+data.ContentType+";base64,";
+            let base64 = Buffer.from(data.Body).toString('base64');
+            let jpgData = prefix + base64;
+            console.log("jpgData: "+jpgData);
+            return jpgData;
           }
       }
   })
   .catch((e) => {
       console.error(`ERROR: ${e.code} - ${e.message}\n`);
-      return "The specified key does not exists in bucket";
+      return "ERROR: "+e.code+" - "+e.message+"\n";
   });
 }
 
@@ -140,6 +150,7 @@ var upload = multer({
     s3: cos,
     bucket: bucket,
     acl: 'public-read',
+    contentType: multerS3.AUTO_CONTENT_TYPE,
     metadata: function (req, file, cb) {
       cb(null, { fieldName: file.fieldname });
     },
@@ -152,9 +163,9 @@ var upload = multer({
 });
 
 router.post("", checkAuth,
-  upload.array("image", 4000),
+  // upload.array("image", 4000),
   (req, res, next) => {
-
+    upload.array("image", 4000);
   if (res.statusCode === 200 && req.files.length > 0) {
     console.log("file list length " + req.files.length);
     console.log("invalid "+invalid);
@@ -193,60 +204,77 @@ router.get("", checkAuth,(req, res, next) => {
       var newFiles = [];
       getBucketContents(bucket).then(() => {
         console.log("totalFilesList.length:",bucketFilesList.length);
-      });
-      fs.readdir(user_wav_dir, (err, filesList) => {
-        if (err) {
-          fetchedImages = "";
+        targetFiles = bucketFilesList;
+        targetFiles.forEach(file => {
+          if (path.extname(file).toLowerCase() == ".tif" || path.extname(file).toLowerCase() == ".png" || path.extname(file).toLowerCase() == ".jpg" ||
+          path.extname(file).toLowerCase() == ".bmp") {
+            fetchedImages.push(file.trim());
+            // console.log("image files["+file+"]");
+          } else if(path.extname(file).toLowerCase() == ".xml") {
+            xmlArrayList.push(file.toLowerCase());
+            // console.log("xml files["+file+"]");
+          }
+        });
+        if (fetchedImages.length > 0) {
+          fetchedImages.forEach(files => {
+            console.log("fetchedImages name",files);
+            const xmlFile = files.slice(0, -3).toLowerCase() + 'xml';
+            if (xmlArrayList.includes(xmlFile)) {
+              completed = 'Y';
+            } else {
+              completed = 'N';
+            }
+            // console.log("user email " + fetchedUser.email)
+            const path = url + '/images/' + fetchedUser.email + '/' + files;
+            const image = {
+              _id: fetchedUser._id,
+              fileName: files,
+              completed: completed,
+              editor: fetchedUser._id
+            };
+            imageList.push(image);
+            imageList.sort((a, b) => a.fileName.localeCompare(b.fileName));
+          });
+          res.status(201).json({
+            message: "Images fetched successfully!",
+            images: imageList
+          });
+          console.log("imageList length " + imageList.length);
+          imageList.forEach(files => {
+            console.log("files.fileName "+files.fileName+" files.completed",files.completed);
+          });
+        } else {
+          imageList = "";
           res.status(201).json({
             message: "No image files",
-            images: fetchedImages
+            images: imageList
           });
-        }
-        else {
-          targetFiles = filesList;
-          targetFiles.forEach(file => {
-            if (path.extname(file).toLowerCase() != ".xml") {
-              fetchedImages.push(file.toLowerCase());
-            } else {
-              xmlArrayList.push(file.toLowerCase());
-            }
-          });
-          console.log("fetchedImages length " + fetchedImages.length)
-          if (fetchedImages.length > 0) {
-            fetchedImages.forEach(files => {
-              const xmlFile = files.slice(0, -3).toLowerCase() + 'xml';
-              if (xmlArrayList.includes(xmlFile)) {
-                completed = 'Y';
-              } else {
-                completed = 'N';
-              }
-              // console.log("user email " + fetchedUser.email)
-              const path = url + '/images/' + fetchedUser.email + '/' + files;
-              const image = {
-                _id: fetchedUser._id,
-                fileName: files,
-                imagePath: path,
-                completed: completed,
-                editor: fetchedUser._id
-              };
-              imageList.push(image);
-              imageList.sort((a, b) => a.fileName.localeCompare(b.fileName));
-            });
-            res.status(201).json({
-              message: "Images fetched successfully!",
-              images: imageList
-            });
-            console.log("imageList length " + imageList.length);
-          } else {
-            imageList = "";
-            res.status(201).json({
-              message: "No image files",
-              images: imageList
-            });
-          }
         }
       });
+      fs.readdir(user_wav_dir, (err, filesList) => {
+      });
     });
+});
+
+router.get("/:fileName", checkAuth,(req, res, next) =>{
+  const fileName = req.params.fileName;
+  console.log("req.params.fileName",req.params.fileName);
+  getItem(bucket, req.params.fileName).then((data) => {
+    if(data == "The specified key does not exists in bucket") {
+      console.log("error while retrieving image:",data);
+      res.status(400).json({
+        message: data,
+        json: ""
+      });
+    }
+    else {
+      console.log("image content:",data);
+        res.status(201).json({
+          message: "image fetched successfully",
+          json: data
+        });
+    }
+  });
 });
 
 

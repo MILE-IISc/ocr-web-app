@@ -173,7 +173,7 @@ export class ImageService implements OnInit {
     }
   }
 
-  getWaveUpdateListener() {
+  getImageUpdateListener() {
     return this.imagesUpdated.asObservable();
   }
 
@@ -229,7 +229,7 @@ export class ImageService implements OnInit {
         this.nextImages = false;
       }
       console.log("file count" + filesCount);
-      let dataURL = await this.loadArray(this.serverImages[0].imagePath);
+      let dataURL = await this.loadArray(this.serverImages[0].fileName);
       this.serverUrl = dataURL
       console.log("server urlssssss" + this.serverUrl);
       this.urlChanged.emit(this.serverUrl.slice());
@@ -243,37 +243,68 @@ export class ImageService implements OnInit {
 
   getImage(imageUrl: any){
     console.log("inside getImage"+imageUrl)
-    return this.http.get(imageUrl, { responseType: 'blob' });
+    return this.http.get("http://localhost:4000/images/sasiocr@gmail.com/birugali_0001.tif", { responseType: 'blob' });
   }
 
 
 
   async loadArray(serverImage: any) {
     console.log("inside load array");
-    const result = await new Promise((resolve) => {
-      this.getImage(serverImage).subscribe(data => {
-        console.log("data----" + data.type);
-        let reader = new FileReader();
-        //if else condition comes here
-        if (data.type == "image/tiff") {
+
+    // console.log("inside load array0000ooooooo((((((((((((((((((((((((((((((((((((((((((((",serverImage);
+    // const result = await new Promise((resolve) => {
+    //   this.getImage(serverImage).subscribe(data => {
+    //     console.log("dataType----" + data.type);
+    //     console.log("data----" + data);
+    //     let reader = new FileReader();
+    //     //if else condition comes here
+    //     if (data.type == "image/tiff") {
+    //       reader.onload = (event: any) => {
+    //         console.log("before tiff conversion",event.target.result);
+    //         var image = new Tiff({ buffer: event.target.result });
+    //         console.log("tiff before canvas",image);
+    //         var canvas = image.toCanvas();
+    //         var img = convertCanvasToImage(canvas);
+    //         resolve(img.src);
+    //       }
+    //       reader.readAsArrayBuffer(data);
+    //     }
+    //     else {
+    //       reader.onload = (event: any) => {
+    //         console.log("data url=====================================" + event.target.result);
+    //         resolve(event.target.result);
+    //       }
+    //       reader.readAsDataURL(data);
+    //     }
+    //   });
+    // });
+    // return result;
+
+    let promise = new Promise((resolve, reject) => {
+      this.http
+        .get<{ message: string; json: any }>(
+          this.IMAGE_BACKEND_URL + serverImage).subscribe(responseData => {
+          console.log("responseData.json",responseData.json);
+          // var tiffData = new Tiff({ buffer: responseData.json });
+          // console.log("tiff before canvas",tiffData);
+          // var canvas = tiffData.toCanvas();
+          // var img = convertCanvasToImage(canvas);
+          // console.log("tiffImage src",img.src);
+          // resolve(img.src);
+
+          let reader = new FileReader();
           reader.onload = (event: any) => {
+            console.log("before tiff conversion",event.target.result);
             var image = new Tiff({ buffer: event.target.result });
+            console.log("tiff before canvas",image);
             var canvas = image.toCanvas();
             var img = convertCanvasToImage(canvas);
             resolve(img.src);
           }
-          reader.readAsArrayBuffer(data);
-        }
-        else {
-          reader.onload = (event: any) => {
-            console.log("data url=====================================" + event.target.result);
-            resolve(event.target.result);
-          }
-          reader.readAsDataURL(data);
-        }
-      });
+          reader.readAsArrayBuffer(responseData.json.data);
+        });
     });
-    return result;
+    return promise;
   }
 
   updateXml(xmlString: any, fileName: any) {
@@ -335,7 +366,7 @@ export class ImageService implements OnInit {
     this.imgFileCount++;
     this.imageCountChange.emit(this.imgFileCount);
     console.log("next image length" + this.serverImages.length);
-    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].imagePath);
+    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
     this.urlChanged.emit(this.localUrl.slice());
     this.fileName = this.serverImages[this.imgFileCount].fileName;
     this.fileNameChange.emit(this.fileName);
@@ -355,7 +386,7 @@ export class ImageService implements OnInit {
     this.serverImages = this.getImages();
     this.imgFileCount--;
     this.imageCountChange.emit(this.imgFileCount);
-    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].imagePath);
+    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
     this.urlChanged.emit(this.localUrl.slice());
     this.fileName = this.serverImages[this.imgFileCount].fileName;
     this.fileNameChange.emit(this.fileName);
@@ -374,7 +405,7 @@ export class ImageService implements OnInit {
     this.serverImages = this.getImages();
     this.imgFileCount = this.serverImages.length - 1;
     this.imageCountChange.emit(this.imgFileCount);
-    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].imagePath);
+    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
     this.urlChanged.emit(this.localUrl.slice());
     this.fileName = this.serverImages[this.imgFileCount].fileName;
     this.fileNameChange.emit(this.fileName);
@@ -390,7 +421,7 @@ export class ImageService implements OnInit {
     this.serverImages = this.getImages();
     this.imgFileCount = 0;
     this.imageCountChange.emit(this.imgFileCount);
-    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].imagePath);
+    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
     this.urlChanged.emit(this.localUrl.slice());
     this.fileName = this.serverImages[this.imgFileCount].fileName;
     this.fileNameChange.emit(this.fileName);
