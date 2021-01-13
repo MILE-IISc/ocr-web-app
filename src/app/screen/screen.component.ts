@@ -66,7 +66,7 @@ export class ScreenComponent implements OnInit{
   images: Images[];
   ImageIs = true;
   isDiv = false;
-  myHeight = window.innerHeight;
+  myHeight = (window.innerHeight-30);
   userName: string;
   userIsAuthenticated = false;
   isAdmin;
