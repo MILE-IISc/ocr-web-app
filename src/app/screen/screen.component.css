@@ -83,7 +83,9 @@ overflow:auto;
 .dropdown-submenu:hover>.dropdown-menu {
   display: block;
 }
-
+.filler {
+  flex: 1 auto;
+}
 .dropdown-submenu>a:after {
   display: block;
   content: " ";
@@ -106,6 +108,9 @@ overflow:auto;
    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
   padding: 12px 16px;
   /* z-index: 1;  */
+}
+.sideBar:hover{
+  font-size: large;
 }
 
 
@@ -153,7 +158,9 @@ overflow:auto;
 
 ::ng-deep .as-split-gutter-icon {
   background-color:rgb(146, 144, 144);
-  cursor:none !important ;
+  width: 3px !important;
+/* cursor: pointer !important; */
+  
 }
 .example-container {
   position: absolute;
@@ -188,5 +195,18 @@ overflow:auto;
 .mat-toolbar-row {
   min-height: 30px !important; 
   height: 30px !important;
+}
+.sidebar1{
+  position: absolute;
+
+  top: 50%;
+  margin: 0%;
+  /* left: 0%; */
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+.sideBody{
+  background-color: rgb(70, 68, 68);
 }
 

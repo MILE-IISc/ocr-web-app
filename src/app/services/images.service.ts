@@ -338,7 +338,7 @@ export class ImageService implements OnInit {
       });
   }
 
-  openModalDialog(images: Images[], display) {
+  openModalDialog(images: Images[]) {
     console.log("images count inside subscribe: " + images.length);
     this.btnImgArray.splice(0, this.btnImgArray.length);
     for (let i = 0; i < images.length; i++) {
@@ -348,14 +348,13 @@ export class ImageService implements OnInit {
       this.btnImgArrayChange.emit(this.btnImgArray.slice());
     }
     console.log("images count inside btnImgArray: " + this.btnImgArray.length);
-    $(".modal-body").empty();
+    $(".sideBody").empty();
     for (let i = 0; i < this.btnImgArray.length; i++) {
-      $(".modal-body").append(this.btnImgArray[i]);
+      $(".sideBody").append(this.btnImgArray[i]);
 
     }
     console.log("opening........")
-    display = 'block';
-    this.displayChange.emit(display);
+ 
   }
 
   async nextPage() {

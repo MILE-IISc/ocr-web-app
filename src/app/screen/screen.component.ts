@@ -67,14 +67,34 @@ export class ScreenComponent implements OnInit{
   ImageIs = true;
   isDiv = false;
   myHeight = ( window.innerHeight-109);
+  sidesize1 = 0;
+  sidesize2 = 100;
+  area1 = 50;
+  area2 = 50;
+  size3 = 50;
+  Isopen = true;
 
-  openLeftMenu() {
-    document.getElementById("leftMenu").style.display = "block";
+sideOpen(){
+  if(this.Isopen == true){
+    this.sidesize1 = 50;
+    this.sidesize2 = 50;
+    this.size3 = 35;
+    this.images = this.imageService.getImages();
+    this.imageService.openModalDialog(this.images);
+    this.Isopen = false;
   }
-  
- closeLeftMenu() {
-    document.getElementById("leftMenu").style.display = "none";
+  else{
+    this.sidesize1 = 0;
+  this.sidesize2 = 100;
+  this.size3 = 50
+  this.Isopen = true;
   }
+ }
+sideClose(){
+  this.sidesize1 = 0;
+  this.sidesize2 = 100;
+  this.size3 = 50
+}
 
   constructor(private headerService: HeaderService, private imageService: ImageService, private viewerService: ViewerService
     , public authService: AuthService,private fileService:FileService) { }

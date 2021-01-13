@@ -28,41 +28,45 @@
 </mat-toolbar>
 
 
+<as-split class="split"  [style.height.px]="this.myHeight" [direction]=value>
+  <as-split-area id="content"   class="split1" (scroll)="updateScroll(scrollOne, scrollTwo)" #scrollOne>
+        <as-split class="sideNav" id="Sidenav" direction="horizontal">
+           <as-split-area [lockSize]=true [size]=sidesize1>
+            <div >
+            <mat-toolbar style="width: 100%; text-align: center;">
+            <h6>select the page</h6>
+            <span class="filler"></span>
+            <button mat-icon-button class="sideBar"  color="accent" title="view Image List" (click)="sideClose()"><img src="assets/images/close.svg"  type="button" width="20px" height="20px"></button>
+            </mat-toolbar>
+            <div class="sideBody">
+            <div style="width: 90%;" (click)="openThisImage($event)"></div>
+            </div>
+           </div>
+           </as-split-area>
 
-  <as-split class="split"  [style.height.px]="this.myHeight" [direction]=value>
-    <as-split-area id="content" [lockSize]=true class="split1"
-      (scroll)="updateScroll(scrollOne, scrollTwo)" #scrollOne>
-      <img [src]="localUrl" *ngIf="localUrl && !isLoading" id="imgToRead" class="imgToRead" />
-     <div class="topleft" *ngIf="!isLoading"><h5>{{ fileName }}</h5></div>
-      <mat-spinner *ngIf="isLoading"></mat-spinner>
-   </as-split-area>
-    <as-split-area class="split2" (scroll)="updatescroll(scrollOne, scrollTwo)" #scrollTwo>
-      <mat-divider [vertical]="true"></mat-divider>
-      <div id="image" [style.position]="'relative'">
-        <span *ngFor="let text of words;let i = index">
-          <input  (ctrls)="showTooltip($event)" class="text_input" id = "{{text.lineNumber}}" value = "{{text.unicode}}"  [style.width.px]="text.txtwidth*(this.percentage/100)" [style.position]="'absolute'" [style.border]="'none'" [style.font-size.px]="text.txtheight*5/8*(this.percentage/100)"
-          [style.top.px]="text.lineRowStart*(this.percentage/100)"   [style.left.px]="text.lineColStart*(this.percentage/100)"   [style.margin-inline-start.px]="text.lineRowStart*(this.percentage/100)"   [style.height.px]="text.txtheight*(this.percentage/100)" >
-        </span>
-      </div>
-    </as-split-area>
-  </as-split>
 
+           <as-split-area [size]=sidesize2>
+            <img [src]="localUrl" *ngIf="localUrl && !isLoading" id="imgToRead" class="imgToRead" />
+            <div class="topleft" *ngIf="!isLoading"><h5>{{ fileName }}</h5></div> 
+            <mat-spinner *ngIf="isLoading"></mat-spinner>
+            <button mat-icon-button class="sidebar1"  color="primary" (click)="sideOpen()"><img src="assets/images/left.svg"  type="button" width="20px" height="20px"></button>
+            </as-split-area>
+          </as-split>
+ </as-split-area>
+
+  <as-split-area class="split2" [size]=size3 (scroll)="updatescroll(scrollOne, scrollTwo)" #scrollTwo>
+    <div id="image" [style.position]="'relative'">
+      <span *ngFor="let text of words;let i = index">
+        <input  (ctrls)="showTooltip($event)" class="text_input" id = "{{text.lineNumber}}" value = "{{text.unicode}}"  [style.width.px]="text.txtwidth*(this.percentage/100)" [style.position]="'absolute'" [style.border]="'none'" [style.font-size.px]="text.txtheight*5/8*(this.percentage/100)"
+        [style.top.px]="text.lineRowStart*(this.percentage/100)"   [style.left.px]="text.lineColStart*(this.percentage/100)"   [style.margin-inline-start.px]="text.lineRowStart*(this.percentage/100)"   [style.height.px]="text.txtheight*(this.percentage/100)" >
+      </span>
+    </div>
+  </as-split-area>
+</as-split>
 
 
 
 <app-footer></app-footer>
-
-
- 
-<div class="w3-sidebar w3-bar-block w3-card w3-animate-left" style="display:none" id="leftMenu">
-  <button onclick="closeLeftMenu()" class="w3-bar-item w3-button w3-large">Close &times;</button>
-  <a href="#" class="w3-bar-item w3-button">Link 1</a>
-  <a href="#" class="w3-bar-item w3-button">Link 2</a>
-  <a href="#" class="w3-bar-item w3-button">Link 3</a>
-</div>
-  
-    
-
 
 <div  id="menu">
   <div class="dropdown-content" (clickOutside)="closeMenu()">
