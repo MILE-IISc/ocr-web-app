@@ -65,7 +65,6 @@ import { ErrorInterceptor } from "./error-interceptor";
 import { ErrorComponent } from "./error/error.component";
 import { HTTP_INTERCEPTORS } from "@angular/common/http";
 import { FlexLayoutModule } from '@angular/flex-layout';
-// import {MatIconModule} from '@angular/material/icon';
 
 
 import { FooterComponent } from './footer/footer.component';
@@ -83,6 +82,10 @@ import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
     FooterComponent
     //FileSelectDirective
   ],
+  exports:[
+    MatIconModule
+
+  ],
   imports: [
     A11yModule,
     ClipboardModule,
@@ -91,7 +94,7 @@ import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
     CdkTreeModule,
     DragDropModule,
     FlexLayoutModule,
-  
+
     MatAutocompleteModule,
     MatBadgeModule,
     MatBottomSheetModule,
@@ -106,7 +109,7 @@ import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
     MatDividerModule,
     MatExpansionModule,
     MatGridListModule,
-    // MatIconModule,
+    MatIconModule,
     MatInputModule,
     MatListModule,
     MatMenuModule,
@@ -140,8 +143,6 @@ import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
 
 
     MatNativeDateModule
-  ],exports:[
-    MatIconModule
   ],
   providers: [
     {  provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'fill' } }
@@ -153,7 +154,7 @@ import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AppModule {
-  
+
  }
 
 platformBrowserDynamic().bootstrapModule(AppModule)

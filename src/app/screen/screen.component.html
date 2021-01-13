@@ -1,30 +1,92 @@
 <script src="https://cdn.rawgit.com/seikichi/tiff.js/master/tiff.min.js"></script>
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    
-<mat-toolbar>
-  <input #fileUpload type="file" (click)="fileUpload.value = null" (change)="importFile($event)" style="display:none"
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+<mat-toolbar color="primary" >
+
+  <button mat-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
+  <span class="example-spacer1"></span>
+  <button  mat-icon-button id="firstImg" data-toggle="tooltip" title="First-Page" [disabled]="previousImages" (click)="firstImage()" >  <mat-icon>first_page</mat-icon></button>
+  <button mat-icon-button id="previousImg" data-toggle="tooltip" title="Previous-Page" [disabled]="previousImages"(click)="previousImage()"><mat-icon>navigate_before</mat-icon></button>
+<button mat-icon-button id="nextImg" data-toggle="tooltip" title="Next-Page" [disabled]="nextImages" (click)="NextImage()"> <mat-icon>navigate_next</mat-icon></button>
+<button mat-icon-button id="lastImg" data-toggle="tooltip" title="Last-Page" [disabled]="nextImages" (click)="lastImage()"> <mat-icon>last_page</mat-icon></button>
+  <span class="example-spacer3"></span>
+  <!-- <button mat-stroked-button  data-toggle="tooltip" title="Select Page" (click)="openModalDialog()" id="SelectPage" > <mat-icon  >toc</mat-icon></button>
+  <div class="backdrop" [ngStyle]="{'display':display}"></div> -->
+  <!-- <input type="checkbox" id="skipPage" value="skipPage"><label for="Skip Page"> Skip Page</label> -->
+
+  <span class="example-spacer2"></span>
+
+
+
+  <!-- <div class="btn-group">
+   <button mat-icon-button color="accent" class="arrowup" style="height:15px;width:30px;"(click)="rotateImage()"> <mat-icon>arrow_drop_up</mat-icon></button>
+     <img src="assets/images/arrow_drop_up-24px.svg" (click)="rotateImage()" title="rotate" class="btn-group" type="button" -->
+      <!-- style="height:20px;width: 30px;"> -->
+      <!-- <br>
+      <button mat-icon-button color="accent" class="arrowdown" style="height:15px;width:30px;" (click)="rotateImageanti()">  <mat-icon>arrow_drop_down</mat-icon></button> -->
+    <!-- <img src="assets/images/arrow_drop_down-24px.svg" (click)="rotateImageanti()" class="btn-group" type="button"
+      style="height:20px;width: 30px; "> -->
+  <!-- </div> -->
+
+  <span class="example-spacer3"></span>
+  <button mat-stroked-button  (click)="loadXMLDoc()"  title="Run-OCR" >Run-OCR</button>
+
+ <span class="example-spacer"></span>
+
+
+ <label>Rotate:</label><input id="angle"  type="number" class="angleclass" style="width: 45px;height:100%;color:black;  " #box (keyup.enter)="onEnter(box.value)" value="{{angle}}">
+  <button mat-icon-button data-toggle="tooltip" title="Zoom-In" id="butZoomIn" (click)="zoomInFun()"> <mat-icon >zoom_in</mat-icon></button>
+  <button mat-icon-button data-toggle="tooltip" title="Zoom-Out" id="butZoomOut" (click)="zoomOutFun()"> <mat-icon >zoom_out</mat-icon></button>
+  <button mat-icon-button data-toggle="tooltip" title="Fit-width" id="fitWidth" (click)="fitwidth()"><mat-icon >height</mat-icon>
+</button>
+  <button mat-icon-button data-toggle="tooltip" title="Fit-height" id="fitHeigth" (click)="fitheight()"><mat-icon >height</mat-icon></button>
+  <button mat-icon-button data-toggle="tooltip" title="100%-zoom" id="100zoom" (click)="orginalsize()"><mat-icon >zoom_out_map</mat-icon></button>
+  <label for="zoom">zoom:</label><input id="zoom" style="width: 45px;height:100%;color:black;" #bo (keyup.enter)="onZoom(bo.value)" value="{{percentage}}">%
+
+
+  <span class="example-spacer2"></span>
+
+
+  <button mat-icon-button   [matMenuTriggerFor]="user"><mat-icon >account_circle</mat-icon></button>
+  <mat-menu #user="matMenu">
+    <div mat-menu-item *ngIf="userIsAuthenticated">
+    <h5> {{ userName }}</h5>
+ </div>
+ <br>
+ <div  mat-menu-item *ngIf="userIsAuthenticated">
+    <button mat-stroked-button (click)="onLogout()" ><h5>Logout</h5></button>
+ </div></mat-menu>
+  <button mat-icon-button><mat-icon >help_outline</mat-icon></button>
+
+  <mat-menu #menu="matMenu">
+    <input #fileUpload type="file" (click)="fileUpload.value = null" (change)="importFile($event)" style="display:none"
     accept="image/*">
-  
-  <button mat-icon-button data-toggle="tooltip" (click)="fileUpload.click()" title="Upload Image"><img src="assets/images/open_file.svg"
-      type="button" width="20px" height="20px"></button>
+  <button mat-icon-button color="accent" data-toggle="tooltip" (click)="fileUpload.click()" title="Upload Image" style=" margin-right:3px;" class="screenicon"><mat-icon  >text_snippet</mat-icon></button>
+
   <input #folderUpload type="file" name="fileList" (click)="folderUpload.value = null" webkitdirectory multiple
     (change)="importFile($event)" style="display:none" />
-  <button mat-icon-button  color="primary"  data-toggle="tooltip" title="Upload Directory" (click)="folderUpload.click()"><img
-      src="assets/images/open_folder.svg" type="button" width="20px" height="20px"></button>
-  <button  mat-icon-button color="primary"  data-toggle="tooltip"   title="vertcal View" (click)="asVertical()"
-    [disabled]="nextImage"><img src="assets/images/horizontal_screen.svg" class="vertical" type="button" width="20px" height="20px"></button>
-  <button mat-icon-button color="primary"  data-toggle="tooltip" title="Horizontal View" (click)="asHorizontal()"
-    [disabled]="nextImage"><img src="assets/images/horizontal_screen.svg" type="button" width="20px" height="20px"></button>
-    <button mat-icon-button color="primary"  data-toggle="tooltip" title="Select Block" (click)="selectBlock()" class="xmlButton" id="buttonXml"><img src="assets/images/select_block.svg"
-      type="button" width="20px" height="20px"></button>
-  <button id="SaveToXML" (click)="onSave()">SaveToXML</button>
-  <button mat-icon-button  color="primary"   (click)="onSaveXml()"><img
-    src="assets/images/download.svg"  type="button" width="20px" height="20px"></button>
-  <button id="blockno" (click)="blockupdate()">blocknumberupdate</button>
-  <button  mat-icon-button color="primary"  data-toggle="tooltip" title="Save Corrections" (click)="correctionUpdate()"><img
-    src="assets/images/saved-icon.jpg" type="button" width="20px" height="20px"></button>
+  <button mat-icon-button color="accent" data-toggle="tooltip" title="Upload Directory" style="margin-right:3px;" class="screenicon" (click)="folderUpload.click()">
+    <mat-icon  >folder_open</mat-icon> </button>
+
+
+  <button mat-icon-button color="accent" data-toggle="tooltip" title="vertcal View"  style="margin-right:3px;" class="screenicon" id="vertical_view"(click)="asVertical()"
+    [disabled]="nextImage"><mat-icon  >vertical_split</mat-icon></button>
+
+  <button mat-icon-button color="accent" data-toggle="tooltip" title="Horizontal View" style="margin-right:3px;" class="screenicon" (click)="asHorizontal()"
+    [disabled]="nextImage"><mat-icon  >horizontal_split</mat-icon></button>
+
+    <button mat-icon-button color="accent" data-toggle="tooltip" title="Select Block" (click)="selectBlock()" style="margin-right:3px;" class="screenicon"  id="buttonXml"><mat-icon  >crop_5_4</mat-icon></button>
+
+
+  <button mat-icon-button color="accent" class="screenicon"(click)="onSaveXml()"><mat-icon  >get_app</mat-icon></button>
+
     <!-- <button class="w3-button w3-teal w3-xlarge w3-left" onclick="openLeftMenu()">&#9776;</button> -->
-  
+  </mat-menu>
+  <button id="blockno" (click)="blockupdate()">blocknumberupdate</button>
+  <button id="SaveToXML" (click)="onSave()">SaveToXML</button>
 </mat-toolbar>
 
 
@@ -50,18 +112,18 @@
 
 
 
-<app-footer></app-footer>
+<!-- <app-footer></app-footer> -->
 
 
- 
+
 <div class="w3-sidebar w3-bar-block w3-card w3-animate-left" style="display:none" id="leftMenu">
   <button onclick="closeLeftMenu()" class="w3-bar-item w3-button w3-large">Close &times;</button>
   <a href="#" class="w3-bar-item w3-button">Link 1</a>
   <a href="#" class="w3-bar-item w3-button">Link 2</a>
   <a href="#" class="w3-bar-item w3-button">Link 3</a>
 </div>
-  
-    
+
+
 
 
 <div  id="menu">

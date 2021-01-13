@@ -1,4 +1,13 @@
 /* @import "../node_modules/@angular/material/prebuilt-themes/indigo-pink.css"; */
+input{
+
+  border-radius: 10px;
+  height: 30px !important;
+  color: black;
+}
+label{
+font-size: small;
+}
 .mat-spinner {
   position: relative;
   margin-left: 50%;
@@ -6,14 +15,55 @@
   transform: translateY(-50%); */
   margin-top: 50%;
 }
+.footer {
+  position: fixed;
+
+  width: 100%;
+  /* background-color: grey; */
+  /* color: white; */
+  text-align: center;
+  height:50px;
+}
+.example-spacer{
+  flex:5 auto;
+}
+.example-spacer1{
+  flex:3 auto;
+}
+.example-spacer2{
+  flex:2 auto;
+}
+.example-spacer3{
+  flex:.5 auto;
+
+}
+ .btn-group{
+  height:100%;
+ }
+
+
+/* .arrowup{
+  height: .25em;
+
+}
+.arrowdown{
+  height: .15em;
+
+} */
+
+#fitWidth{
+  transform: rotate(90deg);
+
+}
+
 
 
   .container{
     position: relative;
-    width: 100%; 
+    width: 100%;
     padding-bottom:5px ;
     margin: 0%;
-  
+
  }
   .btn-group button {
     height: 10px;
@@ -49,14 +99,14 @@ overflow:auto;
   /* margin-right: 2px; */
 }
 .split1{
- 
-  overflow-x: auto; 
+
+  overflow-x: auto;
   overflow-y: auto;
   border: 1px solid;
 }
 .split2{
   overflow-x: auto;
-  overflow-y: auto;  
+  overflow-y: auto;
   border: 1px solid;
 }
 .container.img {
@@ -132,7 +182,7 @@ overflow:auto;
 
 .mat-raised-button {
   margin: 5px;
-/*  
+/*
   color:white;
   background-color: white; */
 }
@@ -181,12 +231,12 @@ overflow:auto;
   transform: translateY(-50%);
 }
 .mat-toolbar {
-  min-height: 30px !important; 
+  min-height: 30px !important;
   height: 30px !important;
 }
 
 .mat-toolbar-row {
-  min-height: 30px !important; 
+  min-height: 30px !important;
   height: 30px !important;
 }
 

@@ -1,65 +1,61 @@
-<!-- 
-
-  <div class="footer"  style="width: 100%;">
-   
- <button mat-icon-button color="black"id="firstImg" data-toggle="tooltip" title="First-Page" [disabled]="previousImages" (click)="firstImage()"><img src="assets/images/first_page.svg" type="button" width="30px" height="30px"></button>
-  <button mat-icon-button color="black"id="previousImg" data-toggle="tooltip" title="Previous-Page" [disabled]="previousImages" (click)="previousImage()"><img src="assets/images/next.svg" class="previous" type="button" width="30px" height="30px"></button>
-  <button mat-icon-button color="black"id="nextImg" data-toggle="tooltip" title="Next-Page" [disabled]="nextImages" (click)="NextImage()"><img src="assets/images/next.svg" type="button" width="30px" height="30px"></button>
-  <button  mat-icon-button color="black"id="lastImg" data-toggle="tooltip" title="Last-Page" [disabled]="nextImages" (click)="lastImage()"><img src="assets/images/last_page.svg" type="button" width="30px" height="30px"></button>
-  <button mat-icon-button color="black"data-toggle="tooltip" title="Select Page" id="SelectPage" type="button" (click)="openModalDialog()">SelectPage</button>
+<!-- <div class="footer"  style="width: 100%;"> -->
+  <mat-toolbar color="primary" class="footer">
+    <span class="example-spacer1"></span>
+ <!-- <button  mat-icon-button id="firstImg" data-toggle="tooltip" title="First-Page"
+    [disabled]="previousImages" (click)="firstImage()"style="border:2px solid #00425a; margin-right:3px;"><img src="assets/images/first_page.png" type="button"
+      width="20px" height="20px"></button> -->
+  <!-- <button mat-icon-button id="previousImg" data-toggle="tooltip" title="Previous-Page" [disabled]="previousImages"
+    (click)="previousImage()"style="border:2px solid #00425a; margin-right:2px;"><img src="assets/images/previous.jpeg" type="button" width="20px" height="20px"></button> -->
+  <!-- <button mat-icon-button id="nextImg" data-toggle="tooltip" title="Next-Page" [disabled]="nextImages" (click)="NextImage()"style="border:2px solid #00425a; margin-right:2px;"><img
+      src="assets/images/next.png" type="button" width="20px" height="20px"></button> -->
+  <!-- <button  mat-icon-button id="lastImg" data-toggle="tooltip" title="Last-Page" [disabled]="nextImages" (click)="lastImage()"style="border:2px solid #00425a; margin-right:2px;"><img
+      src="assets/images/last_page.png" type="button" width="20px" height="20px"></button>&nbsp;&nbsp;&nbsp; -->
+     <button  mat-icon-button id="firstImg" data-toggle="tooltip" title="First-Page" [disabled]="previousImages" (click)="firstImage()" >  <mat-icon>first_page</mat-icon></button>
+      <button mat-icon-button id="previousImg" data-toggle="tooltip" title="Previous-Page" [disabled]="previousImages"(click)="previousImage()"><mat-icon>navigate_before</mat-icon></button>
+    <button mat-icon-button id="nextImg" data-toggle="tooltip" title="Next-Page" [disabled]="nextImages" (click)="NextImage()"> <mat-icon>navigate_next</mat-icon></button>
+  <button mat-icon-button id="lastImg" data-toggle="tooltip" title="Last-Page" [disabled]="nextImages" (click)="lastImage()"> <mat-icon>last_page</mat-icon></button>
+  <span class="example-spacer3"></span>
+  <button mat-raised-button  color="accent" data-toggle="tooltip" title="Select Page" id="SelectPage" (click)="openModalDialog()">Select Page</button>
   <div class="backdrop" [ngStyle]="{'display':display}"></div>
-  Rotate:<input id="angle" class="angleclass" style="width: 30px;" #box (keyup.enter)="onEnter(box.value)" value="{{angle}}">
+  <!-- <input type="checkbox" id="skipPage" value="skipPage"><label for="Skip Page"> Skip Page</label> -->
+
+  <span class="example-spacer2"></span>
+
+  <span color="accent">Rotate:</span><input id="angle" class="angleclass" style="width: 45px;color:black;  border:2px solid accent" #box (keyup.enter)="onEnter(box.value)" value="{{angle}}">
 
   <div class="btn-group">
-    <img src="assets/images/arrowup.png" (click)="rotateImage()" title="rotate" class="btn-group" type="button"
-      style="height:10px;width: 10px;"><br>
-    <img src="assets/images/arrowdown.png" (click)="rotateImageanti()" class="btn-group" type="button"
-      style="height:10px;width: 10px;">
+   <button mat-icon-button color="accent" style="height:15px;width:30px;"(click)="rotateImage()"> <mat-icon>arrow_drop_up</mat-icon></button>
+    <!-- <img src="assets/images/arrow_drop_up-24px.svg" (click)="rotateImage()" title="rotate" class="btn-group" type="button" -->
+      <!-- style="height:20px;width: 30px;"> -->
+      <br>
+      <button mat-icon-button color="accent" style="height:15px;width:30px;" (click)="rotateImageanti()">  <mat-icon>arrow_drop_down</mat-icon></button>
+    <!-- <img src="assets/images/arrow_drop_down-24px.svg" (click)="rotateImageanti()" class="btn-group" type="button"
+      style="height:20px;width: 30px; "> -->
   </div>
 
-  <button  mat-button color="black"(click)="loadXMLDoc()" title="Run-OCR" width="30px" height="30px">Run-OCR</button>
+  <span class="example-spacer3"></span>
+  <button mat-raised-button  color="accent" (click)="loadXMLDoc()"  title="Run-OCR" >Run-OCR</button>
+
+ <span class="example-spacer"></span>
 
 
-  <button mat-icon-button color="black" data-toggle="tooltip" title="Zoom-In" id="butZoomIn" (click)="zoomInFun()"><span><img src="assets/images/zoom_in.svg" height="30px" width="30px"></span></button>
-  <button mat-icon-button color="black" data-toggle="tooltip" title="Zoom-Out" id="butZoomOut" (click)="zoomOutFun()"><span><img src="assets/images/zoom_out.svg" height="30px" width="30px"></span></button>
-  <button  mat-icon-button color="black" data-toggle="tooltip" title="Fit-width" id="fitWidth" (click)="fitwidth()"><img src="assets/images/fitwidth (1).png" height="19px" width="30px"></button>
-  <button mat-icon-button color="black" data-toggle="tooltip" title="Fit-height" id="fitHeigth" (click)="fitheight()"><img src="assets/images/fitheight (1).png" height="19px" width="30px"></button>
-  <button  mat-icon-button color="black" data-toggle="tooltip" title="100%-zoom" id="100zoom" (click)="orginalsize()"><img src="assets/images/fitScrre (1).png" height="19px" width="30px"></button>
-  zoom:<input id="zoom" style="width: 30px;" #bo (keyup.enter)="onZoom(bo.value)" value="{{percentage}}">%
 
-  </div> -->
+  <button mat-icon-button data-toggle="tooltip" title="Zoom-In" id="butZoomIn" (click)="zoomInFun()"> <mat-icon >zoom_in</mat-icon></button>
+  <button mat-icon-button data-toggle="tooltip" title="Zoom-Out" id="butZoomOut" (click)="zoomOutFun()"> <mat-icon >zoom_out</mat-icon></button>
+  <button mat-icon-button data-toggle="tooltip" title="Fit-width" id="fitWidth" (click)="fitwidth()"><mat-icon >horizontal_distribute</mat-icon>
+</button>
+  <button mat-icon-button data-toggle="tooltip" title="Fit-height" id="fitHeigth" (click)="fitheight()"><mat-icon >vertical_distribute</mat-icon></button>
+  <button mat-icon-button data-toggle="tooltip" title="100%-zoom" id="100zoom" (click)="orginalsize()"><mat-icon >zoom_out_map</mat-icon></button>
+  zoom:<input id="zoom" style="width:45px; margin-right:3px;"  #bo (keyup.enter)="onZoom(bo.value)" value="{{percentage}}">%
+  <span class="example-spacer2"></span>
+</mat-toolbar>
+<!-- </div> -->
+<!-- <footer>footer</footer>
+ <mat-toolbar color="primary">
+<mat-toolbar-row>third line</mat-toolbar-row>
+</mat-toolbar> -->
 
-  <mat-toolbar class="footer" color="primary">
-    <mat-toolbar-row >
-      <span class="gap"></span>
-    <button  mat-icon-button color="black"id="firstImg" data-toggle="tooltip" title="First-Page" [disabled]="previousImages" (click)="firstImage()"><img src="assets/images/first_page.svg" type="button" width="30px" height="30px"></button>
-    <button mat-icon-button color="black"id="previousImg" data-toggle="tooltip" title="Previous-Page" [disabled]="previousImages" (click)="previousImage()"><img src="assets/images/next.svg" class="previous" type="button" width="30px" height="30px"></button>
-    <button mat-icon-button color="black"id="nextImg" data-toggle="tooltip" title="Next-Page" [disabled]="nextImages" (click)="NextImage()"><img src="assets/images/next.svg" type="button" width="30px" height="30px"></button>
-    <button  mat-icon-button color="black"id="lastImg" data-toggle="tooltip" title="Last-Page" [disabled]="nextImages" (click)="lastImage()"><img src="assets/images/last_page.svg" type="button" width="30px" height="30px"></button>
-    <button mat-fab color="black"data-toggle="tooltip" title="Select Page" id="SelectPage" type="button" (click)="openModalDialog()"><h5>select</h5></button>
-    <div class="backdrop" [ngStyle]="{'display':display}"></div>
- 
-    <h5>rotate :</h5><input id="angle" class="input" style="width: 30px;" #box (keyup.enter)="onEnter(box.value)" value="{{angle}}">
-  
-    <div class="btn-group">
-      <img mat-icon-button src="assets/images/arrowup.svg" (click)="rotateImage()" title="Increase Skew" class="btn-group" type="button"
-        style="height:25px;width: 25px;"><br>
-      <img mat-icon-button src="assets/images/arrowdown.svg" (click)="rotateImageanti()" title="drecrease Skew" class="btn-group" type="button"
-        style="height:25px;width: 25px;  transform: rotate(180deg)">
-    </div>
-  
-    <button  mat-fab (click)="loadXMLDoc()" class="runOcr" title="Run-OCR" width="30px" height="30px">Run-OCR</button>
 
-    <span class="filler"></span>
-    <button mat-icon-button color="black" data-toggle="tooltip" title="Zoom-In" id="butZoomIn" (click)="zoomInFun()"><span><img src="assets/images/zoom_in.svg" height="30px" width="30px"></span></button>
-    <button mat-icon-button color="black" data-toggle="tooltip" title="Zoom-Out" id="butZoomOut" (click)="zoomOutFun()"><span><img src="assets/images/zoom_out.svg" height="30px" width="30px"></span></button>
-    <button  mat-icon-button color="black" data-toggle="tooltip" title="Fit-width" id="fitWidth" (click)="fitwidth()"><img src="assets/images/fitwidth (1).png" height="30px" width="30px"></button>
-    <button mat-icon-button color="black" data-toggle="tooltip" title="Fit-height" id="fitHeigth" (click)="fitheight()"><img src="assets/images/fitheight (1).png" height="30px" width="30px"></button>
-    <button  mat-icon-button color="black" data-toggle="tooltip" title="100%-zoom" id="100zoom" (click)="orginalsize()"><img src="assets/images/fitScrre (1).png" height="30px" width="30px"></button>
-    <h5>zoom :</h5>:<input id="zoom" class="input" style="width: 30px;" #bo (keyup.enter)="onZoom(bo.value)" value="{{percentage}}">%
-    <span class="end"></span>
-  </mat-toolbar-row> 
-  </mat-toolbar>
-
+  <script src="https://cdn.rawgit.com/seikichi/tiff.js/master/tiff.min.js"></script>
 
 

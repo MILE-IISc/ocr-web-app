@@ -5,38 +5,38 @@
         alt="Angular Logo"
         src="assets/images/mile_logo.png"
       />
-      <div> 
+      <div>
     <h4>
       MILE lab IISc - The Kannada OCR
-    
+
     </h4>
     </div>
 
    </mat-card-title> -->
 
-   
+
     <!-- <div class="toolbar" role="banner" style="padding-bottom: 5px; " >
       <img
         width="20"
         alt="Angular Logo"
         src="assets/images/mile_logo.png"
       />
-      
+
     </div>
      <h4>
         MILE lab IISc - The Kannada OCR
       </h4>
- 
+
 
 <div> -->
 
-<!-- 
+<!--
    <div *ngIf="!userIsAuthenticated">
       <a mat-button routerLink="/auth/login" routerLinkActive="mat-accent" >Login</a>
    </div>
  <div *ngIf="userIsAuthenticated">
       <a mat-button routerLink="/screen" routerLinkActive="mat-accent">Edit Image Content</a>
-   </div> 
+   </div>
 <div *ngIf="userIsAuthenticated && isAdmin">
       <a mat-button routerLink="/auth/signup" routerLinkActive="mat-accent">Create User</a>
    </div>
@@ -46,12 +46,12 @@
    <div *ngIf="userIsAuthenticated">
       <button mat-button (click)="onLogout()">Logout</button>
    </div>
-  
+
 </div>
 <button mat-icon-button href="https://github.com/MILE-IISc/ocr-web-app/blob/main/README.md"><img src="assets/images/help.svg"
   type="button" width="20px" height="20px"></button> -->
 <!-- </mat-card> -->
-<mat-toolbar class="header" color="primary">
+<mat-toolbar *ngIf="!userIsAuthenticated" class="header" color="primary">
   <img
   width="20"
   alt="Angular Logo"
@@ -65,16 +65,16 @@
  </div>
 <!-- <div *ngIf="userIsAuthenticated">
     <a mat-button routerLink="/screen" routerLinkActive="mat-accent">Edit Image Content</a>
- </div> 
+ </div>
 <div *ngIf="userIsAuthenticated && isAdmin">
     <a mat-button routerLink="/auth/signup" routerLinkActive="mat-accent">Create User</a>
  </div> -->
- <div *ngIf="userIsAuthenticated">
+ <!-- <div *ngIf="userIsAuthenticated">
     <h5> {{ userName }}</h5>
  </div>
  <div *ngIf="userIsAuthenticated">
     <button mat-stroked-button (click)="onLogout()"><h5>Logout</h5></button>
- </div>
+ </div> -->
 
 
 <button mat-icon-button href="https://github.com/MILE-IISc/ocr-web-app/blob/main/README.md"><img src="assets/images/help.svg"
