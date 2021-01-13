@@ -91,6 +91,35 @@ export class ScreenComponent implements OnInit{
   JsonObj;
 
 
+  sidesize1 = 0;
+  sidesize2 = 100;
+  area1 = 50;
+  area2 = 50;
+  size3 = 50;
+  Isopen = true;
+  invalidMessage ="";
+
+sideOpen(){
+  if(this.Isopen == true){
+    this.sidesize1 = 50;
+    this.sidesize2 = 50;
+    this.size3 = 35;
+    this.images = this.imageService.getImages();
+    this.imageService.openModalDialog(this.images);
+    this.Isopen = false;
+  }
+  else{
+    this.sidesize1 = 0;
+  this.sidesize2 = 100;
+  this.size3 = 50
+  this.Isopen = true;
+  }
+ }
+sideClose(){
+  this.sidesize1 = 0;
+  this.sidesize2 = 100;
+  this.size3 = 50
+}
 
   constructor(private headerService: HeaderService, private imageService: ImageService, private viewerService: ViewerService
     , public authService: AuthService,private fileService:FileService) { }
@@ -118,6 +147,7 @@ export class ScreenComponent implements OnInit{
 
 
     this.userName = this.authService.getUserName();
+    // this.imageService.getServerImages();
     // console.log("user name in screen "+this.userName)
     this.imageService.getServerImages().then(() => {
       console.log("got serverImages in screen ngOnInit");
@@ -131,8 +161,7 @@ export class ScreenComponent implements OnInit{
           this.percentage = percent;
         });
 
-        retain.percentage = this.percentage;
-        // console.log("the current percentage is "+retain.percentage)
+    retain.percentage = this.percentage;
 
     this.isLoading = this.headerService.getloadingvalue();
     this.headerService.loadingvaluechage
@@ -155,17 +184,32 @@ export class ScreenComponent implements OnInit{
           this.nextImage = multiImage;
         });
 
+
+    this.imageService.invalidMessageChange
+      .subscribe(
+        (invalidMessage: string) => {
+
+          console.log("invalid mes in screen======== " + invalidMessage);
+          this.invalidMessage = invalidMessage;
+          if (this.invalidMessage != "") {
+            var x = document.getElementById("snackbar");
+            console.log("x in screen " + x);
+            x.className = "show";
+            setTimeout(() => {
+              x.className = x.className.replace("show", "");
+            }, 5000);
+          }
+        });
+
+
+
     this.waveSub = this.imageService
       .getImageUpdateListener()
       .subscribe(async (imageData: { serverImages: Images[] }) => {
-        // console.log("inside subscribe in screen oninit")
         this.serverImages = imageData.serverImages;
-        // this.isLoading = true;
         const imageLength = this.serverImages.length;
-        // console.log("imageLength in screen onInit "+imageLength)
         if (imageLength > 0) {
           if (this.isDiv == true) {
-            // console.log("holder is there");
             $('.holderClass').remove();
           }
           this.isLoading = true;
@@ -195,20 +239,16 @@ export class ScreenComponent implements OnInit{
     this.imageService.urlChanged
       .subscribe(
         (url: any) => {
-          // console.log("Inside subscribe");
-          // console.log("+++++++++url: " + url);
           this.localUrl = url;
           setTimeout(() => this.viewerService.fitwidth(), 50);
           setTimeout(() => this.setpercentage(), 60);
         });
 
     this.imageService.fileNameChange.subscribe((fileName: any) => {
-      // console.log("nextImages inside footer: " + fileName);
       this.fileName = fileName;
     });
 
     var element = document.getElementById("content");
-    // console.log("documents----" + element)
     this.imageService.setDocumentId(element);
 
     console.log("this.headerService.getpercentagevary()",this.headerService.getpercentagevary());
@@ -233,9 +273,7 @@ export class ScreenComponent implements OnInit{
   }
 
   async openThisImage(event) {
-    // console.log("inside open this image");
     var id = event.target.value;
-    // console.log("id : " + id);
     this.images = this.imageService.getImages();
     for (let i = 0; i < this.images.length; i++) {
       if (this.images[i].fileName == id) {
@@ -271,9 +309,7 @@ export class ScreenComponent implements OnInit{
     this.anotherTryVisible = true;
     var fileRead = (event.target as HTMLInputElement).files;
     var filesCount = event.target.files.length;
-    // console.log("isLoading before calling importFile: " + this.isLoading);
     this.isLoading = true;
-    // console.log("isLoading after calling importFile: " + this.isLoading);
     if (event.target.files && fileRead) {
       this.imageService.addImage(fileRead);
     }
@@ -437,7 +473,7 @@ export class ScreenComponent implements OnInit{
 
   openModalDialog() {
     this.images = this.imageService.getImages();
-    this.imageService.openModalDialog(this.images, this.display);
+    this.imageService.openModalDialog(this.images);
   }
 
   NextImage() {

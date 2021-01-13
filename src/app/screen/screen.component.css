@@ -133,7 +133,9 @@ overflow:auto;
 .dropdown-submenu:hover>.dropdown-menu {
   display: block;
 }
-
+.filler {
+  flex: 1 auto;
+}
 .dropdown-submenu>a:after {
   display: block;
   content: " ";
@@ -157,6 +159,9 @@ overflow:auto;
   padding: 12px 16px;
   /* z-index: 1;  */
 }
+.sideBar:hover{
+  font-size: large;
+}
 
 
 
@@ -175,6 +180,47 @@ overflow:auto;
   display: block;
 }
 
+#snackbar {
+  visibility: hidden;
+  min-width: 250px;
+  margin-left: -125px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 2px;
+  padding: 16px;
+  position: fixed;
+  z-index: 1;
+  left: 50%;
+  bottom: 30px;
+  font-size: 17px;
+}
+
+#snackbar.show {
+  visibility: visible;
+  -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+  animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+@-webkit-keyframes fadein {
+  from {bottom: 0; opacity: 0;} 
+  to {bottom: 30px; opacity: 1;}
+}
+
+@keyframes fadein {
+  from {bottom: 0; opacity: 0;}
+  to {bottom: 30px; opacity: 1;}
+}
+
+@-webkit-keyframes fadeout {
+  from {bottom: 30px; opacity: 1;} 
+  to {bottom: 0; opacity: 0;}
+}
+
+@keyframes fadeout {
+  from {bottom: 30px; opacity: 1;}
+  to {bottom: 0; opacity: 0;}
+}
 .mat-raised-button:hover {
   font-size: 20px;
 
@@ -203,7 +249,9 @@ overflow:auto;
 
 ::ng-deep .as-split-gutter-icon {
   background-color:rgb(146, 144, 144);
-  cursor:none !important ;
+  width: 3px !important;
+/* cursor: pointer !important; */
+  
 }
 .example-container {
   position: absolute;
@@ -238,5 +286,18 @@ overflow:auto;
 .mat-toolbar-row {
   min-height: 30px !important;
   height: 30px !important;
+}
+.sidebar1{
+  position: absolute;
+
+  top: 50%;
+  margin: 0%;
+  /* left: 0%; */
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+.sideBody{
+  background-color: rgb(70, 68, 68);
 }
 

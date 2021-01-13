@@ -160,7 +160,7 @@ export class FooterComponent implements OnInit {
 
   openModalDialog() {
     this.images = this.imageService.getImages();
-    this.imageService.openModalDialog(this.images, this.display);
+    // this.imageService.openModalDialog(this.images, this.display);
   }
 
   NextImage() {
