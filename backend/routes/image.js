@@ -27,6 +27,7 @@ const MIME_TYPE_MAP = {
 var invalid ="";
 const cloudStorage = require('ibm-cos-sdk');
 const multerS3 = require('multer-s3');
+const { fileURLToPath } = require("url");
 const bucket = "my-bucket-sasi-dev-test-ahsdbasjhbdjash";
 var config = {
   endpoint: process.env.object_storage_endpoint,
@@ -85,7 +86,8 @@ function getBucketContents(bucketName) {
 }
 
 
-function getItem(bucketName, itemName) {
+function getItem(bucketName, itemName, mail, requestType) {
+  console.log("mail inside getItem first",mail)
   console.log(`Retrieving item from bucket: ${bucketName}, key: ${itemName}`);
   return cos.getObject({
       Bucket: bucketName,
@@ -93,8 +95,8 @@ function getItem(bucketName, itemName) {
   }).promise()
   .then((data) => {
       if (data != null) {
-          if(path.extname(itemName).toLowerCase() == ".tif") {
-            console.log('reached getting tif data in getItem\n');
+          if(path.extname(itemName).toLowerCase() == ".tif" && requestType == "post") {
+            console.log('reached getting tif data in getItem\n',itemName);
             let prefix = "data:tif;base64,";
             // let tiffData = prefix + base64;
             // console.log("tiffData: "+tiffData);
@@ -103,26 +105,20 @@ function getItem(bucketName, itemName) {
             console.log("tiff ",data.ContentType);
             console.log("tiffArrayBuff: "+tiffArrayBuff);
 
-            Jimp.read(Buffer.from(tiffArrayBuff, 'base64')).then(file => {
+            console.log("mail===========> ",mail);
+            Jimp.read(Buffer.from(tiffArrayBuff, 'base64')).then((file) => {
               console.log("Jimp file ",file);
               console.log("file width",file.getWidth());
               file
               .quality(75)
-              .write('example.jpg');
-            } );
-
-            // var tiffData = new Tiff({ buffer: Buffer.from(data.Body).buffer });
-            // console.log("tiffData: "+tiffData);
-            // var canvas = tiffData.toCanvas();
-            // console.log("tiffImage: "+tiffData);
-            // console.log("canvas: "+canvas);
-            return data.Body;
+              .write('./backend/images/'+mail+"/"+itemName.slice(0, -3).toLowerCase() + 'jpg');
+            });
           }
           else if(path.extname(itemName).toLowerCase() == ".png" || path.extname(itemName).toLowerCase() == ".jpg" || path.extname(itemName).toLowerCase() == ".bmp"){
             let prefix = "data:"+data.ContentType+";base64,";
             let base64 = Buffer.from(data.Body).toString('base64');
             let jpgData = prefix + base64;
-            console.log("jpgData: "+jpgData);
+            // console.log("jpgData: "+jpgData);
             return jpgData;
           }
       }
@@ -155,23 +151,49 @@ var upload = multer({
     },
     key: function (req, file, cb) {
       console.log("file.originalname"+file.originalName+"file.mimetype"+file.mimetype);
-      // const isValid = MIME_TYPE_MAP[file.mimetype];
-      // let error = new Error("Invalid mime type");
-      // if (isValid) {
-      //   error = null;
-      // }
-      console.log(file.originalname, file);
+      console.log("upload file multer ",file.originalname, Date());
       cb(null, file.originalname);
     }
   })
 });
 
 router.post("", checkAuth,
-  // upload.array("image", 4000),
+  upload.array("image", 4000),
   (req, res, next) => {
-    upload.array("image", 4000);
+    console.log("inside post email ",req.body.email)
   if (res.statusCode === 200 && req.files.length > 0) {
-    console.log("file list length " + req.files.length);
+    console.log("file list length for upload", req.files.length);
+    console.log("invoked multer and sending response", Date());
+    cos.listObjects(
+      {Bucket: bucket},
+    ).promise()
+    .then((data) => {
+      console.log("data.Contents.length in post",data.Contents.length);
+      for(let i = 0; i < data.Contents.length; i++) {
+        console.log("data for file"+data.Contents[i].Key+""+data.Contents[i].ETag);
+        console.log("data for file"+data.Contents[i].Key+""+data.Contents[i].Size);
+        if(path.extname(data.Contents[i].Key).toLowerCase() == ".tif") {
+          console.log("tiff files",data.Contents[i].Key);
+          getItem(bucket, data.Contents[i].Key, req.body.email, "postRequest").then((itemData) => {
+            if(data == "The specified key does not exists in bucket") {
+              console.log("error while retrieving and converting image:",itemData);
+            }
+            else {
+              console.log("image content retrieved and converted");
+              let tiffToJpg = data.Contents[i].Key.slice(0, -3).toLowerCase() + 'jpg';
+              const filePath = './backend/images/' + req.body.email+"/" +tiffToJpg;
+              console.log("file Path " + filePath);
+              console.log("calling multiPartUpload");
+              multiPartUpload(bucket, tiffToJpg, filePath);
+            }
+          });
+        }
+      }
+    })
+    .catch((e) => {
+      console.error(`ERROR: ${e.code} - ${e.message}\n`);
+    });
+
     console.log("invalid "+invalid);
     res.status(201).json({
       message: "Images added successfully "+invalid,
@@ -255,31 +277,124 @@ router.get("", checkAuth,(req, res, next) => {
           });
         }
       });
-      fs.readdir(user_wav_dir, (err, filesList) => {
-      });
     });
 });
 
 router.get("/:fileName", checkAuth,(req, res, next) =>{
+  const mail = req.query.user;
+  let fetchedUser;
+  let jpegFile = req.params.fileName;
   const fileName = req.params.fileName;
-  console.log("req.params.fileName",req.params.fileName);
-  getItem(bucket, req.params.fileName).then((data) => {
-    if(data == "The specified key does not exists in bucket") {
-      console.log("error while retrieving image:",data);
-      res.status(400).json({
-        message: data,
-        json: ""
+  console.log("req.params.fileName",jpegFile);
+  if (path.extname(jpegFile).toLowerCase() == ".tif") {
+    jpegFile = jpegFile.slice(0, -3).toLowerCase() + 'jpg';
+  }
+  User.findOne({ email: mail })
+  .then(user => {
+    if (!user) {
+      return res.status(401).json({
+        message: "Auth failed"
       });
     }
-    else {
-      console.log("image content:",data);
-        res.status(201).json({
-          message: "image fetched successfully",
-          json: data
+    fetchedUser = user;
+    console.log("inside get File mail"+req.query.user);
+    getItem(bucket, jpegFile, req.query.user,"getRequest").then((data) => {
+      if(data == "The specified key does not exists in bucket") {
+        console.log("error while retrieving image:",data);
+        res.status(400).json({
+          message: data,
+          json: ""
         });
-    }
+      }
+      else {
+          res.status(201).json({
+            message: "image fetched successfully",
+            json: data
+          });
+      }
+  });
   });
 });
+
+function multiPartUpload(bucketName, itemName, filePath) {
+    var uploadID = null;
+
+    if (!fs.existsSync(filePath)) {
+        log.error(new Error(`The file \'${filePath}\' does not exist or is not accessible.`));
+        return;
+    }
+
+    console.log(`Starting multi-part upload for ${itemName} to bucket: ${bucketName}`);
+    return cos.createMultipartUpload({
+        Bucket: bucketName,
+        Key: itemName
+    }).promise()
+    .then((data) => {
+        uploadID = data.UploadId;
+
+        //begin the file upload
+        fs.readFile(filePath, (e, fileData) => {
+            //min 5MB part
+            var partSize = 1024 * 1024 * 5;
+            var partCount = Math.ceil(fileData.length / partSize);
+
+            async.timesSeries(partCount, (partNum, next) => {
+                var start = partNum * partSize;
+                var end = Math.min(start + partSize, fileData.length);
+
+                partNum++;
+
+                console.log(`Uploading to ${itemName} (part ${partNum} of ${partCount})`);
+
+                cos.uploadPart({
+                    Body: fileData.slice(start, end),
+                    Bucket: bucketName,
+                    Key: itemName,
+                    PartNumber: partNum,
+                    UploadId: uploadID
+                }).promise()
+                .then((data) => {
+                    next(e, {ETag: data.ETag, PartNumber: partNum});
+                })
+                .catch((e) => {
+                    cancelMultiPartUpload(bucketName, itemName, uploadID);
+                    console.error(`ERROR: ${e.code} - ${e.message}\n`);
+                });
+            }, (e, dataPacks) => {
+                cos.completeMultipartUpload({
+                    Bucket: bucketName,
+                    Key: itemName,
+                    MultipartUpload: {
+                        Parts: dataPacks
+                    },
+                    UploadId: uploadID
+                }).promise()
+                .then(console.log(`Upload of all ${partCount} parts of ${itemName} successful.`))
+                .catch((e) => {
+                    cancelMultiPartUpload(bucketName, itemName, uploadID);
+                    console.error(`ERROR: ${e.code} - ${e.message}\n`);
+                });
+            });
+        });
+    })
+    .catch((e) => {
+        console.error(`ERROR: ${e.code} - ${e.message}\n`);
+    });
+}
+
+function cancelMultiPartUpload(bucketName, itemName, uploadID) {
+    return cos.abortMultipartUpload({
+        Bucket: bucketName,
+        Key: itemName,
+        UploadId: uploadID
+    }).promise()
+    .then(() => {
+        console.log(`Multi-part upload aborted for ${itemName}`);
+    })
+    .catch((e)=>{
+        console.error(`ERROR: ${e.code} - ${e.message}\n`);
+    });
+}
 
 
 // -------------> Unused code for reference <----------------
@@ -371,86 +486,5 @@ router.get("/:fileName", checkAuth,(req, res, next) =>{
 //       });
 //   });
 
-
-
-// function multiPartUpload(bucketName, itemName, filePath) {
-//     var uploadID = null;
-
-//     if (!fs.existsSync(filePath)) {
-//         log.error(new Error(`The file \'${filePath}\' does not exist or is not accessible.`));
-//         return;
-//     }
-
-//     console.log(`Starting multi-part upload for ${itemName} to bucket: ${bucketName}`);
-//     return cos.createMultipartUpload({
-//         Bucket: bucketName,
-//         Key: itemName
-//     }).promise()
-//     .then((data) => {
-//         uploadID = data.UploadId;
-
-//         //begin the file upload
-//         fs.readFile(filePath, (e, fileData) => {
-//             //min 5MB part
-//             var partSize = 1024 * 1024 * 5;
-//             var partCount = Math.ceil(fileData.length / partSize);
-
-//             async.timesSeries(partCount, (partNum, next) => {
-//                 var start = partNum * partSize;
-//                 var end = Math.min(start + partSize, fileData.length);
-
-//                 partNum++;
-
-//                 console.log(`Uploading to ${itemName} (part ${partNum} of ${partCount})`);
-
-//                 cos.uploadPart({
-//                     Body: fileData.slice(start, end),
-//                     Bucket: bucketName,
-//                     Key: itemName,
-//                     PartNumber: partNum,
-//                     UploadId: uploadID
-//                 }).promise()
-//                 .then((data) => {
-//                     next(e, {ETag: data.ETag, PartNumber: partNum});
-//                 })
-//                 .catch((e) => {
-//                     cancelMultiPartUpload(bucketName, itemName, uploadID);
-//                     console.error(`ERROR: ${e.code} - ${e.message}\n`);
-//                 });
-//             }, (e, dataPacks) => {
-//                 cos.completeMultipartUpload({
-//                     Bucket: bucketName,
-//                     Key: itemName,
-//                     MultipartUpload: {
-//                         Parts: dataPacks
-//                     },
-//                     UploadId: uploadID
-//                 }).promise()
-//                 .then(console.log(`Upload of all ${partCount} parts of ${itemName} successful.`))
-//                 .catch((e) => {
-//                     cancelMultiPartUpload(bucketName, itemName, uploadID);
-//                     console.error(`ERROR: ${e.code} - ${e.message}\n`);
-//                 });
-//             });
-//         });
-//     })
-//     .catch((e) => {
-//         console.error(`ERROR: ${e.code} - ${e.message}\n`);
-//     });
-// }
-
-// function cancelMultiPartUpload(bucketName, itemName, uploadID) {
-//     return cos.abortMultipartUpload({
-//         Bucket: bucketName,
-//         Key: itemName,
-//         UploadId: uploadID
-//     }).promise()
-//     .then(() => {
-//         console.log(`Multi-part upload aborted for ${itemName}`);
-//     })
-//     .catch((e)=>{
-//         console.error(`ERROR: ${e.code} - ${e.message}\n`);
-//     });
-// }
 
 module.exports = router;

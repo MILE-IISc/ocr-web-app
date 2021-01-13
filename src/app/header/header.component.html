@@ -9,14 +9,14 @@
         alt="Angular Logo"
         src="assets/images/mile_logo.png"
       />
-      
+
     </div>
     <div >
       <span class="header-text" >
         MILE lab IISc - The Kannada OCR
       </span>
       </div>
-    
+
 <!-- <div class="dropdown" style= z-index:500; *ngIf="userIsAuthenticated">
   &nbsp;&nbsp;&nbsp; <a href = "#" class="dropbtn">File<span class="caret"></span></a>
   <div class="dropdown-content">
@@ -127,9 +127,9 @@ accept="image/*">
     <!-- <li *ngIf="userIsAuthenticated">
       <a mat-button routerLink="/screen" routerLinkActive="mat-accent">Edit Image Content</a>
     </li> -->
-    <!-- <li *ngIf="userIsAuthenticated && isAdmin">
+    <li *ngIf="userIsAuthenticated && isAdmin">
       <a mat-button routerLink="/auth/signup" routerLinkActive="mat-accent">Create User</a>
-    </li> -->
+    </li>
     <li *ngIf="userIsAuthenticated">
       <span style="color: white;">{{ userName }}</span>
     </li>

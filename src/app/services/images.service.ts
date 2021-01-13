@@ -5,7 +5,6 @@ import { EventEmitter, Injectable, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import * as $ from 'jquery';
 import { Subject, Subscription } from 'rxjs';
-import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/auth.service';
 import { Images } from '../shared/images.model';
 import { HeaderService } from '../services/header.service';
@@ -247,7 +246,7 @@ export class ImageService implements OnInit {
   async loadArray(serverImage: any) {
     console.log("inside load array");
 
-    // console.log("inside load array0000ooooooo((((((((((((((((((((((((((((((((((((((((((((",serverImage);
+    console.log("inside load array",serverImage);
     // const result = await new Promise((resolve) => {
     //   this.getImage(serverImage).subscribe(data => {
     //     console.log("dataType----" + data.type);
@@ -277,27 +276,13 @@ export class ImageService implements OnInit {
     // return result;
 
     let promise = new Promise((resolve, reject) => {
+      var user = this.authService.userName;
+      const queryParams = `?user=${user}`;
       this.http
         .get<{ message: string; json: any }>(
-          this.IMAGE_BACKEND_URL + serverImage).subscribe(responseData => {
+          this.IMAGE_BACKEND_URL + serverImage + queryParams).subscribe(responseData => {
           console.log("responseData.json",responseData.json);
-          // var tiffData = new Tiff({ buffer: responseData.json });
-          // console.log("tiff before canvas",tiffData);
-          // var canvas = tiffData.toCanvas();
-          // var img = convertCanvasToImage(canvas);
-          // console.log("tiffImage src",img.src);
-          // resolve(img.src);
-
-          let reader = new FileReader();
-          reader.onload = (event: any) => {
-            console.log("before tiff conversion",event.target.result);
-            var image = new Tiff({ buffer: event.target.result });
-            console.log("tiff before canvas",image);
-            var canvas = image.toCanvas();
-            var img = convertCanvasToImage(canvas);
-            resolve(img.src);
-          }
-          reader.readAsArrayBuffer(responseData.json.data);
+          resolve(responseData.json);
         });
     });
     return promise;
@@ -461,7 +446,7 @@ export class ImageService implements OnInit {
      if(jsonObj['page'].block){
      var blocks = jsonObj['page'].block;
     //  console.log("block length " + blocks.length);
-     
+
      for (var i = 0; i < blocks.length; i++) {
        var blockNumber = (blocks[i].BlockNumber);
        console.log("blockNumber" + blockNumber);
