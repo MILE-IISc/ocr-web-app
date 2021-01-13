@@ -7,6 +7,7 @@
   
   <button mat-icon-button data-toggle="tooltip" (click)="fileUpload.click()" title="Upload Image"><img src="assets/images/open_file.svg"
       type="button" width="20px" height="20px"></button>
+    <div id = "snackbar">{{ invalidMessage }}</div>
   <input #folderUpload type="file" name="fileList" (click)="folderUpload.value = null" webkitdirectory multiple
     (change)="importFile($event)" style="display:none" />
   <button mat-icon-button  color="primary"  data-toggle="tooltip" title="Upload Directory" (click)="folderUpload.click()"><img

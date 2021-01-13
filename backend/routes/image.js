@@ -139,7 +139,7 @@ const fileFilter = (req,file,cb)=>{
   if(isValid){
     cb(null,true);
   }else{
-    invalid = "invalid mime types"
+    invalid = "And invalid file types were skipped. "
     cb(null,false);
   }
 }
@@ -156,11 +156,6 @@ var upload = multer({
     },
     key: function (req, file, cb) {
       console.log("file.originalname"+file.originalName+"file.mimetype"+file.mimetype);
-      // const isValid = MIME_TYPE_MAP[file.mimetype];
-      // let error = new Error("Invalid mime type");
-      // if (isValid) {
-      //   error = null;
-      // }
       console.log(file.originalname, file);
       cb(null, file.originalname);
     }
@@ -175,7 +170,7 @@ router.post("", checkAuth,
     console.log("file list length " + req.files.length);
     console.log("invalid "+invalid);
     res.status(201).json({
-      message: "Images added successfully "+invalid,
+      message: "Images uploaded successfully!!! "+invalid,
     });
   }
   else {

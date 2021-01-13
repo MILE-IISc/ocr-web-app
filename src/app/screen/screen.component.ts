@@ -73,6 +73,7 @@ export class ScreenComponent implements OnInit{
   area2 = 50;
   size3 = 50;
   Isopen = true;
+  invalidMessage ="";
 
 sideOpen(){
   if(this.Isopen == true){
@@ -101,6 +102,7 @@ sideClose(){
 
   ngOnInit(): void {
     this.userName = this.authService.getUserName();
+    // this.imageService.getServerImages();
     // console.log("user name in screen "+this.userName)
     this.imageService.getServerImages().then(() => {
       console.log("got serverImages in screen ngOnInit");
@@ -114,8 +116,7 @@ sideClose(){
           this.percentage = percent;
         });
 
-        retain.percentage = this.percentage;
-        // console.log("the current percentage is "+retain.percentage)
+    retain.percentage = this.percentage;
 
     this.isLoading = this.headerService.getloadingvalue();
     this.headerService.loadingvaluechage
@@ -138,17 +139,32 @@ sideClose(){
           this.nextImage = multiImage;
         });
 
+
+    this.imageService.invalidMessageChange
+      .subscribe(
+        (invalidMessage: string) => {
+
+          console.log("invalid mes in screen======== " + invalidMessage);
+          this.invalidMessage = invalidMessage;
+          if (this.invalidMessage != "") {
+            var x = document.getElementById("snackbar");
+            console.log("x in screen " + x);
+            x.className = "show";
+            setTimeout(() => {
+              x.className = x.className.replace("show", "");
+            }, 5000);
+          }
+        });
+
+
+
     this.waveSub = this.imageService
       .getImageUpdateListener()
       .subscribe(async (imageData: { serverImages: Images[] }) => {
-        // console.log("inside subscribe in screen oninit")
         this.serverImages = imageData.serverImages;
-        // this.isLoading = true;
         const imageLength = this.serverImages.length;
-        // console.log("imageLength in screen onInit "+imageLength)
         if (imageLength > 0) {
           if (this.isDiv == true) {
-            // console.log("holder is there");
             $('.holderClass').remove();
           }
           this.isLoading = true;
@@ -178,27 +194,21 @@ sideClose(){
     this.imageService.urlChanged
       .subscribe(
         (url: any) => {
-          // console.log("Inside subscribe");
-          // console.log("+++++++++url: " + url);
           this.localUrl = url;
           setTimeout(() => this.viewerService.fitwidth(), 50);
           setTimeout(() => this.setpercentage(), 60);
         });
 
     this.imageService.fileNameChange.subscribe((fileName: any) => {
-      // console.log("nextImages inside footer: " + fileName);
       this.fileName = fileName;
     });
 
     var element = document.getElementById("content");
-    // console.log("documents----" + element)
     this.imageService.setDocumentId(element);
   }
 
   async openThisImage(event) {
-    // console.log("inside open this image");
     var id = event.target.value;
-    // console.log("id : " + id);
     this.images = this.imageService.getImages();
     for (let i = 0; i < this.images.length; i++) {
       if (this.images[i].fileName == id) {
@@ -234,9 +244,7 @@ sideClose(){
     this.anotherTryVisible = true;
     var fileRead = (event.target as HTMLInputElement).files;
     var filesCount = event.target.files.length;
-    // console.log("isLoading before calling importFile: " + this.isLoading);
     this.isLoading = true;
-    // console.log("isLoading after calling importFile: " + this.isLoading);
     if (event.target.files && fileRead) {
       this.imageService.addImage(fileRead);
     }
