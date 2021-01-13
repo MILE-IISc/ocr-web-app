@@ -6,6 +6,7 @@
     accept="image/*">
   <button data-toggle="tooltip" (click)="fileUpload.click()" title="Upload Image"><img src="assets/images/open_file.jpg"
       type="button" width="20px" height="20px"></button>
+    <div id = "snackbar">{{ invalidMessage }}</div>
   <input #folderUpload type="file" name="fileList" (click)="folderUpload.value = null" webkitdirectory multiple
     (change)="importFile($event)" style="display:none" />
   <button data-toggle="tooltip" title="Upload Directory" (click)="folderUpload.click()"><img
@@ -21,7 +22,7 @@
   <button id="blockno" (click)="blockupdate()">blocknumberupdate</button>
   <button  data-toggle="tooltip" title="Save Corrections" (click)="correctionUpdate()"><img
     src="assets/images/saved-icon.jpg" type="button" width="20px" height="20px"></button>
-
+    
 </div>
 
 <div class="container" [style.height.px]="this.myHeight" style="width: 100%; background-color: whitesmoke;">
