@@ -44,7 +44,7 @@
 </button>
   <button mat-icon-button data-toggle="tooltip" title="Fit-height" id="fitHeigth" (click)="fitheight()"><mat-icon >height</mat-icon></button>
   <button mat-icon-button data-toggle="tooltip" title="100%-zoom" id="100zoom" (click)="orginalsize()"><mat-icon >zoom_out_map</mat-icon></button>
-  <label for="zoom">zoom:</label><input id="zoom" style="width: 45px;height:100%;color:black;" #bo (keyup.enter)="onZoom(bo.value)" value="{{percentage}}">%
+  <label for="zoom">Zoom:</label><input id="zoom" style="width: 45px;height:100%;color:black;" #bo (keyup.enter)="onZoom(bo.value)" value="{{percentage}}">%
 
 
   <span class="example-spacer2"></span>
@@ -67,8 +67,7 @@
   <button mat-icon-button color="accent" data-toggle="tooltip" (click)="fileUpload.click()" title="Upload Image" style=" margin-right:3px;" class="screenicon"><mat-icon  >text_snippet</mat-icon></button>
 
 
-  <button mat-icon-button data-toggle="tooltip" (click)="fileUpload.click()" title="Upload Image"><img src="assets/images/open_file.svg"
-      type="button" width="20px" height="20px"></button>
+
     <div id = "snackbar">{{ invalidMessage }}</div>
   <input #folderUpload type="file" name="fileList" (click)="folderUpload.value = null" webkitdirectory multiple
     (change)="importFile($event)" style="display:none" />
