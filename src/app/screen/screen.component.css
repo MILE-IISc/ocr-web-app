@@ -25,7 +25,7 @@ font-size: small;
   height:50px;
 }
 .example-spacer{
-  flex:5 auto;
+  flex:2.8 auto;
 }
 .example-spacer1{
   flex:3 auto;
@@ -203,7 +203,7 @@ overflow:auto;
 }
 
 @-webkit-keyframes fadein {
-  from {bottom: 0; opacity: 0;} 
+  from {bottom: 0; opacity: 0;}
   to {bottom: 30px; opacity: 1;}
 }
 
@@ -213,7 +213,7 @@ overflow:auto;
 }
 
 @-webkit-keyframes fadeout {
-  from {bottom: 30px; opacity: 1;} 
+  from {bottom: 30px; opacity: 1;}
   to {bottom: 0; opacity: 0;}
 }
 
@@ -251,7 +251,7 @@ overflow:auto;
   background-color:rgb(146, 144, 144);
   width: 3px !important;
 /* cursor: pointer !important; */
-  
+
 }
 .example-container {
   position: absolute;
