@@ -13,31 +13,21 @@
 <button mat-icon-button id="nextImg" data-toggle="tooltip" title="Next-Page" [disabled]="nextImages" (click)="NextImage()"> <mat-icon>navigate_next</mat-icon></button>
 <button mat-icon-button id="lastImg" data-toggle="tooltip" title="Last-Page" [disabled]="nextImages" (click)="lastImage()"> <mat-icon>last_page</mat-icon></button>
   <span class="example-spacer3"></span>
-  <!-- <button mat-stroked-button  data-toggle="tooltip" title="Select Page" (click)="openModalDialog()" id="SelectPage" > <mat-icon  >toc</mat-icon></button>
-  <div class="backdrop" [ngStyle]="{'display':display}"></div> -->
-  <!-- <input type="checkbox" id="skipPage" value="skipPage"><label for="Skip Page"> Skip Page</label> -->
 
-  <span class="example-spacer2"></span>
+
+  <span class="example-spacer"></span>
 
 
 
-  <!-- <div class="btn-group">
-   <button mat-icon-button color="accent" class="arrowup" style="height:15px;width:30px;"(click)="rotateImage()"> <mat-icon>arrow_drop_up</mat-icon></button>
-     <img src="assets/images/arrow_drop_up-24px.svg" (click)="rotateImage()" title="rotate" class="btn-group" type="button" -->
-      <!-- style="height:20px;width: 30px;"> -->
-      <!-- <br>
-      <button mat-icon-button color="accent" class="arrowdown" style="height:15px;width:30px;" (click)="rotateImageanti()">  <mat-icon>arrow_drop_down</mat-icon></button> -->
-    <!-- <img src="assets/images/arrow_drop_down-24px.svg" (click)="rotateImageanti()" class="btn-group" type="button"
-      style="height:20px;width: 30px; "> -->
-  <!-- </div> -->
+
 
   <span class="example-spacer3"></span>
   <button mat-stroked-button  (click)="loadXMLDoc()"  title="Run-OCR" >Run-OCR</button>
 
- <span class="example-spacer"></span>
+ <span class="example-spacer2"></span>
 
 
- <label>Rotate:</label><input id="angle"  type="number" class="angleclass" style="width: 45px;height:100%;color:black;  " #box (keyup.enter)="onEnter(box.value)" value="{{angle}}">
+ <label>Rotate:</label><input id="angle"  type="number" class="angleclass" step=".5"  (click)="onEnter(box.value)" style="width: 45px;height:100%;color:black;  " #box (keyup.enter)="onEnter(box.value)" value="{{angle}}">
   <button mat-icon-button data-toggle="tooltip" title="Zoom-In" id="butZoomIn" (click)="zoomInFun()"> <mat-icon >zoom_in</mat-icon></button>
   <button mat-icon-button data-toggle="tooltip" title="Zoom-Out" id="butZoomOut" (click)="zoomOutFun()"> <mat-icon >zoom_out</mat-icon></button>
   <button mat-icon-button data-toggle="tooltip" title="Fit-width" id="fitWidth" (click)="fitwidth()"><mat-icon >height</mat-icon>
@@ -86,7 +76,7 @@
 
   <button mat-icon-button color="accent" class="screenicon"(click)="onSaveXml()"><mat-icon  >get_app</mat-icon></button>
 
-    <!-- <button class="w3-button w3-teal w3-xlarge w3-left" onclick="openLeftMenu()">&#9776;</button> -->
+
   </mat-menu>
   <button id="blockno" (click)="blockupdate()">blocknumberupdate</button>
   <button id="SaveToXML" (click)="onSave()">SaveToXML</button>
