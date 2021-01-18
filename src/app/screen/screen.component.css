@@ -31,7 +31,7 @@ font-size: small;
   flex:3 auto;
 }
 .example-spacer2{
-  flex:2 auto;
+  flex:.5 auto;
 }
 .example-spacer3{
   flex:.5 auto;
