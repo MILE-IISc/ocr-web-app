@@ -4,7 +4,7 @@ import {ScreenComponent} from '../screen/screen.component';
 import {HeaderService} from '../services/header.service';
 import { ImageService } from '../services/images.service';
 import { Images } from '../shared/images.model';
-import { ViewerService } from '../services/viewer.service';
+// import { ViewerService } from '../services/viewer.service';
 declare var Tiff: any;
 import { AuthService } from "../auth/auth.service";
 import { Subscription } from "rxjs";
@@ -40,7 +40,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private authListenerSubs: Subscription;
 
 
-  constructor(private authService: AuthService, private headerService : HeaderService,private imageService:ImageService,private viewerService:ViewerService) { }
+  constructor(private authService: AuthService, private headerService : HeaderService,private imageService:ImageService) { }
 
   onLogout() {
     this.authService.logout();
@@ -101,50 +101,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  NextImage(){
-    this.imageService.nextPage();
-    console.log("inside footer nextImage: "+this.imageService.nextImages);
-    this.nextImages = this.imageService.nextImages;
-    console.log("next Images"+this.nextImages);
-  }
-
-  previousImage(){
-    this.imageService.previousPage();
-    console.log("inside footer previousImage: "+this.imageService.previousImages);
-    this.previousImages = this.imageService.previousImages;
-    console.log("previous Images"+this.previousImages);
- }
- lastImage(){
-  this.imageService.LastImage();
-}
-
-FirstImage(){
-  this.imageService.firstImage();
-}
 
 
-asVertical(){
-  this.viewerService.asVertical();
-  this.value=this.viewerService.value;
-  this.headerService.setHeaderValue(this.value);
-
-  // this.viewerService.asVertical();
-  console.log("asVertical has been invoked from screen");
-  setTimeout(() => this.setpercentage(),50);
 
 
-}
-
-asHorizontal(){
-  this.viewerService.asHorizontal();
-  this.value=this.viewerService.value;
-  // this.viewerService.asHorizontal();
-
-  this.headerService.setHeaderValue(this.value);
-  setTimeout(() => this.setpercentage(),50);
 
 
-}
+
 
 
 
@@ -156,74 +119,6 @@ asHorizontal(){
   openModalHelp(){
     this.display='block';
   }
-
-  scrollUp(){
-    console.log("in header element==="+this.element);
-    console.log("inside scroll up")
-    this.element.scrollBy(0,-50)
-  }
-
-  scrollDown(){
-    console.log("in header element==="+this.element);
-    console.log("inside scroll down")
-    this.element.scrollBy(0, 50);
-  }
-
-  scrollLeft(){
-
-    console.log("in header element==="+this.element);
-    console.log("scroll left");
-    this.element.scrollBy(-100, 0);
-  }
-
-  scrollRight(){
-
-    console.log("in header element==="+this.element);
-    console.log("scroll right");
-    this.element.scrollBy(100, 0);
-  }
-  setpercentage(){
-    this.percentage=  this.viewerService.getpercentage();
-
-
-
-    this.headerService.setpercentagevary(this.percentage);
-
-  }
-  fitheight(){
-    this.viewerService.fitheight();
-
-    setTimeout(() => this.setpercentage(),50);
-  }
-
-  fitwidth(){
-
-  this.viewerService.fitwidth()
-
-  setTimeout(() => this.setpercentage(),50);
-
-  }
-
-  zoomInFun(){
-
-   this.viewerService.zoomInFun();
-
-  setTimeout(() => this.setpercentage(),50);
-    }
-
-  zoomOutFun(){
-
-           this.viewerService.zoomOutFun();
-
-          setTimeout(() => this.setpercentage(),50);
-     }
-     orginalsize(){
-
-      this.viewerService.orginalsize();
-
-      setTimeout(() => this.setpercentage(),50);
-
-     }
 
 }
 

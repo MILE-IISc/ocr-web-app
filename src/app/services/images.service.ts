@@ -1,7 +1,7 @@
 import { Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { EventEmitter, Injectable, OnInit } from '@angular/core';
+import { EventEmitter, Injectable, OnInit,Renderer2, RendererFactory2  } from '@angular/core';
 import { Router } from '@angular/router';
 import * as $ from 'jquery';
 import { Subject, Subscription } from 'rxjs';
@@ -9,6 +9,8 @@ import { AuthService } from '../auth/auth.service';
 import { Images } from '../shared/images.model';
 import { HeaderService } from '../services/header.service';
 import { XmlModel,retain } from '../shared/xml-model';
+import { BlockModel} from '../shared/block-model';
+
 
 declare var Tiff: any;
 declare var $:any;
@@ -35,7 +37,7 @@ export class ImageService implements OnInit {
   private serverImages: Images[] = [];
   private imagesUpdated = new Subject<{ serverImages: Images[] }>();
   private waveSub: Subscription;
-  fit: string;
+
   fileName;
   public nextImages = false;
   public previousImages = false;
@@ -55,7 +57,7 @@ export class ImageService implements OnInit {
   localImages : Array<Images> = [];
   imgFileCount = 0;
   ready = false;
-  percentage: number;
+
   btnImgArray: any[] = [];
   public localUrl: any;
   public documentElement;
@@ -68,12 +70,19 @@ export class ImageService implements OnInit {
   IMAGE_BACKEND_URL;
   XML_BACKEND_URL;
   invalidMessage;
+  value: string;
+  fit: string;
+  public percentage: number;
+  public angle: number = 0;
+  private renderer: Renderer2;
+  public clientpercent;
 
-  constructor(private http: HttpClient, private router: Router, private authService: AuthService,private headerService: HeaderService, @Inject(DOCUMENT) private document: Document) {
+  constructor(  rendererFactory: RendererFactory2,private http: HttpClient, private router: Router, private authService: AuthService,private headerService: HeaderService, @Inject(DOCUMENT) private document: Document) {
     this.IMAGE_BACKEND_URL = this.authService.BACKEND_URL + "/api/image/";
     this.XML_BACKEND_URL = this.authService.BACKEND_URL + "/api/xml/";
     console.log("IMAGE_BACKEND_URL "+this.IMAGE_BACKEND_URL);
     console.log("XML_BACKEND_URL "+this.XML_BACKEND_URL);
+    this.renderer = rendererFactory.createRenderer(null, null);
   }
 
   getImages() {
@@ -83,7 +92,7 @@ export class ImageService implements OnInit {
   getLocalImages(){
     return this.localImages.slice();
   }
-  
+
 
   getBtnImages() {
     return this.btnImgArray.slice();
@@ -182,6 +191,7 @@ export class ImageService implements OnInit {
     return this.imagesUpdated.asObservable();
   }
 
+
   setDocumentId(element) {
     this.documentElement = element;
     this.documentChange.emit(this.documentElement);
@@ -226,7 +236,7 @@ export class ImageService implements OnInit {
         console.log("image added+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++: " + responseData.message);
         // await this.getServerImages();
       });
-    
+
     if(this.serverImages.length == 0) {
     this.localImages.splice(0, this.localImages.length);
     var filesCount = fileRead.length;
@@ -260,24 +270,7 @@ export class ImageService implements OnInit {
       this.nextImageChange.emit(this.nextImages);
     }
   }
-    // if (this.serverImages.length > 0) {
-    //   console.log("server images length===" + this.serverImages.length);
-    //   // this.images.splice(0, this.images.length);
-    //   var filesCount = this.serverImages.length;
-    //   if (filesCount > 1) {
-    //     this.nextImages = false;
-    //   }
-    //   console.log("file count" + filesCount);
-    //   let dataURL = await this.loadArray(this.serverImages[0].fileName);
-    //   this.serverUrl = dataURL
-    //   console.log("server urlssssss" + this.serverUrl);
-    //   this.urlChanged.emit(this.serverUrl.slice());
-    //   console.log("(this.serverImages[0]: " + this.serverImages[0]);
-    //   if (this.serverImages.length > 1) {
-    //     this.nextImages = false;
-    //     this.nextImageChange.emit(this.nextImages);
-    //   }
-    // }
+
   }
 
   async loadLocalImages(fileRead:any,i:number) {
@@ -314,33 +307,7 @@ export class ImageService implements OnInit {
     console.log("inside load array");
 
     console.log("inside load array",serverImage);
-    // const result = await new Promise((resolve) => {
-    //   this.getImage(serverImage).subscribe(data => {
-    //     console.log("dataType----" + data.type);
-    //     console.log("data----" + data);
-    //     let reader = new FileReader();
-    //     //if else condition comes here
-    //     if (data.type == "image/tiff") {
-    //       reader.onload = (event: any) => {
-    //         console.log("before tiff conversion",event.target.result);
-    //         var image = new Tiff({ buffer: event.target.result });
-    //         console.log("tiff before canvas",image);
-    //         var canvas = image.toCanvas();
-    //         var img = convertCanvasToImage(canvas);
-    //         resolve(img.src);
-    //       }
-    //       reader.readAsArrayBuffer(data);
-    //     }
-    //     else {
-    //       reader.onload = (event: any) => {
-    //         console.log("data url=====================================" + event.target.result);
-    //         resolve(event.target.result);
-    //       }
-    //       reader.readAsDataURL(data);
-    //     }
-    //   });
-    // });
-    // return result;
+
 
     let promise = new Promise((resolve, reject) => {
       var user = this.authService.userName;
@@ -382,7 +349,7 @@ export class ImageService implements OnInit {
             }
           }
         }
-        
+
       });
   }
 
@@ -417,7 +384,7 @@ export class ImageService implements OnInit {
 
     }
     console.log("opening........")
- 
+
   }
 
   async nextPage() {
@@ -623,7 +590,7 @@ export class ImageService implements OnInit {
     $('#lastImg').click(function () {
       $('#imgToRead').selectAreas('destroy');
     });
- 
+
     $('#buttonXml').click(function () {
       console.log("onclick");
       $('#imgToRead').selectAreas('destroy');
@@ -634,6 +601,280 @@ export class ImageService implements OnInit {
       this.displayarea = areas;
       console.log(areas.length + " this.displayarea", arguments);
     };
+  }
+  asVertical() {
+    console.log("inside asVertical of Viewer");
+    this.value = 'horizontal';
+    // console.log("fit: "+fit);
+
+    if (this.fit == 'width') {
+      setTimeout(() => this.fitwidth(), 50);
+    }
+    else if (this.fit == 'height') {
+      setTimeout(() => this.fitheight(), 50);
+    }
+    else if (this.fit == 'orginalsize') {
+      setTimeout(() => this.orginalsize(), 50);
+    }
+
+
+  }
+  asHorizontal() {
+    this.value = 'vertical';
+    console.log("fit inside screen Horizontal: " + this.fit);
+    if (this.fit == 'width') {
+      setTimeout(() => this.fitwidth(), 50);
+    }
+    else if (this.fit == 'height') {
+      setTimeout(() => this.fitheight(), 50);
+    }
+    else if (this.fit == 'orginalsize') {
+      setTimeout(() => this.orginalsize(), 50);
+    }
+  }
+
+
+
+  fitheight() {
+    this.clientpercent = this.percentage;
+    console.log("inside fitheight of Viewer");
+    this.fit = 'height';
+    var myImg;
+    var falseimg;
+    myImg = document.getElementById("imgToRead");
+    falseimg = document.getElementById("image")
+    console.log("myImg: " + myImg);
+
+
+    var divheight = document.getElementById("content").offsetHeight;
+    console.log("divelementheight " + divheight)
+    myImg.style.height = divheight + "px";
+    falseimg.style.height = myImg.style.height;
+    var currHeight = myImg.clientHeight;
+    var realHeight = myImg.naturalHeight;
+    var realWidth = myImg.naturalWidth;
+    this.percentage = currHeight / realHeight * 100;
+    retain.percentage = this.percentage;
+    // console.log("the current percentage is "+retain.percentage)
+    this.blocksize();
+
+    myImg.style.width = (realWidth * this.percentage / 100) + "px";
+    falseimg.style.width = myImg.style.width;
+  }
+
+  fitwidth() {
+    this.clientpercent = this.percentage;
+    this.fit = 'width';
+    var myImg;
+    var falseimg;
+    myImg = document.getElementById("imgToRead");
+    falseimg = document.getElementById("image")
+
+
+    var divwidth = document.getElementById('content').offsetWidth;
+    console.log("divelementheight " + divwidth)
+    myImg.style.width = divwidth + "px";
+    falseimg.style.width = myImg.style.width;
+    var currWidth = myImg.clientWidth;
+    var realHeight = myImg.naturalHeight;
+    var realWidth = myImg.naturalWidth;
+    this.percentage = (currWidth / realWidth) * 100;
+    retain.percentage = this.percentage;
+    // console.log("the current percentage is "+retain.percentage)
+    //this.blocksize();
+
+    myImg.style.height = (realHeight * this.percentage / 100) + "px";
+    falseimg.style.height = myImg.style.height;
+  }
+  orginalsize() {
+    this.clientpercent = this.percentage;
+    this.fit = 'orginalsize';
+    var myImg;
+    var falseimg;
+    falseimg = document.getElementById("image")
+    myImg = document.getElementById("imgToRead");
+    myImg.style.width = myImg.naturalWidth + "px";
+    falseimg.style.width = myImg.style.width;
+    console.log("currwidth" + myImg.naturalWidth)
+    myImg.style.height = myImg.naturalHeight + "px";
+    falseimg.style.height = myImg.style.height;
+    console.log("currheight" + myImg.naturalHeight)
+    this.percentage = 100;
+    retain.percentage = this.percentage;
+    // console.log("the current percentage is "+retain.percentage)
+    this.blocksize();
+
+
+  }
+  getpercentage() {
+    return this.percentage;
+  }
+
+  onZoom() {
+    // this.clientpercent = this.percentage;
+    var myImg;
+    var zoomlevel = this.percentage;
+    myImg = document.getElementById("imgToRead");
+    var falseimg;
+    falseimg = document.getElementById("image")
+    var realWidth = myImg.naturalWidth;
+    var realHeight = myImg.naturalHeight;
+    var currWidth = myImg.clientWidth;
+    var currHeight = myImg.clientHeight;
+    myImg.style.width = (realWidth * zoomlevel / 100) + "px";
+    console.log("currwidth" + currWidth)
+    myImg.style.height = (realHeight * zoomlevel / 100) + "px";
+    console.log("currheight" + currHeight)
+    falseimg.style.width = myImg.style.width;
+    falseimg.style.height = myImg.style.height;
+    //  this.blocksize();
+  }
+
+  zoomInFun() {
+    this.clientpercent = this.percentage;
+    var myImg;
+    this.percentage = this.percentage + 7.2;
+    retain.percentage = this.percentage;
+    // console.log("the current percentage is "+retain.percentage)
+    this.blocksize();
+    myImg = document.getElementById("imgToRead");
+    var falseimg;
+    falseimg = document.getElementById("image")
+    var realWidth = myImg.naturalWidth;
+    var realHeight = myImg.naturalHeight;
+    var currWidth = myImg.clientWidth;
+    var currHeight = myImg.clientHeight;
+    myImg.style.width = (realWidth * this.percentage / 100) + "px";
+    console.log("currwidth" + currWidth)
+    myImg.style.height = (realHeight * this.percentage / 100) + "px";
+    console.log("currheight" + currHeight)
+    falseimg.style.width = myImg.style.width;
+    falseimg.style.height = myImg.style.height;
+  }
+
+  zoomOutFun() {
+    this.clientpercent = this.percentage;
+    var myImg;
+    this.percentage = this.percentage - 7.2;
+    retain.percentage = this.percentage;
+    // console.log("the current percentage is "+retain.percentage)
+    this.blocksize();
+    myImg = document.getElementById("imgToRead");
+    var falseimg;
+    falseimg = document.getElementById("image")
+    var realWidth = myImg.naturalWidth;
+    var realHeight = myImg.naturalHeight;
+    var currWidth = myImg.clientWidth;
+    var currHeight = myImg.clientHeight;
+    myImg.style.width = (realWidth * this.percentage / 100) + "px";
+    console.log("currwidth" + currWidth)
+    myImg.style.height = (realHeight * this.percentage / 100) + "px";
+    console.log("currheight" + currHeight)
+    falseimg.style.width = myImg.style.width;
+    falseimg.style.height = myImg.style.height;
+  }
+
+  rotateImage() {
+    this.angle = this.angle + 0.5;
+    var myImg;
+    var degree = this.angle;
+    myImg = document.getElementById("imgToRead");
+    this.renderer.setStyle(
+      myImg,
+      'transform',
+      `rotate(${degree}deg)`
+    )
+  }
+
+  rotateImageanti() {
+    this.angle = this.angle - 0.5;
+    var myImg;
+    var degree = this.angle;
+    myImg = document.getElementById("imgToRead");
+    this.renderer.setStyle(
+      myImg,
+      'transform',
+      `rotate(${degree}deg)`
+    )
+  }
+
+  onEnter() {
+    var myImg;
+    var degree = this.angle;
+    myImg = document.getElementById("imgToRead");
+    this.renderer.setStyle(
+      myImg,
+      'transform',
+      `rotate(${degree}deg)`
+    )
+  }
+
+  selectBlockservice() {
+    $('img#imgToRead').selectAreas('destroy');
+    console.log("inside script");
+    let areasarray = BlockModel.blockArray.reverse();
+    console.log("block.model.arrray^^^^   ^^" + JSON.stringify(areasarray));
+    // areasarray
+    $('img#imgToRead').selectAreas({
+      position: "absolute",
+      onChanged: debugQtyAreas,
+      areas: areasarray
+    });
+
+    function debugQtyAreas(event, id, areas) {
+      console.log(areas.length + " areas", arguments);
+      this.displayarea = areas;
+    };
+
+    var elems = $('.select-areas-background-area');
+    var len = elems.length;
+    console.log("select-areas-background-area length: " + len);
+    if (len > 0) {
+      for (var i = 0; i < len; i++) {
+        console.log("elem[" + i + "]" + elems[i]);
+        console.log("elem[" + i + "]" + $('.select-areas-background-area').css("background"));
+        $('.select-areas-background-area').bind()
+      }
+    }
+
+  }
+
+  blocksize() {
+    if (this.percentage > 1) {
+      BlockModel.blockArray.length = 0;
+      var block
+      block = document.getElementsByClassName("select-areas-outline");
+      for (var i = 0; i < block.length; i++) {
+        var blocktop = block[i].style.top;
+        blocktop = blocktop.substring(0, blocktop.length - 2);
+        var blockleft = block[i].style.left;
+        blockleft = blockleft.substring(0, blockleft.length - 2);
+        var constantfactortop = (blocktop / this.clientpercent);
+        var constantfactorwidth = (block[i].clientWidth / this.clientpercent);
+        var constantfactorheight = (block[i].clientHeight / this.clientpercent);
+        var constantfactorleft = (blockleft / this.clientpercent);
+        var id = i;
+        var x = constantfactorleft * this.percentage;
+        var y = constantfactortop * this.percentage;
+        var width = constantfactorwidth * this.percentage;
+        var height = constantfactorheight * this.percentage;
+        var z = 0
+        var blockValue = new BlockModel(height, id, width, x, y, z);
+        BlockModel.blockArray.push(blockValue);
+        // this.viewerService. selectBlockservice()
+        // setTimeout(() =>  this. selectBlockservice(),.001);
+
+      }
+      var SaveToXML = document.getElementById("SaveToXML");
+        console.log("SaveToXML: " + SaveToXML);
+        SaveToXML.click();
+      this.selectBlockservice()
+    }
+  }
+
+  blocknumberupdate() {
+    this.clientpercent = this.percentage;
+    this.blocksize()
   }
 }
 function convertCanvasToImage(canvas) {

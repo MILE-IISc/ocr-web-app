@@ -6,7 +6,7 @@ import * as $ from 'jquery';
 import { HeaderService } from '../services/header.service';
 import { ImageService } from '../services/images.service';
 import { Images } from '../shared/images.model';
-import { ViewerService } from '../services/viewer.service';
+
 import { XmlModel } from '../shared/xml-model';
 import { BlockModel} from '../shared/block-model';
 import { AuthService } from '../auth/auth.service';
@@ -48,7 +48,7 @@ export class FooterComponent implements OnInit {
   urlOcr;
   JsonObj;
 
-  constructor(private headerService: HeaderService, private imageService: ImageService, private viewerService: ViewerService,
+  constructor(private headerService: HeaderService, private imageService: ImageService,
     private renderer: Renderer2,private authService:AuthService) { }
 
   ngOnInit(): void {
@@ -76,15 +76,15 @@ export class FooterComponent implements OnInit {
   onEnter(value: number) {
     this.clientpercent = this.percentage;
     this.angle = value;
-    this.viewerService.angle = this.angle;
-    this.viewerService.onEnter();
+    this.imageService.angle = this.angle;
+    this.imageService.onEnter();
   }
 
   onZoom(value: number) {
     this.clientpercent = this.percentage;
     this.percentage = value;
-    this.viewerService.percentage = this.percentage;
-    this.viewerService.onZoom();
+    this.imageService.percentage = this.percentage;
+    this.imageService.onZoom();
     this.headerService.setpercentagevary(this.percentage);
     this.blocksize()
 
@@ -92,20 +92,20 @@ export class FooterComponent implements OnInit {
 
   asVertical() {
     this.value = 'horizontal';
-    this.viewerService.asVertical();
+    this.imageService.asVertical();
     console.log("asVertical has been invoked from screen");
-    this.percentage = this.viewerService.percentage;
+    this.percentage = this.imageService.percentage;
   }
 
   asHorizontal() {
     this.value = 'vertical';
-    this.viewerService.asHorizontal();
-    this.percentage = this.viewerService.percentage;
+    this.imageService.asHorizontal();
+    this.percentage = this.imageService.percentage;
   }
 
   fitheight() {
-    this.viewerService.fitheight();
-    this.percentage = this.viewerService.percentage;
+    this.imageService.fitheight();
+    this.percentage = this.imageService.percentage;
     console.log("this.percentage before header in fitheight",this.percentage);
     this.headerService.setpercentagevary(this.percentage);
     console.log("this.percentage after header in fitheight",this.percentage);
@@ -113,33 +113,35 @@ export class FooterComponent implements OnInit {
 
   fitwidth() {
     // this.viewerService.fitwidth();
-    this.viewerService.fitwidth()
-    this.percentage = this.viewerService.percentage;
+    this.clientpercent = this.percentage;
+    this.imageService.fitwidth()
+    this.percentage = this.imageService.percentage;
     console.log("this.percentage before header in fitwidth",this.percentage);
     this.headerService.setpercentagevary(this.percentage);
     console.log("this.percentage after header in fitwidth",this.percentage);
+    this.blocksize();
   }
 
   zoomInFun() {
-    this.viewerService.zoomInFun();
-    this.percentage = this.viewerService.percentage;
+    this.imageService.zoomInFun();
+    this.percentage = this.imageService.percentage;
     this.headerService.setpercentagevary(this.percentage);
   }
 
   zoomOutFun() {
-    this.viewerService.zoomOutFun();
-    this.percentage = this.viewerService.percentage;
+    this.imageService.zoomOutFun();
+    this.percentage = this.imageService.percentage;
     this.headerService.setpercentagevary(this.percentage);
   }
 
   rotateImage() {
-    this.viewerService.rotateImage();
-    this.angle = this.viewerService.angle;
+    this.imageService.rotateImage();
+    this.angle = this.imageService.angle;
   }
 
   rotateImageanti() {
-    this.viewerService.rotateImageanti();
-    this.angle = this.viewerService.angle;
+    this.imageService.rotateImageanti();
+    this.angle = this.imageService.angle;
   }
 
   imgSize() {
@@ -151,8 +153,8 @@ export class FooterComponent implements OnInit {
   }
 
   orginalsize() {
-    this.viewerService.orginalsize();
-    this.percentage = this.viewerService.percentage;
+    this.imageService.orginalsize();
+    this.percentage = this.imageService.percentage;
     console.log("this.percentage before header in orginalsize",this.percentage);
     this.headerService.setpercentagevary(this.percentage);
     console.log("this.percentage after header in orginalsize",this.percentage);
@@ -223,8 +225,9 @@ export class FooterComponent implements OnInit {
         var blockValue = new BlockModel(height, id, width, x, y, z);
         BlockModel.blockArray.push(blockValue);
         // this.viewerService. selectBlockservice()
-        setTimeout(() => this.viewerService.selectBlockservice(), .001);
+        // setTimeout(() => this.imageService.selectBlockservice(), .001);
       }
+      this.imageService.selectBlockservice()
     }
   }
 }

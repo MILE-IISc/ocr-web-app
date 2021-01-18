@@ -1,22 +1,14 @@
-<!-- <div class="footer"  style="width: 100%;"> -->
+
   <mat-toolbar color="primary" class="footer">
     <span class="example-spacer1"></span>
- <!-- <button  mat-icon-button id="firstImg" data-toggle="tooltip" title="First-Page"
-    [disabled]="previousImages" (click)="firstImage()"style="border:2px solid #00425a; margin-right:3px;"><img src="assets/images/first_page.png" type="button"
-      width="20px" height="20px"></button> -->
-  <!-- <button mat-icon-button id="previousImg" data-toggle="tooltip" title="Previous-Page" [disabled]="previousImages"
-    (click)="previousImage()"style="border:2px solid #00425a; margin-right:2px;"><img src="assets/images/previous.jpeg" type="button" width="20px" height="20px"></button> -->
-  <!-- <button mat-icon-button id="nextImg" data-toggle="tooltip" title="Next-Page" [disabled]="nextImages" (click)="NextImage()"style="border:2px solid #00425a; margin-right:2px;"><img
-      src="assets/images/next.png" type="button" width="20px" height="20px"></button> -->
-  <!-- <button  mat-icon-button id="lastImg" data-toggle="tooltip" title="Last-Page" [disabled]="nextImages" (click)="lastImage()"style="border:2px solid #00425a; margin-right:2px;"><img
-      src="assets/images/last_page.png" type="button" width="20px" height="20px"></button>&nbsp;&nbsp;&nbsp; -->
+
      <button  mat-icon-button id="firstImg" data-toggle="tooltip" title="First-Page" [disabled]="previousImages" (click)="firstImage()" >  <mat-icon>first_page</mat-icon></button>
       <button mat-icon-button id="previousImg" data-toggle="tooltip" title="Previous-Page" [disabled]="previousImages"(click)="previousImage()"><mat-icon>navigate_before</mat-icon></button>
     <button mat-icon-button id="nextImg" data-toggle="tooltip" title="Next-Page" [disabled]="nextImages" (click)="NextImage()"> <mat-icon>navigate_next</mat-icon></button>
   <button mat-icon-button id="lastImg" data-toggle="tooltip" title="Last-Page" [disabled]="nextImages" (click)="lastImage()"> <mat-icon>last_page</mat-icon></button>
 
 
-  <!-- <input type="checkbox" id="skipPage" value="skipPage"><label for="Skip Page"> Skip Page</label> -->
+
 
   <span class="example-spacer4"></span>
 
@@ -41,11 +33,6 @@
   <label for="zoom">Zoom:</label><input id="zoom" style="width: 45px;height:100%;color:black;" #bo (keyup.enter)="onZoom(bo.value)" value="{{percentage}}">%
   <span class="example-spacer2"></span>
 </mat-toolbar>
-<!-- </div> -->
-<!-- <footer>footer</footer>
- <mat-toolbar color="primary">
-<mat-toolbar-row>third line</mat-toolbar-row>
-</mat-toolbar> -->
 
 
   <script src="https://cdn.rawgit.com/seikichi/tiff.js/master/tiff.min.js"></script>

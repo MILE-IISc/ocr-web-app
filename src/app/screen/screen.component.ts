@@ -13,7 +13,7 @@ declare var Tiff: any;
 import { HeaderService } from '../services/header.service';
 import { ImageService } from '../services/images.service';
 import { Images } from '../shared/images.model';
-import { ViewerService } from '../services/viewer.service';
+// import { ViewerService } from '../services/viewer.service';
 import { XmlModel,retain } from '../shared/xml-model';
 import { AuthService } from '../auth/auth.service';
 import * as fileSaver from 'file-saver';
@@ -109,7 +109,7 @@ export class ScreenComponent implements OnInit{
     this.size3 = 50
   }
 
-  constructor(private headerService: HeaderService, private imageService: ImageService, private viewerService: ViewerService,
+  constructor(private headerService: HeaderService, private imageService: ImageService,
     public authService: AuthService, private fileService: FileService) { }
 
   onLogout() {
@@ -208,7 +208,7 @@ export class ScreenComponent implements OnInit{
           this.localUrl = await this.imageService.loadArray(this.serverImages[0].fileName);
           // this.imageService.urlChanged.emit(this.localUrl.slice());
           this.fileName = this.serverImages[0].fileName;
-          setTimeout(() => this.viewerService.fitwidth(), 50);
+          setTimeout(() => this.imageService.fitwidth(), 50);
           setTimeout(() => this.setpercentage(), 60);
         }
         else {
@@ -227,7 +227,7 @@ export class ScreenComponent implements OnInit{
         this.isLoading = false;
 
         this.ImageIs = true;
-        setTimeout(() => this.viewerService.fitwidth(), 50);
+        setTimeout(() => this.imageService.fitwidth(), 50);
         setTimeout(() => this.setpercentage(), 60);
       }
       else {
@@ -243,7 +243,7 @@ export class ScreenComponent implements OnInit{
       .subscribe(
         (url: any) => {
           this.localUrl = url;
-          setTimeout(() => this.viewerService.fitwidth(), 50);
+          setTimeout(() => this.imageService.fitwidth(), 50);
           setTimeout(() => this.setpercentage(), 60);
         });
 
@@ -307,60 +307,33 @@ export class ScreenComponent implements OnInit{
   }
 
   asVertical() {
-    this.viewerService.asVertical();
-    this.value = this.viewerService.value;
+    this.imageService.asVertical();
+    this.value = this.imageService.value;
     setTimeout(() => this.setpercentage(), 50);
   }
 
   asHorizontal() {
-    this.viewerService.asHorizontal();
-    this.value = this.viewerService.value;
+    this.imageService.asHorizontal();
+    this.value = this.imageService.value;
     this.headerService.setpercentagevary(this.percentage);
     setTimeout(() => this.setpercentage(), 50);
   }
 
   setpercentage() {
-    this.percentage = this.viewerService.getpercentage();
+    this.percentage = this.imageService.getpercentage();
     this.headerService.setpercentagevary(this.percentage);
   }
 
-  fitheight() {
-    this.viewerService.fitheight();
-    this.percentage = this.viewerService.percentage;
-    console.log("this.percentage before header in fitheight",this.percentage);
-    this.headerService.setpercentagevary(this.percentage);
-    console.log("this.percentage after header in fitheight",this.percentage);
-  }
+
 
   fitwidth() {
-    this.viewerService.fitwidth()
-    this.percentage = this.viewerService.percentage;
+    this.imageService.fitwidth()
+    this.percentage = this.imageService.percentage;
     console.log("this.percentage before header in fitwidth",this.percentage);
     this.headerService.setpercentagevary(this.percentage);
     console.log("this.percentage after header in fitwidth",this.percentage);
   }
 
-  zoomInFun() {
-    this.viewerService.zoomInFun();
-    this.percentage = this.viewerService.percentage;
-    this.headerService.setpercentagevary(this.percentage);
-  }
-
-  zoomOutFun() {
-    this.viewerService.zoomOutFun();
-    this.percentage = this.viewerService.percentage;
-    this.headerService.setpercentagevary(this.percentage);
-  }
-
-  rotateImage() {
-    this.viewerService.rotateImage();
-    this.angle = this.viewerService.angle;
-  }
-
-  rotateImageanti() {
-    this.viewerService.rotateImageanti();
-    this.angle = this.viewerService.angle;
-  }
 
   imgSize() {
     var myImg;
@@ -371,56 +344,15 @@ export class ScreenComponent implements OnInit{
   }
 
   orginalsize() {
-    this.viewerService.orginalsize();
-    this.percentage = this.viewerService.percentage;
+    this.imageService.orginalsize();
+    this.percentage = this.imageService.percentage;
     console.log("this.percentage before header in orginalsize",this.percentage);
     this.headerService.setpercentagevary(this.percentage);
     console.log("this.percentage after header in orginalsize",this.percentage);
   }
 
-  onEnter(value: number) {
-    this.clientpercent = this.percentage;
-    this.angle = value;
-    this.viewerService.angle = this.angle;
-    this.viewerService.onEnter();
-  }
-
-  onZoom(value: number) {
-    this.clientpercent = this.percentage;
-    this.percentage = value;
-    this.viewerService.percentage = this.percentage;
-    this.viewerService.onZoom();
-    this.headerService.setpercentagevary(this.percentage);
-    this.blocksize()
-  }
 
 
-  NextImage() {
-    this.onEnter(0);
-    this.imageService.nextPage();
-    this.imageService.onXml();
- }
-
-  previousImage() {
-    this.onEnter(0);
-    this.imageService.previousPage();
-    this.imageService.onXml();
-  }
-
-  lastImage() {
-    this.onEnter(0);
-    this.imageService.LastImage();
-    this.imageService.onXml();
-  }
-
-  firstImage() {
-    this.onEnter(0);
-    this.imageService.firstImage();
-    this.imageService.onXml();
-  }
-  skipPage() {
-    //this.localUrl = this.localUrlArray[this.imgFileCount];
-  }
 
   loadXMLDoc() {
     this.serverImages = this.imageService.getImages();
@@ -456,7 +388,7 @@ export class ScreenComponent implements OnInit{
         var z = 0
         var blockValue = new BlockModel(height, id, width, x, y, z);
         BlockModel.blockArray.push(blockValue);
-        setTimeout(() => this.viewerService.selectBlockservice(), .001);
+        setTimeout(() => this.imageService.selectBlockservice(), .001);
       }
     }
   }
@@ -475,7 +407,7 @@ export class ScreenComponent implements OnInit{
   selectBlock() {
     console.log("inside script");
     this.isDiv = true;
-    this.viewerService. selectBlockservice();
+    this.imageService. selectBlockservice();
     this.imageService.onXml();
 
     $('#nextImg').click(function () {
@@ -593,7 +525,7 @@ export class ScreenComponent implements OnInit{
       }
 
       blockupdate(){
-        this.viewerService.blocknumberupdate()
+        this.imageService.blocknumberupdate()
       }
 
       showTooltip() {
