@@ -13,14 +13,12 @@ declare var Tiff: any;
 import { HeaderService } from '../services/header.service';
 import { ImageService } from '../services/images.service';
 import { Images } from '../shared/images.model';
-import { ViewerService } from '../services/viewer.service';
+// import { ViewerService } from '../services/viewer.service';
 import { XmlModel,retain } from '../shared/xml-model';
 import { AuthService } from '../auth/auth.service';
 import * as fileSaver from 'file-saver';
 import { FileService } from '../services/file.service';
 import { MatIconRegistry } from "@angular/material/icon";
-// import * as format from 'xml-formatter';
-// import * as format from 'xml-formatter';
 
 @Component({
  selector: 'app-screen',
@@ -33,7 +31,6 @@ export class ScreenComponent implements OnInit{
   events: string[] = [];
   private waveSub: Subscription;
   serverImages: Images[] = [];
-
   imageList = "";
   displayarea: any;
   isLoading = false;
@@ -71,26 +68,11 @@ export class ScreenComponent implements OnInit{
   userIsAuthenticated = false;
   isAdmin;
   private authListenerSubs: Subscription;
-
-
-
   clientpercent;
-
   nextImages = true;
-
-
-
-
-
-
-
-
   divelement = true;
-
   urlOcr;
   JsonObj;
-
-
   sidesize1 = 0;
   sidesize2 = 100;
   area1 = 50;
@@ -99,56 +81,61 @@ export class ScreenComponent implements OnInit{
   Isopen = true;
   invalidMessage ="";
 
-sideOpen(){
-  if(this.Isopen == true){
-    this.sidesize1 = 50;
-    this.sidesize2 = 50;
-    this.size3 = 35;
-    this.images = this.imageService.getImages();
-    this.imageService.openModalDialog(this.images);
-    this.Isopen = false;
+  sideOpen() {
+    if (this.Isopen == true) {
+      this.sidesize1 = 50;
+      this.sidesize2 = 50;
+      this.size3 = 35;
+      this.serverImages = this.imageService.getImages();
+      this.images = this.imageService.getLocalImages();
+      if (this.serverImages.length > 0) {
+        this.imageService.openModalDialog(this.serverImages);
+      } else {
+        this.imageService.openModalDialog(this.images);
+      }
+      this.Isopen = false;
+    }
+    else {
+      this.sidesize1 = 0;
+      this.sidesize2 = 100;
+      this.size3 = 50
+      this.Isopen = true;
+    }
   }
-  else{
+
+  sideClose() {
     this.sidesize1 = 0;
-  this.sidesize2 = 100;
-  this.size3 = 50
-  this.Isopen = true;
+    this.sidesize2 = 100;
+    this.size3 = 50
   }
- }
-sideClose(){
-  this.sidesize1 = 0;
-  this.sidesize2 = 100;
-  this.size3 = 50
-}
 
-  constructor(private headerService: HeaderService, private imageService: ImageService, private viewerService: ViewerService
-    , public authService: AuthService,private fileService:FileService) { }
-    onLogout() {
-      this.authService.logout();
-    }
+  constructor(private headerService: HeaderService, private imageService: ImageService,
+    public authService: AuthService, private fileService: FileService) { }
 
-    ngOnDestroy() {
-      this.authListenerSubs.unsubscribe();
-    }
+  onLogout() {
+    this.authService.logout();
+  }
+
+  ngOnDestroy() {
+    this.authListenerSubs.unsubscribe();
+  }
 
 
   ngOnInit(): void {
- // authentication related
- this.userIsAuthenticated = this.authService.getIsAuth();
- this.userName = this.authService.getUserName();
- this.isAdmin = this.authService.getIsAdmin();
- this.authListenerSubs = this.authService
-   .getAuthStatusListener()
-   .subscribe(isAuthenticated => {
-     this.userIsAuthenticated = isAuthenticated;
-     this.userName = this.authService.getUserName();
-     this.isAdmin = this.authService.getIsAdmin();
-   });
+    // authentication related
+    this.userIsAuthenticated = this.authService.getIsAuth();
+    this.userName = this.authService.getUserName();
+    this.isAdmin = this.authService.getIsAdmin();
+    this.authListenerSubs = this.authService
+      .getAuthStatusListener()
+      .subscribe(isAuthenticated => {
+        this.userIsAuthenticated = isAuthenticated;
+        this.userName = this.authService.getUserName();
+        this.isAdmin = this.authService.getIsAdmin();
+      });
 
 
     this.userName = this.authService.getUserName();
-    // this.imageService.getServerImages();
-    // console.log("user name in screen "+this.userName)
     this.imageService.getServerImages().then(() => {
       console.log("got serverImages in screen ngOnInit");
     });
@@ -164,6 +151,7 @@ sideClose(){
     retain.percentage = this.percentage;
 
     this.isLoading = this.headerService.getloadingvalue();
+
     this.headerService.loadingvaluechage
       .subscribe(
         (spin: boolean) => {
@@ -184,24 +172,22 @@ sideClose(){
           this.nextImage = multiImage;
         });
 
-
     this.imageService.invalidMessageChange
       .subscribe(
         (invalidMessage: string) => {
-
           console.log("invalid mes in screen======== " + invalidMessage);
           this.invalidMessage = invalidMessage;
           if (this.invalidMessage != "") {
             var x = document.getElementById("snackbar");
             console.log("x in screen " + x);
-            x.className = "show";
-            setTimeout(() => {
-              x.className = x.className.replace("show", "");
-            }, 5000);
+            if (x != null) {
+              x.className = "show";
+              setTimeout(() => {
+                x.className = x.className.replace("show", "");
+              }, 5000);
+            }
           }
         });
-
-
 
     this.waveSub = this.imageService
       .getImageUpdateListener()
@@ -218,19 +204,36 @@ sideClose(){
           this.imageService.nextImageChange.emit(this.nextImage);
           this.isLoading = false;
           // this.fileName = " The files alloted for you ";
-          console.log("this.serverImages[0].fileName: ------------_> ",this.serverImages[0].fileName);
+          console.log("this.serverImages[0].fileName: ------------_> ", this.serverImages[0].fileName);
           this.localUrl = await this.imageService.loadArray(this.serverImages[0].fileName);
           // this.imageService.urlChanged.emit(this.localUrl.slice());
           this.fileName = this.serverImages[0].fileName;
-          setTimeout(() => this.viewerService.fitwidth(), 50);
+          setTimeout(() => this.imageService.fitwidth(), 50);
           setTimeout(() => this.setpercentage(), 60);
-
         }
         else {
           this.ImageIs = false;
           this.fileName = "No files have been Uploaded";
         }
       });
+
+    this.imageService.imagesModified.subscribe((images: Images[]) => {
+      console.log("inside service subscribe....");
+      console.log("inside foooor");
+      this.isLoading = true;
+      if (images.length > 0) {
+        this.localUrl = images[0].dataUrl;
+        this.fileName = images[0].fileName;
+        this.isLoading = false;
+
+        this.ImageIs = true;
+        setTimeout(() => this.imageService.fitwidth(), 50);
+        setTimeout(() => this.setpercentage(), 60);
+      }
+      else {
+        this.ImageIs = false;
+      }
+    });
 
     this.imageService.displayChange.subscribe((display: any) => {
       this.display = display;
@@ -240,7 +243,7 @@ sideClose(){
       .subscribe(
         (url: any) => {
           this.localUrl = url;
-          setTimeout(() => this.viewerService.fitwidth(), 50);
+          setTimeout(() => this.imageService.fitwidth(), 50);
           setTimeout(() => this.setpercentage(), 60);
         });
 
@@ -251,13 +254,13 @@ sideClose(){
     var element = document.getElementById("content");
     this.imageService.setDocumentId(element);
 
-    console.log("this.headerService.getpercentagevary()",this.headerService.getpercentagevary());
+    console.log("this.headerService.getpercentagevary()", this.headerService.getpercentagevary());
     this.percentage = this.headerService.getpercentagevary();
     this.headerService.percentageChange
       .subscribe(
         (percent: number) => {
           this.percentage = percent;
-          console.log("percent inside footeroninit on headerpercentacgehange",percent);
+          console.log("percent inside footeroninit on headerpercentacgehange", percent);
         }
       );
 
@@ -281,7 +284,7 @@ sideClose(){
         this.fileName = this.images[i].fileName;
         this.imageService.imgFileCount = i;
         this.imageService.imageCountChange.emit(this.imgFileCount);
-        console.log("imgFileCount "+this.imgFileCount);
+        console.log("imgFileCount " + this.imgFileCount);
       }
     }
     this.closeModalDialog();
@@ -290,20 +293,6 @@ sideClose(){
   closeModalDialog() {
     this.display = 'none'; //set none css after close dialog
   }
-
-  //*****************************************************darkMode */
-//  openNav() {
-//     document.getElementById("mySidenav").style.width = "1000px";
-//     console.log("opened")
-//   }
-
-//  closeNav() {
-//     document.getElementById("mySidenav").style.width = "0";
-//   }
-  // darkMode(){
-  //   var element = document.body;
-  //   element.classList.toggle("darkMode");
-  // }
 
   importFile(event) {
     this.anotherTryVisible = true;
@@ -317,103 +306,32 @@ sideClose(){
     setTimeout(() => this.setpercentage(), 60);
   }
 
-
-
-
-
-
   asVertical() {
-    this.viewerService.asVertical();
-    this.value = this.viewerService.value;
-    // this.viewerService.asVertical();
-    // console.log("asVertical has been invoked from screen");
+    this.imageService.asVertical();
+    this.value = this.imageService.value;
     setTimeout(() => this.setpercentage(), 50);
   }
-  // asVertical() {
-  //   this.value = 'horizontal';
-  //   this.viewerService.asVertical();
-  //   console.log("asVertical has been invoked from screen");
-  //   this.percentage = this.viewerService.percentage;
-  // }
-
 
   asHorizontal() {
-    this.viewerService.asHorizontal();
-    this.value = this.viewerService.value;
-    // this.viewerService.asHorizontal();
+    this.imageService.asHorizontal();
+    this.value = this.imageService.value;
     this.headerService.setpercentagevary(this.percentage);
     setTimeout(() => this.setpercentage(), 50);
   }
-  // asHorizontal() {
-  //   this.value = 'vertical';
-  //   this.viewerService.asHorizontal();
-  //   this.percentage = this.viewerService.percentage;
-  // }
 
   setpercentage() {
-    this.percentage = this.viewerService.getpercentage();
+    this.percentage = this.imageService.getpercentage();
     this.headerService.setpercentagevary(this.percentage);
   }
 
-  // fitheight() {
-  //   this.viewerService.fitheight();
-  //   this.percentage = this.viewerService.percentage;
-  // }
-  fitheight() {
-    this.viewerService.fitheight();
-    this.percentage = this.viewerService.percentage;
-    console.log("this.percentage before header in fitheight",this.percentage);
-    this.headerService.setpercentagevary(this.percentage);
-    console.log("this.percentage after header in fitheight",this.percentage);
-  }
 
-  // fitwidth() {
-  //   this.viewerService.fitwidth();
-  //   this.percentage = this.viewerService.percentage;
-  // }
+
   fitwidth() {
-    // this.viewerService.fitwidth();
-    this.viewerService.fitwidth()
-    this.percentage = this.viewerService.percentage;
+    this.imageService.fitwidth()
+    this.percentage = this.imageService.percentage;
     console.log("this.percentage before header in fitwidth",this.percentage);
     this.headerService.setpercentagevary(this.percentage);
     console.log("this.percentage after header in fitwidth",this.percentage);
-  }
-
-
-  // zoomInFun() {
-  //   this.viewerService.zoomInFun();
-  // }
-  zoomInFun() {
-    this.viewerService.zoomInFun();
-    this.percentage = this.viewerService.percentage;
-    this.headerService.setpercentagevary(this.percentage);
-  }
-
-  // zoomOutFun() {
-  //   this.viewerService.zoomOutFun();
-  // }
-  zoomOutFun() {
-    this.viewerService.zoomOutFun();
-    this.percentage = this.viewerService.percentage;
-    this.headerService.setpercentagevary(this.percentage);
-  }
-
-
-  // rotateImage() {
-  //   this.viewerService.rotateImage();
-  // }
-  rotateImage() {
-    this.viewerService.rotateImage();
-    this.angle = this.viewerService.angle;
-  }
-
-  // rotateImageanti() {
-  //   this.viewerService.rotateImageanti();
-  // }
-  rotateImageanti() {
-    this.viewerService.rotateImageanti();
-    this.angle = this.viewerService.angle;
   }
 
 
@@ -425,92 +343,27 @@ sideClose(){
     alert("Original width=" + realWidth + ", " + "Original height=" + realHeight);
   }
 
-
-  // orginalsize() {
-  //   this.viewerService.orginalsize();
-  //   this.percentage = this.viewerService.percentage;
-  // }
   orginalsize() {
-    this.viewerService.orginalsize();
-    this.percentage = this.viewerService.percentage;
+    this.imageService.orginalsize();
+    this.percentage = this.imageService.percentage;
     console.log("this.percentage before header in orginalsize",this.percentage);
     this.headerService.setpercentagevary(this.percentage);
     console.log("this.percentage after header in orginalsize",this.percentage);
   }
 
-  onEnter(value: number) {
-    this.clientpercent = this.percentage;
-    this.angle = value;
-    this.viewerService.angle = this.angle;
-    this.viewerService.onEnter();
-  }
-
-  onZoom(value: number) {
-    this.clientpercent = this.percentage;
-    this.percentage = value;
-    this.viewerService.percentage = this.percentage;
-    this.viewerService.onZoom();
-    this.headerService.setpercentagevary(this.percentage);
-    this.blocksize()
-
-  }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  openModalDialog() {
-    this.images = this.imageService.getImages();
-    this.imageService.openModalDialog(this.images);
-  }
-
-  NextImage() {
-
-    this.onEnter(0);
-    this.imageService.nextPage();
-    this.imageService.onXml();
- }
-
-  previousImage() {
-    this.onEnter(0);
-    this.imageService.previousPage();
-    this.imageService.onXml();
-  }
-
-  lastImage() {
-    this.onEnter(0);
-    this.imageService.LastImage();
-    this.imageService.onXml();
-  }
-
-  firstImage() {
-    this.onEnter(0);
-    this.imageService.firstImage();
-    this.imageService.onXml();
-  }
-  skipPage() {
-    //this.localUrl = this.localUrlArray[this.imgFileCount];
-  }
 
   loadXMLDoc() {
     this.serverImages = this.imageService.getImages();
-    this.fileName = this.serverImages[this.imageService.imgFileCount].fileName;
-    console.log("``````````````````````````````````````````````````this.fileName==="+this.fileName);
-    console.log("this.fileCompleted==="+this.serverImages[this.imageService.imgFileCount].completed);
-    this.imageService.getXmlFileAsJson(this.fileName);
-
+    if(this.serverImages.length>0){
+      this.fileName = this.serverImages[this.imageService.imgFileCount].fileName;
+      this.imageService.getXmlFileAsJson(this.fileName);
+    }else{
+      this.images = this.imageService.getLocalImages();
+      this.fileName = this.images[this.imageService.imgFileCount].fileName;
+      this.imageService.getXmlFileAsJson(this.fileName);
+    }
   }
 
   blocksize() {
@@ -535,8 +388,7 @@ sideClose(){
         var z = 0
         var blockValue = new BlockModel(height, id, width, x, y, z);
         BlockModel.blockArray.push(blockValue);
-        // this.viewerService. selectBlockservice()
-        setTimeout(() => this.viewerService.selectBlockservice(), .001);
+        setTimeout(() => this.imageService.selectBlockservice(), .001);
       }
     }
   }
@@ -555,7 +407,7 @@ sideClose(){
   selectBlock() {
     console.log("inside script");
     this.isDiv = true;
-    this.viewerService. selectBlockservice();
+    this.imageService. selectBlockservice();
     this.imageService.onXml();
 
     $('#nextImg').click(function () {
@@ -576,11 +428,9 @@ sideClose(){
 
   onSave() {
     var areas = $('img#imgToRead').selectAreas('areas');
-    // console.log("area length" + areas.length);
     var prolog = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
     var xmlDocument = document.implementation.createDocument('http://mile.ee.iisc.ernet.in/schemas/ocr_output', "page", null);
     for (let i = 0; i < areas.length; i++) {
-      // console.log("percentage" + this.percentage);
       var blockElem = xmlDocument.createElement("block");
       blockElem.setAttribute("type", "Text");
       var blockNumberElems = $(".select-areas-blockNumber-area");
@@ -600,18 +450,15 @@ sideClose(){
       var width = ((areas[i].width * 100) / this.percentage)
       var colEnd = (width + parseFloat(x)).toString();
       blockElem.setAttribute("colEnd", colEnd);
-      // pageElem.appendChild(blockElem);
       xmlDocument.documentElement.appendChild(blockElem);
     }
-
     var xmlString = prolog + new XMLSerializer().serializeToString(xmlDocument);
 
-    xml2js.parseString(xmlString,{ mergeAttrs: true } ,function (err, result) {
+    xml2js.parseString(xmlString, { mergeAttrs: true }, function (err, result) {
       var jsonString = JSON.stringify(result)
       XmlModel.jsonObject = result;
-      console.log("xml.js result as JSON "+jsonString);
+      console.log("xml.js result as JSON " + jsonString);
     });
-
     this.imageService.updateCorrectedXml(this.fileName);
   }
 
@@ -629,7 +476,6 @@ sideClose(){
         var curFileName = this.images[i].fileName;
         var curXmlFileName = curFileName.slice(0, -3) + 'xml';
         console.log("curXmlFileName " + curXmlFileName);
-
         //changes have to be made in file service to get the xml file from backend
         await this.fileService.downloadFile(curXmlFileName).then(response => {
           let blob: any = new Blob([response], { type: 'text/xml' });
@@ -657,8 +503,6 @@ sideClose(){
     $("#menu").css("top", event.clientY+"px");
     }
     closeMenu() {
-      // if(this.isMenuOpen == true) {
-        // this.isMenuOpen = false;
         $("#menu").css("display", "none");
       }
       alertSize() {
@@ -679,9 +523,9 @@ sideClose(){
         window.alert( 'Width = ' + myWidth );
         window.alert( 'Height = ' + myHeight );
       }
-      blockupdate(){
-        this.viewerService.blocknumberupdate()
 
+      blockupdate(){
+        this.imageService.blocknumberupdate()
       }
 
       showTooltip() {
@@ -689,12 +533,10 @@ sideClose(){
         this.correctionUpdate();
       }
 
-
   correctionUpdate() {
     var texts = document.getElementsByClassName('text_input');
     console.log("texts length " + texts.length);
     for (var l = 0; l < texts.length; l++) {
-      // var jsonObj = XmlModel.jsonObject;
       var blocks = XmlModel.jsonObject['page'].block;
       for (var i = 0; i < blocks.length; i++) {
         if (blocks[i].line) {
@@ -702,30 +544,29 @@ sideClose(){
           for (var j = 0; j < lines.length; j++) {
             if (lines[j].word) {
               var words = lines[j].word;
-              // console.log("words length " + words.length);
               if (lines[j].LineNumber == texts[l].getAttribute("id")) {
                 console.log((texts[l] as HTMLInputElement).value);
                 var text = (texts[l] as HTMLInputElement).value;
                 if (words.length > 1) {
-                  console.log("word array length "+words.length)
+                  console.log("word array length " + words.length)
                   var textArray = text.split(/(\s+)/).filter(function (e) { return e.trim().length > 0; });
-                  console.log("text array length "+textArray.length)
+                  console.log("text array length " + textArray.length)
                   if (words.length == textArray.length) {
-                    for(let k=0;k<words.length;k++){
+                    for (let k = 0; k < words.length; k++) {
                       words[k].unicode = textArray[k].trim();
                     }
-                  }else if(textArray.length > words.length || textArray.length < words.length){
+                  } else if (textArray.length > words.length || textArray.length < words.length) {
                     console.log("in text array greater ");
                     var txt = "";
-                    for(let m=0;m<textArray.length;m++){
-                     txt = txt + " " + textArray[m];
+                    for (let m = 0; m < textArray.length; m++) {
+                      txt = txt + " " + textArray[m];
                     }
                     words[0].unicode = txt.trim();
-                    words[0].colEnd = words[words.length-1].colEnd;
-                    console.log("word[0] "+words[0].unicode);
-                    console.log("word[1] "+words[1].unicode);
-                    for(let n=1;n<words.length;n++){
-                      console.log("words.length",words.length,"n",n,"lines inndex",j)
+                    words[0].colEnd = words[words.length - 1].colEnd;
+                    console.log("word[0] " + words[0].unicode);
+                    console.log("word[1] " + words[1].unicode);
+                    for (let n = 1; n < words.length; n++) {
+                      console.log("words.length", words.length, "n", n, "lines inndex", j)
                       words[n].unicode = "";
                     }
                   }
@@ -742,8 +583,8 @@ sideClose(){
     // console.log("final json  "+JSON.stringify(XmlModel.jsonObject));
     this.imageService.updateCorrectedXml(this.fileName);
   }
-
 }
+
 function convertCanvasToImage(canvas) {
   console.log("in convert................");
   var image = new Image();

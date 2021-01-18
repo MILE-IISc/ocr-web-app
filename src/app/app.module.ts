@@ -60,7 +60,7 @@ import { HeaderService }  from './services/header.service';
 import { AuthInterceptor } from "./auth/auth-interceptor";
 import { AuthService } from './auth/auth.service';
 import { ImageService } from './services/images.service';
-import{ViewerService} from './services/viewer.service';
+// import{ViewerService} from './services/viewer.service';
 import { ErrorInterceptor } from "./error-interceptor";
 import { ErrorComponent } from "./error/error.component";
 import { HTTP_INTERCEPTORS } from "@angular/common/http";
@@ -146,7 +146,7 @@ import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
   ],
   providers: [
     {  provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'fill' } }
-  , HeaderService,ViewerService,AuthService,ImageService,
+  , HeaderService,AuthService,ImageService,
   { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
   { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true }, ],
   bootstrap: [AppComponent],
