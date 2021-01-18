@@ -34,9 +34,6 @@
     <input #fileUpload type="file" (click)="fileUpload.value = null" (change)="importFile($event)" style="display:none"
     accept="image/*">
   <button mat-icon-button color="accent" data-toggle="tooltip" (click)="fileUpload.click()" title="Upload Image" style=" margin-right:3px;" class="screenicon"><mat-icon  >text_snippet</mat-icon></button>
-
-
-
     <div id = "snackbar">{{ invalidMessage }}</div>
   <input #folderUpload type="file" name="fileList" (click)="folderUpload.value = null" webkitdirectory multiple
     (change)="importFile($event)" style="display:none" />
