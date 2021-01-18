@@ -2,7 +2,6 @@ const express = require("express");
 const fs = require("fs");
 var path = require('path');
 var async = require('async');
-// var format = require('xml-formatter');
 var xml2js = require('xml2js');
 var js2xmlparser = require("js2xmlparser");
 const router = express.Router();
@@ -10,12 +9,10 @@ const { promise } = require("protractor");
 var util = require('util');
 
 const checkAuth = require("../middleware/check-auth");
-// const extractFile = require("../middleware/file"); extractFile,
 const Image = require("../models/image");
 const User = require("../models/user");
 
 const cloudStorage = require('ibm-cos-sdk');
-const multerS3 = require('multer-s3');
 const bucket = "my-bucket-sasi-dev-test-ahsdbasjhbdjash";
 var config = {
   endpoint: process.env.object_storage_endpoint,

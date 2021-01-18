@@ -11,7 +11,6 @@ const Tiff = require('tiff.js');
 const Jimp = require('jimp');
 
 const checkAuth = require("../middleware/check-auth");
-// const extractFile = require("../middleware/file"); extractFile,
 const WaveController = require("../controllers/waves");
 const Image = require("../models/image");
 const User = require("../models/user");
@@ -69,11 +68,6 @@ function getBucketContents(bucketName) {
               var itemSize = data.Contents[i].Size;
               console.log(`Item: ${itemKey} (${itemSize} bytes).`);
               bucketFilesList.push(itemKey);
-              // if(itemKey == "balaaka_0001.tif"){
-              //   console.log("reached getItem: "+itemKey);
-              //   continue;
-              // }
-              // getItem(bucketName, itemKey);
           }
       }
   })
@@ -100,8 +94,6 @@ function getItem(bucketName, itemName, mail, requestType) {
           if(path.extname(itemName).toLowerCase() == ".tif" && requestType == "post") {
             console.log('reached getting tif data in getItem\n',itemName);
             let prefix = "data:tif;base64,";
-            // let tiffData = prefix + base64;
-            // console.log("tiffData: "+tiffData);
             const tiffArrayBuff = Buffer.from(data.Body).buffer;
             console.log("tiff ",data.Metadata);
             console.log("tiff ",data.ContentType);
@@ -121,7 +113,6 @@ function getItem(bucketName, itemName, mail, requestType) {
             let prefix = "data:image/jpeg;base64,";
             let base64 = Buffer.from(data.Body).toString('base64');
             let jpgData = prefix + base64;
-            // console.log("jpgData: "+jpgData);
             return jpgData;
           }
       }
@@ -173,7 +164,6 @@ router.post("", checkAuth,
     .then((data) => {
       console.log("data.Contents.length in post",data.Contents.length);
       for(let i = 0; i < data.Contents.length; i++) {
-        console.log("data for file"+data.Contents[i].Key+""+data.Contents[i].ETag);
         console.log("data for file"+data.Contents[i].Key+""+data.Contents[i].Size);
         if(path.extname(data.Contents[i].Key).toLowerCase() == ".tif") {
           console.log("tiff files",data.Contents[i].Key);
@@ -215,8 +205,9 @@ router.get("", checkAuth,(req, res, next) => {
   const url = req.protocol + "://" + req.get("host");
   const mail = req.query.user;
   var fetchedImages = [];
+  var tiffImages = [];
+  var jpegImages = [];
   let fetchedUser;
-  let imageArray = [];
   let imageList = [];
   let xmlArrayList = [];
   let completed;
@@ -227,7 +218,6 @@ router.get("", checkAuth,(req, res, next) => {
           message: "Auth failed"
         });
       }
-      // console.log("user in get" + user.email)
       fetchedUser = user;
       const user_wav_dir = './backend/images/' + fetchedUser.email;
       var newFiles = [];
@@ -235,15 +225,37 @@ router.get("", checkAuth,(req, res, next) => {
         console.log("totalFilesList.length:",bucketFilesList.length);
         targetFiles = bucketFilesList;
         targetFiles.forEach(file => {
-          if (path.extname(file).toLowerCase() == ".tif" || path.extname(file).toLowerCase() == ".png" || path.extname(file).toLowerCase() == ".jpg" ||
-          path.extname(file).toLowerCase() == ".bmp") {
+          if (path.extname(file).toLowerCase() == ".tif") {
+            tiffImages.push(file.trim());
+          }
+          else if (path.extname(file).toLowerCase() == ".jpg") {
+            jpegImages.push(file.trim());
+          }
+          else if (path.extname(file).toLowerCase() == ".png" || path.extname(file).toLowerCase() == ".bmp") {
             fetchedImages.push(file.trim());
-            // console.log("image files["+file+"]");
           } else if(path.extname(file).toLowerCase() == ".xml") {
             xmlArrayList.push(file.toLowerCase());
-            // console.log("xml files["+file+"]");
           }
         });
+
+        jpegImages.map(jpegImage => {
+          mismatchCount = 0;
+          tiffImages.map(tiffImage => {
+            if(tiffImage.slice(0, -3).toLowerCase() == jpegImage.slice(0, -3).toLowerCase()) {
+              fetchedImages.push(tiffImage);
+              console.log("tiff with jpeg",jpegImage);
+            }
+            else {
+              mismatchCount = mismatchCount+1;
+            }
+
+            if(tiffImage.slice(0, -3).toLowerCase() != jpegImage.slice(0, -3).toLowerCase() && mismatchCount == tiffImages.length) {
+              fetchedImages.push(jpegImage);
+              console.log("jpeg Image only",jpegImage);
+            }
+          });
+        });
+
         if (fetchedImages.length > 0) {
           fetchedImages.forEach(files => {
             console.log("fetchedImages name",files);
@@ -398,96 +410,5 @@ function cancelMultiPartUpload(bucketName, itemName, uploadID) {
         console.error(`ERROR: ${e.code} - ${e.message}\n`);
     });
 }
-
-
-// -------------> Unused code for reference <----------------
-
-// const MIME_TYPE_MAP = {
-//   "image/png": "png",
-//   "image/jpeg": "jpg",
-//   "image/jpg": "jpg",
-//   "image/tiff": "tif"
-// };
-
-
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     let fetchedUser;
-//     User.findOne({ email: req.body.email })
-//       .then(user => {
-//         if (!user) {
-//           return res.status(401).json({
-//             message: "Auth failed"
-//           });
-//         }
-//         fetchedUser = user;
-//       }).then(() => {
-//         const isValid = MIME_TYPE_MAP[file.mimetype];
-//         // console.log("file name "+file.originalname);
-//         // console.log("book name "+bookName);
-//         const image_wav_dir = './backend/images/' + req.body.email + '/'
-//         let error = new Error("Invalid mime type");
-//         var fs = require('fs');
-//         let dir = image_wav_dir;
-//         if (!fs.existsSync(dir)) {
-//           fs.mkdirSync(dir, { recursive: true });
-//         }
-
-//         if (isValid) {
-//           error = null;
-//         }
-
-//         cb(error, dir);
-//       });
-//   },
-//   filename: (req, file, cb) => {
-//     const name = file.originalname
-//       .toLowerCase()
-//       .split(" ")
-//       .join("-");
-//     const ext = MIME_TYPE_MAP[file.mimetype];
-//     cb(null, name);
-//   }
-// });
-
-// router.post("", checkAuth,
-//   multer({ storage: storage }).array("image", 4000),
-//   (req, res, next) => {
-//     let imageList = [];
-//     let fetchedUser;
-//     User.findOne({ email: req.body.email })
-//       .then(user => {
-//         if (!user) {
-//           return res.status(401).json({
-//             message: "Auth failed"
-//           });
-//         }
-//         fetchedUser = user;
-//       }).then(() => {
-//         const url = req.protocol + "://" + req.get("host");
-//         const user_wav_dir = './backend/images/' + req.body.email;
-//         // const filePath = './backend/images/' + req.body.email +"/balaaka_0001.tif";
-//         // console.log("file Path " + filePath);
-//         // console.log("calling multiPartUpload");
-//         // multiPartUpload(bucket, "balaaka_0001.tif", filePath);
-//         // console.log("completed multiPartUpload");
-//         fs.readdir(user_wav_dir, (err, filesList) => {
-//           if (err) {
-//             console.log("error in filelist  " + err);
-//             imageList = "";
-//             res.status(500).json({
-//               message: "error in adding images",
-//             });
-//           } else {
-//             targetFiles = filesList;
-//             console.log("file list length " + filesList.length);
-//             res.status(201).json({
-//               message: "Images added successfully",
-//             });
-//           }
-//         });
-//       });
-//   });
-
 
 module.exports = router;
