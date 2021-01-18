@@ -9,19 +9,37 @@
   /* background-color: grey; */
   /* color: white; */
   text-align: center;
-  height:50px;
+  height:30px;
+}
+input{
+
+  border-radius: 10px;
+  height: 30px !important;
+  color: black;
+}
+label{
+font-size: small;
 }
 .example-spacer{
   flex:5 auto;
 }
 .example-spacer1{
-  flex:3 auto;
+  flex:4 auto;
 }
 .example-spacer2{
-  flex:2 auto;
+  flex:1.5 auto;
+}
+.example-spacer4{
+  flex:3.5 auto;
 }
 .example-spacer3{
-  flex:.5 auto;
+  flex:.9 auto;
 
 }
+#fitWidth{
+  transform: rotate(90deg);
+
+}
+
+
 

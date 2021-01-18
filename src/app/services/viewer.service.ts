@@ -4,7 +4,7 @@ declare var $:any;
 import * as $ from 'jquery';
 import { BlockModel} from '../shared/block-model';
 import { XmlModel,retain } from '../shared/xml-model';
-import { ImageService } from '../services/images.service';
+
 import { AuthService } from '../auth/auth.service';
 
 
@@ -16,13 +16,13 @@ export class ViewerService implements OnInit{
  public angle:number=0;
  private renderer: Renderer2;
  public clientpercent;
- serverImages;
- fileName;
- xmlFileName;
 
- imgFileCount;
 
- constructor(private imageService: ImageService,public authService: AuthService,rendererFactory: RendererFactory2) {
+
+
+
+
+ constructor(public authService: AuthService,rendererFactory: RendererFactory2) {
      this.renderer = rendererFactory.createRenderer(null, null);
  }
   ngOnInit() {
