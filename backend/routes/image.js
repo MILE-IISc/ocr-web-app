@@ -27,7 +27,6 @@ const MIME_TYPE_MAP = {
 var invalid ="";
 const cloudStorage = require('ibm-cos-sdk');
 const multerS3 = require('multer-s3');
-const { fileURLToPath } = require("url");
 const bucket = "my-bucket-sasi-dev-test-ahsdbasjhbdjash";
 var config = {
   endpoint: process.env.object_storage_endpoint,
@@ -64,10 +63,12 @@ function getBucketContents(bucketName) {
   ).promise()
   .then((data) => {
       if (data != null && data.Contents != null) {
+        bucketFilesList.splice(0, bucketFilesList.length);
           for (var i = 0; i < data.Contents.length; i++) {
               var itemKey = data.Contents[i].Key;
               var itemSize = data.Contents[i].Size;
               console.log(`Item: ${itemKey} (${itemSize} bytes).`);
+              bucketFilesList.push(itemKey);
               // if(itemKey == "balaaka_0001.tif"){
               //   console.log("reached getItem: "+itemKey);
               //   continue;
@@ -116,7 +117,8 @@ function getItem(bucketName, itemName, mail, requestType) {
             });
           }
           else if(path.extname(itemName).toLowerCase() == ".png" || path.extname(itemName).toLowerCase() == ".jpg" || path.extname(itemName).toLowerCase() == ".bmp"){
-            let prefix = "data:"+data.ContentType+";base64,";
+            console.log("itemName",itemName,"data.ContentType",data.ContentType);
+            let prefix = "data:image/jpeg;base64,";
             let base64 = Buffer.from(data.Body).toString('base64');
             let jpgData = prefix + base64;
             // console.log("jpgData: "+jpgData);
