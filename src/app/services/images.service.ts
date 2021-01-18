@@ -52,6 +52,7 @@ export class ImageService implements OnInit {
   fileNameChange = new EventEmitter<any>();
   invalidMessageChange = new EventEmitter<any>();
   images: Array<Images> = [];
+  localImages : Array<Images> = [];
   imgFileCount = 0;
   ready = false;
   percentage: number;
@@ -78,6 +79,11 @@ export class ImageService implements OnInit {
   getImages() {
     return this.serverImages.slice();
   }
+
+  getLocalImages(){
+    return this.localImages.slice();
+  }
+  
 
   getBtnImages() {
     return this.btnImgArray.slice();
@@ -218,26 +224,83 @@ export class ImageService implements OnInit {
         this.invalidMessage = responseData.message;
         this.invalidMessageChange.emit(this.invalidMessage);
         console.log("image added+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++: " + responseData.message);
-        await this.getServerImages();
+        // await this.getServerImages();
       });
-    if (this.serverImages.length > 0) {
-      console.log("server images length===" + this.serverImages.length);
-      // this.images.splice(0, this.images.length);
-      var filesCount = this.serverImages.length;
-      if (filesCount > 1) {
-        this.nextImages = false;
-      }
-      console.log("file count" + filesCount);
-      let dataURL = await this.loadArray(this.serverImages[0].fileName);
-      this.serverUrl = dataURL
-      console.log("server urlssssss" + this.serverUrl);
-      this.urlChanged.emit(this.serverUrl.slice());
-      console.log("(this.serverImages[0]: " + this.serverImages[0]);
-      if (this.serverImages.length > 1) {
-        this.nextImages = false;
-        this.nextImageChange.emit(this.nextImages);
-      }
+    
+    if(this.serverImages.length == 0) {
+    this.localImages.splice(0, this.localImages.length);
+    var filesCount = fileRead.length;
+    if (filesCount > 1) {
+      this.nextImages = false;
     }
+    console.log("file count" + filesCount);
+    for (let i = 0; i < filesCount; i++) {
+      var isImage = fileRead[i].type.includes("image");
+      if (isImage) {
+        console.log("fileRead.type : " + fileRead[i].type);
+        console.log("fileRead[" + i + "].name : " + fileRead[i].name);
+        console.log("Inside service when pdf is selected length" + this.images.length)
+        let dataURL = await this.loadLocalImages(fileRead, i);
+        const imgValue = new Images(i, fileRead[i].name, 'N',this.authService.email,dataURL);
+        this.localImages.push(imgValue);
+        console.log("after sorting" + this.localImages[0].fileName);
+        console.log("addImage: " + dataURL);
+      }
+  }
+    this.localImages.sort( (a, b) => {
+      var x = a.fileName.toLowerCase();
+      var y = b.fileName.toLowerCase();
+      if (x < y) {return -1;}
+      if (x > y) {return 1;}
+      return 0;
+    });
+    this.imagesModified.emit(this.localImages.slice());
+    if(this.localImages.length > 1) {
+      this.nextImages = false;
+      this.nextImageChange.emit(this.nextImages);
+    }
+  }
+    // if (this.serverImages.length > 0) {
+    //   console.log("server images length===" + this.serverImages.length);
+    //   // this.images.splice(0, this.images.length);
+    //   var filesCount = this.serverImages.length;
+    //   if (filesCount > 1) {
+    //     this.nextImages = false;
+    //   }
+    //   console.log("file count" + filesCount);
+    //   let dataURL = await this.loadArray(this.serverImages[0].fileName);
+    //   this.serverUrl = dataURL
+    //   console.log("server urlssssss" + this.serverUrl);
+    //   this.urlChanged.emit(this.serverUrl.slice());
+    //   console.log("(this.serverImages[0]: " + this.serverImages[0]);
+    //   if (this.serverImages.length > 1) {
+    //     this.nextImages = false;
+    //     this.nextImageChange.emit(this.nextImages);
+    //   }
+    // }
+  }
+
+  async loadLocalImages(fileRead:any,i:number) {
+    const result = await new Promise((resolve) => {
+      let reader = new FileReader();
+       if(fileRead[i].type == "image/tiff"){
+          reader.onload = (event: any) => {
+              var image = new Tiff({ buffer: event.target.result });
+              var canvas = image.toCanvas();
+              var img = convertCanvasToImage(canvas) ;
+              resolve(img.src);
+              }
+              reader.readAsArrayBuffer(fileRead[i]);
+          }else
+          {
+            reader.onload = (event: any) => {
+            resolve(event.target.result);
+          }
+          reader.readAsDataURL(fileRead[i]);
+        }
+      });
+      console.log(result);
+      return result;
   }
 
   getImage(imageUrl: any){
@@ -302,13 +365,24 @@ export class ImageService implements OnInit {
     this.http
       .put<{ message: string, name: string, completed: string }>(this.XML_BACKEND_URL + fileName, xmlData)
       .subscribe(response => {
-        for (let i = 0; i < this.serverImages.length; i++) {
-          if (this.serverImages[i].fileName == response.name) {
-            console.log("name" + this.serverImages[i].fileName);
-            this.serverImages[i].completed = response.completed;
-            console.log("completed" + this.serverImages[i].completed);
+        if(this.serverImages.length>0){
+          for (let i = 0; i < this.serverImages.length; i++) {
+            if (this.serverImages[i].fileName == response.name) {
+              console.log("name" + this.serverImages[i].fileName);
+              this.serverImages[i].completed = response.completed;
+              console.log("completed" + this.serverImages[i].completed);
+            }
+          }
+        }else{
+          for (let i = 0; i < this.localImages.length; i++) {
+            if (this.localImages[i].fileName == response.name) {
+              console.log("name" + this.localImages[i].fileName);
+              this.localImages[i].completed = response.completed;
+              console.log("completed" + this.localImages[i].completed);
+            }
           }
         }
+        
       });
   }
 
@@ -349,35 +423,60 @@ export class ImageService implements OnInit {
   async nextPage() {
     this.imgFileCount++;
     this.imageCountChange.emit(this.imgFileCount);
-    console.log("next image length" + this.serverImages.length);
-    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
-    this.urlChanged.emit(this.localUrl.slice());
-    this.fileName = this.serverImages[this.imgFileCount].fileName;
-    this.fileNameChange.emit(this.fileName);
-    console.log("inside Next this.imgFileCount after incrementing: " + this.imgFileCount);
-    if (this.serverImages.length - 1 == this.imgFileCount) {
-      this.nextImages = true;
-      this.nextImageChange.emit(this.nextImages);
+    this.serverImages = this.getImages();
+    if (this.serverImages.length > 0) {
+      this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
+      this.urlChanged.emit(this.localUrl.slice());
+      this.fileName = this.serverImages[this.imgFileCount].fileName;
+      this.fileNameChange.emit(this.fileName);
+      console.log("inside Next this.imgFileCount after incrementing: " + this.imgFileCount);
+      if (this.serverImages.length - 1 == this.imgFileCount) {
+        this.nextImages = true;
+        this.nextImageChange.emit(this.nextImages);
+      }
+    } else {
+      this.localImages = this.getLocalImages();
+      this.localUrl = this.localImages[this.imgFileCount].dataUrl;
+      this.urlChanged.emit(this.localUrl.slice());
+      this.fileName = this.localImages[this.imgFileCount].fileName;
+      this.fileNameChange.emit(this.fileName);
+      console.log("inside Next this.imgFileCount after incrementing: " + this.imgFileCount);
+      if (this.localImages.length - 1 == this.imgFileCount) {
+        this.nextImages = true;
+        this.nextImageChange.emit(this.nextImages);
+      }
     }
     if (this.imgFileCount > 0) {
       this.previousImages = false;
       this.previousImageChange.emit(this.previousImages);
     }
-    $('#imgToRead').selectAreas('destroy');
   }
 
   async previousPage() {
     this.serverImages = this.getImages();
     this.imgFileCount--;
     this.imageCountChange.emit(this.imgFileCount);
-    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
-    this.urlChanged.emit(this.localUrl.slice());
-    this.fileName = this.serverImages[this.imgFileCount].fileName;
-    this.fileNameChange.emit(this.fileName);
-    console.log("inside Next this.imgFileCount after decrementing: " + this.imgFileCount);
-    if (this.serverImages.length - 1 > this.imgFileCount) {
-      this.nextImages = false;
-      this.nextImageChange.emit(this.nextImages);
+    if (this.serverImages.length > 0) {
+      this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
+      this.urlChanged.emit(this.localUrl.slice());
+      this.fileName = this.serverImages[this.imgFileCount].fileName;
+      this.fileNameChange.emit(this.fileName);
+      console.log("inside Next this.imgFileCount after decrementing: " + this.imgFileCount);
+      if (this.serverImages.length - 1 > this.imgFileCount) {
+        this.nextImages = false;
+        this.nextImageChange.emit(this.nextImages);
+      }
+    } else {
+      this.localImages = this.getLocalImages();
+      this.localUrl = this.localImages[this.imgFileCount].dataUrl;
+      this.urlChanged.emit(this.localUrl.slice());
+      this.fileName = this.localImages[this.imgFileCount].fileName;
+      this.fileNameChange.emit(this.fileName);
+      console.log("inside Next this.imgFileCount after decrementing: " + this.imgFileCount);
+      if (this.localImages.length - 1 > this.imgFileCount) {
+        this.nextImages = false;
+        this.nextImageChange.emit(this.nextImages);
+      }
     }
     if (this.imgFileCount == 0) {
       this.previousImages = true;
@@ -387,28 +486,52 @@ export class ImageService implements OnInit {
 
   async LastImage() {
     this.serverImages = this.getImages();
-    this.imgFileCount = this.serverImages.length - 1;
-    this.imageCountChange.emit(this.imgFileCount);
-    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
-    this.urlChanged.emit(this.localUrl.slice());
-    this.fileName = this.serverImages[this.imgFileCount].fileName;
-    this.fileNameChange.emit(this.fileName);
-    if (this.serverImages.length - 1 == this.imgFileCount) {
-      this.nextImages = true;
-      this.nextImageChange.emit(this.nextImages);
-      this.previousImages = false;
-      this.previousImageChange.emit(this.previousImages);
+    if (this.serverImages.length > 0) {
+      this.imgFileCount = this.serverImages.length - 1;
+      this.imageCountChange.emit(this.imgFileCount);
+      this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
+      this.urlChanged.emit(this.localUrl.slice());
+      this.fileName = this.serverImages[this.imgFileCount].fileName;
+      this.fileNameChange.emit(this.fileName);
+      if (this.serverImages.length - 1 == this.imgFileCount) {
+        this.nextImages = true;
+        this.nextImageChange.emit(this.nextImages);
+        this.previousImages = false;
+        this.previousImageChange.emit(this.previousImages);
+      }
+    } else {
+      this.localImages = this.getLocalImages();
+      this.imgFileCount = this.localImages.length - 1;
+      this.localUrl = this.localImages[this.imgFileCount].dataUrl;
+      this.urlChanged.emit(this.localUrl.slice());
+      this.fileName = this.localImages[this.imgFileCount].fileName;
+      this.fileNameChange.emit(this.fileName);
+      if (this.localImages.length - 1 == this.imgFileCount) {
+        this.nextImages = true;
+        this.nextImageChange.emit(this.nextImages);
+        this.previousImages = false;
+        this.previousImageChange.emit(this.previousImages);
+      }
     }
   }
 
   async firstImage() {
-    this.serverImages = this.getImages();
     this.imgFileCount = 0;
     this.imageCountChange.emit(this.imgFileCount);
-    this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
-    this.urlChanged.emit(this.localUrl.slice());
-    this.fileName = this.serverImages[this.imgFileCount].fileName;
-    this.fileNameChange.emit(this.fileName);
+    this.serverImages = this.getImages();
+    if (this.serverImages.length > 0) {
+      this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
+      this.urlChanged.emit(this.localUrl.slice());
+      this.fileName = this.serverImages[this.imgFileCount].fileName;
+      this.fileNameChange.emit(this.fileName);
+    } else {
+      this.localImages = this.getLocalImages();
+      this.localUrl = this.localImages[this.imgFileCount].dataUrl;
+      this.urlChanged.emit(this.localUrl.slice());
+      this.fileName = this.localImages[this.imgFileCount].fileName;
+      this.fileNameChange.emit(this.fileName);
+    }
+
     if (this.imgFileCount == 0) {
       this.previousImages = true;
       this.previousImageChange.emit(this.previousImages);
@@ -419,12 +542,21 @@ export class ImageService implements OnInit {
 
   onXml() {
     this.serverImages = this.getImages();
-    this.fileName = this.serverImages[this.imgFileCount].fileName;
-    console.log("completion status: ",this.serverImages[this.imgFileCount].completed);
-    if(this.serverImages[this.imgFileCount].completed =="Y") {
+    if(this.serverImages.length>0){
+      this.fileName = this.serverImages[this.imgFileCount].fileName;
+      console.log("completion status: ",this.serverImages[this.imgFileCount].completed);
+      if(this.serverImages[this.imgFileCount].completed =="Y") {
+        this.getFileAsJson(this.fileName);
+      }
+    }else{
+      this.localImages = this.getLocalImages();
+      this.fileName = this.localImages[this.imgFileCount].fileName;
+      console.log("completion status: ",this.localImages[this.imgFileCount].completed);
+      if(this.localImages[this.imgFileCount].completed =="Y") {
       this.getFileAsJson(this.fileName);
     }
   }
+}
 
   getFileAsJson(fileName : any) {
     console.log("file name in run ocr "+ fileName)
@@ -497,15 +629,11 @@ export class ImageService implements OnInit {
       $('#imgToRead').selectAreas('destroy');
     });
 
-     function debugQtyAreas(event, id, areas) {
+    function debugQtyAreas(event, id, areas) {
       console.log(areas.length + " areas", arguments);
       this.displayarea = areas;
       console.log(areas.length + " this.displayarea", arguments);
-      console.log("invoking saving to XML");
-      var SaveToXML = document.getElementById("SaveToXML");
-      console.log("SaveToXML: "+SaveToXML);
-      SaveToXML.click();
-      };
+    };
   }
 }
 function convertCanvasToImage(canvas) {

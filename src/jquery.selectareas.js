@@ -472,12 +472,18 @@ if(originX == releaseX || originY == releaseY) {
 fireEvent("changed");
 
 refresh("releaseSelection");
+autoSave();
 },
 blocknumberupdate= function(event){
  var updatebutton = document.getElementById("blockno")
  updatebutton.click();
 
 },
+autoSave= function(event){
+  var SaveToXML = document.getElementById("SaveToXML");
+  console.log("SaveToXML: "+SaveToXML);
+  SaveToXML.click();
+ },
 deleteSelection = function (event) {
 //$BlockNumber--;
 
