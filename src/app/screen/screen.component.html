@@ -63,7 +63,7 @@
 
 
 <as-split class="split"  [style.height.px]="this.myHeight" [direction]=value>
-  <as-split-area id="content"   class="split1" (scroll)="updateScroll(scrollOne, scrollTwo)" #scrollOne>
+  <as-split-area id="content"   class="split1" >
         <as-split class="sideNav" id="Sidenav" direction="horizontal">
            <as-split-area [size]=sidesize1>
             <div >
@@ -77,9 +77,7 @@
             </div>
            </div>
            </as-split-area>
-
-
-           <as-split-area [size]=sidesize2>
+          <as-split-area [size]=sidesize2 (scroll)="updateScroll(scrollOne, scrollTwo)" #scrollOne>
             <img [src]="localUrl" *ngIf="localUrl && !isLoading" id="imgToRead" class="imgToRead" />
             <!-- <div class="topleft" *ngIf="!isLoading"><h5>{{ fileName }}</h5></div> -->
             <mat-spinner *ngIf="isLoading"></mat-spinner>
