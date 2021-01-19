@@ -1,7 +1,6 @@
 const express = require("express");
 const fs = require("fs");
 var path = require('path');
-var async = require('async');
 var xml2js = require('xml2js');
 var js2xmlparser = require("js2xmlparser");
 const router = express.Router();
@@ -13,7 +12,7 @@ const Image = require("../models/image");
 const User = require("../models/user");
 
 const cloudStorage = require('ibm-cos-sdk');
-const bucket = "my-bucket-maithri-dev-test-ahsdbasjhbdjash";
+const bucket = "my-bucket-gangotri-dev-test-ahsdbasjhbdjash";
 var config = {
   endpoint: process.env.object_storage_endpoint,
   apiKeyId: process.env.object_storage_apiKeyId,
