@@ -72,8 +72,8 @@
             <span class="filler"></span>
             <button mat-icon-button class="sideBar"  color="accent" title="view Image List" (click)="sideClose()"><mat-icon >close</mat-icon></button>
             </mat-toolbar>
-            <div class="sideBody">
-            <div style="width: 90%;" (click)="openThisImage($event)"></div>
+            <div class="sideBody" (click)="openThisImage($event)">
+           
             </div>
            </div>
            </as-split-area>
@@ -128,20 +128,4 @@
     <a>Book Name in Kannd</a>
   </div>
 
-</div>
-
-<div class="modal" id="HI" tabindex="-1" role="dialog" [ngStyle]="{'display':display}">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 class="modal-title">Please select the page that you want to be displayed:</h4>
-      </div>
-      <div>
-        <div class="modal-body" style="width: 90%;" (click)="openThisImage($event)"></div>
-      </div>
-      <div class="modal-footer">
-        <button  mat-flat-button  color="warn"  type="button" class="btn btn-default" data-dismiss="modal" (click)="closeModalDialog()">Close</button>
-      </div>
-    </div>
-  </div>
 </div>

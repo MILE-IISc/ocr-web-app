@@ -287,11 +287,8 @@ export class ScreenComponent implements OnInit{
         console.log("imgFileCount " + this.imgFileCount);
       }
     }
-    this.closeModalDialog();
-  }
-
-  closeModalDialog() {
-    this.display = 'none'; //set none css after close dialog
+    setTimeout(() => this.fitwidth(), 50);
+    setTimeout(() => this.setpercentage(), 60);
   }
 
   importFile(event) {
