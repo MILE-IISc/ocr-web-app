@@ -46,6 +46,7 @@ testem.log
 Thumbs.db
 
 /backend/images/*
+/backend/node_modules
 !/backend/images/.gitkeep
 /backend/OCR-WEB-UI/*
 nodemon.json

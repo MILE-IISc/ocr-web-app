@@ -1,7 +1,6 @@
 const express = require("express");
 const fs = require("fs");
 var path = require('path');
-var async = require('async');
 var xml2js = require('xml2js');
 var js2xmlparser = require("js2xmlparser");
 const router = express.Router();
