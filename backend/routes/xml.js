@@ -74,9 +74,9 @@ router.put("", checkAuth, (req, res, next) => {
   const user_xml_dir = './backend/images/' + editor + '/';
   var fs = require('fs');
   let dir = user_xml_dir;
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
-  }
+  // if (!fs.existsSync(dir)) {
+  //   fs.mkdirSync(dir);
+  // }
   var json = req.body.json;
 
   // console.log("converting this json "+js2xmlparser.parse("page",json));
