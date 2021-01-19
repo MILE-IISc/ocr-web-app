@@ -14,10 +14,10 @@ const User = require("../models/user");
 const cloudStorage = require('ibm-cos-sdk');
 const bucket = "my-bucket-gangotri-dev-test-ahsdbasjhbdjash";
 var config = {
-  endpoint: process.env.object_storage_endpoint,
-  apiKeyId: process.env.object_storage_apiKeyId,
-  ibmAuthEndpoint: process.env.object_storage_ibmAuthEndpoint,
-  serviceInstanceId: process.env.object_storage_serviceInstanceId,
+  endpoint: process.env.OBJECT_STORAGE_ENDPOINT,
+  apiKeyId: process.env.OBJECT_STORAGE_API_KEY_ID,
+  ibmAuthEndpoint: process.env.OBJECT_STORAGE_IBM_AUTH_ENDPOINT,
+  serviceInstanceId: process.env.OBJECT_STORAGE_SERVICE_INSTANCE_ID,
 };
 
 var cos = new cloudStorage.S3(config);

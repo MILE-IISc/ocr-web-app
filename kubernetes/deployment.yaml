@@ -27,13 +27,31 @@ spec:
             secretKeyRef:
               name: mongosecret
               key: endpoint
-              optional: true
         - name: JWT_KEY
           valueFrom:
             secretKeyRef:
               name: jwtsecret
               key: jwtkey
-              optional: true
+        - name: OBJECT_STORAGE_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: objectStorageSecret
+              key: endpoint
+        - name: OBJECT_STORAGE_API_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: objectStorageSecret
+              key: apiKeyId
+        - name: OBJECT_STORAGE_IBM_AUTH_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: objectStorageSecret
+              key: ibmAuthEndpoint
+        - name: OBJECT_STORAGE_SERVICE_INSTANCE_ID
+          valueFrom:
+            secretKeyRef:
+              name: objectStorageSecret
+              key: serviceInstanceId
 ---
 # Expose as service
 apiVersion: v1
