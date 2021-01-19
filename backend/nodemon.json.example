@@ -5,6 +5,7 @@
     "object_storage_endpoint": "<object_storage_endpoint>",
     "object_storage_apiKeyId": "<object_storage_apiKeyId>",
     "object_storage_ibmAuthEndpoint": "<object_storage_ibmAuthEndpoint>",
-    "object_storage_serviceInstanceId": "<object_storage_serviceInstanceId>"
+    "object_storage_serviceInstanceId": "<object_storage_serviceInstanceId>",
+    "object_storage_bucketPrefix": "MILE-IISc-OCR-WEB-BUCKET"
   }
 }
