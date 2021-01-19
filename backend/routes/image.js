@@ -26,7 +26,7 @@ const MIME_TYPE_MAP = {
 var invalid ="";
 const cloudStorage = require('ibm-cos-sdk');
 const multerS3 = require('multer-s3');
-const bucket = "my-bucket-sasi-dev-test-ahsdbasjhbdjash";
+const bucket = "my-bucket-maithri-dev-test-ahsdbasjhbdjash";
 var config = {
   endpoint: process.env.object_storage_endpoint,
   apiKeyId: process.env.object_storage_apiKeyId,
