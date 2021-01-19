@@ -134,14 +134,14 @@ export class ImageService implements OnInit {
 
   getXmlFileAsJson(fileName : any) {
     console.log("file name in run ocr "+ fileName)
-    var queryfileName = fileName.slice(0,-3) + 'xml';
+    // var queryfileName = fileName;
     let userData : any;
     userData = {
       user : this.authService.userName
     }
       this.http
         .get<{ message: string; json:any }>(
-          this.XML_BACKEND_URL + queryfileName).subscribe(responseData => {
+          this.XML_BACKEND_URL + fileName).subscribe(responseData => {
           console.log("xml as json string "+JSON.stringify(responseData.json));
           XmlModel.jsonObject = responseData.json;
           this.updateXmlModel(XmlModel.jsonObject);
@@ -243,7 +243,7 @@ export class ImageService implements OnInit {
         this.nextImages = false;
       }
       console.log("server file count" + this.serverImages.length);
-      if (this.serverImages.length == 0) {  
+      if (this.serverImages.length == 0) {
       this.localImages.splice(0, this.localImages.length);
       console.log("file count" + filesCount);
       for (let i = 0; i < filesCount; i++) {
@@ -275,7 +275,7 @@ export class ImageService implements OnInit {
     // else{
     //   await this.getServerImages();
     // }
-    
+
   }
 
   async loadLocalImages(fileRead:any,i:number) {

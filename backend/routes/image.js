@@ -25,7 +25,9 @@ const MIME_TYPE_MAP = {
 var invalid ="";
 const cloudStorage = require('ibm-cos-sdk');
 const multerS3 = require('multer-s3');
-const bucket = process.env.OBJECT_STORAGE_BUCKET;
+// const bucket = process.env.OBJECT_STORAGE_BUCKET;
+bucket = "";
+// bucket = "my-bucket-sasi-dev-test-ahsdbasjhbdjash";
 var config = {
   endpoint: process.env.OBJECT_STORAGE_ENDPOINT,
   apiKeyId: process.env.OBJECT_STORAGE_API_KEY_ID,
@@ -111,7 +113,7 @@ function getItem(bucketName, itemName, mail, requestType) {
               const filePath = './images/' + mail + "/" + tiffToJpg;
               console.log("file Path " + filePath);
               console.log("calling multiPartUpload");
-              multiPartUpload(bucket, tiffToJpg, filePath);
+              multiPartUpload(bucketName, tiffToJpg, filePath);
             })
           }
           else if(path.extname(itemName).toLowerCase() == ".png" || path.extname(itemName).toLowerCase() == ".jpg" || path.extname(itemName).toLowerCase() == ".bmp"){
@@ -157,7 +159,33 @@ var upload = multer({
   })
 });
 
-router.post("", checkAuth,
+getBucketName = (req, res, next) => {
+  try {
+    // const token = req.headers.authorization.split(" ")[1];
+    // const decodedToken = jwt.verify(token, process.env.JWT_KEY);
+    // req.userData = { email: decodedToken.email, userId: decodedToken.userId };
+    console.log("inside getBucketName while post request user mail",req.userData.email);
+    User.findOne({ email: req.userData.email })
+    .then(user => {
+      if (!user) {
+        return res.status(401).json({
+          message: "Auth failed"
+        });
+      }
+      fetchedUser = user;
+      console.log("email inside post request from database ",fetchedUser.email);
+      console.log("bucket inside post request from database ",fetchedUser.bucketName);
+      bucket = fetchedUser.bucketName;
+    });
+    next();
+  } catch (error) {
+    res.status(401).json({ message: "You are not authenticated!" });
+  }
+};
+
+router.post("",
+  checkAuth,
+  getBucketName,
   upload.array("image", 4000),
   (req, res, next) => {
     console.log("inside post email ",req.body.email)
@@ -177,14 +205,6 @@ router.post("", checkAuth,
             if(data == "The specified key does not exists in bucket") {
               console.log("error while retrieving and converting image:",itemData);
             }
-            // else {
-            //   console.log("image content retrieved and converted");
-            //   let tiffToJpg = data.Contents[i].Key.slice(0, -3).toLowerCase() + 'jpg';
-            //   const filePath = './backend/images/' + req.body.email+"/" +tiffToJpg;
-            //   console.log("file Path " + filePath);
-            //   console.log("calling multiPartUpload");
-            //   multiPartUpload(bucket, tiffToJpg, filePath);
-            // }
           });
         }
       }
@@ -226,6 +246,10 @@ router.get("", checkAuth,(req, res, next) => {
       }
       fetchedUser = user;
       const user_wav_dir = './backend/images/' + fetchedUser.email;
+      console.log("email inside get request from database ",fetchedUser.email);
+      console.log("bucket inside get request from database ",fetchedUser.bucketName);
+      bucket = fetchedUser.bucketName;
+      console.log("bucket inside get request",bucket);
       var newFiles = [];
       getBucketContents(bucket).then(() => {
         console.log("totalFilesList.length:",bucketFilesList.length);
@@ -318,8 +342,9 @@ router.get("/:fileName", checkAuth,(req, res, next) =>{
       });
     }
     fetchedUser = user;
-    console.log("inside get File mail"+req.query.user);
-    getItem(bucket, jpegFile, req.query.user,"get").then((data) => {
+    console.log("inside get File mail "+req.query.user);
+    console.log("bucketName inside get File request "+fetchedUser.bucketName);
+    getItem(fetchedUser.bucketName, jpegFile, req.query.user,"get").then((data) => {
       if(data == "The specified key does not exists in bucket") {
         console.log("error while retrieving image:",data);
         res.status(400).json({
