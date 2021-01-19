@@ -26,7 +26,7 @@ const MIME_TYPE_MAP = {
 var invalid ="";
 const cloudStorage = require('ibm-cos-sdk');
 const multerS3 = require('multer-s3');
-const bucket = "my-bucket-harish-dev-test-ahsdbasjhbdjash";
+const bucket = "my-bucket-sasi-dev-test-ahsdbasjhbdjash";
 var config = {
   endpoint: process.env.object_storage_endpoint,
   apiKeyId: process.env.object_storage_apiKeyId,
@@ -91,9 +91,9 @@ function getItem(bucketName, itemName, mail, requestType) {
   }).promise()
   .then((data) => {
       if (data != null) {
+        console.log("path.extname(itemName).toLowerCase() ",path.extname(itemName).toLowerCase()," requestType ",requestType);
           if(path.extname(itemName).toLowerCase() == ".tif" && requestType == "post") {
             console.log('reached getting tif data in getItem\n',itemName);
-            let prefix = "data:tif;base64,";
             const tiffArrayBuff = Buffer.from(data.Body).buffer;
             console.log("tiff ",data.Metadata);
             console.log("tiff ",data.ContentType);
@@ -167,7 +167,7 @@ router.post("", checkAuth,
         console.log("data for file"+data.Contents[i].Key+""+data.Contents[i].Size);
         if(path.extname(data.Contents[i].Key).toLowerCase() == ".tif") {
           console.log("tiff files",data.Contents[i].Key);
-          getItem(bucket, data.Contents[i].Key, req.body.email, "postRequest").then((itemData) => {
+          getItem(bucket, data.Contents[i].Key, req.body.email, "post").then((itemData) => {
             if(data == "The specified key does not exists in bucket") {
               console.log("error while retrieving and converting image:",itemData);
             }
@@ -313,7 +313,7 @@ router.get("/:fileName", checkAuth,(req, res, next) =>{
     }
     fetchedUser = user;
     console.log("inside get File mail"+req.query.user);
-    getItem(bucket, jpegFile, req.query.user,"getRequest").then((data) => {
+    getItem(bucket, jpegFile, req.query.user,"get").then((data) => {
       if(data == "The specified key does not exists in bucket") {
         console.log("error while retrieving image:",data);
         res.status(400).json({
