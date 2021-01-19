@@ -3,8 +3,6 @@
 
   - Hit the IISc OCR-WEB url:  [OCR-WEB](http://169.38.86.210:8080)
   - Log in with the Email and the Password provided.
-  
-  
   ![alt text](Docs/login.png)
   
   
@@ -43,11 +41,12 @@
   
   
   - While doing corrections you can view the screen in vertical or Horizontal view by selecting either `Horizontal view` or `vertical view`  buttons.
-  
+   ![alt text](Docs/Layouts.png)
   
   - you can zoom the both sides of the screen.
     ![alt text](Docs/zoom.png)
     
     
   - you downloads the XML file generated as OCR output from `ExportXML`.
+  
     ![alt text](Docs/extract.png)
