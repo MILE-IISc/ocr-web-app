@@ -63,7 +63,7 @@ export class ScreenComponent implements OnInit{
   images: Images[];
   ImageIs = true;
   isDiv = false;
-  myHeight = (window.innerHeight-30);
+  myHeight = (window.innerHeight-55.5);
   userName: string;
   userIsAuthenticated = false;
   isAdmin;
@@ -287,11 +287,8 @@ export class ScreenComponent implements OnInit{
         console.log("imgFileCount " + this.imgFileCount);
       }
     }
-    this.closeModalDialog();
-  }
-
-  closeModalDialog() {
-    this.display = 'none'; //set none css after close dialog
+    setTimeout(() => this.fitwidth(), 50);
+    setTimeout(() => this.setpercentage(), 60);
   }
 
   importFile(event) {

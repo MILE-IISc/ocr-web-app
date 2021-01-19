@@ -7,6 +7,9 @@
 <mat-toolbar color="primary" >
 
   <button mat-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
+  <span class="example-spacer2"></span>
+  <div  *ngIf="!isLoading"><h5>{{ fileName }}</h5></div>
+
 
 
 
@@ -30,27 +33,27 @@
  </div></mat-menu>
   <button mat-icon-button><mat-icon >help_outline</mat-icon></button>
 
-  <mat-menu #menu="matMenu">
+  <mat-menu #menu="matMenu" color="primary">
     <input #fileUpload type="file" (click)="fileUpload.value = null" (change)="importFile($event)" style="display:none"
     accept="image/*">
-  <button mat-icon-button color="accent" data-toggle="tooltip" (click)="fileUpload.click()" title="Upload Image" style=" margin-right:3px;" class="screenicon"><mat-icon  >text_snippet</mat-icon></button>
+  <button mat-icon-button color="primary" data-toggle="tooltip" (click)="fileUpload.click()" title="Upload Image" style=" margin-right:3px;" class="screenicon"><mat-icon  >text_snippet</mat-icon></button>
     <div id = "snackbar">{{ invalidMessage }}</div>
   <input #folderUpload type="file" name="fileList" (click)="folderUpload.value = null" webkitdirectory multiple
     (change)="importFile($event)" style="display:none" />
-  <button mat-icon-button color="accent" data-toggle="tooltip" title="Upload Directory" style="margin-right:3px;" class="screenicon" (click)="folderUpload.click()">
+  <button mat-icon-button color="primary" data-toggle="tooltip" title="Upload Directory" style="margin-right:3px;" class="screenicon" (click)="folderUpload.click()">
     <mat-icon  >folder_open</mat-icon> </button>
 
 
-  <button mat-icon-button color="accent" data-toggle="tooltip" title="vertcal View"  style="margin-right:3px;" class="screenicon" id="vertical_view"(click)="asVertical()"
+  <button mat-icon-button color="primary" data-toggle="tooltip" title="vertcal View"  style="margin-right:3px;" class="screenicon" id="vertical_view"(click)="asVertical()"
     [disabled]="nextImage"><mat-icon  >vertical_split</mat-icon></button>
 
-  <button mat-icon-button color="accent" data-toggle="tooltip" title="Horizontal View" style="margin-right:3px;" class="screenicon" (click)="asHorizontal()"
+  <button mat-icon-button color="primary" data-toggle="tooltip" title="Horizontal View" style="margin-right:3px;" class="screenicon" (click)="asHorizontal()"
     [disabled]="nextImage"><mat-icon  >horizontal_split</mat-icon></button>
 
-    <button mat-icon-button color="accent" data-toggle="tooltip" title="Select Block" (click)="selectBlock()" style="margin-right:3px;" class="screenicon"  id="buttonXml"><mat-icon  >crop_5_4</mat-icon></button>
+    <button mat-icon-button color="primary" data-toggle="tooltip" title="Select Block" (click)="selectBlock()" style="margin-right:3px;" class="screenicon"  id="buttonXml"><mat-icon  >crop_5_4</mat-icon></button>
 
 
-  <button mat-icon-button color="accent" class="screenicon"(click)="onSaveXml()"><mat-icon  >get_app</mat-icon></button>
+  <button mat-icon-button color="primary" class="screenicon"(click)="onSaveXml()"><mat-icon  >get_app</mat-icon></button>
 
 
   </mat-menu>
@@ -69,8 +72,8 @@
             <span class="filler"></span>
             <button mat-icon-button class="sideBar"  color="accent" title="view Image List" (click)="sideClose()"><mat-icon >close</mat-icon></button>
             </mat-toolbar>
-            <div class="sideBody">
-            <div style="width: 90%;" (click)="openThisImage($event)"></div>
+            <div class="sideBody" (click)="openThisImage($event)">
+           
             </div>
            </div>
            </as-split-area>
@@ -78,7 +81,7 @@
 
            <as-split-area [size]=sidesize2>
             <img [src]="localUrl" *ngIf="localUrl && !isLoading" id="imgToRead" class="imgToRead" />
-            <div class="topleft" *ngIf="!isLoading"><h5>{{ fileName }}</h5></div>
+            <!-- <div class="topleft" *ngIf="!isLoading"><h5>{{ fileName }}</h5></div> -->
             <mat-spinner *ngIf="isLoading"></mat-spinner>
             <button mat-icon-button class="sidebar1"  color="primary" (click)="sideOpen()"><img src="assets/images/left.svg"  type="button" width="20px" height="20px"></button>
             </as-split-area>
@@ -125,20 +128,4 @@
     <a>Book Name in Kannd</a>
   </div>
 
-</div>
-
-<div class="modal" id="HI" tabindex="-1" role="dialog" [ngStyle]="{'display':display}">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 class="modal-title">Please select the page that you want to be displayed:</h4>
-      </div>
-      <div>
-        <div class="modal-body" style="width: 90%;" (click)="openThisImage($event)"></div>
-      </div>
-      <div class="modal-footer">
-        <button  mat-flat-button  color="warn"  type="button" class="btn btn-default" data-dismiss="modal" (click)="closeModalDialog()">Close</button>
-      </div>
-    </div>
-  </div>
 </div>

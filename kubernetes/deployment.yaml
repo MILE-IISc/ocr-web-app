@@ -34,6 +34,7 @@ spec:
               name: jwtsecret
               key: jwtkey
               optional: true
+---
 # Expose as service
 apiVersion: v1
 kind: Service
