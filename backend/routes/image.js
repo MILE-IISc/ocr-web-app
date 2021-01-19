@@ -7,7 +7,6 @@ const router = express.Router();
 const multer = require('multer');
 const { promise } = require("protractor");
 var util = require('util');
-const Tiff = require('tiff.js');
 const Jimp = require('jimp');
 
 const checkAuth = require("../middleware/check-auth");
