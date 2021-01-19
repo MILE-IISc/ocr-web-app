@@ -35,22 +35,22 @@ spec:
         - name: OBJECT_STORAGE_ENDPOINT
           valueFrom:
             secretKeyRef:
-              name: objectStorageSecret
+              name: objectstorage-secret
               key: endpoint
         - name: OBJECT_STORAGE_API_KEY_ID
           valueFrom:
             secretKeyRef:
-              name: objectStorageSecret
+              name: objectstorage-secret
               key: apiKeyId
         - name: OBJECT_STORAGE_IBM_AUTH_ENDPOINT
           valueFrom:
             secretKeyRef:
-              name: objectStorageSecret
+              name: objectstorage-secret
               key: ibmAuthEndpoint
         - name: OBJECT_STORAGE_SERVICE_INSTANCE_ID
           valueFrom:
             secretKeyRef:
-              name: objectStorageSecret
+              name: objectstorage-secret
               key: serviceInstanceId
 ---
 # Expose as service
