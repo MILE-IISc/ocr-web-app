@@ -25,7 +25,7 @@ const MIME_TYPE_MAP = {
 var invalid ="";
 const cloudStorage = require('ibm-cos-sdk');
 const multerS3 = require('multer-s3');
-const bucket = "my-bucket-sasi-dev-test-ahsdbasjhbdjash";
+const bucket = process.env.OBJECT_STORAGE_BUCKET;
 var config = {
   endpoint: process.env.OBJECT_STORAGE_ENDPOINT,
   apiKeyId: process.env.OBJECT_STORAGE_API_KEY_ID,
@@ -104,11 +104,11 @@ function getItem(bucketName, itemName, mail, requestType) {
               console.log("file width",file.getWidth());
               file
               .quality(75)
-              .write('./backend/images/'+mail+"/"+itemName.slice(0, -3).toLowerCase() + 'jpg');
+              .write('./images/'+mail+"/"+itemName.slice(0, -3).toLowerCase() + 'jpg');
               console.log("file is ready for",mail," fileName ",itemName.slice(0, -3).toLowerCase() + 'jpg');
               console.log("image content retrieved and converted");
               let tiffToJpg = itemName.slice(0, -3).toLowerCase() + 'jpg';
-              const filePath = './backend/images/' + mail + "/" + tiffToJpg;
+              const filePath = './images/' + mail + "/" + tiffToJpg;
               console.log("file Path " + filePath);
               console.log("calling multiPartUpload");
               multiPartUpload(bucket, tiffToJpg, filePath);

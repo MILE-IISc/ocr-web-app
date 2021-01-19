@@ -12,7 +12,7 @@ const Image = require("../models/image");
 const User = require("../models/user");
 
 const cloudStorage = require('ibm-cos-sdk');
-const bucket = "my-bucket-sasi-dev-test-ahsdbasjhbdjash";
+const bucket = process.env.OBJECT_STORAGE_BUCKET;
 var config = {
   endpoint: process.env.OBJECT_STORAGE_ENDPOINT,
   apiKeyId: process.env.OBJECT_STORAGE_API_KEY_ID,
