@@ -214,11 +214,13 @@ export class ImageService implements OnInit {
   }
 
   async addImage(fileRead) {
+    // await this.getServerImages();
+    console.log("server file count before post" + this.serverImages.length);
     // console.log("fileRead"+fileRead);
     const imageData = new FormData();
     imageData.append("email", this.authService.userName);
     // console.log("file name before server call "+fileRead[0].name.slice(0,-9));
-    imageData.append("folderName",fileRead[0].name.slice(0,-9));
+    imageData.append("folderName", fileRead[0].name.slice(0, -9));
     for (let i = 0; i < fileRead.length; i++) {
       var file = fileRead[i];
       console.log(file.name);
@@ -236,41 +238,44 @@ export class ImageService implements OnInit {
         console.log("image added+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++: " + responseData.message);
         // await this.getServerImages();
       });
-
-    if(this.serverImages.length == 0) {
-    this.localImages.splice(0, this.localImages.length);
-    var filesCount = fileRead.length;
-    if (filesCount > 1) {
-      this.nextImages = false;
-    }
-    console.log("file count" + filesCount);
-    for (let i = 0; i < filesCount; i++) {
-      var isImage = fileRead[i].type.includes("image");
-      if (isImage) {
-        console.log("fileRead.type : " + fileRead[i].type);
-        console.log("fileRead[" + i + "].name : " + fileRead[i].name);
-        console.log("Inside service when pdf is selected length" + this.images.length)
-        let dataURL = await this.loadLocalImages(fileRead, i);
-        const imgValue = new Images(i, fileRead[i].name, 'N',this.authService.email,dataURL);
-        this.localImages.push(imgValue);
-        console.log("after sorting" + this.localImages[0].fileName);
-        console.log("addImage: " + dataURL);
+      var filesCount = fileRead.length;
+      if (filesCount > 1) {
+        this.nextImages = false;
       }
-  }
-    this.localImages.sort( (a, b) => {
-      var x = a.fileName.toLowerCase();
-      var y = b.fileName.toLowerCase();
-      if (x < y) {return -1;}
-      if (x > y) {return 1;}
-      return 0;
-    });
-    this.imagesModified.emit(this.localImages.slice());
-    if(this.localImages.length > 1) {
-      this.nextImages = false;
-      this.nextImageChange.emit(this.nextImages);
+      console.log("server file count" + this.serverImages.length);
+      if (this.serverImages.length == 0) {  
+      this.localImages.splice(0, this.localImages.length);
+      console.log("file count" + filesCount);
+      for (let i = 0; i < filesCount; i++) {
+        var isImage = fileRead[i].type.includes("image");
+        if (isImage) {
+          console.log("fileRead.type : " + fileRead[i].type);
+          console.log("fileRead[" + i + "].name : " + fileRead[i].name);
+          console.log("Inside service when pdf is selected length" + this.images.length)
+          let dataURL = await this.loadLocalImages(fileRead, i);
+          const imgValue = new Images(i, fileRead[i].name, 'N', this.authService.email, dataURL);
+          this.localImages.push(imgValue);
+          console.log("after sorting" + this.localImages[0].fileName);
+          console.log("addImage: " + dataURL);
+        }
+      }
+      this.localImages.sort((a, b) => {
+        var x = a.fileName.toLowerCase();
+        var y = b.fileName.toLowerCase();
+        if (x < y) { return -1; }
+        if (x > y) { return 1; }
+        return 0;
+      });
+      this.imagesModified.emit(this.localImages.slice());
+      if (this.localImages.length > 1) {
+        this.nextImages = false;
+        this.nextImageChange.emit(this.nextImages);
+      }
     }
-  }
-
+    // else{
+    //   await this.getServerImages();
+    // }
+    
   }
 
   async loadLocalImages(fileRead:any,i:number) {
@@ -322,27 +327,62 @@ export class ImageService implements OnInit {
     return promise;
   }
 
-  updateXml(xmlString: any, fileName: any) {
-    let xmlData: any;
-    xmlData = {
-      xml: xmlString,
-      fileName: fileName,
-      folderName : fileName.slice(0,-9)
+  // updateXml(xmlString: any, fileName: any) {
+  //   let xmlData: any;
+  //   xmlData = {
+  //     xml: xmlString,
+  //     fileName: fileName,
+  //     folderName : fileName.slice(0,-9)
+  //   };
+  //   this.http
+  //     .put<{ message: string, name: string, completed: string }>(this.XML_BACKEND_URL + fileName, xmlData)
+  //     .subscribe(response => {
+  //       if(this.serverImages.length>0){
+  //         for (let i = 0; i < this.serverImages.length; i++) {
+  //           if (this.serverImages[i].fileName == response.name) {
+  //             console.log("name" + this.serverImages[i].fileName);
+  //             this.serverImages[i].completed = response.completed;
+  //             console.log("completed" + this.serverImages[i].completed);
+  //           }
+  //         }
+  //       }else{
+  //         for (let i = 0; i < this.localImages.length; i++) {
+  //           if (this.localImages[i].fileName == response.name) {
+  //             console.log("name" + this.localImages[i].fileName);
+  //             this.localImages[i].completed = response.completed;
+  //             console.log("completed" + this.localImages[i].completed);
+  //           }
+  //         }
+  //       }
+
+  //     });
+  // }
+
+  updateCorrectedXml(fileName: any) {
+    console.log("Corrected xml " + JSON.stringify(XmlModel.jsonObject));
+    let jsonData: any;
+    jsonData = {
+      json: XmlModel.jsonObject,
+      XmlfileName: fileName.slice(0, -3) + 'xml',
+      user: this.authService.userName
     };
     this.http
-      .put<{ message: string, name: string, completed: string }>(this.XML_BACKEND_URL + fileName, xmlData)
+      .put<{ message: string, completed: string }>(this.XML_BACKEND_URL, jsonData)
       .subscribe(response => {
-        if(this.serverImages.length>0){
+        console.log("response message after correction " + response.message);
+        this.serverImages = this.getImages();
+        console.log("server image length in update "+this.serverImages.length);
+        if (this.serverImages.length > 0) {
           for (let i = 0; i < this.serverImages.length; i++) {
-            if (this.serverImages[i].fileName == response.name) {
+            if (this.serverImages[i].fileName == jsonData.XmlfileName) {
               console.log("name" + this.serverImages[i].fileName);
               this.serverImages[i].completed = response.completed;
               console.log("completed" + this.serverImages[i].completed);
             }
           }
-        }else{
+        } else {
           for (let i = 0; i < this.localImages.length; i++) {
-            if (this.localImages[i].fileName == response.name) {
+            if (this.localImages[i].fileName ==jsonData.XmlfileName) {
               console.log("name" + this.localImages[i].fileName);
               this.localImages[i].completed = response.completed;
               console.log("completed" + this.localImages[i].completed);
@@ -350,21 +390,6 @@ export class ImageService implements OnInit {
           }
         }
 
-      });
-  }
-
-  updateCorrectedXml(fileName:any) {
-    console.log("Corrected xml "+ JSON.stringify(XmlModel.jsonObject));
-    let jsonData : any;
-    jsonData = {
-      json:XmlModel.jsonObject,
-      XmlfileName:fileName.slice(0,-3)+'xml',
-      user : this.authService.userName
-    };
-    this.http
-      .put<{ message: string }>(this.XML_BACKEND_URL, jsonData)
-      .subscribe(response => {
-        console.log("response message after correction "+response.message);
       });
   }
 
@@ -391,7 +416,7 @@ export class ImageService implements OnInit {
     this.imgFileCount++;
     this.imageCountChange.emit(this.imgFileCount);
     this.serverImages = this.getImages();
-    if (this.serverImages.length > 0) {
+    if (this.serverImages.length > 1) {
       this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
       this.urlChanged.emit(this.localUrl.slice());
       this.fileName = this.serverImages[this.imgFileCount].fileName;
@@ -423,7 +448,7 @@ export class ImageService implements OnInit {
     this.serverImages = this.getImages();
     this.imgFileCount--;
     this.imageCountChange.emit(this.imgFileCount);
-    if (this.serverImages.length > 0) {
+    if (this.serverImages.length > 1) {
       this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
       this.urlChanged.emit(this.localUrl.slice());
       this.fileName = this.serverImages[this.imgFileCount].fileName;
@@ -453,7 +478,7 @@ export class ImageService implements OnInit {
 
   async LastImage() {
     this.serverImages = this.getImages();
-    if (this.serverImages.length > 0) {
+    if (this.serverImages.length > 1) {
       this.imgFileCount = this.serverImages.length - 1;
       this.imageCountChange.emit(this.imgFileCount);
       this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
@@ -486,7 +511,7 @@ export class ImageService implements OnInit {
     this.imgFileCount = 0;
     this.imageCountChange.emit(this.imgFileCount);
     this.serverImages = this.getImages();
-    if (this.serverImages.length > 0) {
+    if (this.serverImages.length > 1) {
       this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
       this.urlChanged.emit(this.localUrl.slice());
       this.fileName = this.serverImages[this.imgFileCount].fileName;
@@ -509,7 +534,9 @@ export class ImageService implements OnInit {
 
   onXml() {
     this.serverImages = this.getImages();
-    if(this.serverImages.length>0){
+    if(this.serverImages.length>1){
+      console.log("server image length "+this.serverImages.length);
+      console.log("image file count "+this.imgFileCount);
       this.fileName = this.serverImages[this.imgFileCount].fileName;
       console.log("completion status: ",this.serverImages[this.imgFileCount].completed);
       if(this.serverImages[this.imgFileCount].completed =="Y") {

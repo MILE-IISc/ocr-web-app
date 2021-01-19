@@ -475,7 +475,8 @@ export class ScreenComponent implements OnInit{
         console.log("curXmlFileName " + curXmlFileName);
         //changes have to be made in file service to get the xml file from backend
         await this.fileService.downloadFile(curXmlFileName).then(response => {
-          let blob: any = new Blob([response], { type: 'text/xml' });
+          let blob: any = new Blob([response.xmlData], { type: 'text/xml' });
+          console.log("blob==="+blob);
           folder.file(this.images[i].fileName.slice(0, -3) + 'xml', blob);
         }), error => {
           console.log("error: " + error);

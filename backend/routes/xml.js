@@ -12,7 +12,7 @@ const Image = require("../models/image");
 const User = require("../models/user");
 
 const cloudStorage = require('ibm-cos-sdk');
-const bucket = "my-bucket-sasi-dev-test-ahsdbasjhbdjash";
+const bucket = "my-bucket-gangotri-dev-test-ahsdbasjhbdjash";
 var config = {
   endpoint: process.env.object_storage_endpoint,
   apiKeyId: process.env.object_storage_apiKeyId,
@@ -88,10 +88,16 @@ router.put("", checkAuth, (req, res, next) => {
 
     doCreateObject(xmlFileName, formattedXml.join("\n")).then(() => {
     console.log("saved xml file");
-    res.status(200).json({ message: "XML File saved successfully!"});
+    res.status(200).json({ 
+      message: "XML File saved successfully!",
+      completed: "Y"
+    });
   }).catch((err) => {
     console.log("error while saving xml file:",err);
-    res.status(500).json({ message: "Couldn't save Text File. err: " + err });
+    res.status(500).json({ 
+      message: "Couldn't save Text File. err: " + err,
+      completed: "N"
+    });
   });
 });
 
@@ -120,6 +126,29 @@ router.get("/:fileName", checkAuth,(req, res, next) =>{
           message: "xml read successfully",
           json: result
         });
+      });
+    }
+  });
+});
+
+router.get("", checkAuth,(req, res, next) =>{
+  console.log("in run ocr get ")
+  const XmlfileName = req.query.fileName;
+  console.log("XmlfileName in get call "+XmlfileName);
+  // getItem(bucket, XmlfileName);
+  getItem(bucket, XmlfileName).then(content => {
+    if(content == "The specified key does not exists in bucket") {
+      console.log("error while retrieving:",content);
+      res.status(400).json({
+        message: content,
+        xmlData: ""
+      });
+    }
+    else {
+      console.log("xml.js retrieved content:",content);
+      res.status(201).json({
+        message: "xml read successfully",
+        xmlData: content
       });
     }
   });
