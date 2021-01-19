@@ -27,7 +27,7 @@
     
     
   - you can select the text region using select block facility and which allow you to draw a rectangle over the paragraph.
-    ![alt text](selected%20block.png)
+    ![alt text](Docs/selected%20block.png)
     ![alt text](Docs/blocks.png)
     
     
@@ -40,7 +40,8 @@
   
   
   
-  - While doing corrections you can view the screen in vertical or Horizontal view by selecting either `Horizontal view` or `vertical view`  buttons.
+  - While doing corrections you can view the screen in vertical or Horizontal view by selecting either `Horizontal view` or `vertical view` buttons.
+  
    ![alt text](Docs/Layouts.png)
   
   - you can zoom the both sides of the screen.
