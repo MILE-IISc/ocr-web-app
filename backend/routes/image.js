@@ -26,7 +26,7 @@ const MIME_TYPE_MAP = {
 var invalid ="";
 const cloudStorage = require('ibm-cos-sdk');
 const multerS3 = require('multer-s3');
-const bucket = "my-bucket-gangotri-dev-test-ahsdbasjhbdjash";
+const bucket = "my-bucket-sasi-dev-test-ahsdbasjhbdjash";
 var config = {
   endpoint: process.env.object_storage_endpoint,
   apiKeyId: process.env.object_storage_apiKeyId,
@@ -106,7 +106,14 @@ function getItem(bucketName, itemName, mail, requestType) {
               file
               .quality(75)
               .write('./backend/images/'+mail+"/"+itemName.slice(0, -3).toLowerCase() + 'jpg');
-            });
+              console.log("file is ready for",mail," fileName ",itemName.slice(0, -3).toLowerCase() + 'jpg');
+              console.log("image content retrieved and converted");
+              let tiffToJpg = itemName.slice(0, -3).toLowerCase() + 'jpg';
+              const filePath = './backend/images/' + mail + "/" + tiffToJpg;
+              console.log("file Path " + filePath);
+              console.log("calling multiPartUpload");
+              multiPartUpload(bucket, tiffToJpg, filePath);
+            })
           }
           else if(path.extname(itemName).toLowerCase() == ".png" || path.extname(itemName).toLowerCase() == ".jpg" || path.extname(itemName).toLowerCase() == ".bmp"){
             console.log("itemName",itemName,"data.ContentType",data.ContentType);
@@ -171,14 +178,14 @@ router.post("", checkAuth,
             if(data == "The specified key does not exists in bucket") {
               console.log("error while retrieving and converting image:",itemData);
             }
-            else {
-              console.log("image content retrieved and converted");
-              let tiffToJpg = data.Contents[i].Key.slice(0, -3).toLowerCase() + 'jpg';
-              const filePath = './backend/images/' + req.body.email+"/" +tiffToJpg;
-              console.log("file Path " + filePath);
-              console.log("calling multiPartUpload");
-              multiPartUpload(bucket, tiffToJpg, filePath);
-            }
+            // else {
+            //   console.log("image content retrieved and converted");
+            //   let tiffToJpg = data.Contents[i].Key.slice(0, -3).toLowerCase() + 'jpg';
+            //   const filePath = './backend/images/' + req.body.email+"/" +tiffToJpg;
+            //   console.log("file Path " + filePath);
+            //   console.log("calling multiPartUpload");
+            //   multiPartUpload(bucket, tiffToJpg, filePath);
+            // }
           });
         }
       }

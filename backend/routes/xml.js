@@ -12,7 +12,7 @@ const Image = require("../models/image");
 const User = require("../models/user");
 
 const cloudStorage = require('ibm-cos-sdk');
-const bucket = "my-bucket-gangotri-dev-test-ahsdbasjhbdjash";
+const bucket = "my-bucket-sasi-dev-test-ahsdbasjhbdjash";
 var config = {
   endpoint: process.env.object_storage_endpoint,
   apiKeyId: process.env.object_storage_apiKeyId,
@@ -88,13 +88,13 @@ router.put("", checkAuth, (req, res, next) => {
 
     doCreateObject(xmlFileName, formattedXml.join("\n")).then(() => {
     console.log("saved xml file");
-    res.status(200).json({ 
+    res.status(200).json({
       message: "XML File saved successfully!",
       completed: "Y"
     });
   }).catch((err) => {
     console.log("error while saving xml file:",err);
-    res.status(500).json({ 
+    res.status(500).json({
       message: "Couldn't save Text File. err: " + err,
       completed: "N"
     });

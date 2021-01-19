@@ -47,6 +47,8 @@ Thumbs.db
 
 /backend/images/*
 /backend/node_modules
+/backend/package-lock.json
+/backend/images/*
 !/backend/images/.gitkeep
 /backend/OCR-WEB-UI/*
 nodemon.json
