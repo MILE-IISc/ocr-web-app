@@ -12,7 +12,7 @@
 
   <span class="example-spacer4"></span>
 
-  <label>Rotate:</label><input id="angle"  type="number" class="angleclass" step=".5"  (click)="onEnter(box.value)" style="width: 45px;height:100%;color:black;  " #box (keyup.enter)="onEnter(box.value)" value="{{angle}}">
+  <label>Rotate:</label><input id="angle"  type="number" class="angleclass" step=".5"  (click)="onEnter(box.value)" style="width: 45px;height:100%;color:black;font-size: small;  " #box (keyup.enter)="onEnter(box.value)" value="{{angle}}">
 
 
 
@@ -30,7 +30,7 @@
   <button mat-icon-button data-toggle="tooltip" title="Fit-height" id="fitHeigth" (click)="fitheight()"><mat-icon >height</mat-icon></button>
   <button mat-icon-button data-toggle="tooltip" title="100%-zoom" id="100zoom" (click)="orginalsize()"><mat-icon >zoom_out_map</mat-icon></button>
   <span class="example-spacer3"></span>
-  <label for="zoom">Zoom:</label><input id="zoom" style="width: 45px;height:100%;color:black;" #bo (keyup.enter)="onZoom(bo.value)" value="{{percentage}}">%
+  <label for="zoom">Zoom:</label><input id="zoom" style="width: 45px;height:100%;color:black;font-size: small;" #bo (keyup.enter)="onZoom(bo.value)" value="{{percentage}}">%
   <span class="example-spacer2"></span>
 </mat-toolbar>
 

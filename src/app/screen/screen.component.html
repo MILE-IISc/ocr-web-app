@@ -4,126 +4,134 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
-<mat-toolbar color="primary" >
+<mat-toolbar color="primary">
+  <input #fileUpload type="file" (click)="fileUpload.value = null" (change)="importFile($event)" style="display:none"
+    accept="image/*">
+  <button mat-icon-button data-toggle="tooltip" (click)="fileUpload.click()" title="Upload Image"
+    style=" margin-right:3px;">
+    <mat-icon>text_snippet</mat-icon>
+  </button>
 
-  <button mat-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
+  <div id="snackbar">{{ invalidMessage }}</div>
+
+  <input #folderUpload type="file" name="fileList" (click)="folderUpload.value = null" webkitdirectory multiple
+    (change)="importFile($event)" style="display:none" />
+  <button mat-icon-button data-toggle="tooltip" title="Upload Directory" style="margin-right:3px;"
+    (click)="folderUpload.click()">
+    <mat-icon>folder_open</mat-icon>
+  </button>
+
+  <button mat-icon-button data-toggle="tooltip" title="Vertical View" style="margin-right:3px;" id="vertical_view"
+    (click)="asVertical()" [disabled]="nextImage">
+    <mat-icon>vertical_split</mat-icon>
+  </button>
+
+  <button mat-icon-button data-toggle="tooltip" title="Horizontal View" style="margin-right:3px;"
+    (click)="asHorizontal()" [disabled]="nextImage">
+    <mat-icon>horizontal_split</mat-icon>
+  </button>
+
+  <button mat-icon-button data-toggle="tooltip" title="Select Block" (click)="selectBlock()" style="margin-right:3px;"
+    id="buttonXml">
+    <mat-icon>crop_5_4</mat-icon>
+  </button>
+
+  <button mat-icon-button data-toggle="tooltip" title="Download XML" (click)="onSaveXml()">
+    <mat-icon>get_app</mat-icon>
+  </button>
   <span class="example-spacer2"></span>
-  <div  *ngIf="!isLoading"><h5>{{ fileName }}</h5></div>
-
-
-
+  <div *ngIf="!isLoading">
+    <h5>{{ fileName }}</h5>
+  </div>
 
   <span class="example-spacer"></span>
 
-
-
-
-
-
-
-
-  <button mat-icon-button   [matMenuTriggerFor]="user"><mat-icon >account_circle</mat-icon></button>
+  <button mat-icon-button [matMenuTriggerFor]="user">
+    <mat-icon>account_circle</mat-icon>
+  </button>
   <mat-menu #user="matMenu">
     <div mat-menu-item *ngIf="userIsAuthenticated">
-    <h5> {{ userName }}</h5>
- </div>
- <br>
- <div  mat-menu-item *ngIf="userIsAuthenticated">
-    <button mat-stroked-button (click)="onLogout()" ><h5>Logout</h5></button>
- </div></mat-menu>
-  <button mat-icon-button><mat-icon >help_outline</mat-icon></button>
-
-  <mat-menu #menu="matMenu" color="primary">
-    <input #fileUpload type="file" (click)="fileUpload.value = null" (change)="importFile($event)" style="display:none"
-    accept="image/*">
-  <button mat-icon-button color="primary" data-toggle="tooltip" (click)="fileUpload.click()" title="Upload Image" style=" margin-right:3px;" class="screenicon"><mat-icon  >text_snippet</mat-icon></button>
-    <div id = "snackbar">{{ invalidMessage }}</div>
-  <input #folderUpload type="file" name="fileList" (click)="folderUpload.value = null" webkitdirectory multiple
-    (change)="importFile($event)" style="display:none" />
-  <button mat-icon-button color="primary" data-toggle="tooltip" title="Upload Directory" style="margin-right:3px;" class="screenicon" (click)="folderUpload.click()">
-    <mat-icon  >folder_open</mat-icon> </button>
-
-
-  <button mat-icon-button color="primary" data-toggle="tooltip" title="vertcal View"  style="margin-right:3px;" class="screenicon" id="vertical_view"(click)="asVertical()"
-    [disabled]="nextImage"><mat-icon  >vertical_split</mat-icon></button>
-
-  <button mat-icon-button color="primary" data-toggle="tooltip" title="Horizontal View" style="margin-right:3px;" class="screenicon" (click)="asHorizontal()"
-    [disabled]="nextImage"><mat-icon  >horizontal_split</mat-icon></button>
-
-    <button mat-icon-button color="primary" data-toggle="tooltip" title="Select Block" (click)="selectBlock()" style="margin-right:3px;" class="screenicon"  id="buttonXml"><mat-icon  >crop_5_4</mat-icon></button>
-
-
-  <button mat-icon-button color="primary" class="screenicon"(click)="onSaveXml()"><mat-icon  >get_app</mat-icon></button>
-
-
+      <h5> {{ userName }}</h5>
+    </div>
+    <br>
+    <div mat-menu-item *ngIf="userIsAuthenticated">
+      <button mat-stroked-button (click)="onLogout()">
+        <h5>Logout</h5>
+      </button>
+    </div>
   </mat-menu>
+
+  <button mat-icon-button data-toggle="tooltip" title="Help" >
+    <mat-icon>help_outline</mat-icon>
+  </button>
+
   <button id="blockno" (click)="blockupdate()">blocknumberupdate</button>
   <button id="SaveToXML" (click)="onSave()">SaveToXML</button>
 </mat-toolbar>
 
 
-<as-split class="split"  [style.height.px]="this.myHeight" [direction]=value>
-  <as-split-area id="content"   class="split1" >
-        <as-split class="sideNav" id="Sidenav" direction="horizontal">
-           <as-split-area [size]=sidesize1>
-            <div >
-            <mat-toolbar style="width: 100%; text-align: center;">
+<as-split class="split" [style.height.px]="this.myHeight" [direction]=value>
+  <as-split-area id="content" class="split1">
+    <as-split class="sideNav" id="Sidenav" direction="horizontal">
+      <as-split-area [size]=sidesize1>
+        <div>
+          <mat-toolbar style="width: 100%; text-align: center;">
             <h6>select the page</h6>
             <span class="filler"></span>
-            <button mat-icon-button class="sideBar"  color="accent" title="view Image List" (click)="sideClose()"><mat-icon >close</mat-icon></button>
-            </mat-toolbar>
-            <div class="sideBody" (click)="openThisImage($event)">
-           
-            </div>
-           </div>
-           </as-split-area>
-          <as-split-area [size]=sidesize2 (scroll)="updateScroll(scrollOne, scrollTwo)" #scrollOne>
-            <img [src]="localUrl" *ngIf="localUrl && !isLoading" id="imgToRead" class="imgToRead" />
-            <!-- <div class="topleft" *ngIf="!isLoading"><h5>{{ fileName }}</h5></div> -->
-            <mat-spinner *ngIf="isLoading"></mat-spinner>
-            <button mat-icon-button class="sidebar1"  color="primary" (click)="sideOpen()"><img src="assets/images/left.svg"  type="button" width="20px" height="20px"></button>
-            </as-split-area>
-          </as-split>
- </as-split-area>
+            <button mat-icon-button class="sideBar" color="accent" title="view Image List" (click)="sideClose()">
+              <mat-icon>close</mat-icon>
+            </button>
+          </mat-toolbar>
+          <div class="sideBody" (click)="openThisImage($event)">
+
+          </div>
+        </div>
+      </as-split-area>
+      <as-split-area [size]=sidesize2 (scroll)="updateScroll(scrollOne, scrollTwo)" #scrollOne>
+        <img [src]="localUrl" *ngIf="localUrl && !isLoading" id="imgToRead" class="imgToRead" />
+        <!-- <div class="topleft" *ngIf="!isLoading"><h5>{{ fileName }}</h5></div> -->
+        <mat-spinner *ngIf="isLoading"></mat-spinner>
+        <button mat-icon-button class="sidebar1" color="primary" (click)="sideOpen()"><img src="assets/images/left.svg"
+            type="button" width="20px" height="20px"></button>
+      </as-split-area>
+    </as-split>
+  </as-split-area>
 
   <as-split-area class="split2" [size]=size3 (scroll)="updatescroll(scrollOne, scrollTwo)" #scrollTwo>
     <div id="image" [style.position]="'relative'">
       <span *ngFor="let text of words;let i = index">
-        <input  (ctrls)="showTooltip($event)" class="text_input" id = "{{text.lineNumber}}" value = "{{text.unicode}}"  [style.width.px]="text.txtwidth*(this.percentage/100)" [style.position]="'absolute'" [style.border]="'none'" [style.font-size.px]="text.txtheight*5/8*(this.percentage/100)"
-        [style.top.px]="text.lineRowStart*(this.percentage/100)"   [style.left.px]="text.lineColStart*(this.percentage/100)"   [style.margin-inline-start.px]="text.lineRowStart*(this.percentage/100)"   [style.height.px]="text.txtheight*(this.percentage/100)" >
+        <input (ctrls)="showTooltip($event)" class="text_input" id="{{text.lineNumber}}" value="{{text.unicode}}"
+          [style.width.px]="text.txtwidth*(this.percentage/100)" [style.position]="'absolute'" [style.border]="'none'"
+          [style.font-size.px]="text.txtheight*5/8*(this.percentage/100)"
+          [style.top.px]="text.lineRowStart*(this.percentage/100)"
+          [style.left.px]="text.lineColStart*(this.percentage/100)"
+          [style.margin-inline-start.px]="text.lineRowStart*(this.percentage/100)"
+          [style.height.px]="text.txtheight*(this.percentage/100)">
       </span>
     </div>
   </as-split-area>
 </as-split>
 
-
 <app-footer></app-footer>
 
-
-
-
-
-
-
-<!-- <app-footer></app-footer> -->
-
-<div  id="menu">
-  <div class="dropdown-content" (clickOutside)="closeMenu()">
-    <a  (click)="asHorizontal()">prose (..from prev page/block)</a>
-    <a   (click)="asVertical()" >Header</a>
+<div id="menu">
+  <div class="dropdown-content">
+    <a (click)="asHorizontal()">prose (..from prev page/block)</a>
+    <a (click)="asVertical()">Header</a>
     <a>Figure Caption</a>
     <a>Retain Graphic</a>
-    <a >Retain Graphic-Rotate</a>
+    <a>Retain Graphic-Rotate</a>
     <a>Retain graphic -Full page</a>
-    <a >Ignore Graphic</a>
-    <a >Part Heading</a>
-    <a >Chapter heading</a>
-    <a >section heading</a>
-    <a >Front Matter heading</a>
+    <a>Ignore Graphic</a>
+    <a>Part Heading</a>
+    <a>Chapter heading</a>
+    <a>section heading</a>
+    <a>Front Matter heading</a>
     <a>prose</a>
     <a>poem</a>
     <a>poem(..from prevpage/block)</a>
     <a>Book Name in Kannd</a>
   </div>
+  <!-- (clickOutside)="closeMenu()" -->
 
 </div>
