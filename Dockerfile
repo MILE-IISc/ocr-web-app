@@ -13,7 +13,7 @@ RUN npm install -g @angular/cli@10.0.8
 RUN ng build --prod
 
 RUN npm install -g marked
-RUN marked -o backend/OCR-WEB-UI/help.html README.MD
+RUN marked -o backend/OCR-WEB-UI/help.html README.md
 
 FROM node:14.15.3-alpine3.11
 
