@@ -70,6 +70,8 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { FooterComponent } from './footer/footer.component';
 import { ClickOutsideDirective } from './shared/click-outside.directive';
 import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
+import { HelpComponent } from './help/help.component';
+import { MarkdownModule } from 'ngx-markdown';
 
 @NgModule({
   declarations: [
@@ -79,7 +81,8 @@ import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
     ScreenComponent,
     ClickOutsideDirective,
     CtrlsDetectorDirective,
-    FooterComponent
+    FooterComponent,
+    HelpComponent
     //FileSelectDirective
   ],
   exports:[
@@ -142,7 +145,8 @@ import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
     AngularSplitModule,
 
 
-    MatNativeDateModule
+    MatNativeDateModule,
+    MarkdownModule.forRoot()
   ],
   providers: [
     {  provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'fill' } }
