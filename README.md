@@ -29,7 +29,7 @@
 - You can select the text region using `Select Block` facility and which allow you to draw a rectangle over the paragraph.
 
 <img src="./docs/selected%20block.png" width="200"/>
-
+<br>
 <img src="./docs/blocks.png" width="800"/>
 
 - Once the blocks are selected, you can run OCR on the image by clicking the `Run-OCR` button in the bottom toolbar.
