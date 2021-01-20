@@ -287,7 +287,7 @@ overflow:auto;
   height: 30px !important;
 }
 .sidebar1{
-  position: absolute;
+  position: sticky;
   top: 50%;
   margin: 0%;
   -ms-transform: translateY(-50%);
@@ -297,5 +297,12 @@ overflow:auto;
 .sideBody{
   background-color: rgb(70, 68, 68);
 
+}
+.sidebar2{
+  position: sticky;
+  top: 50%;
+  margin: 0%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
 }
 

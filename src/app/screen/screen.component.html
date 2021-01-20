@@ -86,9 +86,12 @@
         </div>
       </as-split-area>
       <as-split-area [size]=sidesize2 (scroll)="updateScroll(scrollOne, scrollTwo)" #scrollOne>
+        <button mat-icon-button class="sidebar1" data-toggle="tooltip" title="Open SideBar"  color="primary" id="OpenBar" (click)="sideOpen()"><mat-icon>keyboard_arrow_right</mat-icon></button>
+        <button mat-icon-button class="sidebar2" data-toggle="tooltip" title="Close SideBar"  color="primary" id="CloseBar" (click)="sideClose()"><mat-icon>keyboard_arrow_left</mat-icon></button>
+      
         <img [src]="localUrl" *ngIf="localUrl && !isLoading" id="imgToRead" class="imgToRead" />
          <mat-spinner *ngIf="isLoading"></mat-spinner>
-        <button mat-icon-button class="sidebar1" data-toggle="tooltip" title="Select Image"  color="primary" id="SideBar" (click)="sideOpen()"><mat-icon>keyboard_arrow_right</mat-icon></button>
+        
       </as-split-area>
     </as-split>
   </as-split-area>
