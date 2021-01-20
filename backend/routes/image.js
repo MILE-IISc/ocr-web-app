@@ -25,9 +25,7 @@ const MIME_TYPE_MAP = {
 var invalid ="";
 const cloudStorage = require('ibm-cos-sdk');
 const multerS3 = require('multer-s3');
-// const bucket = process.env.OBJECT_STORAGE_BUCKET;
 bucket = "";
-// bucket = "my-bucket-sasi-dev-test-ahsdbasjhbdjash";
 var config = {
   endpoint: process.env.OBJECT_STORAGE_ENDPOINT,
   apiKeyId: process.env.OBJECT_STORAGE_API_KEY_ID,
@@ -145,63 +143,71 @@ var upload = multer({
   fileFilter,
   storage: multerS3({
     s3: cos,
-    bucket: bucket,
+    bucket: (req, file, cb) => {
+      cb(null,req.userData.bucketName);
+   },
     acl: 'public-read',
     contentType: multerS3.AUTO_CONTENT_TYPE,
     metadata: function (req, file, cb) {
       cb(null, { fieldName: file.fieldname });
     },
     key: function (req, file, cb) {
-      console.log("file.originalname"+file.originalName+"file.mimetype"+file.mimetype);
       console.log(file.originalname, file);
       cb(null, file.originalname);
     }
   })
 });
 
-getBucketName = (req, res, next) => {
-  try {
-    // const token = req.headers.authorization.split(" ")[1];
-    // const decodedToken = jwt.verify(token, process.env.JWT_KEY);
-    // req.userData = { email: decodedToken.email, userId: decodedToken.userId };
-    console.log("inside getBucketName while post request user mail",req.userData.email);
-    User.findOne({ email: req.userData.email })
-    .then(user => {
-      if (!user) {
-        return res.status(401).json({
-          message: "Auth failed"
-        });
-      }
-      fetchedUser = user;
-      console.log("email inside post request from database ",fetchedUser.email);
-      console.log("bucket inside post request from database ",fetchedUser.bucketName);
-      bucket = fetchedUser.bucketName;
-    });
-    next();
-  } catch (error) {
-    res.status(401).json({ message: "You are not authenticated!" });
-  }
-};
-
 router.post("",
   checkAuth,
-  getBucketName,
   upload.array("image", 4000),
   (req, res, next) => {
-    console.log("inside post email ",req.body.email)
+    console.log("inside post email ",req.body.email);
+    bucketName = req.userData.bucketName;
+    console.log("bucketName inside post images ",bucketName);
   if (res.statusCode === 200 && req.files.length > 0) {
     console.log("file list length for upload", req.files.length);
     console.log("invoked multer and sending response", Date());
+    let postJpegImages = [];
+    let postTiffImages = [];
+    let postFetchedImages = [];
     cos.listObjects(
-      {Bucket: bucket},
+      {Bucket: bucketName},
     ).promise()
     .then((data) => {
       console.log("data.Contents.length in post",data.Contents.length);
       for(let i = 0; i < data.Contents.length; i++) {
-        console.log("data for file"+data.Contents[i].Key+""+data.Contents[i].Size);
+        if (path.extname(data.Contents[i].Key).toLowerCase() == ".tif") {
+          postTiffImages.push(data.Contents[i].Key.trim());
+        }
+        else if (path.extname(data.Contents[i].Key).toLowerCase() == ".jpg") {
+          postJpegImages.push(data.Contents[i].Key.trim());
+        }
+      }
+
+      postJpegImages.map(postJpegImage => {
+        mismatchCount = 0;
+        postTiffImages.map(postTiffImage => {
+          if(postTiffImage.slice(0, -3).toLowerCase() == postJpegImage.slice(0, -3).toLowerCase()) {
+            postFetchedImages.push(postTiffImage);
+            console.log("tiff with jpeg",postJpegImage);
+          }
+          else {
+            mismatchCount = mismatchCount+1;
+          }
+
+          if(postTiffImage.slice(0, -3).toLowerCase() != postJpegImage.slice(0, -3).toLowerCase() && mismatchCount == postTiffImages.length) {
+            postFetchedImages.push(postJpegImage);
+            console.log("jpeg Image only",postJpegImage);
+          }
+        });
+      });
+
+      for(let i = 0; i < data.Contents.length; i++) {
+        console.log("data for file "+data.Contents[i].Key+""+data.Contents[i].Size);
         if(path.extname(data.Contents[i].Key).toLowerCase() == ".tif") {
           console.log("tiff files",data.Contents[i].Key);
-          getItem(bucket, data.Contents[i].Key, req.body.email, "post").then((itemData) => {
+          getItem(bucketName, data.Contents[i].Key, req.body.email, "post").then((itemData) => {
             if(data == "The specified key does not exists in bucket") {
               console.log("error while retrieving and converting image:",itemData);
             }
@@ -227,9 +233,10 @@ router.post("",
 });
 
 router.get("", checkAuth,(req, res, next) => {
-  console.log("inside get request start");
   const url = req.protocol + "://" + req.get("host");
   const mail = req.query.user;
+  const userId = req.userData.userId;
+  console.log("inside get request start mail",mail);
   var fetchedImages = [];
   var tiffImages = [];
   var jpegImages = [];
@@ -237,134 +244,112 @@ router.get("", checkAuth,(req, res, next) => {
   let imageList = [];
   let xmlArrayList = [];
   let completed;
-  User.findOne({ email: mail })
-    .then(user => {
-      if (!user) {
-        return res.status(401).json({
-          message: "Auth failed"
-        });
+  bucketName = req.userData.bucketName;
+  console.log("bucket inside get request",bucketName);
+  var newFiles = [];
+  getBucketContents(bucketName).then(() => {
+    console.log("totalFilesList.length:",bucketFilesList.length);
+    targetFiles = bucketFilesList;
+    console.log("targetFiles.length:",targetFiles.length);
+    targetFiles.forEach(file => {
+      if (path.extname(file).toLowerCase() == ".tif") {
+        tiffImages.push(file.trim());
       }
-      fetchedUser = user;
-      const user_wav_dir = './backend/images/' + fetchedUser.email;
-      console.log("email inside get request from database ",fetchedUser.email);
-      console.log("bucket inside get request from database ",fetchedUser.bucketName);
-      bucket = fetchedUser.bucketName;
-      console.log("bucket inside get request",bucket);
-      var newFiles = [];
-      getBucketContents(bucket).then(() => {
-        console.log("totalFilesList.length:",bucketFilesList.length);
-        targetFiles = bucketFilesList;
-        targetFiles.forEach(file => {
-          if (path.extname(file).toLowerCase() == ".tif") {
-            tiffImages.push(file.trim());
-          }
-          else if (path.extname(file).toLowerCase() == ".jpg") {
-            jpegImages.push(file.trim());
-          }
-          else if (path.extname(file).toLowerCase() == ".png" || path.extname(file).toLowerCase() == ".bmp") {
-            fetchedImages.push(file.trim());
-          } else if(path.extname(file).toLowerCase() == ".xml") {
-            xmlArrayList.push(file.toLowerCase());
-          }
-        });
+      else if (path.extname(file).toLowerCase() == ".jpg") {
+        jpegImages.push(file.trim());
+      }
+      else if (path.extname(file).toLowerCase() == ".png" || path.extname(file).toLowerCase() == ".bmp") {
+        fetchedImages.push(file.trim());
+      } else if(path.extname(file).toLowerCase() == ".xml") {
+        xmlArrayList.push(file.toLowerCase());
+      }
+    });
 
-        jpegImages.map(jpegImage => {
-          mismatchCount = 0;
-          if(tiffImages.length == 0) {
+    jpegImages.map(jpegImage => {
+      mismatchCount = 0;
+      if(tiffImages.length == 0) {
+        fetchedImages.push(jpegImage);
+        console.log("jpeg Image only",jpegImage);
+      }
+      else {
+        tiffImages.map(tiffImage => {
+          if(tiffImage.slice(0, -3).toLowerCase() == jpegImage.slice(0, -3).toLowerCase()) {
+            fetchedImages.push(tiffImage);
+            console.log("tiff with jpeg",jpegImage);
+          }
+          else {
+            mismatchCount = mismatchCount+1;
+          }
+
+          if(tiffImage.slice(0, -3).toLowerCase() != jpegImage.slice(0, -3).toLowerCase() && mismatchCount == tiffImages.length) {
             fetchedImages.push(jpegImage);
             console.log("jpeg Image only",jpegImage);
           }
-          else {
-            tiffImages.map(tiffImage => {
-              if(tiffImage.slice(0, -3).toLowerCase() == jpegImage.slice(0, -3).toLowerCase()) {
-                fetchedImages.push(tiffImage);
-                console.log("tiff with jpeg",jpegImage);
-              }
-              else {
-                mismatchCount = mismatchCount+1;
-              }
-  
-              if(tiffImage.slice(0, -3).toLowerCase() != jpegImage.slice(0, -3).toLowerCase() && mismatchCount == tiffImages.length) {
-                fetchedImages.push(jpegImage);
-                console.log("jpeg Image only",jpegImage);
-              }
-            });
-          }
         });
-
-        if (fetchedImages.length > 0) {
-          fetchedImages.forEach(files => {
-            console.log("fetchedImages name",files);
-            const xmlFile = files.slice(0, -3).toLowerCase() + 'xml';
-            if (xmlArrayList.includes(xmlFile)) {
-              completed = 'Y';
-            } else {
-              completed = 'N';
-            }
-            // console.log("user email " + fetchedUser.email)
-            const path = url + '/images/' + fetchedUser.email + '/' + files;
-            const image = {
-              _id: fetchedUser._id,
-              fileName: files,
-              completed: completed,
-              editor: fetchedUser._id
-            };
-            imageList.push(image);
-            imageList.sort((a, b) => a.fileName.localeCompare(b.fileName));
-          });
-          res.status(201).json({
-            message: "Images fetched successfully!",
-            images: imageList
-          });
-          console.log("imageList length " + imageList.length);
-          imageList.forEach(files => {
-            console.log("files.fileName "+files.fileName+" files.completed",files.completed);
-          });
-        } else {
-          imageList = "";
-          res.status(201).json({
-            message: "No image files",
-            images: imageList
-          });
-        }
-      });
+      }
     });
+
+    if (fetchedImages.length > 0) {
+      fetchedImages.forEach(files => {
+        console.log("fetchedImages name",files);
+        const xmlFile = files.slice(0, -3).toLowerCase() + 'xml';
+        if (xmlArrayList.includes(xmlFile)) {
+          completed = 'Y';
+        } else {
+          completed = 'N';
+        }
+        const path = url + '/images/' + mail + '/' + files;
+        const image = {
+          _id: userId,
+          fileName: files,
+          completed: completed,
+          editor: userId
+        };
+        imageList.push(image);
+        imageList.sort((a, b) => a.fileName.localeCompare(b.fileName));
+      });
+      res.status(201).json({
+        message: "Images fetched successfully!",
+        images: imageList
+      });
+      console.log("imageList length " + imageList.length);
+      imageList.forEach(files => {
+        console.log("files.fileName "+files.fileName+" files.completed",files.completed);
+      });
+    } else {
+      imageList = "";
+      res.status(201).json({
+        message: "No image files",
+        images: imageList
+      });
+    }
+  });
 });
 
 router.get("/:fileName", checkAuth,(req, res, next) =>{
   const mail = req.query.user;
   let fetchedUser;
   let jpegFile = req.params.fileName;
-  const fileName = req.params.fileName;
   console.log("req.params.fileName",jpegFile);
   if (path.extname(jpegFile).toLowerCase() == ".tif") {
     jpegFile = jpegFile.slice(0, -3).toLowerCase() + 'jpg';
   }
-  User.findOne({ email: mail })
-  .then(user => {
-    if (!user) {
-      return res.status(401).json({
-        message: "Auth failed"
+  bucketName = req.userData.bucketName;
+  console.log("bucketName inside get specific Image ",bucketName);
+  getItem(bucketName, jpegFile, req.query.user,"get").then((data) => {
+    if(data == "The specified key does not exists in bucket") {
+      console.log("error while retrieving image:",data);
+      res.status(400).json({
+        message: data,
+        json: ""
       });
     }
-    fetchedUser = user;
-    console.log("inside get File mail "+req.query.user);
-    console.log("bucketName inside get File request "+fetchedUser.bucketName);
-    getItem(fetchedUser.bucketName, jpegFile, req.query.user,"get").then((data) => {
-      if(data == "The specified key does not exists in bucket") {
-        console.log("error while retrieving image:",data);
-        res.status(400).json({
-          message: data,
-          json: ""
+    else {
+        res.status(201).json({
+          message: "image fetched successfully",
+          json: data
         });
-      }
-      else {
-          res.status(201).json({
-            message: "image fetched successfully",
-            json: data
-          });
-      }
-  });
+    }
   });
 });
 
