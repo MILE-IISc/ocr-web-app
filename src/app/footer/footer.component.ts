@@ -169,25 +169,25 @@ export class FooterComponent implements OnInit {
 
     this.onEnter(0);
     this.imageService.nextPage();
-    this.imageService.onXml();
+    // this.imageService.onXml();
  }
 
   previousImage() {
     this.onEnter(0);
     this.imageService.previousPage();
-    this.imageService.onXml();
+    // this.imageService.onXml();
   }
 
   lastImage() {
     this.onEnter(0);
     this.imageService.LastImage();
-    this.imageService.onXml();
+    // this.imageService.onXml();
   }
 
   firstImage() {
     this.onEnter(0);
     this.imageService.firstImage();
-    this.imageService.onXml();
+    // this.imageService.onXml();
   }
   skipPage() {
     //this.localUrl = this.localUrlArray[this.imgFileCount];

@@ -115,7 +115,7 @@
 <app-footer></app-footer>
 
 <div id="menu">
-  <div class="dropdown-content">
+  <div class="dropdown-content"(clickOutside)="closeMenu()">
     <a (click)="asHorizontal()">prose (..from prev page/block)</a>
     <a (click)="asVertical()">Header</a>
     <a>Figure Caption</a>
