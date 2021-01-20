@@ -83,9 +83,8 @@ export class ScreenComponent implements OnInit{
 
   sideOpen() {
     if (this.Isopen == true) {
-      this.sidesize1 = 50;
-      this.sidesize2 = 50;
-      this.size3 = 35;
+      this.sidesize1 = 30;
+      this.sidesize2 = 70;
       this.serverImages = this.imageService.getImages();
       this.images = this.imageService.getLocalImages();
       if (this.serverImages.length > 0) {
@@ -98,7 +97,6 @@ export class ScreenComponent implements OnInit{
     else {
       this.sidesize1 = 0;
       this.sidesize2 = 100;
-      this.size3 = 50
       this.Isopen = true;
     }
   }
@@ -287,6 +285,7 @@ export class ScreenComponent implements OnInit{
         console.log("imgFileCount " + this.imgFileCount);
       }
     }
+    this.imageService.onXml();
     setTimeout(() => this.fitwidth(), 50);
     setTimeout(() => this.setpercentage(), 60);
   }
@@ -418,6 +417,9 @@ export class ScreenComponent implements OnInit{
       $('#imgToRead').selectAreas('reset');
     });
     $('#lastImg').click(function () {
+      $('#imgToRead').selectAreas('reset');
+    });
+    $('.sidebody').click(function () {
       $('#imgToRead').selectAreas('reset');
     });
   // });
