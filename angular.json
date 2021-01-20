@@ -34,7 +34,6 @@
               "src/styles.css"
             ],
             "scripts": [
-              "node_modules/marked/lib/marked.js",
               "node_modules/tiff.js/tiff.min.js",
               "node_modules/jquery/dist/jquery.js",
              "src/jquery.selectareas.js"

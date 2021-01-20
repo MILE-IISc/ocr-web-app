@@ -34,7 +34,6 @@
     "moment": "^2.29.1",
     "ng-click-outside": "^7.0.1",
     "ng2-file-upload": "^1.4.0",
-    "ngx-markdown": "^11.0.1",
     "rxjs": "~6.5.5",
     "rxjs-compat": "^6.6.3",
     "save": "^2.4.0",
