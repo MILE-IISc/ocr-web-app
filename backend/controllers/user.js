@@ -9,7 +9,8 @@ exports.createUser = (req, res, next) => {
       email: req.body.email,
       password: hash,
       type: req.body.type,
-      filesListLoaded: "N"
+      filesListLoaded: "N",
+      bucketName: ""
     });
     user
       .save()
