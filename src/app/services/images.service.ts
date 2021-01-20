@@ -646,7 +646,10 @@ export class ImageService implements OnInit {
       console.log("onclick");
       $('#imgToRead').selectAreas('destroy');
     });
-
+    $('.btnImg').click(function () {
+     
+      $('#imgToRead').selectAreas('reset');
+    });
     function debugQtyAreas(event, id, areas) {
       console.log(areas.length + " areas", arguments);
       this.displayarea = areas;

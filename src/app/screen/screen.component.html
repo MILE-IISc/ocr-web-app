@@ -76,23 +76,19 @@
       <as-split-area [size]=sidesize1>
         <div>
           <mat-toolbar style="width: 100%; text-align: center;">
-            <h6>select the page</h6>
-            <span class="filler"></span>
+            <h6>Select the page</h6>
+          
             <button mat-icon-button class="sideBar" color="accent" title="view Image List" (click)="sideClose()">
               <mat-icon>close</mat-icon>
             </button>
           </mat-toolbar>
-          <div class="sideBody" (click)="openThisImage($event)">
-
-          </div>
+          <div class="sideBody" (click)="openThisImage($event)"></div>
         </div>
       </as-split-area>
       <as-split-area [size]=sidesize2 (scroll)="updateScroll(scrollOne, scrollTwo)" #scrollOne>
         <img [src]="localUrl" *ngIf="localUrl && !isLoading" id="imgToRead" class="imgToRead" />
-        <!-- <div class="topleft" *ngIf="!isLoading"><h5>{{ fileName }}</h5></div> -->
-        <mat-spinner *ngIf="isLoading"></mat-spinner>
-        <button mat-icon-button class="sidebar1" color="primary" (click)="sideOpen()"><img src="assets/images/left.svg"
-            type="button" width="20px" height="20px"></button>
+         <mat-spinner *ngIf="isLoading"></mat-spinner>
+        <button mat-icon-button class="sidebar1" data-toggle="tooltip" title="Select Image"  color="primary" id="SideBar" (click)="sideOpen()"><mat-icon>keyboard_arrow_right</mat-icon></button>
       </as-split-area>
     </as-split>
   </as-split-area>
