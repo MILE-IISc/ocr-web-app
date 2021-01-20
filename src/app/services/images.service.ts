@@ -462,6 +462,7 @@ export class ImageService implements OnInit {
       this.previousImages = false;
       this.previousImageChange.emit(this.previousImages);
     }
+    this.onXml()
   }
 
   async previousPage() {
@@ -494,6 +495,7 @@ export class ImageService implements OnInit {
       this.previousImages = true;
       this.previousImageChange.emit(this.previousImages);
     }
+    this.onXml()
   }
 
   async LastImage() {
@@ -525,6 +527,7 @@ export class ImageService implements OnInit {
         this.previousImageChange.emit(this.previousImages);
       }
     }
+    this.onXml()
   }
 
   async firstImage() {
@@ -550,6 +553,7 @@ export class ImageService implements OnInit {
       this.nextImages = false;
       this.nextImageChange.emit(this.nextImages);
     }
+    this.onXml()
   }
 
   onXml() {
@@ -655,7 +659,9 @@ export class ImageService implements OnInit {
     // console.log("fit: "+fit);
 
     if (this.fit == 'width') {
+      this.clientpercent = this.percentage;
       setTimeout(() => this.fitwidth(), 50);
+      setTimeout(() => this.blocksize(), 50);
     }
     else if (this.fit == 'height') {
       setTimeout(() => this.fitheight(), 50);
@@ -670,7 +676,9 @@ export class ImageService implements OnInit {
     this.value = 'vertical';
     console.log("fit inside screen Horizontal: " + this.fit);
     if (this.fit == 'width') {
+      this.clientpercent = this.percentage;
       setTimeout(() => this.fitwidth(), 50);
+      setTimeout(() => this.blocksize(), 50);
     }
     else if (this.fit == 'height') {
       setTimeout(() => this.fitheight(), 50);
