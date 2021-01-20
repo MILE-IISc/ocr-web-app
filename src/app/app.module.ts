@@ -70,7 +70,6 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { FooterComponent } from './footer/footer.component';
 import { ClickOutsideDirective } from './shared/click-outside.directive';
 import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
-import { MarkdownModule } from 'ngx-markdown';
 
 @NgModule({
   declarations: [
@@ -141,8 +140,7 @@ import { MarkdownModule } from 'ngx-markdown';
     HttpClientModule,
     ReactiveFormsModule,
     AngularSplitModule,
-    MatNativeDateModule,
-    MarkdownModule.forRoot()
+    MatNativeDateModule
   ],
   providers: [
     {  provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'fill' } }
