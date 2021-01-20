@@ -82,7 +82,7 @@ export class ScreenComponent implements OnInit{
   invalidMessage ="";
 
   sideOpen() {
-    if (this.Isopen == true) {
+
       this.sidesize1 = 30;
       this.sidesize2 = 70;
       this.serverImages = this.imageService.getImages();
@@ -92,19 +92,17 @@ export class ScreenComponent implements OnInit{
       } else {
         this.imageService.openModalDialog(this.images);
       }
-      this.Isopen = false;
-    }
-    else {
-      this.sidesize1 = 0;
-      this.sidesize2 = 100;
-      this.Isopen = true;
-    }
+   
+    $("#OpenBar").hide();
+    $("#CloseBar").show();
   }
 
   sideClose() {
     this.sidesize1 = 0;
     this.sidesize2 = 100;
     this.size3 = 50
+    $("#OpenBar").show();
+    $("#CloseBar").hide();
   }
 
   constructor(private headerService: HeaderService, private imageService: ImageService,
@@ -120,6 +118,7 @@ export class ScreenComponent implements OnInit{
 
 
   ngOnInit(): void {
+    $("#CloseBar").hide();
     // authentication related
     this.userIsAuthenticated = this.authService.getIsAuth();
     this.userName = this.authService.getUserName();
