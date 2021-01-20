@@ -270,20 +270,26 @@ router.get("", checkAuth,(req, res, next) => {
 
         jpegImages.map(jpegImage => {
           mismatchCount = 0;
-          tiffImages.map(tiffImage => {
-            if(tiffImage.slice(0, -3).toLowerCase() == jpegImage.slice(0, -3).toLowerCase()) {
-              fetchedImages.push(tiffImage);
-              console.log("tiff with jpeg",jpegImage);
-            }
-            else {
-              mismatchCount = mismatchCount+1;
-            }
-
-            if(tiffImage.slice(0, -3).toLowerCase() != jpegImage.slice(0, -3).toLowerCase() && mismatchCount == tiffImages.length) {
-              fetchedImages.push(jpegImage);
-              console.log("jpeg Image only",jpegImage);
-            }
-          });
+          if(tiffImages.length == 0) {
+            fetchedImages.push(jpegImage);
+            console.log("jpeg Image only",jpegImage);
+          }
+          else {
+            tiffImages.map(tiffImage => {
+              if(tiffImage.slice(0, -3).toLowerCase() == jpegImage.slice(0, -3).toLowerCase()) {
+                fetchedImages.push(tiffImage);
+                console.log("tiff with jpeg",jpegImage);
+              }
+              else {
+                mismatchCount = mismatchCount+1;
+              }
+  
+              if(tiffImage.slice(0, -3).toLowerCase() != jpegImage.slice(0, -3).toLowerCase() && mismatchCount == tiffImages.length) {
+                fetchedImages.push(jpegImage);
+                console.log("jpeg Image only",jpegImage);
+              }
+            });
+          }
         });
 
         if (fetchedImages.length > 0) {
