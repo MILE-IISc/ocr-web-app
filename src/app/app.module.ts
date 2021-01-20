@@ -70,7 +70,6 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { FooterComponent } from './footer/footer.component';
 import { ClickOutsideDirective } from './shared/click-outside.directive';
 import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
-import { HelpComponent } from './help/help.component';
 import { MarkdownModule } from 'ngx-markdown';
 
 @NgModule({
@@ -82,8 +81,7 @@ import { MarkdownModule } from 'ngx-markdown';
     ClickOutsideDirective,
     CtrlsDetectorDirective,
     FooterComponent,
-    HelpComponent
-    //FileSelectDirective
+ 
   ],
   exports:[
     MatIconModule
@@ -143,8 +141,6 @@ import { MarkdownModule } from 'ngx-markdown';
     HttpClientModule,
     ReactiveFormsModule,
     AngularSplitModule,
-
-
     MatNativeDateModule,
     MarkdownModule.forRoot()
   ],
