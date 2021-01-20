@@ -534,7 +534,7 @@ export class ImageService implements OnInit {
 
   onXml() {
     this.serverImages = this.getImages();
-    if(this.serverImages.length>1){
+    if(this.serverImages.length > 1){
       console.log("server image length "+this.serverImages.length);
       console.log("image file count "+this.imgFileCount);
       this.fileName = this.serverImages[this.imgFileCount].fileName;
