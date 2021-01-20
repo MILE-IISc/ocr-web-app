@@ -57,7 +57,8 @@ exports.userLogin = (req, res, next) => {
         userId: fetchedUser._id,
         email: fetchedUser.email,
         type: fetchedUser.type,
-        isLoaded: fetchedUser.filesListLoaded
+        isLoaded: fetchedUser.filesListLoaded,
+        bucketName: fetchedUser.bucketName
       });
     })
     .catch(err => {

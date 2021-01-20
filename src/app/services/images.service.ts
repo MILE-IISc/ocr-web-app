@@ -238,7 +238,7 @@ export class ImageService implements OnInit {
         console.log("image added+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++: " + responseData.message);
         // await this.getServerImages();
       });
-      
+
       console.log("server file count" + this.serverImages.length);
     if (this.serverImages.length == 0) {
       var filesCount = fileRead.length;
@@ -558,7 +558,7 @@ export class ImageService implements OnInit {
 
   onXml() {
     this.serverImages = this.getImages();
-    if(this.serverImages.length>1){
+    if(this.serverImages.length > 1){
       console.log("server image length "+this.serverImages.length);
       console.log("image file count "+this.imgFileCount);
       this.fileName = this.serverImages[this.imgFileCount].fileName;
@@ -664,7 +664,9 @@ export class ImageService implements OnInit {
     if (this.fit == 'width') {
       this.clientpercent = this.percentage;
       setTimeout(() => this.fitwidth(), 50);
-      setTimeout(() => this.blocksize(), 50);
+      var block;
+    block = document.getElementsByClassName("select-areas-outline");
+    if ( block.length>0){ setTimeout(() => this.blocksize(), 50);}
     }
     else if (this.fit == 'height') {
       setTimeout(() => this.fitheight(), 50);
@@ -681,7 +683,10 @@ export class ImageService implements OnInit {
     if (this.fit == 'width') {
       this.clientpercent = this.percentage;
       setTimeout(() => this.fitwidth(), 50);
-      setTimeout(() => this.blocksize(), 50);
+      var block;
+    block = document.getElementsByClassName("select-areas-outline");
+    if ( block.length>0){ setTimeout(() => this.blocksize(), 50);}
+
     }
     else if (this.fit == 'height') {
       setTimeout(() => this.fitheight(), 50);
@@ -714,7 +719,9 @@ export class ImageService implements OnInit {
     this.percentage = currHeight / realHeight * 100;
     retain.percentage = this.percentage;
     // console.log("the current percentage is "+retain.percentage)
-    this.blocksize();
+    var block;
+    block = document.getElementsByClassName("select-areas-outline");
+    if ( block.length>0){ this.blocksize();}
 
     myImg.style.width = (realWidth * this.percentage / 100) + "px";
     falseimg.style.width = myImg.style.width;
@@ -760,7 +767,9 @@ export class ImageService implements OnInit {
     this.percentage = 100;
     retain.percentage = this.percentage;
     // console.log("the current percentage is "+retain.percentage)
-    this.blocksize();
+    var block;
+    block = document.getElementsByClassName("select-areas-outline");
+    if ( block.length>0){ this.blocksize();}
 
 
   }
@@ -797,7 +806,7 @@ export class ImageService implements OnInit {
     var block;
     block = document.getElementsByClassName("select-areas-outline");
     if ( block.length>0){ this.blocksize();}
-   
+
     myImg = document.getElementById("imgToRead");
     var falseimg;
     falseimg = document.getElementById("image")
@@ -819,7 +828,9 @@ export class ImageService implements OnInit {
     this.percentage = this.percentage - 7.2;
     retain.percentage = this.percentage;
     // console.log("the current percentage is "+retain.percentage)
-    this.blocksize();
+    var block;
+    block = document.getElementsByClassName("select-areas-outline");
+    if ( block.length>0){ this.blocksize();}
     myImg = document.getElementById("imgToRead");
     var falseimg;
     falseimg = document.getElementById("image")

@@ -86,7 +86,9 @@ export class FooterComponent implements OnInit {
     this.imageService.percentage = this.percentage;
     this.imageService.onZoom();
     this.headerService.setpercentagevary(this.percentage);
-    this.blocksize()
+    var block;
+    block = document.getElementsByClassName("select-areas-outline");
+    if ( block.length>0){ this.blocksize();}
 
   }
 
@@ -119,7 +121,9 @@ export class FooterComponent implements OnInit {
     console.log("this.percentage before header in fitwidth",this.percentage);
     this.headerService.setpercentagevary(this.percentage);
     console.log("this.percentage after header in fitwidth",this.percentage);
-    this.blocksize();
+    var block;
+    block = document.getElementsByClassName("select-areas-outline");
+    if ( block.length>0){ this.blocksize();}
   }
 
   zoomInFun() {
@@ -227,6 +231,9 @@ export class FooterComponent implements OnInit {
         // this.viewerService. selectBlockservice()
         // setTimeout(() => this.imageService.selectBlockservice(), .001);
       }
+      var SaveToXML = document.getElementById("SaveToXML");
+        console.log("SaveToXML: " + SaveToXML);
+        SaveToXML.click();
       this.imageService.selectBlockservice()
     }
   }
