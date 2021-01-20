@@ -13,8 +13,8 @@
 }
 input{
 
-  border-radius: 10px;
-  height: 30px !important;
+  border-radius:5px;
+  height:75% !important;
   color: black;
 }
 label{
@@ -38,8 +38,12 @@ font-size: small;
 }
 #fitWidth{
   transform: rotate(90deg);
-
 }
+
+#orginalsize{
+  transform: rotate(45deg);
+}
+
 
 
 
