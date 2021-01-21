@@ -750,7 +750,7 @@ this.$image.on("loaded", this.options.onLoaded);
 }
 
 // Initialize an image holder
-this.$holder = $("<div />")
+this.$holder = $("<div  class=\"holderClass\" />")
 .css({
 position : "relative",
 width: this.$image.width(),
@@ -826,59 +826,7 @@ if (direction) {
 
 $.imageSelectAreas.prototype._refresh = function () {
 var nbAreas = this.areas().length;
-nbAreas = this.areas().length;
 
- AREAS = this.areas();
- // console.log("area::"+AREAS);
- if(nbAreas > 0){
- for(let i=0;i<nbAreas;i++){
- if (i>0){
- var j = i-1;
-
- if( AREAS[i].id != AREAS[j].id && AREAS[i].x < AREAS[j].x && AREAS[i].y < AREAS[j].y && AREAS[i].width >
- AREAS[j].width && AREAS[i].height > AREAS[j].height ){
- console.log("biggest one");
- $('#imgToRead').selectAreas('reset');
-
- j--;
-
- console.log("deleted one");
-
- }
-
- j++;
-
- }else{
- j=0;
- }
-
- }
- }
-if(nbAreas > 0){
-
-  $(".select-areas-background-area").dblclick(function(event){
-  console.log("doble click........");
-
-  for(let i=0;i<nbAreas;i++){
-  j = i-1;
-
-  var areaOptions = {
-
-  width: AREAS[i].width,
-  height: (AREAS[i].y + AREAS[i].height) - event.clientY,
-  x: AREAS[i].x,
-  y: event.clientY,
-
-  };
-
- }
-
-  // output("Add a new area: " + areaToString(areaOptions))
-  $('img#imgToRead').selectAreas('add', areaOptions);
-
-  });
-
-  }
 this.$overlay.css({
 display : nbAreas? "block" : "none"
 });

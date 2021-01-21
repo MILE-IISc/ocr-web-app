@@ -288,7 +288,7 @@ export class ScreenComponent implements OnInit{
       }
     }
     $('img#imgToRead').selectAreas('destroy');
-    // this.imageService.onXml();
+    this.imageService.onXml();
     setTimeout(() => this.imageService.screenview(), 50);
     setTimeout(() => this.setpercentage(), 60);
   }
