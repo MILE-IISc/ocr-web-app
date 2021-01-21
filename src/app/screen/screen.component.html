@@ -31,7 +31,7 @@
     <mat-icon>horizontal_split</mat-icon>
   </button>
 
-  <button mat-icon-button data-toggle="tooltip" title="Select Block" (click)="selectBlock()" style="margin-right:3px;"
+  <button mat-icon-button data-toggle="tooltip" title="Select Block" (click)="call()" style="margin-right:3px;"
     id="buttonXml">
     <mat-icon>crop_5_4</mat-icon>
   </button>
@@ -39,6 +39,7 @@
   <button mat-icon-button data-toggle="tooltip" title="Download XML" (click)="onSaveXml()">
     <mat-icon>get_app</mat-icon>
   </button>
+
   <span class="example-spacer2"></span>
   <div *ngIf="!isLoading">
     <h5>{{ fileName }}</h5>
@@ -86,9 +87,9 @@
           <div class="sideBody" (click)="openThisImage($event)"></div>
         </div>
       </as-split-area>
-      <as-split-area [size]=sidesize2 (scroll)="updateScroll(scrollOne, scrollTwo)" #scrollOne>
-        <button mat-icon-button class="sidebar1" data-toggle="tooltip" title="Open SideBar"  color="primary" id="OpenBar" (click)="sideOpen()"><mat-icon>keyboard_arrow_right</mat-icon></button>
-        <button mat-icon-button class="sidebar2" data-toggle="tooltip" title="Close SideBar"  color="primary" id="CloseBar" (click)="sideClose()"><mat-icon>keyboard_arrow_left</mat-icon></button>
+      <as-split-area [size]=sidesize2 style="overflow-x: auto; overflow-y: auto;"(scroll)="updateScroll(scrollOne, scrollTwo)" #scrollOne>
+        <button mat-icon-button class="sidebar1" data-toggle="tooltip" title="Open SideBar" style="z-index:600;" color="primary" id="OpenBar" (click)="sideOpen()"><mat-icon>keyboard_arrow_right</mat-icon></button>
+        <button mat-icon-button class="sidebar2" data-toggle="tooltip" title="Close SideBar" style="z-index:600;" color="primary" id="CloseBar" (click)="sideClose()"><mat-icon>keyboard_arrow_left</mat-icon></button>
 
         <img [src]="localUrl" *ngIf="localUrl && !isLoading" id="imgToRead" class="imgToRead" />
          <mat-spinner *ngIf="isLoading"></mat-spinner>
@@ -97,7 +98,7 @@
     </as-split>
   </as-split-area>
 
-  <as-split-area class="split2" [size]=size3 (scroll)="updatescroll(scrollOne, scrollTwo)" #scrollTwo>
+  <as-split-area class="split2" [size]=size3 style="overflow-x: auto; overflow-y: auto;"(scroll)="updatescroll(scrollOne, scrollTwo)" #scrollTwo>
     <div id="image" [style.position]="'relative'">
       <span *ngFor="let text of words;let i = index">
         <input (ctrls)="showTooltip($event)" class="text_input" id="{{text.lineNumber}}" value="{{text.unicode}}"
