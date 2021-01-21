@@ -10,6 +10,7 @@ import { Images } from '../shared/images.model';
 import { HeaderService } from '../services/header.service';
 import { XmlModel,retain } from '../shared/xml-model';
 import { BlockModel} from '../shared/block-model';
+// import { HeaderService } from '../services/header.service';
 
 
 declare var Tiff: any;
@@ -440,6 +441,7 @@ export class ImageService implements OnInit {
     if (this. obtainblock == true) {
       $('#imgToRead').selectAreas('reset');
    }
+
     if (this.serverImages.length > 1) {
       this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
       this.urlChanged.emit(this.localUrl.slice());
@@ -735,6 +737,7 @@ export class ImageService implements OnInit {
     var realHeight = myImg.naturalHeight;
     var realWidth = myImg.naturalWidth;
     this.percentage = currHeight / realHeight * 100;
+    this.headerService.setpercentagevary(this.percentage);
     retain.percentage = this.percentage;
     // console.log("the current percentage is "+retain.percentage)
     var block;
@@ -762,6 +765,7 @@ export class ImageService implements OnInit {
     var realHeight = myImg.naturalHeight;
     var realWidth = myImg.naturalWidth;
     this.percentage = (currWidth / realWidth) * 100;
+    this.headerService.setpercentagevary(this.percentage);
     retain.percentage = this.percentage;
     // console.log("the current percentage is "+retain.percentage)
     //this.blocksize();
@@ -783,6 +787,7 @@ export class ImageService implements OnInit {
     falseimg.style.height = myImg.style.height;
     console.log("currheight" + myImg.naturalHeight)
     this.percentage = 100;
+    this.headerService.setpercentagevary(this.percentage);
     retain.percentage = this.percentage;
     // console.log("the current percentage is "+retain.percentage)
     var block;
