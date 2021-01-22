@@ -52,6 +52,16 @@ spec:
             secretKeyRef:
               name: objectstorage-secret
               key: serviceInstanceId
+        - name: RUN_OCR_ADDRESS
+          valueFrom:
+            secretKeyRef:
+              name: ocrengine-secret
+              key: address
+        - name: RUN_OCR_PORT
+          valueFrom:
+            secretKeyRef:
+              name: ocrengine-secret
+              key: port
 ---
 # Expose as service
 apiVersion: v1

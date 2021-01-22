@@ -136,22 +136,17 @@ export class ImageService implements OnInit {
 
   getXmlFileAsJson(fileName : any) {
     console.log("file name in run ocr "+ fileName)
-    // var queryfileName = fileName;
-    let userData : any;
-    userData = {
-      user : this.authService.userName
-    }
-      this.http
-        .get<{ message: string; json:any }>(
-          this.XML_BACKEND_URL + fileName).subscribe(responseData => {
-          console.log("xml as json string "+JSON.stringify(responseData.json));
-          XmlModel.jsonObject = responseData.json;
+
+    const queryParams = `?fileName=${fileName}&type=GET-OCR-XML`;
+    this.http.get<{ message: string; xmlData:any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
+          console.log("xml as json string on RUN-OCR"+JSON.stringify(response.xmlData));
+          XmlModel.jsonObject = response.xmlData;
           this.updateXmlModel(XmlModel.jsonObject);
         });
   }
 
   updateXmlModel(jsonObj) {
-    // var jsonObj = JSON.parse(json);
+    console.log("jsonObj inside updateXmlModel after running OCR",jsonObj);
     var blocks = jsonObj['page'].block;
     console.log("block length " + blocks.length);
     for (var i = 0; i < blocks.length; i++) {
@@ -164,17 +159,17 @@ export class ImageService implements OnInit {
             var words = lines[j].word;
             console.log("words length " + words.length);
             for (var k = 0; k < words.length; k++) {
-              // console.log("word:", words[k]["$"].unicode);
-              if (words[k].unicode != null) {
-                txt = txt + " " + words[k].unicode;
+              if (words[k]["$"].unicode != null) {
+                console.log("words["+k+"][\"$\"].unicode",words[k]["$"].unicode);
+                txt = txt + " " + words[k]["$"].unicode;
               }
             }
-            var lineRowStart = lines[j].rowStart;
-            var lineRowEnd = lines[j].rowEnd;
-            var lineColStart = lines[j].colStart;
-            var lineColEnd = lines[j].colEnd;
-            var lineNumber = lines[j].LineNumber;
-            var blockNumber = blocks[i].BlockNumber;
+            var lineRowStart = lines[j]["$"].rowStart;
+            var lineRowEnd = lines[j]["$"].rowEnd;
+            var lineColStart = lines[j]["$"].colStart;
+            var lineColEnd = lines[j]["$"].colEnd;
+            var lineNumber = lines[j]["$"].LineNumber;
+            var blockNumber = blocks[i]["$"].BlockNumber;
             var txtwidth = (lineColEnd - lineColStart);
             var txtheight = (lineRowEnd - lineRowStart);
             var wordValue = new XmlModel(txt, lineRowStart, lineRowEnd, lineColStart, lineColEnd, txtwidth, txtheight,lineNumber,blockNumber);
@@ -229,7 +224,7 @@ export class ImageService implements OnInit {
       console.log(fileRead.length)
       imageData.append("image", file);
     }
-    this.http
+      this.http
       .post<{ message: string }>(
         this.IMAGE_BACKEND_URL,
         imageData
@@ -244,9 +239,9 @@ export class ImageService implements OnInit {
       console.log("server file count" + this.serverImages.length);
     if (this.serverImages.length == 0) {
       var filesCount = fileRead.length;
-      if (filesCount > 1) {
-        this.nextImages = false;
-      }
+      // if (filesCount > 1) {
+      //   this.nextImages = false;
+      // }
       this.localImages.splice(0, this.localImages.length);
       console.log("file count" + filesCount);
       for (let i = 0; i < filesCount; i++) {
@@ -582,7 +577,8 @@ export class ImageService implements OnInit {
 
   onXml() {
     this.serverImages = this.getImages();
-    if(this.serverImages.length > 1){
+    console.log("serverImagesLength in onXml",this.serverImages.length);
+    if(this.serverImages.length > 0){
       console.log("server image length "+this.serverImages.length);
       console.log("image file count "+this.imgFileCount);
       this.fileName = this.serverImages[this.imgFileCount].fileName;
@@ -601,37 +597,32 @@ export class ImageService implements OnInit {
 }
 
   getFileAsJson(fileName : any) {
-    console.log("file name in run ocr "+ fileName)
-    var queryfileName = fileName.slice(0,-3) + 'xml';
-    let userData : any;
-    userData = {
-      user : this.authService.userName
-    }
-      this.http
-        .get<{ message: string; json:any }>(
-          this.XML_BACKEND_URL + queryfileName).subscribe(responseData => {
-          console.log("xml as json string "+JSON.stringify(responseData.json));
-          XmlModel.jsonObject = responseData.json;
-          this.retain(XmlModel.jsonObject);
-        });
+    console.log("file name in run ocr "+ fileName);
+    const queryParams = `?fileName=${fileName}&type=GET-XML`;
+    this.http.get<{ message: string; xmlData:any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
+      console.log("reponseData in getFileAsJson",response.xmlData);
+      console.log("xml as json string "+JSON.stringify(response.xmlData));
+      XmlModel.jsonObject = response.xmlData;
+      this.retain(XmlModel.jsonObject);
+    });
   }
 
   retain(jsonObj){
     let areaarray=[];
-     // var jsonObj = JSON.parse(json);
+    // var jsonObj = JSON.parse(json);
      console.log("inside retain jsonObj: "+JSON.stringify(jsonObj));
      if(jsonObj['page'].block){
      var blocks = jsonObj['page'].block;
     //  console.log("block length " + blocks.length);
 
      for (var i = 0; i < blocks.length; i++) {
-       var blockNumber = (blocks[i].BlockNumber);
+       var blockNumber = (blocks[i]["$"].BlockNumber);
        console.log("blockNumber" + blockNumber);
        console.log("blockRowStart from json "+blocks[i].rowStart);
-       var blockRowStart = blocks[i].rowStart;
-       var blockRowEnd = blocks[i].rowEnd;
-       var blockColStart = blocks[i].colStart;
-       var blockColEnd = blocks[i].colEnd;
+       var blockRowStart = blocks[i]["$"].rowStart;
+       var blockRowEnd = blocks[i]["$"].rowEnd;
+       var blockColStart = blocks[i]["$"].colStart;
+       var blockColEnd = blocks[i]["$"].colEnd;
        var x = (blockColEnd - blockColStart);
        console.log("x in retain "+x);
        console.log("percentage in retain ***************"+this.percentage);
@@ -671,7 +662,6 @@ export class ImageService implements OnInit {
       $('#imgToRead').selectAreas('destroy');
     });
     $('.btnImg').click(function () {
-
       $('#imgToRead').selectAreas('reset');
     });
     function debugQtyAreas(event, id, areas) {

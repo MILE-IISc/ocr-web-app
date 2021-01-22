@@ -104,10 +104,10 @@ function getItem(bucketName, itemName, mail, requestType) {
               console.log("file width",file.getWidth());
               file
               .quality(75)
-              .write('./images/'+mail+"/"+itemName.slice(0, -3).toLowerCase() + 'jpg');
+              .write('./images/'+mail+"/"+itemName.slice(0, -3) + 'jpg');
               console.log("file is ready for",mail," fileName ",itemName.slice(0, -3).toLowerCase() + 'jpg');
               console.log("image content retrieved and converted");
-              let tiffToJpg = itemName.slice(0, -3).toLowerCase() + 'jpg';
+              let tiffToJpg = itemName.slice(0, -3) + 'jpg';
               const filePath = './images/' + mail + "/" + tiffToJpg;
               console.log("file Path " + filePath);
               console.log("calling multiPartUpload");
@@ -261,7 +261,7 @@ router.get("", checkAuth,(req, res, next) => {
       else if (path.extname(file).toLowerCase() == ".png" || path.extname(file).toLowerCase() == ".bmp") {
         fetchedImages.push(file.trim());
       } else if(path.extname(file).toLowerCase() == ".xml") {
-        xmlArrayList.push(file.toLowerCase());
+        xmlArrayList.push(file);
       }
     });
 
@@ -292,7 +292,7 @@ router.get("", checkAuth,(req, res, next) => {
     if (fetchedImages.length > 0) {
       fetchedImages.forEach(files => {
         console.log("fetchedImages name",files);
-        const xmlFile = files.slice(0, -3).toLowerCase() + 'xml';
+        const xmlFile = files.slice(0, -3) + 'xml';
         if (xmlArrayList.includes(xmlFile)) {
           completed = 'Y';
         } else {
@@ -332,7 +332,7 @@ router.get("/:fileName", checkAuth,(req, res, next) =>{
   let jpegFile = req.params.fileName;
   console.log("req.params.fileName",jpegFile);
   if (path.extname(jpegFile).toLowerCase() == ".tif") {
-    jpegFile = jpegFile.slice(0, -3).toLowerCase() + 'jpg';
+    jpegFile = jpegFile.slice(0, -3) + 'jpg';
   }
   bucketName = req.userData.bucketName;
   console.log("bucketName inside get specific Image ",bucketName);

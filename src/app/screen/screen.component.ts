@@ -200,8 +200,10 @@ export class ScreenComponent implements OnInit{
           }
           this.isLoading = true;
           this.ImageIs = true;
-          this.nextImage = false;
-          this.imageService.nextImageChange.emit(this.nextImage);
+          if(imageLength > 1) {
+            this.nextImage = false;
+            this.imageService.nextImageChange.emit(this.nextImage);
+          }
           this.isLoading = false;
           // this.fileName = " The files alloted for you ";
           console.log("this.serverImages[0].fileName: ------------_> ", this.serverImages[0].fileName);
@@ -225,7 +227,6 @@ export class ScreenComponent implements OnInit{
         this.localUrl = images[0].dataUrl;
         this.fileName = images[0].fileName;
         this.isLoading = false;
-
         this.ImageIs = true;
         setTimeout(() => this.imageService.screenview(), 50);
         setTimeout(() => this.setpercentage(), 60);
@@ -323,8 +324,6 @@ export class ScreenComponent implements OnInit{
     this.headerService.setpercentagevary(this.percentage);
   }
 
-
-
   fitwidth() {
     this.imageService.fitwidth()
     this.percentage = this.imageService.percentage;
@@ -349,9 +348,6 @@ export class ScreenComponent implements OnInit{
     this.headerService.setpercentagevary(this.percentage);
     console.log("this.percentage after header in orginalsize",this.percentage);
   }
-
-
-
 
   loadXMLDoc() {
     this.serverImages = this.imageService.getImages();
@@ -432,12 +428,15 @@ export class ScreenComponent implements OnInit{
   // });
   }
 
+
   onSave() {
     var areas = $('img#imgToRead').selectAreas('areas');
     var prolog = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
-    var xmlDocument = document.implementation.createDocument('http://mile.ee.iisc.ernet.in/schemas/ocr_output', "page", null);
+    var ns1 = 'http://mile.ee.iisc.ernet.in/schemas/ocr_output';
+    var xmlDocument = document.implementation.createDocument(null, "page", null);
+    xmlDocument.documentElement.setAttribute("xmlns",ns1);
     for (let i = 0; i < areas.length; i++) {
-      var blockElem = xmlDocument.createElement("block");
+      var blockElem = xmlDocument.createElementNS(null,"block");
       blockElem.setAttribute("type", "Text");
       var blockNumberElems = $(".select-areas-blockNumber-area");
       console.log("-----blockNumberElems------" + blockNumberElems.length);
@@ -446,33 +445,35 @@ export class ScreenComponent implements OnInit{
       blockElem.setAttribute("BlockNumber", blockNumber[(blockNumberElems.length - 1) - i].innerHTML);
       blockElem.setAttribute("SubType", "paragraphProse");
       var y = ((areas[i].y * 100) / this.percentage).toString();
-      console.log("row start" + y);
-      blockElem.setAttribute("rowStart", y);
-      var height = ((areas[i].height * 100) / this.percentage)
+      blockElem.setAttribute("rowStart", (Math.ceil(parseInt(y))).toString());
+      var height = ((areas[i].height * 100) / this.percentage);
       var rowEnd = (height + parseFloat(y)).toString();
-      blockElem.setAttribute("rowEnd", rowEnd);
+      blockElem.setAttribute("rowEnd", (Math.ceil(parseInt(rowEnd))).toString());
       var x = ((areas[i].x * 100) / this.percentage).toString();
-      blockElem.setAttribute("colStart", x);
-      var width = ((areas[i].width * 100) / this.percentage)
+      blockElem.setAttribute("colStart", (Math.ceil(parseInt(x))).toString());
+      var width = ((areas[i].width * 100) / this.percentage);
       var colEnd = (width + parseFloat(x)).toString();
-      blockElem.setAttribute("colEnd", colEnd);
+      blockElem.setAttribute("colEnd", (Math.ceil(parseInt(colEnd))).toString());
+      // blockElem.removeAttribute("xmlns");
       xmlDocument.documentElement.appendChild(blockElem);
     }
-    var xmlString = prolog + new XMLSerializer().serializeToString(xmlDocument);
+    var xmlString = new XMLSerializer().serializeToString(xmlDocument);
+    console.log("xml string "+xmlString);
 
-    xml2js.parseString(xmlString, { mergeAttrs: true }, function (err, result) {
-      var jsonString = JSON.stringify(result)
+    xml2js.parseString(xmlString, function (err, result) {
+      var jsonString = JSON.stringify(result);
       XmlModel.jsonObject = result;
-      console.log("xml.js result as JSON " + jsonString);
     });
     this.imageService.updateCorrectedXml(this.fileName);
   }
 
-  async onSaveXml() {
+  async downloadXml() {
     console.log("in export")
     this.images = this.imageService.getImages();
     console.log("image length in export " + this.images.length);
-    var folderName = this.fileName.slice(0, -9)
+    // var folderName = this.fileName.slice(0, -9);
+    var folderName = "XML_Files";
+    console.log("folder Name",folderName);
     var zip = new JSZip();
     let count = 0;
     var folder = zip.folder(folderName);
@@ -484,8 +485,10 @@ export class ScreenComponent implements OnInit{
         console.log("curXmlFileName " + curXmlFileName);
         //changes have to be made in file service to get the xml file from backend
         await this.fileService.downloadFile(curXmlFileName).then(response => {
+          console.log("xml content while downloading",response.xmlData);
           let blob: any = new Blob([response.xmlData], { type: 'text/xml' });
           console.log("blob==="+blob);
+          console.log("this.images[i].fileName.slice(0, -3) + 'xml'",this.images[i].fileName.slice(0, -3) + 'xml');
           folder.file(this.images[i].fileName.slice(0, -3) + 'xml', blob);
         }), error => {
           console.log("error: " + error);
@@ -493,10 +496,12 @@ export class ScreenComponent implements OnInit{
         };
       }
       count++;
-      if (count === this.images.length - 1) {
+      console.log("count before if of onSave", count);
+      if (count === this.images.length) {
+        console.log("count inside if of onSave", count);
         zip.generateAsync({ type: "blob" })
           .then(function (content) {
-            fileSaver.saveAs(content, folderName);
+            fileSaver(content, folderName);
           });
       }
     }
@@ -551,7 +556,7 @@ export class ScreenComponent implements OnInit{
           for (var j = 0; j < lines.length; j++) {
             if (lines[j].word) {
               var words = lines[j].word;
-              if (lines[j].LineNumber == texts[l].getAttribute("id")) {
+              if (lines[j]["$"].LineNumber == texts[l].getAttribute("id")) {
                 console.log((texts[l] as HTMLInputElement).value);
                 var text = (texts[l] as HTMLInputElement).value;
                 if (words.length > 1) {
@@ -560,7 +565,7 @@ export class ScreenComponent implements OnInit{
                   console.log("text array length " + textArray.length)
                   if (words.length == textArray.length) {
                     for (let k = 0; k < words.length; k++) {
-                      words[k].unicode = textArray[k].trim();
+                      words[k]["$"].unicode = textArray[k].trim();
                     }
                   } else if (textArray.length > words.length || textArray.length < words.length) {
                     console.log("in text array greater ");
@@ -568,18 +573,18 @@ export class ScreenComponent implements OnInit{
                     for (let m = 0; m < textArray.length; m++) {
                       txt = txt + " " + textArray[m];
                     }
-                    words[0].unicode = txt.trim();
-                    words[0].colEnd = words[words.length - 1].colEnd;
-                    console.log("word[0] " + words[0].unicode);
-                    console.log("word[1] " + words[1].unicode);
+                    words[0]["$"].unicode = txt.trim();
+                    words[0]["$"].colEnd = words[words.length - 1].colEnd;
+                    console.log("word[0] " + words[0]["$"].unicode);
+                    console.log("word[1] " + words[1]["$"].unicode);
                     for (let n = 1; n < words.length; n++) {
                       console.log("words.length", words.length, "n", n, "lines inndex", j)
-                      words[n].unicode = "";
+                      words[n]["$"].unicode = "";
                     }
                   }
                 } else {
                   console.log("in else block of update");
-                  words[0].unicode = text.trim();
+                  words[0]["$"].unicode = text.trim();
                 }
               }
             }
