@@ -978,9 +978,21 @@ export class ImageService implements OnInit {
   SaveToXML.click();
 
 
-      this.selectBlockservice()
+      this.selectBlock()
     }
   }
+
+  selectBlock(){
+    $('img#imgToRead').selectAreas('destroy');
+  console.log("inside script");
+  let areasarray = BlockModel.blockArray.reverse();
+  console.log("block.model.arrray^^^^   ^^" + JSON.stringify(areasarray));
+  // areasarray
+  $('img#imgToRead').selectAreas({
+    position: "absolute",
+
+    areas: areasarray
+  });}
 
   blocknumberupdate() {
     this.clientpercent = this.percentage;
