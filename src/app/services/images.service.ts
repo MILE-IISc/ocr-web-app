@@ -771,20 +771,23 @@ export class ImageService implements OnInit {
 
 
     var divwidth = document.getElementById('content').offsetWidth;
-    console.log("divelementheight " + divwidth)
-    myImg.style.width = divwidth + "px";
-    falseimg.style.width = myImg.style.width;
-    var currWidth = myImg.clientWidth;
-    var realHeight = myImg.naturalHeight;
-    var realWidth = myImg.naturalWidth;
-    this.percentage = (currWidth / realWidth) * 100;
-    this.headerService.setpercentagevary(this.percentage);
+    console.log("divelementheight",divwidth);
+    console.log("myImg on fitwidth",myImg);
+    if(myImg != null) {
+      myImg.style.width = divwidth + "px";
+      falseimg.style.width = myImg.style.width;
+      var currWidth = myImg.clientWidth;
+      var realHeight = myImg.naturalHeight;
+      var realWidth = myImg.naturalWidth;
+      this.percentage = (currWidth / realWidth) * 100;
+      this.headerService.setpercentagevary(this.percentage);
 
-    // console.log("the current percentage is "+retain.percentage)
-    //this.blocksize();
+      // console.log("the current percentage is "+retain.percentage)
+      //this.blocksize();
 
-    myImg.style.height = (realHeight * this.percentage / 100) + "px";
-    falseimg.style.height = myImg.style.height;
+      myImg.style.height = (realHeight * this.percentage / 100) + "px";
+      falseimg.style.height = myImg.style.height;
+    }
   }
   orginalsize() {
     this.clientpercent = this.percentage;

@@ -66,11 +66,12 @@ function getItem(bucketName, itemName, type) {
 }
 
 router.put("", checkAuth, (req, res, next) => {
-  xmlFileName = req.body.xmlFileName;
+  xmlFileName = req.body.XmlfileName;
   const mail = req.userData.email;
   const bucketName = req.userData.bucketName;
   console.log("bucketName inside put XML ",bucketName);
   console.log("mail inside put XML ",mail);
+  console.log("xmlFileName inside put XML ",xmlFileName);
   var json = req.body.json;
   console.log("xml content in put request ",JSON.stringify(json));
 

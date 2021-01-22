@@ -292,6 +292,10 @@ export class ScreenComponent implements OnInit{
     this.imageService.onXml();
     setTimeout(() => this.imageService.screenview(), 50);
     setTimeout(() => this.setpercentage(), 60);
+
+    console.log("empty the right side screen");
+    $(".textElementsDiv").not(':first').remove();
+    $(".textSpanDiv").empty();
   }
 
   importFile(event) {
