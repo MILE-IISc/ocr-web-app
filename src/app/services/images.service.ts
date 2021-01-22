@@ -634,14 +634,14 @@ export class ImageService implements OnInit {
        var blockColEnd = blocks[i].colEnd;
        var x = (blockColEnd - blockColStart);
        console.log("x in retain "+x);
-       console.log("percentage in retain "+retain.percentage);
-       var blockwidth = (blockColEnd - blockColStart) * retain.percentage / 100;
+       console.log("percentage in retain ***************"+this.percentage);
+       var blockwidth = (blockColEnd - blockColStart) * this.percentage / 100;
        console.log("blockwidth" + blockwidth);
-       var blockheight = (blockRowEnd - blockRowStart) * retain.percentage / 100;
+       var blockheight = (blockRowEnd - blockRowStart) * this.percentage / 100;
        console.log("blockheight" + blockheight);
-       var X = blockColStart * retain.percentage / 100;
+       var X = blockColStart * this.percentage / 100;
        console.log("blockX" + X);
-       var Y = blockRowStart * retain.percentage / 100;
+       var Y = blockRowStart * this.percentage / 100;
        console.log("blockY" + Y);
        areaarray[i] = { "id": blockNumber, "x": X, "y": Y, "width": blockwidth, "height": blockheight };
      }
@@ -738,7 +738,7 @@ export class ImageService implements OnInit {
     var realWidth = myImg.naturalWidth;
     this.percentage = currHeight / realHeight * 100;
     this.headerService.setpercentagevary(this.percentage);
-    retain.percentage = this.percentage;
+
     // console.log("the current percentage is "+retain.percentage)
     var block;
     block = document.getElementsByClassName("select-areas-outline");
@@ -766,7 +766,7 @@ export class ImageService implements OnInit {
     var realWidth = myImg.naturalWidth;
     this.percentage = (currWidth / realWidth) * 100;
     this.headerService.setpercentagevary(this.percentage);
-    retain.percentage = this.percentage;
+
     // console.log("the current percentage is "+retain.percentage)
     //this.blocksize();
 
@@ -781,14 +781,15 @@ export class ImageService implements OnInit {
     falseimg = document.getElementById("image")
     myImg = document.getElementById("imgToRead");
     myImg.style.width = myImg.naturalWidth + "px";
+
     falseimg.style.width = myImg.style.width;
     console.log("currwidth" + myImg.naturalWidth)
     myImg.style.height = myImg.naturalHeight + "px";
     falseimg.style.height = myImg.style.height;
     console.log("currheight" + myImg.naturalHeight)
     this.percentage = 100;
-    this.headerService.setpercentagevary(this.percentage);
-    retain.percentage = this.percentage;
+     this.headerService.setpercentagevary(this.percentage);
+
     // console.log("the current percentage is "+retain.percentage)
     var block;
     block = document.getElementsByClassName("select-areas-outline");
@@ -843,7 +844,7 @@ export class ImageService implements OnInit {
     this.fit = 'bypercentage';
     var myImg;
     this.percentage = this.percentage + 7.2;
-    retain.percentage = this.percentage;
+
     // console.log("the current percentage is "+retain.percentage)
     var block;
     block = document.getElementsByClassName("select-areas-outline");
@@ -869,7 +870,7 @@ export class ImageService implements OnInit {
     this.fit = 'bypercentage';
     var myImg;
     this.percentage = this.percentage - 7.2;
-    retain.percentage = this.percentage;
+
     // console.log("the current percentage is "+retain.percentage)
     var block;
     block = document.getElementsByClassName("select-areas-outline");
@@ -983,8 +984,9 @@ export class ImageService implements OnInit {
 
       }
       var SaveToXML = document.getElementById("SaveToXML");
-        console.log("SaveToXML: " + SaveToXML);
-        SaveToXML.click();
+  console.log("SaveToXML: "+SaveToXML);
+  SaveToXML.click();
+
 
       this.selectBlockservice()
     }
