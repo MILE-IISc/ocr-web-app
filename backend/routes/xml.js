@@ -66,7 +66,7 @@ function getItem(bucketName, itemName, type) {
 }
 
 router.put("", checkAuth, (req, res, next) => {
-  xmlFileName = req.body.XmlfileName;
+  xmlFileName = req.body.xmlFileName;
   const mail = req.userData.email;
   const bucketName = req.userData.bucketName;
   console.log("bucketName inside put XML ",bucketName);
@@ -103,9 +103,9 @@ router.get("/:fileName", checkAuth,(req, res, next) =>{
   console.log("mail inside get fileName XML ",mail);
 
   console.log("ImagefileName in get XML fileName call "+req.params.fileName);
-  const XmlfileName = req.params.fileName.slice(0,-3) + 'xml';
-  console.log("XmlfileName in get XML fileName call "+XmlfileName);
-  getItem(bucketName, XmlfileName,"GET").then(content => {
+  const xmlFileName = req.params.fileName.slice(0,-3) + 'xml';
+  console.log("xmlFileName in get XML fileName call "+xmlFileName);
+  getItem(bucketName, xmlFileName,"GET").then(content => {
     if(content == "The specified key does not exists in bucket") {
       console.log("error while retrieving:",content);
       res.status(400).json({
@@ -133,9 +133,9 @@ router.get("", checkAuth,(req, res, next) =>{
   console.log("fileName inside get XML ",req.query.fileName);
   console.log("type inside get XML ",req.query.type);
   if(req.query.type == "GET-XML") {
-    const XmlfileName = req.query.fileName.slice(0,-3) + 'xml';
-    console.log("XmlfileName in get call "+XmlfileName);
-    getItem(bucketName, XmlfileName, "GET").then(xmlContent => {
+    const xmlFileName = req.query.fileName.slice(0,-3) + 'xml';
+    console.log("xmlFileName in get call "+xmlFileName);
+    getItem(bucketName, xmlFileName, "GET").then(xmlContent => {
       if(xmlContent == "The specified key does not exists in bucket") {
         console.log("error while retrieving:",xmlContent);
         res.status(400).json({
@@ -156,9 +156,9 @@ router.get("", checkAuth,(req, res, next) =>{
     });
   }
   else if(req.query.type == "GET-OCR-XML"){
-    const XmlfileName = req.query.fileName.slice(0,-3) + 'xml';
-    console.log("XmlfileName in get call "+XmlfileName);
-    getItem(bucketName, XmlfileName, "GET").then(xmlContent => {
+    const xmlFileName = req.query.fileName.slice(0,-3) + 'xml';
+    console.log("xmlFileName in get call "+xmlFileName);
+    getItem(bucketName, xmlFileName, "GET").then(xmlContent => {
       if(xmlContent == "The specified key does not exists in bucket") {
         console.log("error while retrieving:",xmlContent);
         res.status(400).json({
@@ -195,7 +195,7 @@ router.get("", checkAuth,(req, res, next) =>{
               //   fs.mkdirSync(dir);
               // }
 
-              // let writeStream = fs.createWriteStream(dir + XmlfileName);
+              // let writeStream = fs.createWriteStream(dir + xmlFileName);
               // writeStream.on('error', (err) => {
               //   console.log(err);
               //   writeStream.end();
@@ -229,6 +229,11 @@ router.get("", checkAuth,(req, res, next) =>{
                       message: "xml read successfully",
                       xmlData: result
                     });
+                  });
+                  doCreateObject(bucketName, xmlFileName, body).then(() => {
+                    console.log("saved OCR output xml file");
+                  }).catch((err) => {
+                    console.log("error while saving xml file:",err);
                   });
                 }
                 else {
