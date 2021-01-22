@@ -46,13 +46,18 @@ function getItem(bucketName, itemName, type) {
       if (data != null) {
         // console.log('File Contents:\n' + Buffer.from(data.Body).toString());
         if(type == "OCR") {
-          console.log("tiff ",data.Metadata);
-          console.log("tiff ",data.ContentType);
-          const tiffArrayBuff = Buffer.from(data.Body).buffer;
-
-          TiffBase64Data = Buffer.from(tiffArrayBuff).toString('base64');
-          // console.log("TiffBase64Data",TiffBase64Data);
-          return TiffBase64Data;
+          console.log("image Metadata",data.Metadata);
+          console.log("image Type",data.ContentType);
+          if(data.ContentType == "image/tiff") {
+            // console.log("base64Data",base64Data);
+            console.log("inside get Tiff image base64");
+            const tiffArrayBuff = Buffer.from(data.Body).buffer;
+            base64Data = Buffer.from(tiffArrayBuff).toString('base64');
+            return base64Data;
+          }
+          console.log("inside get normal image base64");
+          base64Data = Buffer.from(data.Body).toString('base64');
+          return base64Data;
         }
         else {
           return Buffer.from(data.Body).toString();
@@ -169,7 +174,7 @@ router.get("", checkAuth,(req, res, next) =>{
       }
       else {
         // console.log("content retrieved for XML while running OCR:",content);
-        console.log("getting Tiff Data for",req.query.fileName);
+        console.log("getting Image Data for",req.query.fileName);
 
         getItem(bucketName, req.query.fileName, "OCR").then(imgContent => {
           if(imgContent == "The specified key does not exists in bucket") {
@@ -180,7 +185,7 @@ router.get("", checkAuth,(req, res, next) =>{
             });
           }
           else {
-            console.log("Tiff Base64String retrieved in get Request for RUN-OCR");
+            console.log("Base64String image Data retrieved in get Request for RUN-OCR");
             console.log("data before appending imageData",xmlContent);
             xml2js.parseString(xmlContent, (err, result) => {
               console.log("xml result inside xml2js.parse",result);
