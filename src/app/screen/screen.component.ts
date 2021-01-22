@@ -445,16 +445,15 @@ export class ScreenComponent implements OnInit{
       blockElem.setAttribute("BlockNumber", blockNumber[(blockNumberElems.length - 1) - i].innerHTML);
       blockElem.setAttribute("SubType", "paragraphProse");
       var y = ((areas[i].y * 100) / this.percentage).toString();
-      console.log("row start" + y);
-      blockElem.setAttribute("rowStart", y);
-      var height = ((areas[i].height * 100) / this.percentage)
+      blockElem.setAttribute("rowStart", (Math.ceil(parseInt(y))).toString());
+      var height = ((areas[i].height * 100) / this.percentage);
       var rowEnd = (height + parseFloat(y)).toString();
-      blockElem.setAttribute("rowEnd", rowEnd);
+      blockElem.setAttribute("rowEnd", (Math.ceil(parseInt(rowEnd))).toString());
       var x = ((areas[i].x * 100) / this.percentage).toString();
-      blockElem.setAttribute("colStart", x);
-      var width = ((areas[i].width * 100) / this.percentage)
+      blockElem.setAttribute("colStart", (Math.ceil(parseInt(x))).toString());
+      var width = ((areas[i].width * 100) / this.percentage);
       var colEnd = (width + parseFloat(x)).toString();
-      blockElem.setAttribute("colEnd", colEnd);
+      blockElem.setAttribute("colEnd", (Math.ceil(parseInt(colEnd))).toString());
       // blockElem.removeAttribute("xmlns");
       xmlDocument.documentElement.appendChild(blockElem);
     }

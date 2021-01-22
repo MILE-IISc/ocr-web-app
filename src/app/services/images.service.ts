@@ -136,7 +136,6 @@ export class ImageService implements OnInit {
 
   getXmlFileAsJson(fileName : any) {
     console.log("file name in run ocr "+ fileName)
-    // var queryfileName = fileName;
 
     const queryParams = `?fileName=${fileName}&type=GET-OCR-XML`;
     this.http.get<{ message: string; xmlData:any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
@@ -147,7 +146,7 @@ export class ImageService implements OnInit {
   }
 
   updateXmlModel(jsonObj) {
-    // var jsonObj = JSON.parse(json);
+    console.log("jsonObj inside updateXmlModel after running OCR",jsonObj);
     var blocks = jsonObj['page'].block;
     console.log("block length " + blocks.length);
     for (var i = 0; i < blocks.length; i++) {
@@ -160,9 +159,9 @@ export class ImageService implements OnInit {
             var words = lines[j].word;
             console.log("words length " + words.length);
             for (var k = 0; k < words.length; k++) {
-              // console.log("word:", words[k]["$"].unicode);
-              if (words[k].unicode != null) {
-                txt = txt + " " + words[k].unicode;
+              if (words[k]["$"].unicode != null) {
+                console.log("words["+k+"][\"$\"].unicode",words[k]["$"].unicode);
+                txt = txt + " " + words[k]["$"].unicode;
               }
             }
             var lineRowStart = lines[j]["$"].rowStart;

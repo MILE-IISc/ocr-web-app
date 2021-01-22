@@ -38,10 +38,6 @@ function doCreateObject(bucketName, xmlFileName, xmlData) {
 
 function getItem(bucketName, itemName, type) {
   console.log(`Retrieving item from bucket: ${bucketName}, key: ${itemName}`);
-  if(type == "OCR") {
-    itemName = itemName
-  }
-  console.log(`Retrieving item from bucket: ${bucketName}, key: ${itemName}`);
   return cos.getObject({
       Bucket: bucketName,
       Key: itemName
@@ -139,19 +135,18 @@ router.get("", checkAuth,(req, res, next) =>{
   if(req.query.type == "GET-XML") {
     const XmlfileName = req.query.fileName.slice(0,-3) + 'xml';
     console.log("XmlfileName in get call "+XmlfileName);
-    getItem(bucketName, XmlfileName, "GET").then(content => {
-      if(content == "The specified key does not exists in bucket") {
-        console.log("error while retrieving:",content);
+    getItem(bucketName, XmlfileName, "GET").then(xmlContent => {
+      if(xmlContent == "The specified key does not exists in bucket") {
+        console.log("error while retrieving:",xmlContent);
         res.status(400).json({
-          message: content,
+          message: xmlContent,
           xmlData: ""
         });
       }
       else {
-        // console.log("content retrieved for XML",content);
-        xml2js.parseString(content,{ explicitArray: false } ,function (err, result) {
-          var jsonString = JSON.stringify(result);
-          // console.log("xml result as JSON in "+jsonString);
+        // console.log("xmlContent retrieved for XML",xmlContent);
+        xml2js.parseString(xmlContent, function (err, result) {
+          console.log("xml result as JSON in "+JSON.stringify(result));
           res.status(201).json({
             message: "xml read successfully",
             xmlData: result
@@ -185,10 +180,36 @@ router.get("", checkAuth,(req, res, next) =>{
           }
           else {
             console.log("Tiff Base64String retrieved in get Request for RUN-OCR");
-            console.log("Tiff Base64String retrieved in get Request for RUN-OCR:",  );
-            var imageData = xmlContent.createElement("imageData");
-            imageData.nodeValue = imgContent;
-            xmlContent.documentElement.appendChild(imageData);
+            console.log("data before appending imageData",xmlContent);
+            xml2js.parseString(xmlContent, (err, result) => {
+              console.log("xml result inside xml2js.parse",result);
+              // result["page"]["imageData"] =  imgContent;
+              result["page"]["imageData"] =  imgContent;
+              const builder = new xml2js.Builder();
+              xmlContent = builder.buildObject(result);
+              // console.log("data after appending imageData",xmlContent);
+              // const user_xml_dir = './';
+              // var fs = require('fs');
+              // let dir = user_xml_dir;
+              // if (!fs.existsSync(dir)) {
+              //   fs.mkdirSync(dir);
+              // }
+
+              // let writeStream = fs.createWriteStream(dir + XmlfileName);
+              // writeStream.on('error', (err) => {
+              //   console.log(err);
+              //   writeStream.end();
+              //   res.status(500).json({
+              //     message: "Couldn't save Text File. err: " + err
+              //   });
+              // });
+              // writeStream.write(xmlContent);
+
+              // writeStream.on('finish', () => {
+              //   console.log("writestream completed-----");
+              // });
+              // writeStream.end();
+            });
             request.post({
                 url: process.env.RUN_OCR_ADDRESS,
                 port: process.env.RUN_OCR_PORT,
@@ -200,21 +221,24 @@ router.get("", checkAuth,(req, res, next) =>{
             },
             function(error, response, body){
                 console.log(response.statusCode);
-                // console.log(body);
-                console.log(error);
-                res.status(201).json({
-                  message: "Tiff base64 String retrieved successfully",
-                  json: body
-                });
+                if(error == null) {
+                  console.log("output on RUN-OCR",body);
+                  xml2js.parseString(body, function (err, result) {
+                    console.log("xml result as JSON in "+JSON.stringify(result));
+                    res.status(201).json({
+                      message: "xml read successfully",
+                      xmlData: result
+                    });
+                  });
+                }
+                else {
+                  console.log("error while RUN-OCR",error);
+                  res.status(400).json({
+                    message: error,
+                    xmlData: ""
+                  });
+                }
             });
-            // xml2js.parseString(content,{ mergeAttrs: true } ,function (err, result) {
-            //   var jsonString = JSON.stringify(result)
-            //   console.log("xml.js result as JSON "+jsonString);
-            //   res.status(201).json({
-            //     message: "xml read successfully",
-            //     json: result
-            //   });
-            // });
           }
         });
       }
