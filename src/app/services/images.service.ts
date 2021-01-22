@@ -167,12 +167,12 @@ export class ImageService implements OnInit {
                 txt = txt + " " + words[k].unicode;
               }
             }
-            var lineRowStart = lines[j].rowStart;
-            var lineRowEnd = lines[j].rowEnd;
-            var lineColStart = lines[j].colStart;
-            var lineColEnd = lines[j].colEnd;
-            var lineNumber = lines[j].LineNumber;
-            var blockNumber = blocks[i].BlockNumber;
+            var lineRowStart = lines[j]["$"].rowStart;
+            var lineRowEnd = lines[j]["$"].rowEnd;
+            var lineColStart = lines[j]["$"].colStart;
+            var lineColEnd = lines[j]["$"].colEnd;
+            var lineNumber = lines[j]["$"].LineNumber;
+            var blockNumber = blocks[i]["$"].BlockNumber;
             var txtwidth = (lineColEnd - lineColStart);
             var txtheight = (lineRowEnd - lineRowStart);
             var wordValue = new XmlModel(txt, lineRowStart, lineRowEnd, lineColStart, lineColEnd, txtwidth, txtheight,lineNumber,blockNumber);
@@ -227,7 +227,7 @@ export class ImageService implements OnInit {
       console.log(fileRead.length)
       imageData.append("image", file);
     }
-    this.http
+      this.http
       .post<{ message: string }>(
         this.IMAGE_BACKEND_URL,
         imageData
@@ -238,7 +238,7 @@ export class ImageService implements OnInit {
         console.log("image added+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++: " + responseData.message);
         // await this.getServerImages();
       });
-
+    
       console.log("server file count" + this.serverImages.length);
     if (this.serverImages.length == 0) {
       var filesCount = fileRead.length;
@@ -601,13 +601,13 @@ export class ImageService implements OnInit {
     //  console.log("block length " + blocks.length);
 
      for (var i = 0; i < blocks.length; i++) {
-       var blockNumber = (blocks[i].BlockNumber);
+       var blockNumber = (blocks[i]["$"].BlockNumber);
        console.log("blockNumber" + blockNumber);
        console.log("blockRowStart from json "+blocks[i].rowStart);
-       var blockRowStart = blocks[i].rowStart;
-       var blockRowEnd = blocks[i].rowEnd;
-       var blockColStart = blocks[i].colStart;
-       var blockColEnd = blocks[i].colEnd;
+       var blockRowStart = blocks[i]["$"].rowStart;
+       var blockRowEnd = blocks[i]["$"].rowEnd;
+       var blockColStart = blocks[i]["$"].colStart;
+       var blockColEnd = blocks[i]["$"].colEnd;
        var x = (blockColEnd - blockColStart);
        console.log("x in retain "+x);
        console.log("percentage in retain "+retain.percentage);
