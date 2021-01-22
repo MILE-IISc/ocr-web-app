@@ -15,7 +15,7 @@
 
 .select-areas-outline {
 	/* background-color: blue; */
-	outline: 3px solid blue;
+	outline: 1.8px solid blue;
 	/* background: #fff url('outline.gif'); */
 	overflow: hidden;
 }
@@ -42,7 +42,7 @@
 .select-areas-blockNumber-area {
   position: absolute;
   color:blue;
-
+font-size:smaller;
   padding: 5px;
   /* color: 3px solid blue; */
 

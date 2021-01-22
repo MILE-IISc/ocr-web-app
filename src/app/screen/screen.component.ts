@@ -400,6 +400,7 @@ export class ScreenComponent implements OnInit{
   }
 
   selectBlock() {
+    $("#blockselect").css("color", "blue");
     this.obtainblock=true;
     console.log("inside script");
     this.isDiv = true;
@@ -597,6 +598,7 @@ export class ScreenComponent implements OnInit{
   }
 
   unselectBlock(){
+    $("#blockselect").css("color", "white");
     this.obtainblock=false;
     this.imageService.unselectBlock();
 

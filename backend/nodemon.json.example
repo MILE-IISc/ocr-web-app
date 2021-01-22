@@ -6,7 +6,7 @@
     "OBJECT_STORAGE_API_KEY_ID": "<apikey>",
     "OBJECT_STORAGE_IBM_AUTH_ENDPOINT": "https://iam.cloud.ibm.com/identity/token",
     "OBJECT_STORAGE_SERVICE_INSTANCE_ID": "crn:v1:bluemix:public:cloud-object-storage:global:a/<instance_id>::",
-    "RUN_OCR_ADDRESS": "<IP_ADDRESS>:<PORT>",
+    "RUN_OCR_ADDRESS": "http://<IP_ADDRESS>:<PORT>",
     "RUN_OCR_PORT": "<PORT>"
   }
 }
