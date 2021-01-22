@@ -10,6 +10,7 @@ import { Images } from '../shared/images.model';
 import { HeaderService } from '../services/header.service';
 import { XmlModel,retain } from '../shared/xml-model';
 import { BlockModel} from '../shared/block-model';
+// import { HeaderService } from '../services/header.service';
 
 
 declare var Tiff: any;
@@ -76,6 +77,7 @@ export class ImageService implements OnInit {
   public angle: number = 0;
   private renderer: Renderer2;
   public clientpercent;
+  obtainblock=false;
 
   constructor(  rendererFactory: RendererFactory2,private http: HttpClient, private router: Router, private authService: AuthService,private headerService: HeaderService, @Inject(DOCUMENT) private document: Document) {
     this.IMAGE_BACKEND_URL = this.authService.BACKEND_URL + "/api/image/";
@@ -163,12 +165,12 @@ export class ImageService implements OnInit {
                 txt = txt + " " + words[k].unicode;
               }
             }
-            var lineRowStart = lines[j].rowStart;
-            var lineRowEnd = lines[j].rowEnd;
-            var lineColStart = lines[j].colStart;
-            var lineColEnd = lines[j].colEnd;
-            var lineNumber = lines[j].LineNumber;
-            var blockNumber = blocks[i].BlockNumber;
+            var lineRowStart = lines[j]["$"].rowStart;
+            var lineRowEnd = lines[j]["$"].rowEnd;
+            var lineColStart = lines[j]["$"].colStart;
+            var lineColEnd = lines[j]["$"].colEnd;
+            var lineNumber = lines[j]["$"].LineNumber;
+            var blockNumber = blocks[i]["$"].BlockNumber;
             var txtwidth = (lineColEnd - lineColStart);
             var txtheight = (lineRowEnd - lineRowStart);
             var wordValue = new XmlModel(txt, lineRowStart, lineRowEnd, lineColStart, lineColEnd, txtwidth, txtheight,lineNumber,blockNumber);
@@ -223,7 +225,7 @@ export class ImageService implements OnInit {
       console.log(fileRead.length)
       imageData.append("image", file);
     }
-    this.http
+      this.http
       .post<{ message: string }>(
         this.IMAGE_BACKEND_URL,
         imageData
@@ -432,6 +434,10 @@ export class ImageService implements OnInit {
     this.imgFileCount++;
     this.imageCountChange.emit(this.imgFileCount);
     this.serverImages = this.getImages();
+    if (this. obtainblock == true) {
+      $('#imgToRead').selectAreas('reset');
+   }
+
     if (this.serverImages.length > 1) {
       this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
       this.urlChanged.emit(this.localUrl.slice());
@@ -458,13 +464,19 @@ export class ImageService implements OnInit {
       this.previousImages = false;
       this.previousImageChange.emit(this.previousImages);
     }
-    this.onXml()
+    if (this. obtainblock == true) {
+       this.onXml();
+    }
+
   }
 
   async previousPage() {
     this.serverImages = this.getImages();
     this.imgFileCount--;
     this.imageCountChange.emit(this.imgFileCount);
+    if (this. obtainblock == true) {
+      $('#imgToRead').selectAreas('reset');
+   }
     if (this.serverImages.length > 1) {
       this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
       this.urlChanged.emit(this.localUrl.slice());
@@ -491,11 +503,16 @@ export class ImageService implements OnInit {
       this.previousImages = true;
       this.previousImageChange.emit(this.previousImages);
     }
-    this.onXml()
+    if (this. obtainblock == true) {
+      this.onXml();
+   }
   }
 
   async LastImage() {
     this.serverImages = this.getImages();
+    if (this. obtainblock == true) {
+      $('#imgToRead').selectAreas('reset');
+   }
     if (this.serverImages.length > 1) {
       this.imgFileCount = this.serverImages.length - 1;
       this.imageCountChange.emit(this.imgFileCount);
@@ -523,13 +540,18 @@ export class ImageService implements OnInit {
         this.previousImageChange.emit(this.previousImages);
       }
     }
-    this.onXml()
+    if (this. obtainblock == true) {
+      this.onXml();
+   }
   }
 
   async firstImage() {
     this.imgFileCount = 0;
     this.imageCountChange.emit(this.imgFileCount);
     this.serverImages = this.getImages();
+    if (this. obtainblock == true) {
+      $('#imgToRead').selectAreas('reset');
+   }
     if (this.serverImages.length > 1) {
       this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
       this.urlChanged.emit(this.localUrl.slice());
@@ -549,7 +571,9 @@ export class ImageService implements OnInit {
       this.nextImages = false;
       this.nextImageChange.emit(this.nextImages);
     }
-    this.onXml()
+    if (this. obtainblock == true) {
+      this.onXml();
+   }
   }
 
   onXml() {
@@ -593,13 +617,13 @@ export class ImageService implements OnInit {
     //  console.log("block length " + blocks.length);
 
      for (var i = 0; i < blocks.length; i++) {
-       var blockNumber = (blocks[i].BlockNumber);
+       var blockNumber = (blocks[i]["$"].BlockNumber);
        console.log("blockNumber" + blockNumber);
        console.log("blockRowStart from json "+blocks[i].rowStart);
-       var blockRowStart = blocks[i].rowStart;
-       var blockRowEnd = blocks[i].rowEnd;
-       var blockColStart = blocks[i].colStart;
-       var blockColEnd = blocks[i].colEnd;
+       var blockRowStart = blocks[i]["$"].rowStart;
+       var blockRowEnd = blocks[i]["$"].rowEnd;
+       var blockColStart = blocks[i]["$"].colStart;
+       var blockColEnd = blocks[i]["$"].colEnd;
        var x = (blockColEnd - blockColStart);
        console.log("x in retain "+x);
        console.log("percentage in retain "+retain.percentage);
@@ -620,19 +644,19 @@ export class ImageService implements OnInit {
       areas: areaarray
     });
 
-    $('#nextImg').click(function () {
-      console.log("onclick");
-      $('#imgToRead').selectAreas('reset');
-    });
-    $('#previousImg').click(function () {
-      $('#imgToRead').selectAreas('reset');
-    });
-    $('#firstImg').click(function () {
-      $('#imgToRead').selectAreas('reset');
-    });
-    $('#lastImg').click(function () {
-      $('#imgToRead').selectAreas('reset');
-    });
+    // $('#nextImg').click(function () {
+    //   console.log("onclick");
+    //   $('#imgToRead').selectAreas('reset');
+    // });
+    // $('#previousImg').click(function () {
+    //   $('#imgToRead').selectAreas('reset');
+    // });
+    // $('#firstImg').click(function () {
+    //   $('#imgToRead').selectAreas('reset');
+    // });
+    // $('#lastImg').click(function () {
+    //   $('#imgToRead').selectAreas('reset');
+    // });
 
     $('#buttonXml').click(function () {
       console.log("onclick");
@@ -647,17 +671,15 @@ export class ImageService implements OnInit {
       console.log(areas.length + " this.displayarea", arguments);
     };
   }
-  asVertical() {
-    console.log("inside asVertical of Viewer");
-    this.value = 'horizontal';
-    // console.log("fit: "+fit);
 
+  screenview(){
     if (this.fit == 'width') {
       this.clientpercent = this.percentage;
       setTimeout(() => this.fitwidth(), 50);
       var block;
     block = document.getElementsByClassName("select-areas-outline");
     if ( block.length>0){ setTimeout(() => this.blocksize(), 50);}
+
     }
     else if (this.fit == 'height') {
       setTimeout(() => this.fitheight(), 50);
@@ -665,26 +687,24 @@ export class ImageService implements OnInit {
     else if (this.fit == 'orginalsize') {
       setTimeout(() => this.orginalsize(), 50);
     }
+    else if (this.fit == 'bypercentage') {
+      setTimeout(() => this.sizebypercentage(), 50);
+    }
+
+  };
+  asVertical() {
+    console.log("inside asVertical of Viewer");
+    this.value = 'horizontal';
+    // console.log("fit: "+fit);
+
+    this.screenview()
 
 
   }
   asHorizontal() {
     this.value = 'vertical';
     console.log("fit inside screen Horizontal: " + this.fit);
-    if (this.fit == 'width') {
-      this.clientpercent = this.percentage;
-      setTimeout(() => this.fitwidth(), 50);
-      var block;
-    block = document.getElementsByClassName("select-areas-outline");
-    if ( block.length>0){ setTimeout(() => this.blocksize(), 50);}
-
-    }
-    else if (this.fit == 'height') {
-      setTimeout(() => this.fitheight(), 50);
-    }
-    else if (this.fit == 'orginalsize') {
-      setTimeout(() => this.orginalsize(), 50);
-    }
+    this.screenview()
   }
 
 
@@ -708,6 +728,7 @@ export class ImageService implements OnInit {
     var realHeight = myImg.naturalHeight;
     var realWidth = myImg.naturalWidth;
     this.percentage = currHeight / realHeight * 100;
+    this.headerService.setpercentagevary(this.percentage);
     retain.percentage = this.percentage;
     // console.log("the current percentage is "+retain.percentage)
     var block;
@@ -735,6 +756,7 @@ export class ImageService implements OnInit {
     var realHeight = myImg.naturalHeight;
     var realWidth = myImg.naturalWidth;
     this.percentage = (currWidth / realWidth) * 100;
+    this.headerService.setpercentagevary(this.percentage);
     retain.percentage = this.percentage;
     // console.log("the current percentage is "+retain.percentage)
     //this.blocksize();
@@ -756,6 +778,7 @@ export class ImageService implements OnInit {
     falseimg.style.height = myImg.style.height;
     console.log("currheight" + myImg.naturalHeight)
     this.percentage = 100;
+    this.headerService.setpercentagevary(this.percentage);
     retain.percentage = this.percentage;
     // console.log("the current percentage is "+retain.percentage)
     var block;
@@ -770,6 +793,7 @@ export class ImageService implements OnInit {
 
   onZoom() {
     // this.clientpercent = this.percentage;
+    this.fit = 'bypercentage';
     var myImg;
     var zoomlevel = this.percentage;
     myImg = document.getElementById("imgToRead");
@@ -787,9 +811,27 @@ export class ImageService implements OnInit {
     falseimg.style.height = myImg.style.height;
     //  this.blocksize();
   }
+  sizebypercentage(){
+    var myImg;
+    var zoomlevel = this.percentage;
+    myImg = document.getElementById("imgToRead");
+    var falseimg;
+    falseimg = document.getElementById("image")
+    var realWidth = myImg.naturalWidth;
+    var realHeight = myImg.naturalHeight;
+
+    myImg.style.width = (realWidth * zoomlevel / 100) + "px";
+
+    myImg.style.height = (realHeight * zoomlevel / 100) + "px";
+
+    falseimg.style.width = myImg.style.width;
+    falseimg.style.height = myImg.style.height;
+
+  };
 
   zoomInFun() {
     this.clientpercent = this.percentage;
+    this.fit = 'bypercentage';
     var myImg;
     this.percentage = this.percentage + 7.2;
     retain.percentage = this.percentage;
@@ -815,6 +857,7 @@ export class ImageService implements OnInit {
 
   zoomOutFun() {
     this.clientpercent = this.percentage;
+    this.fit = 'bypercentage';
     var myImg;
     this.percentage = this.percentage - 7.2;
     retain.percentage = this.percentage;
@@ -873,6 +916,7 @@ export class ImageService implements OnInit {
   }
 
   selectBlockservice() {
+    this.obtainblock=true;
     $('img#imgToRead').selectAreas('destroy');
     console.log("inside script");
     let areasarray = BlockModel.blockArray.reverse();
@@ -901,6 +945,7 @@ export class ImageService implements OnInit {
     }
 
   }
+
 
   blocksize() {
     if (this.percentage > 1) {
@@ -940,6 +985,11 @@ export class ImageService implements OnInit {
     this.clientpercent = this.percentage;
     this.blocksize()
   }
+  unselectBlock(){
+    this.obtainblock=false;
+    $('img#imgToRead').selectAreas('destroy');
+
+  };
 }
 function convertCanvasToImage(canvas) {
   console.log("in convert................");

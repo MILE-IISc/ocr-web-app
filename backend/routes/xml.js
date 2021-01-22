@@ -4,6 +4,7 @@ var path = require('path');
 var xml2js = require('xml2js');
 var js2xmlparser = require("js2xmlparser");
 const router = express.Router();
+var format = require('xml-formatter');
 const { promise } = require("protractor");
 var util = require('util');
 
@@ -74,32 +75,15 @@ router.put("", checkAuth, (req, res, next) => {
   const bucketName = req.userData.bucketName;
   console.log("bucketName inside put XML ",bucketName);
   console.log("mail inside put XML ",mail);
-  var xmlDocument = document.implementation.createDocument(ns1, "page", null);
-
   var json = req.body.json;
-  //testing starts here
-  console.log("initial XML json",JSON.stringify(json));
-  let xmlString = JSON.stringify(json);
-  attr = ' xmlns = \"http://mile.ee.iisc.ernet.in/schemas/ocr_output\"'
-  appendedString = xmlString.substring(6,0)+attr+xmlString.substring(7,xmlString.length);
-  console.log("xmlString after appending",appendedString);
-  xml2js.parseString(xmlString, { mergeAttrs: true }, function (err, result) {
-    if(err) {
-      console.log("error while parsing",err);
-    }
-    console.log("\n\n");
-    console.log("result",result);
-    console.log("xml.js result as JSON before adding attribute" + JSON.stringify(result));
-  });
-  //testing ends here
   console.log("xml content in put request ",JSON.stringify(json));
-  var formattedXml = js2xmlparser.parse("page",json).split("\n");
-  formattedXml.splice(1, 1);
-  formattedXml.splice(-1, 1);
 
-  console.log("formattedXml content in put request ",formattedXml);
+  var builder = new xml2js.Builder();
+  var formattedXml = builder.buildObject(json);
 
-  doCreateObject(bucketName, xmlFileName, formattedXml.join("\n")).then(() => {
+  console.log("formattedXml "+formattedXml);
+
+  doCreateObject(bucketName, xmlFileName, formattedXml).then(() => {
     console.log("saved xml file");
     res.status(200).json({
       message: "XML File saved successfully!",
@@ -179,11 +163,11 @@ router.get("", checkAuth,(req, res, next) =>{
   else if(req.query.type == "GET-OCR-XML"){
     const XmlfileName = req.query.fileName.slice(0,-3) + 'xml';
     console.log("XmlfileName in get call "+XmlfileName);
-    getItem(bucketName, XmlfileName, "GET").then(content => {
-      if(content == "The specified key does not exists in bucket") {
-        console.log("error while retrieving:",content);
+    getItem(bucketName, XmlfileName, "GET").then(xmlContent => {
+      if(xmlContent == "The specified key does not exists in bucket") {
+        console.log("error while retrieving:",xmlContent);
         res.status(400).json({
-          message: content,
+          message: xmlContent,
           xmlData: ""
         });
       }
@@ -202,19 +186,21 @@ router.get("", checkAuth,(req, res, next) =>{
           else {
             console.log("Tiff Base64String retrieved in get Request for RUN-OCR");
             console.log("Tiff Base64String retrieved in get Request for RUN-OCR:",  );
-
+            var imageData = xmlContent.createElement("imageData");
+            imageData.nodeValue = imgContent;
+            xmlContent.documentElement.appendChild(imageData);
             request.post({
-                url:"http://169.38.86.210:9080",
-                port: 9080,
+                url: process.env.RUN_OCR_ADDRESS,
+                port: process.env.RUN_OCR_PORT,
                 method:"POST",
                 headers:{
                     'Content-Type': 'application/xml',
                 },
-                 body: content
+                 body: xmlContent
             },
             function(error, response, body){
                 console.log(response.statusCode);
-                console.log(body);
+                // console.log(body);
                 console.log(error);
                 res.status(201).json({
                   message: "Tiff base64 String retrieved successfully",

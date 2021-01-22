@@ -20,6 +20,7 @@ import * as fileSaver from 'file-saver';
 import { FileService } from '../services/file.service';
 import { MatIconRegistry } from "@angular/material/icon";
 
+
 @Component({
  selector: 'app-screen',
  templateUrl: './screen.component.html',
@@ -80,6 +81,8 @@ export class ScreenComponent implements OnInit{
   size3 = 50;
   Isopen = true;
   invalidMessage ="";
+   callOne = true;
+   obtainblock=false;
 
   sideOpen() {
 
@@ -225,7 +228,7 @@ export class ScreenComponent implements OnInit{
         this.fileName = images[0].fileName;
         this.isLoading = false;
         this.ImageIs = true;
-        setTimeout(() => this.imageService.fitwidth(), 50);
+        setTimeout(() => this.imageService.screenview(), 50);
         setTimeout(() => this.setpercentage(), 60);
       }
       else {
@@ -241,7 +244,7 @@ export class ScreenComponent implements OnInit{
       .subscribe(
         (url: any) => {
           this.localUrl = url;
-          setTimeout(() => this.imageService.fitwidth(), 50);
+          setTimeout(() => this.imageService.screenview(), 50);
           setTimeout(() => this.setpercentage(), 60);
         });
 
@@ -286,8 +289,8 @@ export class ScreenComponent implements OnInit{
       }
     }
     $('img#imgToRead').selectAreas('destroy');
-    // this.imageService.onXml();
-    setTimeout(() => this.fitwidth(), 50);
+    this.imageService.onXml();
+    setTimeout(() => this.imageService.screenview(), 50);
     setTimeout(() => this.setpercentage(), 60);
   }
 
@@ -321,8 +324,6 @@ export class ScreenComponent implements OnInit{
     this.headerService.setpercentagevary(this.percentage);
   }
 
-
-
   fitwidth() {
     this.imageService.fitwidth()
     this.percentage = this.imageService.percentage;
@@ -347,9 +348,6 @@ export class ScreenComponent implements OnInit{
     this.headerService.setpercentagevary(this.percentage);
     console.log("this.percentage after header in orginalsize",this.percentage);
   }
-
-
-
 
   loadXMLDoc() {
     this.serverImages = this.imageService.getImages();
@@ -402,24 +400,28 @@ export class ScreenComponent implements OnInit{
   }
 
   selectBlock() {
+    this.obtainblock=true;
     console.log("inside script");
     this.isDiv = true;
     this.imageService. selectBlockservice();
     this.imageService.onXml();
 
-    $('#nextImg').click(function () {
-      // console.log("onclick");
-      $('#imgToRead').selectAreas('reset');
-    });
-    $('#previousImg').click(function () {
-      $('#imgToRead').selectAreas('reset');
-    });
-    $('#firstImg').click(function () {
-      $('#imgToRead').selectAreas('reset');
-    });
-    $('#lastImg').click(function () {
-      $('#imgToRead').selectAreas('reset');
-    });
+
+
+    // $('#nextImg').click(function () {
+    //   // console.log("onclick");
+    //   $('#imgToRead').selectAreas('reset');
+    // });
+    // $('#previousImg').click(function () {
+    //   $('#imgToRead').selectAreas('reset');
+    // });
+    // $('#firstImg').click(function () {
+    //   $('#imgToRead').selectAreas('reset');
+    // });
+    // $('#lastImg').click(function () {
+    //   $('#imgToRead').selectAreas('reset');
+    // });
+
     $('.sidebody').click(function () {
       $('#imgToRead').selectAreas('reset');
     });
@@ -431,9 +433,8 @@ export class ScreenComponent implements OnInit{
     var areas = $('img#imgToRead').selectAreas('areas');
     var prolog = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
     var ns1 = 'http://mile.ee.iisc.ernet.in/schemas/ocr_output';
-    var xmlDocument = document.implementation.createDocument(ns1, "page", null);
-    // var xmlDocument = new XMLDocument();
-    // xmlDocument.documentElement.setAttribute("xmlns",ns1);
+    var xmlDocument = document.implementation.createDocument(null, "page", null);
+    xmlDocument.documentElement.setAttribute("xmlns",ns1);
     for (let i = 0; i < areas.length; i++) {
       var blockElem = xmlDocument.createElementNS(null,"block");
       blockElem.setAttribute("type", "Text");
@@ -457,24 +458,17 @@ export class ScreenComponent implements OnInit{
       // blockElem.removeAttribute("xmlns");
       xmlDocument.documentElement.appendChild(blockElem);
     }
-    console.log("xmlDocument inside onSave",xmlDocument);
-    var xmlString = prolog + new XMLSerializer().serializeToString(xmlDocument);
-    console.log("xml string inside onSave"+xmlString);
+    var xmlString = new XMLSerializer().serializeToString(xmlDocument);
+    console.log("xml string "+xmlString);
+
     xml2js.parseString(xmlString, function (err, result) {
       var jsonString = JSON.stringify(result);
-      console.log("xml.js result as JSON before adding attribute" + jsonString);
       XmlModel.jsonObject = result;
     });
-
-    // xml2js.parseString(xmlString, { mergeAttrs: true }, function (err, result) {
-    //   var jsonString = JSON.stringify(result);
-    //   console.log("xml.js result as JSON before adding attribute" + jsonString);
-    //   XmlModel.jsonObject = result;
-    // });
     this.imageService.updateCorrectedXml(this.fileName);
   }
 
-  async onSaveXml() {
+  async downloadXml() {
     console.log("in export")
     this.images = this.imageService.getImages();
     console.log("image length in export " + this.images.length);
@@ -563,7 +557,7 @@ export class ScreenComponent implements OnInit{
           for (var j = 0; j < lines.length; j++) {
             if (lines[j].word) {
               var words = lines[j].word;
-              if (lines[j].LineNumber == texts[l].getAttribute("id")) {
+              if (lines[j]["$"].LineNumber == texts[l].getAttribute("id")) {
                 console.log((texts[l] as HTMLInputElement).value);
                 var text = (texts[l] as HTMLInputElement).value;
                 if (words.length > 1) {
@@ -572,7 +566,7 @@ export class ScreenComponent implements OnInit{
                   console.log("text array length " + textArray.length)
                   if (words.length == textArray.length) {
                     for (let k = 0; k < words.length; k++) {
-                      words[k].unicode = textArray[k].trim();
+                      words[k]["$"].unicode = textArray[k].trim();
                     }
                   } else if (textArray.length > words.length || textArray.length < words.length) {
                     console.log("in text array greater ");
@@ -580,18 +574,18 @@ export class ScreenComponent implements OnInit{
                     for (let m = 0; m < textArray.length; m++) {
                       txt = txt + " " + textArray[m];
                     }
-                    words[0].unicode = txt.trim();
-                    words[0].colEnd = words[words.length - 1].colEnd;
-                    console.log("word[0] " + words[0].unicode);
-                    console.log("word[1] " + words[1].unicode);
+                    words[0]["$"].unicode = txt.trim();
+                    words[0]["$"].colEnd = words[words.length - 1].colEnd;
+                    console.log("word[0] " + words[0]["$"].unicode);
+                    console.log("word[1] " + words[1]["$"].unicode);
                     for (let n = 1; n < words.length; n++) {
                       console.log("words.length", words.length, "n", n, "lines inndex", j)
-                      words[n].unicode = "";
+                      words[n]["$"].unicode = "";
                     }
                   }
                 } else {
                   console.log("in else block of update");
-                  words[0].unicode = text.trim();
+                  words[0]["$"].unicode = text.trim();
                 }
               }
             }
@@ -602,6 +596,19 @@ export class ScreenComponent implements OnInit{
     // console.log("final json  "+JSON.stringify(XmlModel.jsonObject));
     this.imageService.updateCorrectedXml(this.fileName);
   }
+
+  unselectBlock(){
+    this.obtainblock=false;
+    this.imageService.unselectBlock();
+
+  };
+
+  call(){
+    if(this.callOne) this.selectBlock();
+   else this.unselectBlock();
+   this.callOne = !this.callOne;
+ };
+
 }
 
 function convertCanvasToImage(canvas) {
