@@ -135,15 +135,11 @@ export class ImageService implements OnInit {
   getXmlFileAsJson(fileName : any) {
     console.log("file name in run ocr "+ fileName)
     // var queryfileName = fileName;
-    let userData : any;
-    userData = {
-      user : this.authService.userName
-    }
-      this.http
-        .get<{ message: string; json:any }>(
-          this.XML_BACKEND_URL + fileName).subscribe(responseData => {
-          console.log("xml as json string "+JSON.stringify(responseData.json));
-          XmlModel.jsonObject = responseData.json;
+
+    const queryParams = `?fileName=${fileName}&type=GET-OCR-XML`;
+    this.http.get<{ message: string; xmlData:any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
+          console.log("xml as json string on RUN-OCR"+JSON.stringify(response.xmlData));
+          XmlModel.jsonObject = response.xmlData;
           this.updateXmlModel(XmlModel.jsonObject);
         });
   }
@@ -242,9 +238,9 @@ export class ImageService implements OnInit {
       console.log("server file count" + this.serverImages.length);
     if (this.serverImages.length == 0) {
       var filesCount = fileRead.length;
-      if (filesCount > 1) {
-        this.nextImages = false;
-      }
+      // if (filesCount > 1) {
+      //   this.nextImages = false;
+      // }
       this.localImages.splice(0, this.localImages.length);
       console.log("file count" + filesCount);
       for (let i = 0; i < filesCount; i++) {
@@ -558,7 +554,8 @@ export class ImageService implements OnInit {
 
   onXml() {
     this.serverImages = this.getImages();
-    if(this.serverImages.length > 1){
+    console.log("serverImagesLength in onXml",this.serverImages.length);
+    if(this.serverImages.length > 0){
       console.log("server image length "+this.serverImages.length);
       console.log("image file count "+this.imgFileCount);
       this.fileName = this.serverImages[this.imgFileCount].fileName;
@@ -577,24 +574,19 @@ export class ImageService implements OnInit {
 }
 
   getFileAsJson(fileName : any) {
-    console.log("file name in run ocr "+ fileName)
-    var queryfileName = fileName.slice(0,-3) + 'xml';
-    let userData : any;
-    userData = {
-      user : this.authService.userName
-    }
-      this.http
-        .get<{ message: string; json:any }>(
-          this.XML_BACKEND_URL + queryfileName).subscribe(responseData => {
-          console.log("xml as json string "+JSON.stringify(responseData.json));
-          XmlModel.jsonObject = responseData.json;
-          this.retain(XmlModel.jsonObject);
-        });
+    console.log("file name in run ocr "+ fileName);
+    const queryParams = `?fileName=${fileName}&type=GET-XML`;
+    this.http.get<{ message: string; xmlData:any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
+      console.log("reponseData in getFileAsJson",response.xmlData);
+      console.log("xml as json string "+JSON.stringify(response.xmlData));
+      XmlModel.jsonObject = response.xmlData;
+      this.retain(XmlModel.jsonObject);
+    });
   }
 
   retain(jsonObj){
     let areaarray=[];
-     // var jsonObj = JSON.parse(json);
+    // var jsonObj = JSON.parse(json);
      console.log("inside retain jsonObj: "+JSON.stringify(jsonObj));
      if(jsonObj['page'].block){
      var blocks = jsonObj['page'].block;
@@ -647,7 +639,6 @@ export class ImageService implements OnInit {
       $('#imgToRead').selectAreas('destroy');
     });
     $('.btnImg').click(function () {
-     
       $('#imgToRead').selectAreas('reset');
     });
     function debugQtyAreas(event, id, areas) {

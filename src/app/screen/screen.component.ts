@@ -92,7 +92,7 @@ export class ScreenComponent implements OnInit{
       } else {
         this.imageService.openModalDialog(this.images);
       }
-   
+
     $("#OpenBar").hide();
     $("#CloseBar").show();
   }
@@ -197,8 +197,10 @@ export class ScreenComponent implements OnInit{
           }
           this.isLoading = true;
           this.ImageIs = true;
-          this.nextImage = false;
-          this.imageService.nextImageChange.emit(this.nextImage);
+          if(imageLength > 1) {
+            this.nextImage = false;
+            this.imageService.nextImageChange.emit(this.nextImage);
+          }
           this.isLoading = false;
           // this.fileName = " The files alloted for you ";
           console.log("this.serverImages[0].fileName: ------------_> ", this.serverImages[0].fileName);
@@ -222,7 +224,6 @@ export class ScreenComponent implements OnInit{
         this.localUrl = images[0].dataUrl;
         this.fileName = images[0].fileName;
         this.isLoading = false;
-
         this.ImageIs = true;
         setTimeout(() => this.imageService.fitwidth(), 50);
         setTimeout(() => this.setpercentage(), 60);
@@ -425,12 +426,16 @@ export class ScreenComponent implements OnInit{
   // });
   }
 
+
   onSave() {
     var areas = $('img#imgToRead').selectAreas('areas');
     var prolog = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
-    var xmlDocument = document.implementation.createDocument('http://mile.ee.iisc.ernet.in/schemas/ocr_output', "page", null);
+    var ns1 = 'http://mile.ee.iisc.ernet.in/schemas/ocr_output';
+    var xmlDocument = document.implementation.createDocument(ns1, "page", null);
+    // var xmlDocument = new XMLDocument();
+    // xmlDocument.documentElement.setAttribute("xmlns",ns1);
     for (let i = 0; i < areas.length; i++) {
-      var blockElem = xmlDocument.createElement("block");
+      var blockElem = xmlDocument.createElementNS(null,"block");
       blockElem.setAttribute("type", "Text");
       var blockNumberElems = $(".select-areas-blockNumber-area");
       console.log("-----blockNumberElems------" + blockNumberElems.length);
@@ -449,15 +454,23 @@ export class ScreenComponent implements OnInit{
       var width = ((areas[i].width * 100) / this.percentage)
       var colEnd = (width + parseFloat(x)).toString();
       blockElem.setAttribute("colEnd", colEnd);
+      // blockElem.removeAttribute("xmlns");
       xmlDocument.documentElement.appendChild(blockElem);
     }
+    console.log("xmlDocument inside onSave",xmlDocument);
     var xmlString = prolog + new XMLSerializer().serializeToString(xmlDocument);
-
-    xml2js.parseString(xmlString, { mergeAttrs: true }, function (err, result) {
-      var jsonString = JSON.stringify(result)
+    console.log("xml string inside onSave"+xmlString);
+    xml2js.parseString(xmlString, function (err, result) {
+      var jsonString = JSON.stringify(result);
+      console.log("xml.js result as JSON before adding attribute" + jsonString);
       XmlModel.jsonObject = result;
-      console.log("xml.js result as JSON " + jsonString);
     });
+
+    // xml2js.parseString(xmlString, { mergeAttrs: true }, function (err, result) {
+    //   var jsonString = JSON.stringify(result);
+    //   console.log("xml.js result as JSON before adding attribute" + jsonString);
+    //   XmlModel.jsonObject = result;
+    // });
     this.imageService.updateCorrectedXml(this.fileName);
   }
 
@@ -465,7 +478,9 @@ export class ScreenComponent implements OnInit{
     console.log("in export")
     this.images = this.imageService.getImages();
     console.log("image length in export " + this.images.length);
-    var folderName = this.fileName.slice(0, -9)
+    // var folderName = this.fileName.slice(0, -9);
+    var folderName = "XML_Files";
+    console.log("folder Name",folderName);
     var zip = new JSZip();
     let count = 0;
     var folder = zip.folder(folderName);
@@ -477,8 +492,10 @@ export class ScreenComponent implements OnInit{
         console.log("curXmlFileName " + curXmlFileName);
         //changes have to be made in file service to get the xml file from backend
         await this.fileService.downloadFile(curXmlFileName).then(response => {
+          console.log("xml content while downloading",response.xmlData);
           let blob: any = new Blob([response.xmlData], { type: 'text/xml' });
           console.log("blob==="+blob);
+          console.log("this.images[i].fileName.slice(0, -3) + 'xml'",this.images[i].fileName.slice(0, -3) + 'xml');
           folder.file(this.images[i].fileName.slice(0, -3) + 'xml', blob);
         }), error => {
           console.log("error: " + error);
@@ -486,10 +503,12 @@ export class ScreenComponent implements OnInit{
         };
       }
       count++;
-      if (count === this.images.length - 1) {
+      console.log("count before if of onSave", count);
+      if (count === this.images.length) {
+        console.log("count inside if of onSave", count);
         zip.generateAsync({ type: "blob" })
           .then(function (content) {
-            fileSaver.saveAs(content, folderName);
+            fileSaver(content, folderName);
           });
       }
     }

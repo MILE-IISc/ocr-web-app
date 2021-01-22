@@ -10,8 +10,8 @@ export class FileService {
   }
 
   downloadFile(fileName : any) {
-    const queryParams = `?fileName=${fileName}`;
-    return this.http
-        .get<{ message: string; xmlData:any }>(this.XML_BACKEND_URL + queryParams).toPromise();
-  }
+
+    console.log("fileName in download XML",fileName);
+    return this.http.get<{ message: string; xmlData:any }>(this.XML_BACKEND_URL + fileName).toPromise();
+ }
 }
