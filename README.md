@@ -12,7 +12,7 @@
 
 - Once the images are uploaded, you will be able to see the first image of the uploaded folder at the left side split screen.
 
-<img src="./docs/fullScreen.png" width="800"/>
+<img src="./docs/ImageOnLeftSide.jpg" width="800"/>
 
 - You can navigate to other images with the help of navigation buttons (`First Page` / `Previous Page`/ `Next Page` / `Last Page`) at the left bottom corner of the screen.
 
@@ -20,7 +20,7 @@
 
 - If you want to navigate to a specific image from uploaded images folder, you can make use of `Sidebar` button to see the list of images in folder and choose the same.
 
-<img src="./docs/SelectPage.png" width="800"/>
+<img src="./docs/SideBar.jpg" width="800"/>
 
 - If the image is skewed during scanning, you can correct the skew using `Rotate` option in the bottom toolbar.
 
@@ -30,7 +30,7 @@
 
 <img src="./docs/SelectBlockButton.jpg" width="200"/>
 <br>
-<img src="./docs/blocks.png" width="800"/>
+<img src="./docs/SelectedBlocks.jpg" width="800"/>
 
 - Once the blocks are selected, you can run OCR on the image by clicking the `Run-OCR` button in the bottom toolbar.
 

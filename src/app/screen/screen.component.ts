@@ -20,6 +20,7 @@ import * as fileSaver from 'file-saver';
 import { FileService } from '../services/file.service';
 import { MatIconRegistry } from "@angular/material/icon";
 
+
 @Component({
  selector: 'app-screen',
  templateUrl: './screen.component.html',
@@ -80,6 +81,8 @@ export class ScreenComponent implements OnInit{
   size3 = 50;
   Isopen = true;
   invalidMessage ="";
+   callOne = true;
+   obtainblock=false;
 
   sideOpen() {
 
@@ -92,7 +95,7 @@ export class ScreenComponent implements OnInit{
       } else {
         this.imageService.openModalDialog(this.images);
       }
-   
+
     $("#OpenBar").hide();
     $("#CloseBar").show();
   }
@@ -224,7 +227,7 @@ export class ScreenComponent implements OnInit{
         this.isLoading = false;
 
         this.ImageIs = true;
-        setTimeout(() => this.imageService.fitwidth(), 50);
+        setTimeout(() => this.imageService.screenview(), 50);
         setTimeout(() => this.setpercentage(), 60);
       }
       else {
@@ -240,7 +243,7 @@ export class ScreenComponent implements OnInit{
       .subscribe(
         (url: any) => {
           this.localUrl = url;
-          setTimeout(() => this.imageService.fitwidth(), 50);
+          setTimeout(() => this.imageService.screenview(), 50);
           setTimeout(() => this.setpercentage(), 60);
         });
 
@@ -285,8 +288,8 @@ export class ScreenComponent implements OnInit{
       }
     }
     $('img#imgToRead').selectAreas('destroy');
-    // this.imageService.onXml();
-    setTimeout(() => this.fitwidth(), 50);
+    this.imageService.onXml();
+    setTimeout(() => this.imageService.screenview(), 50);
     setTimeout(() => this.setpercentage(), 60);
   }
 
@@ -396,24 +399,28 @@ export class ScreenComponent implements OnInit{
   }
 
   selectBlock() {
+    this.obtainblock=true;
     console.log("inside script");
     this.isDiv = true;
     this.imageService. selectBlockservice();
     this.imageService.onXml();
 
-    $('#nextImg').click(function () {
-      // console.log("onclick");
-      $('#imgToRead').selectAreas('reset');
-    });
-    $('#previousImg').click(function () {
-      $('#imgToRead').selectAreas('reset');
-    });
-    $('#firstImg').click(function () {
-      $('#imgToRead').selectAreas('reset');
-    });
-    $('#lastImg').click(function () {
-      $('#imgToRead').selectAreas('reset');
-    });
+
+
+    // $('#nextImg').click(function () {
+    //   // console.log("onclick");
+    //   $('#imgToRead').selectAreas('reset');
+    // });
+    // $('#previousImg').click(function () {
+    //   $('#imgToRead').selectAreas('reset');
+    // });
+    // $('#firstImg').click(function () {
+    //   $('#imgToRead').selectAreas('reset');
+    // });
+    // $('#lastImg').click(function () {
+    //   $('#imgToRead').selectAreas('reset');
+    // });
+
     $('.sidebody').click(function () {
       $('#imgToRead').selectAreas('reset');
     });
@@ -581,6 +588,19 @@ export class ScreenComponent implements OnInit{
     // console.log("final json  "+JSON.stringify(XmlModel.jsonObject));
     this.imageService.updateCorrectedXml(this.fileName);
   }
+
+  unselectBlock(){
+    this.obtainblock=false;
+    this.imageService.unselectBlock();
+
+  };
+
+  call(){
+    if(this.callOne) this.selectBlock();
+   else this.unselectBlock();
+   this.callOne = !this.callOne;
+ };
+
 }
 
 function convertCanvasToImage(canvas) {
