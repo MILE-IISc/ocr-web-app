@@ -466,6 +466,9 @@ export class ImageService implements OnInit {
     if (this. obtainblock == true) {
        this.onXml();
     }
+    console.log("empty the right side screen");
+     $(".textElementsDiv").not(':first').remove();
+     $(".textSpanDiv").empty();
 
   }
 
@@ -505,6 +508,10 @@ export class ImageService implements OnInit {
     if (this. obtainblock == true) {
       this.onXml();
    }
+   console.log("empty the right side screen");
+  //  $(".textElementsDiv").empty();
+   $(".textElementsDiv").not(':first').remove();
+   $(".textSpanDiv").empty();
   }
 
   async LastImage() {
@@ -542,6 +549,9 @@ export class ImageService implements OnInit {
     if (this. obtainblock == true) {
       this.onXml();
    }
+   console.log("empty the right side screen");
+   $(".textElementsDiv").not(':first').remove();
+   $(".textSpanDiv").empty();
   }
 
   async firstImage() {
@@ -573,6 +583,9 @@ export class ImageService implements OnInit {
     if (this. obtainblock == true) {
       this.onXml();
    }
+   console.log("empty the right side screen");
+   $(".textElementsDiv").not(':first').remove();
+   $(".textSpanDiv").empty();
   }
 
   onXml() {
@@ -604,6 +617,16 @@ export class ImageService implements OnInit {
       console.log("xml as json string "+JSON.stringify(response.xmlData));
       XmlModel.jsonObject = response.xmlData;
       this.retain(XmlModel.jsonObject);
+      this.updateXmlModel(XmlModel.jsonObject);
+      // if(XmlModel.jsonObject['page'].block){
+      //   var blocks = XmlModel.jsonObject['page'].block;
+      //   for(let i =0;i<blocks.length;i++){
+      //     if(blocks[i].line){
+      //       console.log("lines are present");
+      //       this.updateXmlModel(jsonObj)
+      //     }
+      //   }
+      // }
     });
   }
 
