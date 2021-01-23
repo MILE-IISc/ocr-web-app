@@ -28,7 +28,6 @@
     "bootstrap": "^3.4.1",
     "file-saver": "^2.0.5",
     "jquery": "^3.5.1",
-    "jquery-select-areas": "^0.1.0",
     "jszip": "^3.5.0",
     "material-icons": "^0.5.2",
     "moment": "^2.29.1",

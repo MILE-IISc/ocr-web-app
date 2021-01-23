@@ -471,6 +471,11 @@ export class ImageService implements OnInit {
      $(".textSpanDiv").empty();
 
   }
+  onXMLservice(){
+    if (this. obtainblock == true) {
+      this.onXml();
+   }
+  }
 
   async previousPage() {
     this.serverImages = this.getImages();

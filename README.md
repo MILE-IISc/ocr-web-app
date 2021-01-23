@@ -38,7 +38,7 @@
 
 - The recognized text output will be displayed in the right side split screen and you can do text corrections on it.
 
-<img src="./docs/ocr_ouput.png" width="800"/>
+<img src="./docs/TextOnRightSide.jpg" width="800"/>
 
 - While doing corrections you can view the screen in Vertical or Horizontal mode by selecting either  `Vertical View` or  `Horizontal View` buttons in the top toolbar.
 
