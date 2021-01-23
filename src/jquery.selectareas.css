@@ -1,10 +1,10 @@
 .select-areas-overlay {
-	background-color:none;
+	background-color: none;
 	/* overflow: hidden; */
 	position: absolute;
-	/* opacity: 0.01; */
 	cursor: pointer;
 }
+
 /* .blurred {
 	filter: url("/filters.svg#blur3px");
 	-webkit-filter: blur(1px);
@@ -14,9 +14,9 @@
 } */
 
 .select-areas-outline {
+	/* background: #fff url('outline.gif'); */
 	/* background-color: blue; */
 	outline: 1.8px solid blue;
-	/* background: #fff url('outline.gif'); */
 	overflow: hidden;
 }
 
@@ -34,19 +34,19 @@
 	height: 16px;
 	width: 16px;
 }
+
 .delete-area {
 	position: absolute;
 	cursor: pointer;
 	padding: 5px;
 }
+
 .select-areas-blockNumber-area {
   position: absolute;
   color:blue;
-font-size:smaller;
+  font-size:smaller;
   padding: 5px;
   /* color: 3px solid blue; */
-
-
-	height: fit-content;
-	width: fit-content;
+  height: fit-content;
+  width: fit-content;
 }
