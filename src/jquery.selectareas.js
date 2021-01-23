@@ -12,13 +12,11 @@ var $x=1;
 isMenuOpen = true;
 var myExtObject;
 $.imageArea = function(parent, id) {
-           //   var $x=0,
+
 var options = parent.options,
 $image = parent.$image,
 $trigger = parent.$trigger,
 $outline,
-
-//  $BlockNumber = 0;
 $blockNumber,
 $selection,
 $resizeHandlers = {},
@@ -275,11 +273,9 @@ cancelEvent(event);
 focus();
 on("move", moveSelection);
 on("stop", releaseSelection);
-// $x = $x + 1;
+
 console.log("$xvalue"+$x)
-
 var mousePosition = getMousePosition(event);
-
 // Get the selection offset relative to the mouse position
 selectionOffset[0] = mousePosition[0] - area.x;
 selectionOffset[1] = mousePosition[1] - area.y;
@@ -559,26 +555,7 @@ opacity : options.outlineOpacity,
 position : "absolute"
 })
 .insertAfter($trigger);
-//475
-// $openMenu=function(event) {
-//   this.isMenuOpen = true;
-//   console.log("is menu open")
-//   event. preventDefault();
 
-
-
-//   $("#menu").css("display", "block");
-//   $("#menu").css("left", event.clientX+"px");
-//   $("#menu").css("top", event.clientY+"px");
-//   };
-// $closeMenu=function() {
-//   if(this.isMenuOpen == true) {
-//     this.isMenuOpen = false;
-//     $("#menu").css("display", "none");
-//   }
-// }
-
-// clickOutside=$closeMenu
 // Initialize a selection layer and place it above the outline layer
 $selection = $("<div (click)='$openMenu'   id=\"backgroundarea\"/>")
 
@@ -826,18 +803,17 @@ if (direction) {
 
 $.imageSelectAreas.prototype._refresh = function () {
 var nbAreas = this.areas().length;
-
-this.$overlay.css({
-display : nbAreas? "block" : "none"
-});
-if (nbAreas) {
-this.$image.addClass("blurred");
-} else {
-this.$image.removeClass("blurred");
-}
-this.$trigger.css({
-cursor : this.options.allowSelect ? "crosshair" : "default"
-});
+  this.$overlay.css({
+    display: nbAreas ? "block" : "none"
+  });
+  if (nbAreas) {
+    this.$image.addClass("blurred");
+  } else {
+    this.$image.removeClass("blurred");
+  }
+  this.$trigger.css({
+    cursor: this.options.allowSelect ? "crosshair" : "default"
+  });
 };
 
 $.imageSelectAreas.prototype._eachArea = function (cb) {
@@ -858,14 +834,6 @@ if (this._areas[id]) {
 this._areas[id].deleteSelection();
 }
 };
-
-//   $.imageSelectAreas.prototype.zoom = function (id) {
-//     // if (this._areas[id]) {
-//     //     this._areas[id].updateSelection();
-
-//     // }
-//     console.log("zooming");
-// };
 
 $.imageSelectAreas.prototype.newArea = function (event) {
 var id = -1;
@@ -908,7 +876,7 @@ that._add(val);
 } else {
 this._add(options);
 }
-this._refresh();
+ this._refresh();
 if (! this.options.allowSelect && ! this.options.allowMove && ! this.options.allowResize && ! this.options.allowDelete) {
 this.blurAll();
 }
