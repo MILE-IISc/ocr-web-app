@@ -435,6 +435,7 @@ export class ScreenComponent implements OnInit{
 
 
   onSave() {
+    console.log("in xml save");
     var areas = $('img#imgToRead').selectAreas('areas');
     var prolog = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
     var ns1 = 'http://mile.ee.iisc.ernet.in/schemas/ocr_output';
@@ -450,6 +451,7 @@ export class ScreenComponent implements OnInit{
       blockElem.setAttribute("BlockNumber", blockNumber[(blockNumberElems.length - 1) - i].innerHTML);
       blockElem.setAttribute("SubType", "paragraphProse");
       var y = ((areas[i].y * 100) / this.percentage).toString();
+      console.log("this.percentage--------"+this.percentage)
       blockElem.setAttribute("rowStart", (Math.ceil(parseInt(y))).toString());
       var height = ((areas[i].height * 100) / this.percentage);
       var rowEnd = (height + parseFloat(y)).toString();
@@ -469,6 +471,58 @@ export class ScreenComponent implements OnInit{
       var jsonString = JSON.stringify(result);
       XmlModel.jsonObject = result;
     });
+    this.imageService.updateCorrectedXml(this.fileName);
+  }
+
+  correctionUpdate() {
+    console.log("in ocr correction")
+    var texts = document.getElementsByClassName('text_input');
+    console.log("texts length " + texts.length);
+    for (var l = 0; l < texts.length; l++) {
+      var blocks = XmlModel.jsonObject['page'].block;
+      for (var i = 0; i < blocks.length; i++) {
+        if (blocks[i].line) {
+          var lines = blocks[i].line;
+          for (var j = 0; j < lines.length; j++) {
+            if (lines[j].word) {
+              var words = lines[j].word;
+              if (lines[j]["$"].LineNumber == texts[l].getAttribute("id")) {
+                console.log((texts[l] as HTMLInputElement).value);
+                var text = (texts[l] as HTMLInputElement).value;
+                if (words.length > 1) {
+                  console.log("word array length " + words.length)
+                  var textArray = text.split(/(\s+)/).filter(function (e) { return e.trim().length > 0; });
+                  console.log("text array length " + textArray.length)
+                  if (words.length == textArray.length) {
+                    for (let k = 0; k < words.length; k++) {
+                      words[k]["$"].unicode = textArray[k].trim();
+                    }
+                  } else if (textArray.length > words.length || textArray.length < words.length) {
+                    console.log("in text array greater ");
+                    var txt = "";
+                    for (let m = 0; m < textArray.length; m++) {
+                      txt = txt + " " + textArray[m];
+                    }
+                    words[0]["$"].unicode = txt.trim();
+                    words[0]["$"].colEnd = words[words.length - 1].colEnd;
+                    console.log("word[0] " + words[0]["$"].unicode);
+                    console.log("word[1] " + words[1]["$"].unicode);
+                    for (let n = 1; n < words.length; n++) {
+                      console.log("words.length", words.length, "n", n, "lines inndex", j)
+                      words[n]["$"].unicode = "";
+                    }
+                  }
+                } else {
+                  console.log("in else block of update");
+                  words[0]["$"].unicode = text.trim();
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    // console.log("final json  "+JSON.stringify(XmlModel.jsonObject));
     this.imageService.updateCorrectedXml(this.fileName);
   }
 
@@ -546,60 +600,14 @@ export class ScreenComponent implements OnInit{
       }
 
       showTooltip() {
-        console.log("inside show tool tip on save");
+        console.log("inside show tol tip");
         this.correctionUpdate();
       }
 
-  correctionUpdate() {
-    var texts = document.getElementsByClassName('text_input');
-    console.log("texts length " + texts.length);
-    for (var l = 0; l < texts.length; l++) {
-      var blocks = XmlModel.jsonObject['page'].block;
-      for (var i = 0; i < blocks.length; i++) {
-        if (blocks[i].line) {
-          var lines = blocks[i].line;
-          for (var j = 0; j < lines.length; j++) {
-            if (lines[j].word) {
-              var words = lines[j].word;
-              if (lines[j]["$"].LineNumber == texts[l].getAttribute("id")) {
-                console.log((texts[l] as HTMLInputElement).value);
-                var text = (texts[l] as HTMLInputElement).value;
-                if (words.length > 1) {
-                  console.log("word array length " + words.length)
-                  var textArray = text.split(/(\s+)/).filter(function (e) { return e.trim().length > 0; });
-                  console.log("text array length " + textArray.length)
-                  if (words.length == textArray.length) {
-                    for (let k = 0; k < words.length; k++) {
-                      words[k]["$"].unicode = textArray[k].trim();
-                    }
-                  } else if (textArray.length > words.length || textArray.length < words.length) {
-                    console.log("in text array greater ");
-                    var txt = "";
-                    for (let m = 0; m < textArray.length; m++) {
-                      txt = txt + " " + textArray[m];
-                    }
-                    words[0]["$"].unicode = txt.trim();
-                    words[0]["$"].colEnd = words[words.length - 1].colEnd;
-                    console.log("word[0] " + words[0]["$"].unicode);
-                    console.log("word[1] " + words[1]["$"].unicode);
-                    for (let n = 1; n < words.length; n++) {
-                      console.log("words.length", words.length, "n", n, "lines inndex", j)
-                      words[n]["$"].unicode = "";
-                    }
-                  }
-                } else {
-                  console.log("in else block of update");
-                  words[0]["$"].unicode = text.trim();
-                }
-              }
-            }
-          }
-        }
+      xmlonSave(){
+        console.log("inside xmlOnSave");
+        this.onSave();
       }
-    }
-    // console.log("final json  "+JSON.stringify(XmlModel.jsonObject));
-    this.imageService.updateCorrectedXml(this.fileName);
-  }
 
   unselectBlock(){
     $("#blockselect").css("color", "white");

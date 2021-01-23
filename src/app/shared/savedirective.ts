@@ -1,20 +1,20 @@
 import { Directive, OnInit, HostListener, OnDestroy, Output, EventEmitter, ElementRef } from '@angular/core';
 
 @Directive({
-    selector: '[ctrls]'
+    selector: '[ctrlS]'
 })
 
-export class CtrlsDetectorDirective {
+export class SaveDetectorDirective {
 
-    @Output() ctrls: EventEmitter<boolean>=new EventEmitter();
+    @Output() ctrlS: EventEmitter<boolean>=new EventEmitter();
 
     constructor() {
     }
 
     @HostListener('window:keydown', ['$event'])
     onKeyDown(event: KeyboardEvent): void {
-        if (event.keyCode === 13) {
-            this.ctrls.emit(true);
+        if ((event.metaKey || event.ctrlKey) && event.key === 's') {
+            this.ctrlS.emit(true);
             event.preventDefault();
         }
     }
