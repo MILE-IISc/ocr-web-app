@@ -70,6 +70,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { FooterComponent } from './footer/footer.component';
 import { ClickOutsideDirective } from './shared/click-outside.directive';
 import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
+import { SaveDetectorDirective } from './shared/savedirective';
 
 @NgModule({
   declarations: [
@@ -79,8 +80,9 @@ import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
     ScreenComponent,
     ClickOutsideDirective,
     CtrlsDetectorDirective,
+    SaveDetectorDirective,
     FooterComponent,
- 
+
   ],
   exports:[
     MatIconModule
