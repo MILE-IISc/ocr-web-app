@@ -231,9 +231,9 @@ export class FooterComponent implements OnInit {
         // this.viewerService. selectBlockservice()
         // setTimeout(() => this.imageService.selectBlockservice(), .001);
       }
-      var SaveToXML = document.getElementById("SaveToXML");
-        console.log("SaveToXML: " + SaveToXML);
-        SaveToXML.click();
+      // var SaveToXML = document.getElementById("SaveToXML");
+      //   console.log("SaveToXML: " + SaveToXML);
+      //   SaveToXML.click();
       this.imageService.selectBlockservice()
     }
   }

@@ -5,12 +5,10 @@
 //  */
 
 (function ($) {
-  // $blockNumber
   var $x = 1;
   var originX;
   var originY;
   isMenuOpen = true;
-  var myExtObject;
   $.imageArea = function (parent, id) {
 
     var options = parent.options,
@@ -162,7 +160,7 @@
           });
         }
       },
-      updateblockNumber = function (visible) {
+      updateBlockNumber = function (visible) {
         if ($blockNumber) {
           $blockNumber.css({
             display: "block",
@@ -189,35 +187,35 @@
             updateSelection();
             updateResizeHandlers();
             updateBtDelete(true);
-            updateblockNumber(true);
+            updateBlockNumber(true);
             break;
 
           case "pickSelection":
-          // case "pickResizeHandler":
-          //     updateResizeHandlers();
-          //     break;
+          case "pickResizeHandler":
+            updateResizeHandlers();
+            break;
 
-          // case "resizeSelection":
-          //     updateSelection();
-          //     updateResizeHandlers();
-          //     updateCursor("crosshair");
-          //     updateBtDelete(true);
-          //     updateblockNumber(true);
-          //     break;
+          case "resizeSelection":
+            updateSelection();
+            updateResizeHandlers();
+            updateCursor("crosshair");
+            updateBtDelete(true);
+            updateBlockNumber(true);
+            break;
 
-          // case "moveSelection":
-          //     updateSelection();
-          //     updateResizeHandlers();
-          //     updateCursor("move");
-          //     updateBtDelete(true);
-          //     updateblockNumber(true);
-          //     break;
+          case "moveSelection":
+            updateSelection();
+            updateResizeHandlers();
+            updateCursor("move");
+            updateBtDelete(true);
+            updateBlockNumber(true);
+            break;
 
           case "blur":
             updateSelection();
             updateResizeHandlers();
             updateBtDelete();
-            updateblockNumber();
+            updateBlockNumber();
             break;
 
           //case "releaseSelection":
@@ -225,20 +223,18 @@
             updateSelection();
             updateResizeHandlers(true);
             updateBtDelete(true);
-            updateblockNumber(true);
+            updateBlockNumber(true);
         }
       },
       startSelection = function (event) {
         cancelEvent(event);
         $x = $x + 1;
-        console.log("$xvalue" + $x)
 
         // Reset the selection size
         area.width = options.minSize[0];
         area.height = options.minSize[1];
         focus();
         on("move", resizeSelection);
-
 
         // Get the selection origin
         selectionOrigin = getMousePosition(event);
@@ -248,17 +244,12 @@
         if (selectionOrigin[1] + area.height > $image.height()) {
           selectionOrigin[1] = $image.height() - area.height;
         }
-
         // And set its position
         area.x = selectionOrigin[0];
         area.y = selectionOrigin[1];
-
         originX = area.x;
         originY = area.y;
 
-        console.log("inside start selection");
-        console.log("area.x: " + originX);
-        console.log("area.y: " + originY);
         on("stop", releaseSelection);
 
         refresh("startSelection");
@@ -269,8 +260,8 @@
         on("move", moveSelection);
         on("stop", releaseSelection);
 
-        console.log("$xvalue" + $x)
         var mousePosition = getMousePosition(event);
+
         // Get the selection offset relative to the mouse position
         selectionOffset[0] = mousePosition[0] - area.x;
         selectionOffset[1] = mousePosition[1] - area.y;
@@ -280,7 +271,6 @@
       pickResizeHandler = function (event) {
         cancelEvent(event);
         focus();
-        // $x = $x + 1;
 
         var card = event.target.className.split(" ")[1];
         if (card[card.length - 1] === "w") {
@@ -450,33 +440,26 @@
         resizeVertically = true;
 
         var mousePosition = getMousePosition(event);
-
         releaseX = mousePosition[0];
         releaseY = mousePosition[1];
-
-
-        if (originX == releaseX || originY == releaseY) {
+        if (Math.abs(originX - releaseX) < 15 || Math.abs(originY - releaseY) < 15) {
           deleteSelection();
-
         }
 
         fireEvent("changed");
 
         refresh("releaseSelection");
-        autoSave();
+        // autoSave();
       },
-      blocknumberupdate = function (event) {
-        var updatebutton = document.getElementById("blockno")
-        updatebutton.click();
-
+      blockNumberUpdate = function (event) {
+        var updateButton = document.getElementById("blockno")
+        updateButton.click();
       },
       autoSave = function (event) {
-        var SaveToXML = document.getElementById("SaveToXML");
-        console.log("SaveToXML: " + SaveToXML);
-        SaveToXML.click();
+        var saveToXML = document.getElementById("SaveToXML");
+        saveToXML.click();
       },
       deleteSelection = function (event) {
-        console.log("ondecrease" + $x)
         cancelEvent(event);
         $selection.remove();
         $outline.remove();
@@ -484,28 +467,12 @@
         $.each($resizeHandlers, function (card, $handler) {
           $handler.remove();
         });
-
-        console.log("area.idon -1" + area.id)
-
         if ($btDelete) {
           $btDelete.remove();
         }
         parent._remove(id);
         fireEvent("changed");
       },
-      myExtObject = (function () {
-
-        return {
-          func1: function () {
-            refresh("releaseSelection");;
-          },
-          func2: function () {
-            alert('function 2 called');
-          }
-        }
-
-      })(myExtObject || {}),
-
       getElementOffset = function (object) {
         var offset = $(object).offset();
 
@@ -538,7 +505,6 @@
 
 
     // Initialize an outline layer and place it above the trigger layer
-    console.log("number" + area.id);
     $outline = $("<div class=\"select-areas-outline\" id=\"outline\" />")
       .css({
         display: "block",
@@ -548,8 +514,7 @@
       .insertAfter($trigger);
 
     // Initialize a selection layer and place it above the outline layer
-    $selection = $("<div (click)='$openMenu'   id=\"backgroundarea\"/>")
-
+    $selection = $("<div (click)='$openMenu' id=\"backgroundArea\"/>")
       .addClass("select-areas-background-area")
       .css({
         // background : "#fff url(" + $image.attr("src") + ") no-repeat",
@@ -557,7 +522,6 @@
         position: "absolute"
       })
       .insertAfter($outline);
-    console.log("console of div" + $selection);
 
     // Initialize all handlers
     if (options.allowResize) {
@@ -573,28 +537,25 @@
           .bind("touchstart", pickResizeHandler);
       });
     }
+
     // initialize delete button
     if (options.allowDelete) {
       var bindToDelete = function ($obj) {
         $obj.click(deleteSelection)
-        $obj.click(blocknumberupdate)
+        $obj.click(blockNumberUpdate)
           .bind("touchstart", deleteSelection)
           .bind("tap", deleteSelection);
         return $obj;
       };
       $btDelete = bindToDelete($("<div class=\"delete-area\" />"))
         .append(bindToDelete($("<div class=\"select-areas-delete-area\" />")))
-        .insertAfter($selection); id
+        .insertAfter($selection);
     }
 
-    // setTimeout(() => {
-    //BlockNumber = $x;
+    // initialize blockNumber area
     var blockNumberElems = $(".select-areas-blockNumber-area");
-    $blockNumber = $("<div id=\"blockNumber_" + $x + "\" class=\"select-areas-blockNumber-area\">" + (blockNumberElems.length + 1) + "</div>")
+    $blockNumber = $("<div class=\"select-areas-blockNumber-area\">" + (blockNumberElems.length + 1) + "</div>")
       .insertAfter($btDelete);
-    console.log("$valueat assign" + $x);
-    // }
-    // ,5);
 
     if (options.allowMove) {
       $selection.mousedown(pickSelection).bind("touchstart", pickSelection);
@@ -602,23 +563,15 @@
 
     focus();
 
+    // Allow right click on block
     $('.select-areas-background-area').bind('contextmenu', (e) => {
-      console.log("inside right click+++++++++++++++++++++++");
+      console.log("Inside right click");
       e.preventDefault();
       this.isMenuOpen = true;
       $("#menu").css("display", "block");
       $("#menu").css("left", e.clientX + "px");
       $("#menu").css("top", e.clientY + "px");
-      // alert('The eventhandler will make sure, that the contextmenu dosn&#39;t appear.');
     });
-
-    // $closeMenu=function() {
-    //   if(this.isMenuOpen == true) {
-    //     this.isMenuOpen = false;
-    //     $("#menu").css("display", "none");
-    //   }
-    // }
-    // clickOutside = $closeMenu
 
     return {
       getData: getData,
@@ -682,7 +635,7 @@
         onChanging: null,
         onChanged: null
       };
-    // updateSelection();
+
     this.options = $.extend(defaultOptions, customOptions);
 
     if (!this.options.allowEdit) {

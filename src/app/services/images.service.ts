@@ -1001,17 +1001,12 @@ export class ImageService implements OnInit {
         // setTimeout(() =>  this. selectBlockservice(),.001);
 
       }
-      var SaveToXML = document.getElementById("SaveToXML");
-  console.log("SaveToXML: "+SaveToXML);
-  SaveToXML.click();
+  //     var SaveToXML = document.getElementById("SaveToXML");
+  // console.log("SaveToXML: "+SaveToXML);
+  // SaveToXML.click();
 
 
-      this.selectBlock()
-    }
-  }
-
-  selectBlock(){
-    $('img#imgToRead').selectAreas('destroy');
+  $('img#imgToRead').selectAreas('destroy');
   console.log("inside script");
   let areasarray = BlockModel.blockArray.reverse();
   console.log("block.model.arrray^^^^   ^^" + JSON.stringify(areasarray));
@@ -1020,7 +1015,11 @@ export class ImageService implements OnInit {
     position: "absolute",
 
     areas: areasarray
-  });}
+  });
+    }
+  }
+
+
 
   blocknumberupdate() {
     this.clientpercent = this.percentage;
