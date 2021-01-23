@@ -565,12 +565,33 @@
 
     // Allow right click on block
     $('.select-areas-background-area').bind('contextmenu', (e) => {
-      console.log("Inside right click");
+      console.log("Inside right click handler");
       e.preventDefault();
       this.isMenuOpen = true;
       $("#menu").css("display", "block");
       $("#menu").css("left", e.clientX + "px");
       $("#menu").css("top", e.clientY + "px");
+    });
+
+    // Allow double on block
+    $(".select-areas-background-area").dblclick((event) => {
+      console.log("Inside double click handler");
+      var parent = $(".select-areas-background-area").parent();
+      var clickedPoint = {
+        x: event.clientX - parent.offset().left,
+        y: event.clientY- parent.offset().top
+      };
+      var doubleClickedArea = $('img#imgToRead').selectAreas('contains', clickedPoint);
+      var doubleClickedAreaNewHeight = clickedPoint.y - doubleClickedArea.y;
+      var newArea = {
+        x: doubleClickedArea.x,
+        y: clickedPoint.y,
+        width: doubleClickedArea.width,
+        height: doubleClickedArea.height - doubleClickedAreaNewHeight,
+      };
+      doubleClickedArea.height = doubleClickedAreaNewHeight;
+      $('img#imgToRead').selectAreas('add', newArea);
+      $('img#imgToRead').selectAreas('_refresh');
     });
 
     return {
