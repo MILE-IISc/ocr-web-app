@@ -104,15 +104,16 @@ function getItem(bucketName, itemName, mail, requestType) {
               console.log("file width",file.getWidth());
               file
               .quality(75)
-              .write('./images/'+mail+"/"+itemName.slice(0, -3) + 'jpg');
-              console.log("file is ready for",mail," fileName ",itemName.slice(0, -3).toLowerCase() + 'jpg');
-              console.log("image content retrieved and converted");
-              let tiffToJpg = itemName.slice(0, -3) + 'jpg';
-              const filePath = './images/' + mail + "/" + tiffToJpg;
-              console.log("file Path " + filePath);
-              console.log("calling multiPartUpload");
-              multiPartUpload(bucketName, tiffToJpg, filePath);
-            })
+              .writeAsync('./images/'+mail+"/"+itemName.slice(0, -3) + 'jpg').then(() => {
+                console.log("file is ready for",mail," fileName ",itemName.slice(0, -3).toLowerCase() + 'jpg');
+                console.log("image content retrieved and converted");
+                let tiffToJpg = itemName.slice(0, -3) + 'jpg';
+                const filePath = './images/' + mail + "/" + tiffToJpg;
+                console.log("file Path " + filePath);
+                console.log("calling multiPartUpload");
+                multiPartUpload(bucketName, tiffToJpg, filePath);
+              });
+            });
           }
           else if(path.extname(itemName).toLowerCase() == ".png" || path.extname(itemName).toLowerCase() == ".jpg" || path.extname(itemName).toLowerCase() == ".bmp"){
             console.log("itemName",itemName,"data.ContentType",data.ContentType);
@@ -357,7 +358,8 @@ function multiPartUpload(bucketName, itemName, filePath) {
     var uploadID = null;
 
     if (!fs.existsSync(filePath)) {
-        log.error(new Error(`The file \'${filePath}\' does not exist or is not accessible.`));
+        // log.error(new Error(`The file \'${filePath}\' does not exist or is not accessible.`));
+        console.log("The file",filePath,"does not exist or is not accessible.");
         return;
     }
     console.log("filePath inside multiPart Upload",filePath);
