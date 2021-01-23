@@ -1,5 +1,10 @@
 /* @import "../node_modules/@angular/material/prebuilt-themes/indigo-pink.css"; */
+/* input{
 
+  border-radius: 10px;
+  height: 30px !important;
+  color: black;
+} */
 label{
 font-size: small;
 }

@@ -91,7 +91,7 @@ function getItem(bucketName, itemName, mail, requestType) {
   .then((data) => {
       if (data != null) {
         console.log("path.extname(itemName).toLowerCase() ",path.extname(itemName).toLowerCase()," requestType ",requestType);
-          if(path.extname(itemName).toLowerCase() == ".tif" && requestType == "post") {
+          if(path.extname(itemName).toLowerCase() == ".tif" && requestType == "POST") {
             console.log('reached getting tif data in getItem\n',itemName);
             const tiffArrayBuff = Buffer.from(data.Body).buffer;
             console.log("tiff ",data.Metadata);
@@ -207,7 +207,7 @@ router.post("",
         console.log("data for file "+data.Contents[i].Key+""+data.Contents[i].Size);
         if(path.extname(data.Contents[i].Key).toLowerCase() == ".tif") {
           console.log("tiff files",data.Contents[i].Key);
-          getItem(bucketName, data.Contents[i].Key, req.body.email, "post").then((itemData) => {
+          getItem(bucketName, data.Contents[i].Key, req.body.email, "POST").then((itemData) => {
             if(data == "The specified key does not exists in bucket") {
               console.log("error while retrieving and converting image:",itemData);
             }
@@ -336,7 +336,7 @@ router.get("/:fileName", checkAuth,(req, res, next) =>{
   }
   bucketName = req.userData.bucketName;
   console.log("bucketName inside get specific Image ",bucketName);
-  getItem(bucketName, jpegFile, req.query.user,"get").then((data) => {
+  getItem(bucketName, jpegFile, req.query.user,"GET").then((data) => {
     if(data == "The specified key does not exists in bucket") {
       console.log("error while retrieving image:",data);
       res.status(400).json({
@@ -360,7 +360,7 @@ function multiPartUpload(bucketName, itemName, filePath) {
         log.error(new Error(`The file \'${filePath}\' does not exist or is not accessible.`));
         return;
     }
-
+    console.log("filePath inside multiPart Upload",filePath);
     console.log(`Starting multi-part upload for ${itemName} to bucket: ${bucketName}`);
     return cos.createMultipartUpload({
         Bucket: bucketName,
@@ -406,7 +406,21 @@ function multiPartUpload(bucketName, itemName, filePath) {
                     },
                     UploadId: uploadID
                 }).promise()
-                .then(console.log(`Upload of all ${partCount} parts of ${itemName} successful.`))
+                .then(() => {
+                  console.log(`Upload of all ${partCount} parts of ${itemName} successful.`);
+                  console.log("filePath in multiPart successful upload",filePath);
+                  fs.unlinkSync(filePath, function(err) {
+                    if(err && err.code == 'ENOENT') {
+                      // file doens't exist
+                      console.log("File doesn't exist, won't remove it.");
+                    } else if (err) {
+                        // other errors, e.g. maybe we don't have enough permission
+                        console.log("Error occurred while trying to remove file");
+                    } else {
+                        console.log(`file removed`);
+                    }
+                  });
+                })
                 .catch((e) => {
                     cancelMultiPartUpload(bucketName, itemName, uploadID);
                     console.error(`ERROR: ${e.code} - ${e.message}\n`);
