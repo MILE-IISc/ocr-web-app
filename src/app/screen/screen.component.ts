@@ -404,7 +404,7 @@ export class ScreenComponent implements OnInit{
   }
 
   selectBlock() {
-    $("#blockselect").css("color", "blue");
+    $("#blockselect").css("background-color", "hsl(210, 100%, 20%)");
     this.obtainblock=true;
     console.log("inside script");
     this.isDiv = true;
@@ -431,6 +431,11 @@ export class ScreenComponent implements OnInit{
       $('#imgToRead').selectAreas('reset');
     });
   // });
+  }
+  deleteblocks(){
+    $('#imgToRead').selectAreas('reset');
+    this.onSave();
+
   }
 
 
@@ -610,7 +615,7 @@ export class ScreenComponent implements OnInit{
       }
 
   unselectBlock(){
-    $("#blockselect").css("color", "white");
+    $("#blockselect").css("background-color", "initial");
     this.obtainblock=false;
     this.imageService.unselectBlock();
 

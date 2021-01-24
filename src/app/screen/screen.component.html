@@ -5,6 +5,10 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
 <mat-toolbar color="primary">
+  <button mat-icon-button   data-toggle="tooltip" title="Upload Images"   [matMenuTriggerFor]="upload">
+    <mat-icon>cloud_upload</mat-icon>
+  </button>
+  <mat-menu #upload="matMenu">
   <input #fileUpload type="file" (click)="fileUpload.value = null" (change)="importFile($event)" style="display:none"
     accept="image/*">
   <button mat-icon-button data-toggle="tooltip" (click)="fileUpload.click()" title="Upload Image"
@@ -12,7 +16,6 @@
     <mat-icon>text_snippet</mat-icon>
   </button>
 
-  <div id="snackbar">{{ invalidMessage }}</div>
 
   <input #folderUpload type="file" name="fileList" (click)="folderUpload.value = null" webkitdirectory multiple
     (change)="importFile($event)" style="display:none" />
@@ -20,6 +23,10 @@
     (click)="folderUpload.click()">
     <mat-icon>folder_open</mat-icon>
   </button>
+</mat-menu>
+
+  <div id="snackbar">{{ invalidMessage }}</div>
+
 
   <button mat-icon-button data-toggle="tooltip" title="Vertical View" style="margin-right:3px;" id="vertical_view"
     (click)="asVertical()" [disabled]="nextImage">
@@ -44,12 +51,20 @@
       <mat-icon>save</mat-icon>
       </button>
 
+      <button mat-icon-button data-toggle="tooltip" title="Save XML(Ctrl+s)" (click)="deleteblocks()">
+        <mat-icon>delete_outline</mat-icon>
+        </button>
+
   <span class="example-spacer2"></span>
   <div *ngIf="!isLoading">
     <h5>{{ fileName }}</h5>
   </div>
 
   <span class="example-spacer"></span>
+
+  <a mat-icon-button data-toggle="tooltip" title="Help" href="/help.html" target="_blank">
+    <mat-icon>help_outline</mat-icon>
+  </a>
 
   <button mat-icon-button [matMenuTriggerFor]="user">
     <mat-icon>account_circle</mat-icon>
@@ -66,12 +81,10 @@
     </div>
   </mat-menu>
 
-  <a mat-icon-button data-toggle="tooltip" title="Help" href="/help.html" target="_blank">
-    <mat-icon>help_outline</mat-icon>
-  </a>
+
 
   <button id="blockno" (click)="blockupdate()">blocknumberupdate</button>
-  <!-- <button id="SaveToXML" (click)="onSave()">SaveToXML</button> -->
+
 </mat-toolbar>
 
 
@@ -108,20 +121,23 @@
           [style.width.px]="text.txtwidth*(this.percentage/100)" [style.position]="'absolute'" [style.border]="'none'"
           [style.font-size.px]="text.txtheight*5/8*(this.percentage/100)"
           [style.top.px]="text.lineRowStart*(this.percentage/100)"
+          [style.margin-inline-start.px]="text.lineColStart*(this.percentage/100)"
+
           [style.left.px]="text.lineColStart*(this.percentage/100)"
-          [style.margin-inline-start.px]="text.lineRowStart*(this.percentage/100)"
           [style.height.px]="text.txtheight*(this.percentage/100)">
+
       </span>
     </div>
   </as-split-area>
 </as-split>
-
+<!-- [style.margin-inline-start.px]="text.lineRowStart*(this.percentage/100)" -->
+<!-- [style.left.px]="text.lineColStart*(this.percentage/100)" -->
 <app-footer></app-footer>
 
 <div id="menu">
   <div class="dropdown-content"(clickOutside)="closeMenu()">
-    <a (click)="asHorizontal()">prose (..from prev page/block)</a>
-    <a (click)="asVertical()">Header</a>
+    <a >prose (..from prev page/block)</a>
+    <a >Header</a>
     <a>Figure Caption</a>
     <a>Retain Graphic</a>
     <a>Retain Graphic-Rotate</a>

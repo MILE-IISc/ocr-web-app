@@ -29,10 +29,11 @@
 }
 
 .select-areas-delete-area {
-	background: url('bt-delete.png');
+  /* background: url('bt-delete.png'); */
+  background-image: url('baseline-clear.svg');
 	cursor: pointer;
-	height: 16px;
-	width: 16px;
+	height: 24px;
+	width: 24px;
 }
 
 .delete-area {

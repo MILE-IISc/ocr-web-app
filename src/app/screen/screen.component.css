@@ -113,11 +113,11 @@ overflow:auto;
   height: auto;
   opacity: 0.3;
 }
-.text_input{
+/* .text_input{
   margin: 0px !important;
   display: inline-block !important;
   padding: 0px !important;
-}
+} */
 /* div { position: relative; } */
 #menu {
   position:absolute;
