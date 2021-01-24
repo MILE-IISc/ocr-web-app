@@ -6,9 +6,7 @@
 
 (function ($) {
   var $x = 1;
-  var originX;
-  var originY;
-  isMenuOpen = true;
+  var isMenuOpen = true;
   $.imageArea = function (parent, id) {
 
     var options = parent.options,
@@ -45,8 +43,6 @@
       },
       fireEvent = function (event) {
         $image.trigger(event, [area.id, parent.areas()]);
-        //1
-        console.log("indexnumber" + area.id)
       },
       cancelEvent = function (e) {
         var event = e || window.event || {};
@@ -65,15 +61,15 @@
         switch (type) {
           case "start":
             browserEvent = "mousedown";
-            //mobileEvent = "touchstart";
+            mobileEvent = "touchstart";
             break;
           case "move":
             browserEvent = "mousemove";
-            //mobileEvent = "touchmove";
+            mobileEvent = "touchmove";
             break;
           case "stop":
             browserEvent = "mouseup";
-            //mobileEvent = "touchend";
+            mobileEvent = "touchend";
             break;
           default:
             return;
@@ -167,7 +163,6 @@
             left: area.x - 20,
             top: area.y,
             "z-index": area.z + 2
-
           })
         }
       },
@@ -247,8 +242,6 @@
         // And set its position
         area.x = selectionOrigin[0];
         area.y = selectionOrigin[1];
-        originX = area.x;
-        originY = area.y;
 
         on("stop", releaseSelection);
 
@@ -439,16 +432,13 @@
         resizeHorizontally = true;
         resizeVertically = true;
 
-        var mousePosition = getMousePosition(event);
-        releaseX = mousePosition[0];
-        releaseY = mousePosition[1];
-        if (Math.abs(originX - releaseX) < 15 || Math.abs(originY - releaseY) < 15) {
-          deleteSelection();
-        }
-
         fireEvent("changed");
 
         refresh("releaseSelection");
+
+        if (area.width < 15 || area.height < 15) {
+          deleteSelection();
+        }
         // autoSave();
       },
       blockNumberUpdate = function (event) {
