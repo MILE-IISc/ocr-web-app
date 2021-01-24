@@ -213,30 +213,27 @@ export class ImageService implements OnInit {
   async addImage(fileRead) {
     await this.getServerImages();
     console.log("server file count before post" + this.serverImages.length);
-    // console.log("fileRead"+fileRead);
     const imageData = new FormData();
     imageData.append("email", this.authService.userName);
-    // console.log("file name before server call "+fileRead[0].name.slice(0,-9));
-    imageData.append("folderName", fileRead[0].name.slice(0, -9));
     for (let i = 0; i < fileRead.length; i++) {
       var file = fileRead[i];
       console.log(file.name);
       console.log(fileRead.length)
       imageData.append("image", file);
     }
-      this.http
-      .post<{ message: string }>(
-        this.IMAGE_BACKEND_URL,
-        imageData
-      )
-      .subscribe(async responseData => {
-        this.invalidMessage = responseData.message;
-        this.invalidMessageChange.emit(this.invalidMessage);
-        console.log("image added+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++: " + responseData.message);
-        // await this.getServerImages();
-      });
+    this.http
+    .post<{ message: string }>(
+      this.IMAGE_BACKEND_URL,
+      imageData
+    )
+    .subscribe(async responseData => {
+      this.invalidMessage = responseData.message;
+      this.invalidMessageChange.emit(this.invalidMessage);
+      console.log("image added+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++: " + responseData.message);
+      // await this.getServerImages();
+    });
 
-      console.log("server file count" + this.serverImages.length);
+    console.log("server file count" + this.serverImages.length);
     if (this.serverImages.length == 0) {
       var filesCount = fileRead.length;
       // if (filesCount > 1) {
@@ -254,7 +251,7 @@ export class ImageService implements OnInit {
           const imgValue = new Images(i, fileRead[i].name, 'N', this.authService.email, dataURL);
           this.localImages.push(imgValue);
           console.log("after sorting" + this.localImages[0].fileName);
-          console.log("addImage: " + dataURL);
+          // console.log("addImage: " + dataURL);
         }
       }
       this.localImages.sort((a, b) => {
@@ -467,8 +464,8 @@ export class ImageService implements OnInit {
        this.onXml();
     }
     console.log("empty the right side screen");
-     $(".textElementsDiv").not(':first').remove();
-     $(".textSpanDiv").empty();
+    $(".textElementsDiv").not(':first').remove();
+    $(".textSpanDiv").empty();
 
   }
   onXMLservice(){

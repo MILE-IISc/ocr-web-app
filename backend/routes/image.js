@@ -299,12 +299,12 @@ router.get("", checkAuth,(req, res, next) => {
         } else {
           completed = 'N';
         }
-        const path = url + '/images/' + mail + '/' + files;
         const image = {
           _id: userId,
           fileName: files,
           completed: completed,
-          editor: userId
+          editor: userId,
+          dataUrl: ""
         };
         imageList.push(image);
         imageList.sort((a, b) => a.fileName.localeCompare(b.fileName));
