@@ -5,7 +5,7 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
 <mat-toolbar color="primary">
-  <button mat-icon-button   data-toggle="tooltip" title="Upload Images"   [matMenuTriggerFor]="upload">
+  <button mat-icon-button   data-toggle="tooltip" title="Upload Images"  style="margin-right:3px;" [matMenuTriggerFor]="upload">
     <mat-icon>cloud_upload</mat-icon>
   </button>
   <mat-menu #upload="matMenu">
@@ -27,6 +27,10 @@
 
   <div id="snackbar">{{ invalidMessage }}</div>
 
+  <button mat-icon-button data-toggle="tooltip" title="Save Blocks(Ctrl+s)" style="margin-right:3px;"(click)="onSave()">
+    <mat-icon>save</mat-icon>
+    </button>
+
 
   <button mat-icon-button data-toggle="tooltip" title="Vertical View" style="margin-right:3px;" id="vertical_view"
     (click)="asVertical()" [disabled]="nextImage">
@@ -47,11 +51,7 @@
     <mat-icon>get_app</mat-icon>
     </button>
 
-    <button mat-icon-button data-toggle="tooltip" title="Save Blocks(Ctrl+s)" (click)="onSave()">
-      <mat-icon>save</mat-icon>
-      </button>
-
-      <button mat-icon-button data-toggle="tooltip" title="Delete Blocks" (click)="deleteblocks()">
+  <button mat-icon-button data-toggle="tooltip" title="Delete Blocks" (click)="deleteblocks()">
         <mat-icon>delete_outline</mat-icon>
         </button>
 

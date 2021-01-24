@@ -435,8 +435,15 @@ export class ScreenComponent implements OnInit{
   // });
   }
   deleteblocks(){
+    var r = confirm("This action will delete all the blocks on the current page including any recognized or corrected text. Are you sure you want to continue?");
+    if (r == true){
     $('#imgToRead').selectAreas('reset');
+    console.log("empty the right side screen");
+    $(".textElementsDiv").not(':first').remove();
+    $(".textSpanDiv").empty();
     this.onSave();
+    }
+
 
   }
 
