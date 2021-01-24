@@ -147,7 +147,10 @@ export class ImageService implements OnInit {
 
   updateXmlModel(jsonObj) {
     console.log("jsonObj inside updateXmlModel after running OCR",jsonObj);
-    var blocks = jsonObj['page'].block;
+    var blocks = [];
+    if(jsonObj['page'].block) {
+      blocks = jsonObj['page'].block;
+    }
     console.log("block length " + blocks.length);
     for (var i = 0; i < blocks.length; i++) {
       if (blocks[i].line) {
