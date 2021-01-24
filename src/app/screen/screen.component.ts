@@ -141,7 +141,7 @@ export class ScreenComponent implements OnInit{
     });
     this.percentage = this.headerService.getpercentagevary();
     $("#SaveToXML").hide();
-    $("#blockno").hide();
+    $("#btUpdateBlockNumbers").hide();
     this.headerService.percentageChange
       .subscribe(
         (percent: number) => {
