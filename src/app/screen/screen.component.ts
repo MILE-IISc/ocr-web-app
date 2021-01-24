@@ -287,7 +287,9 @@ export class ScreenComponent implements OnInit{
         this.imageService.imageCountChange.emit(this.imgFileCount);
         console.log("imgFileCount " + this.imgFileCount);
       }
+
     }
+    this.imageService.buttonenable();
     $('img#imgToRead').selectAreas('destroy');
     this.imageService.onXMLservice();
     setTimeout(() => this.imageService.screenview(), 50);
