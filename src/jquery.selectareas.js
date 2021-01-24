@@ -5,20 +5,16 @@
 //  */
 
 (function ($) {
-  var $x = 1;
-  var originX;
-  var originY;
-  isMenuOpen = true;
+  var isMenuOpen = true;
   $.imageArea = function (parent, id) {
-
     var options = parent.options,
       $image = parent.$image,
       $trigger = parent.$trigger,
       $outline,
-      $blockNumber,
       $selection,
       $resizeHandlers = {},
       $btDelete,
+      $blockNumber,
       resizeHorizontally = true,
       resizeVertically = true,
       selectionOffset = [0, 0],
@@ -45,8 +41,6 @@
       },
       fireEvent = function (event) {
         $image.trigger(event, [area.id, parent.areas()]);
-        //1
-        console.log("indexnumber" + area.id)
       },
       cancelEvent = function (e) {
         var event = e || window.event || {};
@@ -65,15 +59,15 @@
         switch (type) {
           case "start":
             browserEvent = "mousedown";
-            //mobileEvent = "touchstart";
+            mobileEvent = "touchstart";
             break;
           case "move":
             browserEvent = "mousemove";
-            //mobileEvent = "touchmove";
+            mobileEvent = "touchmove";
             break;
           case "stop":
             browserEvent = "mouseup";
-            //mobileEvent = "touchend";
+            mobileEvent = "touchend";
             break;
           default:
             return;
@@ -85,7 +79,6 @@
         }
       },
       updateSelection = function () {
-
         // Update the outline layer
         $outline.css({
           cursor: "default",
@@ -107,7 +100,6 @@
           "z-index": area.z + 2
         });
       },
-
       updateResizeHandlers = function (show) {
         if (!options.allowResize) {
           return;
@@ -167,7 +159,6 @@
             left: area.x - 20,
             top: area.y,
             "z-index": area.z + 2
-
           })
         }
       },
@@ -228,7 +219,6 @@
       },
       startSelection = function (event) {
         cancelEvent(event);
-        $x = $x + 1;
 
         // Reset the selection size
         area.width = options.minSize[0];
@@ -247,8 +237,6 @@
         // And set its position
         area.x = selectionOrigin[0];
         area.y = selectionOrigin[1];
-        originX = area.x;
-        originY = area.y;
 
         on("stop", releaseSelection);
 
@@ -439,25 +427,13 @@
         resizeHorizontally = true;
         resizeVertically = true;
 
-        var mousePosition = getMousePosition(event);
-        releaseX = mousePosition[0];
-        releaseY = mousePosition[1];
-        if (Math.abs(originX - releaseX) < 15 || Math.abs(originY - releaseY) < 15) {
-          deleteSelection();
-        }
-
         fireEvent("changed");
 
         refresh("releaseSelection");
-        // autoSave();
-      },
-      blockNumberUpdate = function (event) {
-        var updateButton = document.getElementById("blockno")
-        updateButton.click();
-      },
-      autoSave = function (event) {
-        var saveToXML = document.getElementById("SaveToXML");
-        saveToXML.click();
+
+        if (area.width < 15 || area.height < 15) {
+          deleteSelection();
+        }
       },
       deleteSelection = function (event) {
         cancelEvent(event);
@@ -472,6 +448,41 @@
         }
         parent._remove(id);
         fireEvent("changed");
+      },
+      splitSelection = function (event) {
+        console.log("Inside double-click handler");
+        cancelEvent(event);
+        focus();
+
+        var mousePosition = getMousePosition(event);
+        var newHeight = mousePosition[1] - selectionOrigin[1];
+        var oldHeight = area.height;
+
+        area.height = newHeight;
+
+        var newArea = {
+          x: area.x,
+          y: mousePosition[1],
+          width: area.width,
+          height: oldHeight - newHeight,
+        };
+        $('img#imgToRead').selectAreas('add', newArea);
+
+        fireEvent("changed");
+        refresh("releaseSelection");
+      },
+      menuOnSelection = function (event) {
+        console.log("Inside right click handler");
+        cancelEvent(event);
+        focus();
+        isMenuOpen = true;
+        $("#menu").css("display", "block");
+        $("#menu").css("left", event.clientX + "px");
+        $("#menu").css("top", event.clientY + "px");
+      },
+	    updateBlockNumbers = function (event) {
+        var updateButton = document.getElementById("btUpdateBlockNumbers")
+        updateButton.click();
       },
       getElementOffset = function (object) {
         var offset = $(object).offset();
@@ -505,7 +516,7 @@
 
 
     // Initialize an outline layer and place it above the trigger layer
-    $outline = $("<div class=\"select-areas-outline\" id=\"outline\" />")
+    $outline = $("<div class=\"select-areas-outline\" />")
       .css({
         display: "block",
         opacity: options.outlineOpacity,
@@ -514,7 +525,7 @@
       .insertAfter($trigger);
 
     // Initialize a selection layer and place it above the outline layer
-    $selection = $("<div (click)='$openMenu' id=\"backgroundArea\"/>")
+    $selection = $("<div (click)='$openMenu'/>")
       .addClass("select-areas-background-area")
       .css({
         // background : "#fff url(" + $image.attr("src") + ") no-repeat",
@@ -526,7 +537,7 @@
     // Initialize all handlers
     if (options.allowResize) {
       $.each(["nw", "n", "ne", "e", "se", "s", "sw", "w"], function (key, card) {
-        $resizeHandlers[card] = $("<div class=\"select-areas-resize-handler " + card + "\" id=\"selectarea\"/>")
+        $resizeHandlers[card] = $("<div class=\"select-areas-resize-handler " + card + "\"/>")
           .css({
             opacity: 0.5,
             position: "absolute",
@@ -542,7 +553,7 @@
     if (options.allowDelete) {
       var bindToDelete = function ($obj) {
         $obj.click(deleteSelection)
-        $obj.click(blockNumberUpdate)
+          .click(updateBlockNumbers)
           .bind("touchstart", deleteSelection)
           .bind("tap", deleteSelection);
         return $obj;
@@ -561,17 +572,13 @@
       $selection.mousedown(pickSelection).bind("touchstart", pickSelection);
     }
 
-    focus();
+    // Allow double on block
+    $selection.dblclick(splitSelection);
 
     // Allow right click on block
-    $('.select-areas-background-area').bind('contextmenu', (e) => {
-      console.log("Inside right click");
-      e.preventDefault();
-      this.isMenuOpen = true;
-      $("#menu").css("display", "block");
-      $("#menu").css("left", e.clientX + "px");
-      $("#menu").css("top", e.clientY + "px");
-    });
+    $selection.contextmenu(menuOnSelection);
+
+    focus();
 
     return {
       getData: getData,

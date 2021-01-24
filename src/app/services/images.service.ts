@@ -124,8 +124,11 @@ export class ImageService implements OnInit {
   }
 
   updateXmlModel(jsonObj) {
-    console.log("jsonObj inside updateXmlModel after running OCR", jsonObj);
-    var blocks = jsonObj['page'].block;
+    console.log("jsonObj inside updateXmlModel after running OCR",jsonObj);
+    var blocks = [];
+    if(jsonObj['page'].block) {
+      blocks = jsonObj['page'].block;
+    }
     console.log("block length " + blocks.length);
     for (var i = 0; i < blocks.length; i++) {
       if (blocks[i].line) {
@@ -216,7 +219,8 @@ export class ImageService implements OnInit {
 
   async loadLocalImages(fileRead, type) {
     if (type == "NEW") {
-      this.localImages.splice(0, this.localImages.length);
+      // this.localImages.splice(0, this.localImages.length);
+      this.localImages = [];
     }
     var filesCount = fileRead.length;
     console.log("file count" + filesCount);
@@ -470,6 +474,36 @@ export class ImageService implements OnInit {
     if (this.obtainblock == true) {
       this.onXml();
     }
+  }
+
+  buttonenable(){
+    if (this.localImages.length - 1 == 0) {
+      this.nextImages = true;
+      this.nextImageChange.emit(this.nextImages);
+      this.previousImages = true;
+      this.previousImageChange.emit(this.previousImages);
+    }
+
+    else if (this.localImages.length - 1 == this.imgFileCount) {
+      this.nextImages = true;
+      this.nextImageChange.emit(this.nextImages);
+      this.previousImages = false;
+      this.previousImageChange.emit(this.previousImages);
+    }
+
+     else if((this.localImages.length - 1 > 0) && (this.imgFileCount==0)) {
+      this.nextImages = false;
+      this.nextImageChange.emit(this.nextImages);
+      this.previousImages = true;
+      this.previousImageChange.emit(this.previousImages);
+    }
+    else if((this.localImages.length - 1 > 0) && (this.localImages.length - 1 !== this.imgFileCount)) {
+      this.nextImages = false;
+      this.nextImageChange.emit(this.nextImages);
+      this.previousImages =false;
+      this.previousImageChange.emit(this.previousImages);
+    }
+
   }
 
   onXml() {

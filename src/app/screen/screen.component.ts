@@ -135,7 +135,7 @@ export class ScreenComponent implements OnInit{
     });
     this.percentage = this.headerService.getpercentagevary();
     $("#SaveToXML").hide();
-    $("#blockno").hide();
+    $("#btUpdateBlockNumbers").hide();
     this.headerService.percentageChange
       .subscribe(
         (percent: number) => {
@@ -200,7 +200,9 @@ export class ScreenComponent implements OnInit{
           }
           this.isLoading = false;
           console.log("this.localImages[0].fileName: ------------_> ", this.localImages[0].fileName);
-          this.localImages[0].dataUrl = await this.imageService.loadArray(this.localImages[0].fileName);
+          if(this.localImages[0].dataUrl == "" || this.localImages[0].dataUrl == null) {
+            this.localImages[0].dataUrl = await this.imageService.loadArray(this.localImages[0].fileName);
+          }
           this.localUrl = this.localImages[0].dataUrl;
           this.fileName = this.localImages[0].fileName;
           setTimeout(() => this.imageService.fitwidth(), 50);
@@ -271,7 +273,9 @@ export class ScreenComponent implements OnInit{
         this.imageService.imageCountChange.emit(this.imgFileCount);
         console.log("imgFileCount " + this.imgFileCount);
       }
+
     }
+    this.imageService.buttonenable();
     this.imageService.onXMLservice();
     setTimeout(() => this.imageService.screenview(), 50);
     setTimeout(() => this.setpercentage(), 60);
@@ -383,7 +387,7 @@ export class ScreenComponent implements OnInit{
   }
 
   selectBlock() {
-    $("#blockselect").css("color", "blue");
+    $("#blockselect").css("background-color", "hsl(210, 100%, 20%)");
     this.obtainblock=true;
     console.log("inside script");
     this.isDiv = true;
@@ -410,6 +414,18 @@ export class ScreenComponent implements OnInit{
       $('#imgToRead').selectAreas('reset');
     });
   // });
+  }
+  deleteblocks(){
+    var r = confirm("This action will delete all the blocks on the current page including any recognized or corrected text. Are you sure you want to continue?");
+    if (r == true){
+    $('#imgToRead').selectAreas('reset');
+    console.log("empty the right side screen");
+    $(".textElementsDiv").not(':first').remove();
+    $(".textSpanDiv").empty();
+    this.onSave();
+    }
+
+
   }
 
 
@@ -589,7 +605,7 @@ export class ScreenComponent implements OnInit{
       }
 
   unselectBlock(){
-    $("#blockselect").css("color", "white");
+    $("#blockselect").css("background-color", "initial");
     this.obtainblock=false;
     this.imageService.unselectBlock();
 

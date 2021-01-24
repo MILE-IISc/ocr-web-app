@@ -93,7 +93,6 @@ export class FooterComponent implements OnInit {
   asVertical() {
     this.value = 'horizontal';
     this.imageService.asVertical();
-    console.log("asVertical has been invoked from screen");
     this.percentage = this.imageService.percentage;
   }
 
@@ -106,9 +105,7 @@ export class FooterComponent implements OnInit {
   fitheight() {
     this.imageService.fitheight();
     this.percentage = this.imageService.percentage;
-    console.log("this.percentage before header in fitheight",this.percentage);
     this.headerService.setpercentagevary(this.percentage);
-    console.log("this.percentage after header in fitheight",this.percentage);
   }
 
   fitwidth() {
