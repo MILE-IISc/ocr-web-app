@@ -88,7 +88,7 @@ export class ImageService implements OnInit {
   }
 
   getImages() {
-    return this.serverImages.slice();
+     return this.serverImages.slice();
   }
 
   getLocalImages(){
@@ -588,6 +588,36 @@ export class ImageService implements OnInit {
    console.log("empty the right side screen");
    $(".textElementsDiv").not(':first').remove();
    $(".textSpanDiv").empty();
+  }
+
+  buttonenable(){
+    if (this.serverImages.length - 1 == 0) {
+      this.nextImages = true;
+      this.nextImageChange.emit(this.nextImages);
+      this.previousImages = true;
+      this.previousImageChange.emit(this.previousImages);
+    }
+
+    else if (this.serverImages.length - 1 == this.imgFileCount) {
+      this.nextImages = true;
+      this.nextImageChange.emit(this.nextImages);
+      this.previousImages = false;
+      this.previousImageChange.emit(this.previousImages);
+    }
+
+     else if((this.serverImages.length - 1 > 0) && (this.imgFileCount==0)) {
+      this.nextImages = false;
+      this.nextImageChange.emit(this.nextImages);
+      this.previousImages = true;
+      this.previousImageChange.emit(this.previousImages);
+    }
+    else if((this.serverImages.length - 1 > 0) && (this.serverImages.length - 1 !== this.imgFileCount)) {
+      this.nextImages = false;
+      this.nextImageChange.emit(this.nextImages);
+      this.previousImages =false;
+      this.previousImageChange.emit(this.previousImages);
+    }
+
   }
 
   onXml() {
