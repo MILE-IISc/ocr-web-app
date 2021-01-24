@@ -31,7 +31,7 @@ export class ScreenComponent implements OnInit{
   opened: boolean;
   events: string[] = [];
   private waveSub: Subscription;
-  serverImages: Images[] = [];
+  localImages: Images[] = [];
   imageList = "";
   displayarea: any;
   isLoading = false;
@@ -48,7 +48,6 @@ export class ScreenComponent implements OnInit{
   xmlFileName;
   url;
   fileName: any;
-  localUrlArray: any[] = [];
   files: any[] = []
   nextImage = true;
   previousImages = true;
@@ -88,13 +87,8 @@ export class ScreenComponent implements OnInit{
 
       this.sidesize1 = 30;
       this.sidesize2 = 70;
-      this.serverImages = this.imageService.getImages();
-      this.images = this.imageService.getLocalImages();
-      if (this.serverImages.length > 0) {
-        this.imageService.openModalDialog(this.serverImages);
-      } else {
-        this.imageService.openModalDialog(this.images);
-      }
+      this.localImages = this.imageService.getLocalImages();
+      this.imageService.openModalDialog(this.localImages);
 
     $("#OpenBar").hide();
     $("#CloseBar").show();
@@ -191,9 +185,9 @@ export class ScreenComponent implements OnInit{
 
     this.waveSub = this.imageService
       .getImageUpdateListener()
-      .subscribe(async (imageData: { serverImages: Images[] }) => {
-        this.serverImages = imageData.serverImages;
-        const imageLength = this.serverImages.length;
+      .subscribe(async (imageData: { localImages: Images[] }) => {
+        this.localImages = imageData.localImages;
+        const imageLength = this.localImages.length;
         if (imageLength > 0) {
           if (this.isDiv == true) {
             $('.holderClass').remove();
@@ -205,11 +199,10 @@ export class ScreenComponent implements OnInit{
             this.imageService.nextImageChange.emit(this.nextImage);
           }
           this.isLoading = false;
-          // this.fileName = " The files alloted for you ";
-          console.log("this.serverImages[0].fileName: ------------_> ", this.serverImages[0].fileName);
-          this.localUrl = await this.imageService.loadArray(this.serverImages[0].fileName);
-          // this.imageService.urlChanged.emit(this.localUrl.slice());
-          this.fileName = this.serverImages[0].fileName;
+          console.log("this.localImages[0].fileName: ------------_> ", this.localImages[0].fileName);
+          this.localImages[0].dataUrl = await this.imageService.loadArray(this.localImages[0].fileName);
+          this.localUrl = this.localImages[0].dataUrl;
+          this.fileName = this.localImages[0].fileName;
           setTimeout(() => this.imageService.fitwidth(), 50);
           setTimeout(() => this.setpercentage(), 60);
         }
@@ -218,23 +211,6 @@ export class ScreenComponent implements OnInit{
           this.fileName = "No files have been Uploaded";
         }
       });
-
-    this.imageService.imagesModified.subscribe((images: Images[]) => {
-      console.log("inside service subscribe....");
-      console.log("inside foooor");
-      this.isLoading = true;
-      if (images.length > 0) {
-        this.localUrl = images[0].dataUrl;
-        this.fileName = images[0].fileName;
-        this.isLoading = false;
-        this.ImageIs = true;
-        setTimeout(() => this.imageService.screenview(), 50);
-        setTimeout(() => this.setpercentage(), 60);
-      }
-      else {
-        this.ImageIs = false;
-      }
-    });
 
     this.imageService.displayChange.subscribe((display: any) => {
       this.display = display;
@@ -278,24 +254,27 @@ export class ScreenComponent implements OnInit{
 
   async openThisImage(event) {
     var id = event.target.value;
-    this.images = this.imageService.getImages();
-    for (let i = 0; i < this.images.length; i++) {
-      if (this.images[i].fileName == id) {
-        this.localUrl = await this.imageService.loadArray(this.images[i].fileName);
-        this.fileName = this.images[i].fileName;
+    this.localImages = this.imageService.getLocalImages();
+    $('img#imgToRead').selectAreas('destroy');
+    console.log("empty the right side screen");
+    $(".textElementsDiv").not(':first').remove();
+    $(".textSpanDiv").empty();
+    for (let i = 0; i < this.localImages.length; i++) {
+      if (this.localImages[i].fileName == id) {
+        console.log("this.localImages["+i+"].fileName",this.localImages[i].fileName,"dataUrl",this.localImages[i].dataUrl);
+        if(this.localImages[i].dataUrl == null || this.localImages[i].dataUrl == "") {
+          this.localImages[i].dataUrl = await this.imageService.loadArray(this.localImages[i].fileName);
+        }
+        this.localUrl = this.localImages[i].dataUrl;
+        this.fileName = this.localImages[i].fileName;
         this.imageService.imgFileCount = i;
         this.imageService.imageCountChange.emit(this.imgFileCount);
         console.log("imgFileCount " + this.imgFileCount);
       }
     }
-    $('img#imgToRead').selectAreas('destroy');
     this.imageService.onXMLservice();
     setTimeout(() => this.imageService.screenview(), 50);
     setTimeout(() => this.setpercentage(), 60);
-
-    console.log("empty the right side screen");
-    $(".textElementsDiv").not(':first').remove();
-    $(".textSpanDiv").empty();
   }
 
   importFile(event) {
@@ -354,13 +333,13 @@ export class ScreenComponent implements OnInit{
   }
 
   loadXMLDoc() {
-    this.serverImages = this.imageService.getImages();
-    if(this.serverImages.length>0){
-      this.fileName = this.serverImages[this.imageService.imgFileCount].fileName;
+    this.localImages = this.imageService.getLocalImages();
+    if(this.localImages.length>0){
+      this.fileName = this.localImages[this.imageService.imgFileCount].fileName;
       this.imageService.getXmlFileAsJson(this.fileName);
     }else{
-      this.images = this.imageService.getLocalImages();
-      this.fileName = this.images[this.imageService.imgFileCount].fileName;
+      this.localImages = this.imageService.getLocalImages();
+      this.fileName = this.localImages[this.imageService.imgFileCount].fileName;
       this.imageService.getXmlFileAsJson(this.fileName);
     }
   }
@@ -528,18 +507,18 @@ export class ScreenComponent implements OnInit{
 
   async downloadXml() {
     console.log("in export")
-    this.images = this.imageService.getImages();
-    console.log("image length in export " + this.images.length);
+    this.localImages = this.imageService.getLocalImages();
+    console.log("image length in export " + this.localImages.length);
     // var folderName = this.fileName.slice(0, -9);
     var folderName = "XML_Files";
     console.log("folder Name",folderName);
     var zip = new JSZip();
     let count = 0;
     var folder = zip.folder(folderName);
-    for (let i = 0; i < this.images.length; i++) {
-      console.log("in export completed " + this.images[i].completed);
-      if (this.images[i].completed == "Y") {
-        var curFileName = this.images[i].fileName;
+    for (let i = 0; i < this.localImages.length; i++) {
+      console.log("in export completed " + this.localImages[i].completed);
+      if (this.localImages[i].completed == "Y") {
+        var curFileName = this.localImages[i].fileName;
         var curXmlFileName = curFileName.slice(0, -3) + 'xml';
         console.log("curXmlFileName " + curXmlFileName);
         //changes have to be made in file service to get the xml file from backend
@@ -547,8 +526,8 @@ export class ScreenComponent implements OnInit{
           console.log("xml content while downloading",response.xmlData);
           let blob: any = new Blob([response.xmlData], { type: 'text/xml' });
           console.log("blob==="+blob);
-          console.log("this.images[i].fileName.slice(0, -3) + 'xml'",this.images[i].fileName.slice(0, -3) + 'xml');
-          folder.file(this.images[i].fileName.slice(0, -3) + 'xml', blob);
+          console.log("this.localImages[i].fileName.slice(0, -3) + 'xml'",this.localImages[i].fileName.slice(0, -3) + 'xml');
+          folder.file(this.localImages[i].fileName.slice(0, -3) + 'xml', blob);
         }), error => {
           console.log("error: " + error);
           alert(error);
@@ -556,7 +535,7 @@ export class ScreenComponent implements OnInit{
       }
       count++;
       console.log("count before if of onSave", count);
-      if (count === this.images.length) {
+      if (count === this.localImages.length) {
         console.log("count inside if of onSave", count);
         zip.generateAsync({ type: "blob" })
           .then(function (content) {

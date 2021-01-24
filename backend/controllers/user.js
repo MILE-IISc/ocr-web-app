@@ -32,7 +32,7 @@ exports.userLogin = (req, res, next) => {
   let fetchedUser;
   User.findOne({ email: req.body.email })
     .then(user => {
-      console.log("user: "+user);
+      console.log("user: " + user);
       if (!user) {
         return res.status(401).json({
           message: "Auth failed"

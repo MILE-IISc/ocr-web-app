@@ -19,7 +19,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   value:string;
   inputValue:String ;
   isTiff=false;
-  localUrlArray: any[]=[];
   nextImage = true;
   multipleImage=true;
   loaded = false;
@@ -84,7 +83,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   selectedImage: string;
   anotherTryVisible: boolean;
 
-  public localUrl: string;
   importFile(event) {
     this.anotherTryVisible = true;
     var fileRead = event.target.files;

@@ -19,17 +19,15 @@ import { AuthService } from '../auth/auth.service';
 
 export class FooterComponent implements OnInit {
   title = 'Layout';
-  serverImages: Images[] = [];
+  localImages: Images[] = [];
   value = 'horizontal';
   imagewidth;
   selectedImage: string;
   anotherTryVisible: boolean;
-  public localUrl: any;
   public tiffUrl: any;
   clientpercent;
   url;
   fileName: any;
-  localUrlArray: any[] = [];
   files: any[] = []
   nextImages = true;
   previousImages = true;
@@ -164,11 +162,6 @@ export class FooterComponent implements OnInit {
     console.log("this.percentage after header in orginalsize",this.percentage);
   }
 
-  openModalDialog() {
-    this.images = this.imageService.getImages();
-    // this.imageService.openModalDialog(this.images, this.display);
-  }
-
   NextImage() {
 
     this.onEnter(0);
@@ -193,15 +186,12 @@ export class FooterComponent implements OnInit {
     this.imageService.firstImage();
     // this.imageService.onXml();
   }
-  skipPage() {
-    //this.localUrl = this.localUrlArray[this.imgFileCount];
-  }
 
   loadXMLDoc() {
-    this.serverImages = this.imageService.getImages();
-    this.fileName = this.serverImages[this.imageService.imgFileCount].fileName;
+    this.localImages = this.imageService.getLocalImages();
+    this.fileName = this.localImages[this.imageService.imgFileCount].fileName;
     console.log("``````````````````````````````````````````````````this.fileName==="+this.fileName);
-    console.log("this.fileCompleted==="+this.serverImages[this.imageService.imgFileCount].completed);
+    console.log("this.fileCompleted==="+this.localImages[this.imageService.imgFileCount].completed);
     this.imageService.getXmlFileAsJson(this.fileName);
 
   }

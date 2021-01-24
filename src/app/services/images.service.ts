@@ -1,51 +1,44 @@
 import { Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { EventEmitter, Injectable, OnInit,Renderer2, RendererFactory2  } from '@angular/core';
+import { EventEmitter, Injectable, OnInit, Renderer2, RendererFactory2 } from '@angular/core';
 import { Router } from '@angular/router';
 import * as $ from 'jquery';
 import { Subject, Subscription } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { Images } from '../shared/images.model';
 import { HeaderService } from '../services/header.service';
-import { XmlModel,retain } from '../shared/xml-model';
-import { BlockModel} from '../shared/block-model';
+import { XmlModel, retain } from '../shared/xml-model';
+import { BlockModel } from '../shared/block-model';
 // import { HeaderService } from '../services/header.service';
 
 
 declare var Tiff: any;
-declare var $:any;
+declare var $: any;
 
 @Injectable()
 export class ImageService implements OnInit {
   displayImages;
 
   ngOnInit(): void {
-    this.imageLoaded
+    this.percentage = this.headerService.getpercentagevary();
+    this.headerService.percentageChange
       .subscribe(
-        (images: Images) => {
-          console.log("imageLoaded:+++++++++++++++++++++++++++++ ");
-        }
-      );
-      this.percentage = this.headerService.getpercentagevary();
-      this.headerService.percentageChange
-        .subscribe(
-          (percent: number) => {
-            this.percentage = percent;
-          });
+        (percent: number) => {
+          this.percentage = percent;
+        });
   }
 
-  private serverImages: Images[] = [];
-  private imagesUpdated = new Subject<{ serverImages: Images[] }>();
-  private waveSub: Subscription;
+  images: Array<Images> = [];
+  localImages: Array<Images> = [];
+  imgFileCount = 0;
+  private imagesUpdated = new Subject<{ localImages: Images[] }>();
 
   fileName;
   public nextImages = false;
   public previousImages = false;
   imageCountChange = new EventEmitter<Number>();
   btnImgArrayChange = new EventEmitter<any>();
-  imageLoaded = new EventEmitter<Images>();
-  imagesModified = new EventEmitter<Images[]>();
   nextImageChange = new EventEmitter<boolean>();
   isSelectBlockChange = new EventEmitter<boolean>();
   displayChange = new EventEmitter<any>();
@@ -54,16 +47,11 @@ export class ImageService implements OnInit {
   documentChange = new EventEmitter<any>();
   fileNameChange = new EventEmitter<any>();
   invalidMessageChange = new EventEmitter<any>();
-  images: Array<Images> = [];
-  localImages : Array<Images> = [];
-  imgFileCount = 0;
   ready = false;
 
   btnImgArray: any[] = [];
   public localUrl: any;
   public documentElement;
-  //display='none';
-  // public serverImages: any[] = [];
   postedImages: any;
   serverUrl: any
   dataUrl: any;
@@ -77,21 +65,17 @@ export class ImageService implements OnInit {
   public angle: number = 0;
   private renderer: Renderer2;
   public clientpercent;
-  obtainblock=false;
+  obtainblock = false;
 
-  constructor(  rendererFactory: RendererFactory2,private http: HttpClient, private router: Router, private authService: AuthService,private headerService: HeaderService, @Inject(DOCUMENT) private document: Document) {
+  constructor(rendererFactory: RendererFactory2, private http: HttpClient, private router: Router, private authService: AuthService, private headerService: HeaderService, @Inject(DOCUMENT) private document: Document) {
     this.IMAGE_BACKEND_URL = this.authService.BACKEND_URL + "/api/image/";
     this.XML_BACKEND_URL = this.authService.BACKEND_URL + "/api/xml/";
-    console.log("IMAGE_BACKEND_URL "+this.IMAGE_BACKEND_URL);
-    console.log("XML_BACKEND_URL "+this.XML_BACKEND_URL);
+    console.log("IMAGE_BACKEND_URL " + this.IMAGE_BACKEND_URL);
+    console.log("XML_BACKEND_URL " + this.XML_BACKEND_URL);
     this.renderer = rendererFactory.createRenderer(null, null);
   }
 
-  getImages() {
-    return this.serverImages.slice();
-  }
-
-  getLocalImages(){
+  getLocalImages() {
     return this.localImages.slice();
   }
 
@@ -102,9 +86,7 @@ export class ImageService implements OnInit {
 
   async getServerImages() {
     var user = this.authService.userName;
-
     const queryParams = `?user=${user}`;
-
     console.log("enter get server from screen")
     let promise = new Promise((resolve, reject) => {
       this.http
@@ -114,39 +96,35 @@ export class ImageService implements OnInit {
         .then(responseData => {
           const imageLength = responseData.images.length;
           if (imageLength > 0) {
-            this.serverImages = responseData.images;
+            this.localImages = responseData.images;
             console.log("message" + responseData.message);
-            console.log("server images length--" + this.serverImages.length);
-            this.imagesUpdated.next({
-              serverImages: [...this.serverImages]
-            });
+            console.log("server images length--" + this.localImages.length);
+            this.imagesUpdated.next({localImages: [...this.localImages]});
           }
           else {
             console.log("message" + responseData.message);
-            this.serverImages = responseData.images;
-            this.imagesUpdated.next({
-              serverImages: []
-            });
+            this.localImages = responseData.images;
+            this.imagesUpdated.next({localImages: []});
           }
-          resolve(this.serverImages);
+          resolve(this.localImages);
         });
     });
     return promise;
   }
 
-  getXmlFileAsJson(fileName : any) {
-    console.log("file name in run ocr "+ fileName)
+  getXmlFileAsJson(fileName: any) {
+    console.log("file name in run ocr " + fileName)
 
     const queryParams = `?fileName=${fileName}&type=GET-OCR-XML`;
-    this.http.get<{ message: string; xmlData:any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
-          console.log("xml as json string on RUN-OCR"+JSON.stringify(response.xmlData));
-          XmlModel.jsonObject = response.xmlData;
-          this.updateXmlModel(XmlModel.jsonObject);
-        });
+    this.http.get<{ message: string; xmlData: any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
+      console.log("xml as json string on RUN-OCR" + JSON.stringify(response.xmlData));
+      XmlModel.jsonObject = response.xmlData;
+      this.updateXmlModel(XmlModel.jsonObject);
+    });
   }
 
   updateXmlModel(jsonObj) {
-    console.log("jsonObj inside updateXmlModel after running OCR",jsonObj);
+    console.log("jsonObj inside updateXmlModel after running OCR", jsonObj);
     var blocks = jsonObj['page'].block;
     console.log("block length " + blocks.length);
     for (var i = 0; i < blocks.length; i++) {
@@ -160,7 +138,7 @@ export class ImageService implements OnInit {
             console.log("words length " + words.length);
             for (var k = 0; k < words.length; k++) {
               if (words[k]["$"].unicode != null) {
-                console.log("words["+k+"][\"$\"].unicode",words[k]["$"].unicode);
+                console.log("words[" + k + "][\"$\"].unicode", words[k]["$"].unicode);
                 txt = txt + " " + words[k]["$"].unicode;
               }
             }
@@ -172,7 +150,7 @@ export class ImageService implements OnInit {
             var blockNumber = blocks[i]["$"].BlockNumber;
             var txtwidth = (lineColEnd - lineColStart);
             var txtheight = (lineRowEnd - lineRowStart);
-            var wordValue = new XmlModel(txt, lineRowStart, lineRowEnd, lineColStart, lineColEnd, txtwidth, txtheight,lineNumber,blockNumber);
+            var wordValue = new XmlModel(txt, lineRowStart, lineRowEnd, lineColStart, lineColEnd, txtwidth, txtheight, lineNumber, blockNumber);
             XmlModel.textArray.push(wordValue);
             console.log("textarray length" + XmlModel.textArray.length);
             XmlModel.textArray.slice(0, XmlModel.textArray.length);
@@ -212,8 +190,8 @@ export class ImageService implements OnInit {
 
   async addImage(fileRead) {
     await this.getServerImages();
-    console.log("server file count before post" + this.serverImages.length);
-    const imageData = new FormData();
+    console.log("server file count before post" + this.localImages.length);
+    let imageData = new FormData();
     imageData.append("email", this.authService.userName);
     for (let i = 0; i < fileRead.length; i++) {
       var file = fileRead[i];
@@ -221,155 +199,88 @@ export class ImageService implements OnInit {
       console.log(fileRead.length)
       imageData.append("image", file);
     }
-    this.http
-    .post<{ message: string }>(
-      this.IMAGE_BACKEND_URL,
-      imageData
-    )
-    .subscribe(async responseData => {
+    this.http.post<{ message: string }>(this.IMAGE_BACKEND_URL,imageData).subscribe(async responseData => {
       this.invalidMessage = responseData.message;
       this.invalidMessageChange.emit(this.invalidMessage);
-      console.log("image added+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++: " + responseData.message);
-      // await this.getServerImages();
+      console.log("image added+++++++++++++++++++: " + responseData.message);
     });
 
-    console.log("server file count" + this.serverImages.length);
-    if (this.serverImages.length == 0) {
-      var filesCount = fileRead.length;
-      // if (filesCount > 1) {
-      //   this.nextImages = false;
-      // }
-      this.localImages.splice(0, this.localImages.length);
-      console.log("file count" + filesCount);
-      for (let i = 0; i < filesCount; i++) {
-        var isImage = fileRead[i].type.includes("image");
-        if (isImage) {
-          console.log("fileRead.type : " + fileRead[i].type);
-          console.log("fileRead[" + i + "].name : " + fileRead[i].name);
-          console.log("Inside service when pdf is selected length" + this.images.length)
-          let dataURL = await this.loadLocalImages(fileRead, i);
-          const imgValue = new Images(i, fileRead[i].name, 'N', this.authService.email, dataURL);
-          this.localImages.push(imgValue);
-          console.log("after sorting" + this.localImages[0].fileName);
-          // console.log("addImage: " + dataURL);
-        }
-      }
-      this.localImages.sort((a, b) => {
-        var x = a.fileName.toLowerCase();
-        var y = b.fileName.toLowerCase();
-        if (x < y) { return -1; }
-        if (x > y) { return 1; }
-        return 0;
-      });
-      this.imagesModified.emit(this.localImages.slice());
-      if (this.localImages.length > 1) {
-        this.nextImages = false;
-        this.nextImageChange.emit(this.nextImages);
-      }
+    console.log("server file count" + this.localImages.length);
+    if (this.localImages.length == 0) {
+      this.loadLocalImages(fileRead, "NEW");
     }
-    else{
-      await this.getServerImages();
-      console.log("server Images length after await getServerImages",this.serverImages.length );
-      if (this.serverImages.length > 0) {
-        console.log("server images length===" + this.serverImages.length);
-        // this.images.splice(0, this.images.length);
-        var filesCounts = this.serverImages.length;
-        if (filesCounts > 1) {
-          this.nextImages = false;
-        }
-        console.log("file count" + filesCount);
-        let dataURL = await this.loadArray(this.serverImages[0].fileName);
-        this.serverUrl = dataURL
-        console.log("server urlssssss" + this.serverUrl);
-        this.urlChanged.emit(this.serverUrl.slice());
-        console.log("(this.serverImages[0]: " + this.serverImages[0]);
-        if (this.serverImages.length > 1) {
-          this.nextImages = false;
-          this.nextImageChange.emit(this.nextImages);
-        }
-      }
+    else {
+      this.loadLocalImages(fileRead, "APPEND");
     }
   }
 
-  async loadLocalImages(fileRead:any,i:number) {
+  async loadLocalImages(fileRead, type) {
+    if (type == "NEW") {
+      this.localImages.splice(0, this.localImages.length);
+    }
+    var filesCount = fileRead.length;
+    console.log("file count" + filesCount);
+    for (let i = 0; i < filesCount; i++) {
+      var isImage = fileRead[i].type.includes("image");
+      if (isImage) {
+        console.log("fileRead.type : " + fileRead[i].type);
+        console.log("fileRead[" + i + "].name : " + fileRead[i].name);
+        let dataURL = await this.loadLocalImageData(fileRead, i);
+        const imgValue = new Images(i, fileRead[i].name, 'N', this.authService.userName, dataURL);
+        this.localImages.push(imgValue);
+      }
+    }
+    this.localImages.sort((a, b) => {
+      var x = a.fileName.toLowerCase();
+      var y = b.fileName.toLowerCase();
+      if (x < y) { return -1; }
+      if (x > y) { return 1; }
+      return 0;
+    });
+    console.log("localImages Count after Upload",this.localImages.length);
+    this.imagesUpdated.next({localImages: [...this.localImages]});
+    if (this.localImages.length > 1) {
+      this.nextImages = false;
+      this.nextImageChange.emit(this.nextImages);
+    }
+  }
+
+  async loadLocalImageData(fileRead: any, i: number) {
     const result = await new Promise((resolve) => {
       let reader = new FileReader();
-       if(fileRead[i].type == "image/tiff"){
-          reader.onload = (event: any) => {
-              var image = new Tiff({ buffer: event.target.result });
-              var canvas = image.toCanvas();
-              var img = convertCanvasToImage(canvas) ;
-              resolve(img.src);
-              }
-              reader.readAsArrayBuffer(fileRead[i]);
-          }else
-          {
-            reader.onload = (event: any) => {
-            resolve(event.target.result);
-          }
-          reader.readAsDataURL(fileRead[i]);
+      if (fileRead[i].type == "image/tiff") {
+        reader.onload = (event: any) => {
+          var image = new Tiff({ buffer: event.target.result });
+          var canvas = image.toCanvas();
+          var img = convertCanvasToImage(canvas);
+          resolve(img.src);
         }
-      });
-      console.log(result);
-      return result;
+        reader.readAsArrayBuffer(fileRead[i]);
+      } else {
+        reader.onload = (event: any) => {
+          resolve(event.target.result);
+        }
+        reader.readAsDataURL(fileRead[i]);
+      }
+    });
+    console.log(result);
+    return result;
   }
-
-  getImage(imageUrl: any){
-    console.log("inside getImage"+imageUrl)
-    return this.http.get("http://localhost:4000/images/sasiocr@gmail.com/birugali_0001.tif", { responseType: 'blob' });
-  }
-
 
 
   async loadArray(serverImage: any) {
     console.log("inside load array");
-
-    console.log("inside load array",serverImage);
-
+    console.log("inside load array", serverImage);
 
     let promise = new Promise((resolve, reject) => {
       var user = this.authService.userName;
       const queryParams = `?user=${user}`;
-      this.http
-        .get<{ message: string; json: any }>(
-          this.IMAGE_BACKEND_URL + serverImage + queryParams).subscribe(responseData => {
-          console.log("responseData.json",responseData.json);
-          resolve(responseData.json);
-        });
+      this.http.get<{ message: string; json: any }>(this.IMAGE_BACKEND_URL + serverImage + queryParams).subscribe(responseData => {
+        resolve(responseData.json);
+      });
     });
     return promise;
   }
-
-  // updateXml(xmlString: any, fileName: any) {
-  //   let xmlData: any;
-  //   xmlData = {
-  //     xml: xmlString,
-  //     fileName: fileName,
-  //     folderName : fileName.slice(0,-9)
-  //   };
-  //   this.http
-  //     .put<{ message: string, name: string, completed: string }>(this.XML_BACKEND_URL + fileName, xmlData)
-  //     .subscribe(response => {
-  //       if(this.serverImages.length>0){
-  //         for (let i = 0; i < this.serverImages.length; i++) {
-  //           if (this.serverImages[i].fileName == response.name) {
-  //             console.log("name" + this.serverImages[i].fileName);
-  //             this.serverImages[i].completed = response.completed;
-  //             console.log("completed" + this.serverImages[i].completed);
-  //           }
-  //         }
-  //       }else{
-  //         for (let i = 0; i < this.localImages.length; i++) {
-  //           if (this.localImages[i].fileName == response.name) {
-  //             console.log("name" + this.localImages[i].fileName);
-  //             this.localImages[i].completed = response.completed;
-  //             console.log("completed" + this.localImages[i].completed);
-  //           }
-  //         }
-  //       }
-
-  //     });
-  // }
 
   updateCorrectedXml(fileName: any) {
     console.log("Corrected xml " + JSON.stringify(XmlModel.jsonObject));
@@ -383,21 +294,21 @@ export class ImageService implements OnInit {
       .put<{ message: string, completed: string }>(this.XML_BACKEND_URL, jsonData)
       .subscribe(response => {
         console.log("response message after correction " + response.message);
-        this.serverImages = this.getImages();
-        console.log("server image length in update "+this.serverImages.length);
-        if (this.serverImages.length > 0) {
-          for (let i = 0; i < this.serverImages.length; i++) {
-            console.log("jsonData.XmlfileName ",jsonData.XmlfileName,"this.serverImages["+i+"].fileName ",this.serverImages[i].fileName);
-            if (this.serverImages[i].fileName.slice(0,-3) + 'xml' == jsonData.XmlfileName) {
-              console.log("name" + this.serverImages[i].fileName);
-              this.serverImages[i].completed = response.completed;
-              console.log("response completed "+response.completed);
-              console.log("completed" + this.serverImages[i].completed);
+        this.localImages = this.getLocalImages();
+        console.log("server image length in update " + this.localImages.length);
+        if (this.localImages.length > 0) {
+          for (let i = 0; i < this.localImages.length; i++) {
+            console.log("jsonData.XmlfileName ", jsonData.XmlfileName, "this.localImages[" + i + "].fileName ", this.localImages[i].fileName);
+            if (this.localImages[i].fileName.slice(0, -3) + 'xml' == jsonData.XmlfileName) {
+              console.log("name" + this.localImages[i].fileName);
+              this.localImages[i].completed = response.completed;
+              console.log("response completed " + response.completed);
+              console.log("completed" + this.localImages[i].completed);
             }
           }
         } else {
           for (let i = 0; i < this.localImages.length; i++) {
-            if (this.localImages[i].fileName.slice(0,-3) + 'xml' ==jsonData.XmlfileName) {
+            if (this.localImages[i].fileName.slice(0, -3) + 'xml' == jsonData.XmlfileName) {
               console.log("name" + this.localImages[i].fileName);
               this.localImages[i].completed = response.completed;
               console.log("completed" + this.localImages[i].completed);
@@ -429,152 +340,126 @@ export class ImageService implements OnInit {
   async nextPage() {
     this.imgFileCount++;
     this.imageCountChange.emit(this.imgFileCount);
-    this.serverImages = this.getImages();
-    if (this. obtainblock == true) {
+    this.localImages = this.getLocalImages();
+    if (this.obtainblock == true) {
       $('#imgToRead').selectAreas('reset');
-   }
-
-    if (this.serverImages.length > 1) {
-      this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
-      this.urlChanged.emit(this.localUrl.slice());
-      this.fileName = this.serverImages[this.imgFileCount].fileName;
-      this.fileNameChange.emit(this.fileName);
-      console.log("inside Next this.imgFileCount after incrementing: " + this.imgFileCount);
-      if (this.serverImages.length - 1 == this.imgFileCount) {
-        this.nextImages = true;
-        this.nextImageChange.emit(this.nextImages);
-      }
-    } else {
-      this.localImages = this.getLocalImages();
-      this.localUrl = this.localImages[this.imgFileCount].dataUrl;
-      this.urlChanged.emit(this.localUrl.slice());
-      this.fileName = this.localImages[this.imgFileCount].fileName;
-      this.fileNameChange.emit(this.fileName);
-      console.log("inside Next this.imgFileCount after incrementing: " + this.imgFileCount);
-      if (this.localImages.length - 1 == this.imgFileCount) {
-        this.nextImages = true;
-        this.nextImageChange.emit(this.nextImages);
-      }
-    }
-    if (this.imgFileCount > 0) {
-      this.previousImages = false;
-      this.previousImageChange.emit(this.previousImages);
-    }
-    if (this. obtainblock == true) {
-       this.onXml();
     }
     console.log("empty the right side screen");
     $(".textElementsDiv").not(':first').remove();
     $(".textSpanDiv").empty();
 
-  }
-  onXMLservice(){
-    if (this. obtainblock == true) {
+    this.localImages = this.getLocalImages();
+    console.log("localImages count",this.localImages.length);
+    console.log("index of image to be displayed",this.imgFileCount);
+    if(this.localImages[this.imgFileCount].dataUrl == null || this.localImages[this.imgFileCount].dataUrl == "") {
+      this.localImages[this.imgFileCount].dataUrl = await this.loadArray(this.localImages[this.imgFileCount].fileName);
+    }
+    this.localUrl = this.localImages[this.imgFileCount].dataUrl;
+    this.urlChanged.emit(this.localUrl.slice());
+    this.fileName = this.localImages[this.imgFileCount].fileName;
+    this.fileNameChange.emit(this.fileName);
+    console.log("inside Next this.imgFileCount after incrementing: " + this.imgFileCount);
+
+    if (this.localImages.length - 1 == this.imgFileCount) {
+      this.nextImages = true;
+      this.nextImageChange.emit(this.nextImages);
+    }
+    if (this.imgFileCount > 0) {
+      this.previousImages = false;
+      this.previousImageChange.emit(this.previousImages);
+    }
+    if (this.obtainblock == true) {
       this.onXml();
-   }
+    }
+  }
+
+  onXMLservice() {
+    if (this.obtainblock == true) {
+      this.onXml();
+    }
   }
 
   async previousPage() {
-    this.serverImages = this.getImages();
     this.imgFileCount--;
     this.imageCountChange.emit(this.imgFileCount);
-    if (this. obtainblock == true) {
+    if (this.obtainblock == true) {
       $('#imgToRead').selectAreas('reset');
-   }
-    if (this.serverImages.length > 1) {
-      this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
-      this.urlChanged.emit(this.localUrl.slice());
-      this.fileName = this.serverImages[this.imgFileCount].fileName;
-      this.fileNameChange.emit(this.fileName);
-      console.log("inside Next this.imgFileCount after decrementing: " + this.imgFileCount);
-      if (this.serverImages.length - 1 > this.imgFileCount) {
-        this.nextImages = false;
-        this.nextImageChange.emit(this.nextImages);
-      }
-    } else {
-      this.localImages = this.getLocalImages();
-      this.localUrl = this.localImages[this.imgFileCount].dataUrl;
-      this.urlChanged.emit(this.localUrl.slice());
-      this.fileName = this.localImages[this.imgFileCount].fileName;
-      this.fileNameChange.emit(this.fileName);
-      console.log("inside Next this.imgFileCount after decrementing: " + this.imgFileCount);
-      if (this.localImages.length - 1 > this.imgFileCount) {
-        this.nextImages = false;
-        this.nextImageChange.emit(this.nextImages);
-      }
+    }
+    console.log("empty the right side screen");
+    $(".textElementsDiv").not(':first').remove();
+    $(".textSpanDiv").empty();
+
+    this.localImages = this.getLocalImages();
+    console.log("localImages count",this.localImages.length);
+    console.log("index of image to be displayed",this.imgFileCount);
+    if(this.localImages[this.imgFileCount].dataUrl == null || this.localImages[this.imgFileCount].dataUrl == "") {
+      this.localImages[this.imgFileCount].dataUrl = await this.loadArray(this.localImages[this.imgFileCount].fileName);
+    }
+    this.localUrl = this.localImages[this.imgFileCount].dataUrl;
+    this.urlChanged.emit(this.localUrl.slice());
+    this.fileName = this.localImages[this.imgFileCount].fileName;
+    this.fileNameChange.emit(this.fileName);
+    console.log("inside Next this.imgFileCount after decrementing: " + this.imgFileCount);
+    if (this.localImages.length - 1 > this.imgFileCount) {
+      this.nextImages = false;
+      this.nextImageChange.emit(this.nextImages);
     }
     if (this.imgFileCount == 0) {
       this.previousImages = true;
       this.previousImageChange.emit(this.previousImages);
     }
-    if (this. obtainblock == true) {
+    if (this.obtainblock == true) {
       this.onXml();
-   }
-   console.log("empty the right side screen");
-  //  $(".textElementsDiv").empty();
-   $(".textElementsDiv").not(':first').remove();
-   $(".textSpanDiv").empty();
+    }
   }
 
   async LastImage() {
-    this.serverImages = this.getImages();
-    if (this. obtainblock == true) {
+    if (this.obtainblock == true) {
       $('#imgToRead').selectAreas('reset');
-   }
-    if (this.serverImages.length > 1) {
-      this.imgFileCount = this.serverImages.length - 1;
-      this.imageCountChange.emit(this.imgFileCount);
-      this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
-      this.urlChanged.emit(this.localUrl.slice());
-      this.fileName = this.serverImages[this.imgFileCount].fileName;
-      this.fileNameChange.emit(this.fileName);
-      if (this.serverImages.length - 1 == this.imgFileCount) {
-        this.nextImages = true;
-        this.nextImageChange.emit(this.nextImages);
-        this.previousImages = false;
-        this.previousImageChange.emit(this.previousImages);
-      }
-    } else {
-      this.localImages = this.getLocalImages();
-      this.imgFileCount = this.localImages.length - 1;
-      this.localUrl = this.localImages[this.imgFileCount].dataUrl;
-      this.urlChanged.emit(this.localUrl.slice());
-      this.fileName = this.localImages[this.imgFileCount].fileName;
-      this.fileNameChange.emit(this.fileName);
-      if (this.localImages.length - 1 == this.imgFileCount) {
-        this.nextImages = true;
-        this.nextImageChange.emit(this.nextImages);
-        this.previousImages = false;
-        this.previousImageChange.emit(this.previousImages);
-      }
     }
-    if (this. obtainblock == true) {
+    console.log("empty the right side screen");
+    $(".textElementsDiv").not(':first').remove();
+    $(".textSpanDiv").empty();
+
+    this.localImages = this.getLocalImages();
+    this.imgFileCount = this.localImages.length - 1;
+    this.imageCountChange.emit(this.imgFileCount);
+    if(this.localImages[this.imgFileCount].dataUrl == null || this.localImages[this.imgFileCount].dataUrl == "") {
+      this.localImages[this.imgFileCount].dataUrl = await this.loadArray(this.localImages[this.imgFileCount].fileName);
+    }
+    this.localUrl = this.localImages[this.imgFileCount].dataUrl;
+    this.urlChanged.emit(this.localUrl.slice());
+    this.fileName = this.localImages[this.imgFileCount].fileName;
+    this.fileNameChange.emit(this.fileName);
+    if (this.localImages.length - 1 == this.imgFileCount) {
+      this.nextImages = true;
+      this.nextImageChange.emit(this.nextImages);
+      this.previousImages = false;
+      this.previousImageChange.emit(this.previousImages);
+    }
+    if (this.obtainblock == true) {
       this.onXml();
-   }
-   console.log("empty the right side screen");
-   $(".textElementsDiv").not(':first').remove();
-   $(".textSpanDiv").empty();
+    }
   }
 
   async firstImage() {
     this.imgFileCount = 0;
     this.imageCountChange.emit(this.imgFileCount);
-    this.serverImages = this.getImages();
-    if (this. obtainblock == true) {
+    if (this.obtainblock == true) {
       $('#imgToRead').selectAreas('reset');
-   }
-    if (this.serverImages.length > 1) {
-      this.localUrl = await this.loadArray(this.serverImages[this.imgFileCount].fileName);
-      this.urlChanged.emit(this.localUrl.slice());
-      this.fileName = this.serverImages[this.imgFileCount].fileName;
-      this.fileNameChange.emit(this.fileName);
-    } else {
-      this.localImages = this.getLocalImages();
-      this.localUrl = this.localImages[this.imgFileCount].dataUrl;
-      this.urlChanged.emit(this.localUrl.slice());
-      this.fileName = this.localImages[this.imgFileCount].fileName;
-      this.fileNameChange.emit(this.fileName);
     }
+    console.log("empty the right side screen");
+    $(".textElementsDiv").not(':first').remove();
+    $(".textSpanDiv").empty();
+
+    this.localImages = this.getLocalImages();
+    if(this.localImages[this.imgFileCount].dataUrl == null || this.localImages[this.imgFileCount].dataUrl == "") {
+      this.localImages[this.imgFileCount].dataUrl = await this.loadArray(this.localImages[this.imgFileCount].fileName);
+    }
+    this.localUrl = this.localImages[this.imgFileCount].dataUrl;
+    this.urlChanged.emit(this.localUrl.slice());
+    this.fileName = this.localImages[this.imgFileCount].fileName;
+    this.fileNameChange.emit(this.fileName);
 
     if (this.imgFileCount == 0) {
       this.previousImages = true;
@@ -582,41 +467,38 @@ export class ImageService implements OnInit {
       this.nextImages = false;
       this.nextImageChange.emit(this.nextImages);
     }
-    if (this. obtainblock == true) {
+    if (this.obtainblock == true) {
       this.onXml();
-   }
-   console.log("empty the right side screen");
-   $(".textElementsDiv").not(':first').remove();
-   $(".textSpanDiv").empty();
+    }
   }
 
   onXml() {
-    this.serverImages = this.getImages();
-    console.log("serverImagesLength in onXml",this.serverImages.length);
-    if(this.serverImages.length > 0){
-      console.log("server image length "+this.serverImages.length);
-      console.log("image file count "+this.imgFileCount);
-      this.fileName = this.serverImages[this.imgFileCount].fileName;
-      console.log("completion status: ",this.serverImages[this.imgFileCount].completed);
-      if(this.serverImages[this.imgFileCount].completed =="Y") {
+    this.localImages = this.getLocalImages();
+    console.log("localImages in onXml", this.localImages.length);
+    if (this.localImages.length > 0) {
+      console.log("server image length " + this.localImages.length);
+      console.log("image file count " + this.imgFileCount);
+      this.fileName = this.localImages[this.imgFileCount].fileName;
+      console.log("completion status: ", this.localImages[this.imgFileCount].completed);
+      if (this.localImages[this.imgFileCount].completed == "Y") {
         this.getFileAsJson(this.fileName);
       }
-    }else{
+    } else {
       this.localImages = this.getLocalImages();
       this.fileName = this.localImages[this.imgFileCount].fileName;
-      console.log("completion status: ",this.localImages[this.imgFileCount].completed);
-      if(this.localImages[this.imgFileCount].completed =="Y") {
-      this.getFileAsJson(this.fileName);
+      console.log("completion status: ", this.localImages[this.imgFileCount].completed);
+      if (this.localImages[this.imgFileCount].completed == "Y") {
+        this.getFileAsJson(this.fileName);
+      }
     }
   }
-}
 
-  getFileAsJson(fileName : any) {
-    console.log("file name in run ocr "+ fileName);
+  getFileAsJson(fileName: any) {
+    console.log("file name in run ocr " + fileName);
     const queryParams = `?fileName=${fileName}&type=GET-XML`;
-    this.http.get<{ message: string; xmlData:any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
-      console.log("reponseData in getFileAsJson",response.xmlData);
-      console.log("xml as json string "+JSON.stringify(response.xmlData));
+    this.http.get<{ message: string; xmlData: any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
+      console.log("reponseData in getFileAsJson", response.xmlData);
+      console.log("xml as json string " + JSON.stringify(response.xmlData));
       XmlModel.jsonObject = response.xmlData;
       this.retain(XmlModel.jsonObject);
       this.updateXmlModel(XmlModel.jsonObject);
@@ -632,55 +514,41 @@ export class ImageService implements OnInit {
     });
   }
 
-  retain(jsonObj){
-    let areaarray=[];
+  retain(jsonObj) {
+    let areaarray = [];
     // var jsonObj = JSON.parse(json);
-     console.log("inside retain jsonObj: "+JSON.stringify(jsonObj));
-     if(jsonObj['page'].block){
-     var blocks = jsonObj['page'].block;
-    //  console.log("block length " + blocks.length);
+    console.log("inside retain jsonObj: " + JSON.stringify(jsonObj));
+    if (jsonObj['page'].block) {
+      var blocks = jsonObj['page'].block;
+      //  console.log("block length " + blocks.length);
 
-     for (var i = 0; i < blocks.length; i++) {
-       var blockNumber = (blocks[i]["$"].BlockNumber);
-       console.log("blockNumber" + blockNumber);
-       console.log("blockRowStart from json "+blocks[i].rowStart);
-       var blockRowStart = blocks[i]["$"].rowStart;
-       var blockRowEnd = blocks[i]["$"].rowEnd;
-       var blockColStart = blocks[i]["$"].colStart;
-       var blockColEnd = blocks[i]["$"].colEnd;
-       var x = (blockColEnd - blockColStart);
-       console.log("x in retain "+x);
-       console.log("percentage in retain ***************"+this.percentage);
-       var blockwidth = (blockColEnd - blockColStart) * this.percentage / 100;
-       console.log("blockwidth" + blockwidth);
-       var blockheight = (blockRowEnd - blockRowStart) * this.percentage / 100;
-       console.log("blockheight" + blockheight);
-       var X = blockColStart * this.percentage / 100;
-       console.log("blockX" + X);
-       var Y = blockRowStart * this.percentage / 100;
-       console.log("blockY" + Y);
-       areaarray[i] = { "id": blockNumber, "x": X, "y": Y, "width": blockwidth, "height": blockheight };
-     }
+      for (var i = 0; i < blocks.length; i++) {
+        var blockNumber = (blocks[i]["$"].BlockNumber);
+        console.log("blockNumber" + blockNumber);
+        console.log("blockRowStart from json " + blocks[i].rowStart);
+        var blockRowStart = blocks[i]["$"].rowStart;
+        var blockRowEnd = blocks[i]["$"].rowEnd;
+        var blockColStart = blocks[i]["$"].colStart;
+        var blockColEnd = blocks[i]["$"].colEnd;
+        var x = (blockColEnd - blockColStart);
+        console.log("x in retain " + x);
+        console.log("percentage in retain ***************" + this.percentage);
+        var blockwidth = (blockColEnd - blockColStart) * this.percentage / 100;
+        console.log("blockwidth" + blockwidth);
+        var blockheight = (blockRowEnd - blockRowStart) * this.percentage / 100;
+        console.log("blockheight" + blockheight);
+        var X = blockColStart * this.percentage / 100;
+        console.log("blockX" + X);
+        var Y = blockRowStart * this.percentage / 100;
+        console.log("blockY" + Y);
+        areaarray[i] = { "id": blockNumber, "x": X, "y": Y, "width": blockwidth, "height": blockheight };
+      }
     }
-     $('img#imgToRead').selectAreas('destroy');
-     $('img#imgToRead').selectAreas({
+    $('img#imgToRead').selectAreas('destroy');
+    $('img#imgToRead').selectAreas({
       onChanged: debugQtyAreas,
       areas: areaarray
     });
-
-    // $('#nextImg').click(function () {
-    //   console.log("onclick");
-    //   $('#imgToRead').selectAreas('reset');
-    // });
-    // $('#previousImg').click(function () {
-    //   $('#imgToRead').selectAreas('reset');
-    // });
-    // $('#firstImg').click(function () {
-    //   $('#imgToRead').selectAreas('reset');
-    // });
-    // $('#lastImg').click(function () {
-    //   $('#imgToRead').selectAreas('reset');
-    // });
 
     $('#buttonXml').click(function () {
       console.log("onclick");
@@ -696,13 +564,13 @@ export class ImageService implements OnInit {
     };
   }
 
-  screenview(){
+  screenview() {
     if (this.fit == 'width') {
       this.clientpercent = this.percentage;
       setTimeout(() => this.fitwidth(), 50);
       var block;
-    block = document.getElementsByClassName("select-areas-outline");
-    if ( block.length>0){ setTimeout(() => this.blocksize(), 50);}
+      block = document.getElementsByClassName("select-areas-outline");
+      if (block.length > 0) { setTimeout(() => this.blocksize(), 50); }
 
     }
     else if (this.fit == 'height') {
@@ -757,7 +625,7 @@ export class ImageService implements OnInit {
     // console.log("the current percentage is "+retain.percentage)
     var block;
     block = document.getElementsByClassName("select-areas-outline");
-    if ( block.length>0){ this.blocksize();}
+    if (block.length > 0) { this.blocksize(); }
 
     myImg.style.width = (realWidth * this.percentage / 100) + "px";
     falseimg.style.width = myImg.style.width;
@@ -773,9 +641,9 @@ export class ImageService implements OnInit {
 
 
     var divwidth = document.getElementById('content').offsetWidth;
-    console.log("divelementheight",divwidth);
-    console.log("myImg on fitwidth",myImg);
-    if(myImg != null) {
+    console.log("divelementheight", divwidth);
+    console.log("myImg on fitwidth", myImg);
+    if (myImg != null) {
       myImg.style.width = divwidth + "px";
       falseimg.style.width = myImg.style.width;
       var currWidth = myImg.clientWidth;
@@ -806,12 +674,12 @@ export class ImageService implements OnInit {
     falseimg.style.height = myImg.style.height;
     console.log("currheight" + myImg.naturalHeight)
     this.percentage = 100;
-     this.headerService.setpercentagevary(this.percentage);
+    this.headerService.setpercentagevary(this.percentage);
 
     // console.log("the current percentage is "+retain.percentage)
     var block;
     block = document.getElementsByClassName("select-areas-outline");
-    if ( block.length>0){ this.blocksize();}
+    if (block.length > 0) { this.blocksize(); }
 
 
   }
@@ -839,7 +707,7 @@ export class ImageService implements OnInit {
     falseimg.style.height = myImg.style.height;
     //  this.blocksize();
   }
-  sizebypercentage(){
+  sizebypercentage() {
     var myImg;
     var zoomlevel = this.percentage;
     myImg = document.getElementById("imgToRead");
@@ -866,7 +734,7 @@ export class ImageService implements OnInit {
     // console.log("the current percentage is "+retain.percentage)
     var block;
     block = document.getElementsByClassName("select-areas-outline");
-    if ( block.length>0){ this.blocksize();}
+    if (block.length > 0) { this.blocksize(); }
 
     myImg = document.getElementById("imgToRead");
     var falseimg;
@@ -892,7 +760,7 @@ export class ImageService implements OnInit {
     // console.log("the current percentage is "+retain.percentage)
     var block;
     block = document.getElementsByClassName("select-areas-outline");
-    if ( block.length>0){ this.blocksize();}
+    if (block.length > 0) { this.blocksize(); }
     myImg = document.getElementById("imgToRead");
     var falseimg;
     falseimg = document.getElementById("image")
@@ -944,7 +812,7 @@ export class ImageService implements OnInit {
   }
 
   selectBlockservice() {
-    this.obtainblock=true;
+    this.obtainblock = true;
     $('img#imgToRead').selectAreas('destroy');
     console.log("inside script");
     let areasarray = BlockModel.blockArray.reverse();
@@ -1001,21 +869,16 @@ export class ImageService implements OnInit {
         // setTimeout(() =>  this. selectBlockservice(),.001);
 
       }
-  //     var SaveToXML = document.getElementById("SaveToXML");
-  // console.log("SaveToXML: "+SaveToXML);
-  // SaveToXML.click();
 
+      $('img#imgToRead').selectAreas('destroy');
+      console.log("inside script");
+      let areasarray = BlockModel.blockArray.reverse();
+      console.log("block.model.arrray^^^^   ^^" + JSON.stringify(areasarray));
+      $('img#imgToRead').selectAreas({
+        position: "absolute",
 
-  $('img#imgToRead').selectAreas('destroy');
-  console.log("inside script");
-  let areasarray = BlockModel.blockArray.reverse();
-  console.log("block.model.arrray^^^^   ^^" + JSON.stringify(areasarray));
-  // areasarray
-  $('img#imgToRead').selectAreas({
-    position: "absolute",
-
-    areas: areasarray
-  });
+        areas: areasarray
+      });
     }
   }
 
@@ -1025,16 +888,15 @@ export class ImageService implements OnInit {
     this.clientpercent = this.percentage;
     this.blocksize()
   }
-  unselectBlock(){
-    this.obtainblock=false;
+  unselectBlock() {
+    this.obtainblock = false;
     $('img#imgToRead').selectAreas('destroy');
 
   };
 }
 function convertCanvasToImage(canvas) {
-  console.log("in convert................");
+  console.log("In Tiff Image conversion");
   var image = new Image();
   image.src = canvas.toDataURL("image/png");
-  console.log("image source"+image.src);
   return image;
 }

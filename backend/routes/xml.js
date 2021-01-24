@@ -28,27 +28,27 @@ var config = {
 var cos = new cloudStorage.S3(config);
 
 function doCreateObject(bucketName, xmlFileName, xmlData) {
-  console.log('Creating xmlFile',xmlFileName);
+  console.log('Creating xmlFile', xmlFileName);
   return cos.putObject({
-      Bucket: bucketName,
-      Key: xmlFileName,
-      Body: xmlData
+    Bucket: bucketName,
+    Key: xmlFileName,
+    Body: xmlData
   }).promise();
 }
 
 function getItem(bucketName, itemName, type) {
   console.log(`Retrieving item from bucket: ${bucketName}, key: ${itemName}`);
   return cos.getObject({
-      Bucket: bucketName,
-      Key: itemName
+    Bucket: bucketName,
+    Key: itemName
   }).promise()
-  .then((data) => {
+    .then((data) => {
       if (data != null) {
         // console.log('File Contents:\n' + Buffer.from(data.Body).toString());
-        if(type == "OCR") {
-          console.log("image Metadata",data.Metadata);
-          console.log("image Type",data.ContentType);
-          if(data.ContentType == "image/tiff") {
+        if (type == "OCR") {
+          console.log("image Metadata", data.Metadata);
+          console.log("image Type", data.ContentType);
+          if (data.ContentType == "image/tiff") {
             // console.log("base64Data",base64Data);
             console.log("inside get Tiff image base64");
             const tiffArrayBuff = Buffer.from(data.Body).buffer;
@@ -63,27 +63,27 @@ function getItem(bucketName, itemName, type) {
           return Buffer.from(data.Body).toString();
         }
       }
-  })
-  .catch((e) => {
+    })
+    .catch((e) => {
       console.error(`ERROR: ${e.code} - ${e.message}\n`);
       return "The specified key does not exists in bucket";
-  });
+    });
 }
 
 router.put("", checkAuth, (req, res, next) => {
   xmlFileName = req.body.XmlfileName;
   const mail = req.userData.email;
   const bucketName = req.userData.bucketName;
-  console.log("bucketName inside put XML ",bucketName);
-  console.log("mail inside put XML ",mail);
-  console.log("xmlFileName inside put XML ",xmlFileName);
+  console.log("bucketName inside put XML ", bucketName);
+  console.log("mail inside put XML ", mail);
+  console.log("xmlFileName inside put XML ", xmlFileName);
   var json = req.body.json;
-  console.log("xml content in put request ",JSON.stringify(json));
+  console.log("xml content in put request ", JSON.stringify(json));
 
   var builder = new xml2js.Builder();
   var formattedXml = builder.buildObject(json);
 
-  console.log("formattedXml "+formattedXml);
+  console.log("formattedXml " + formattedXml);
 
   doCreateObject(bucketName, xmlFileName, formattedXml).then(() => {
     console.log("saved xml file");
@@ -92,7 +92,7 @@ router.put("", checkAuth, (req, res, next) => {
       completed: "Y"
     });
   }).catch((err) => {
-    console.log("error while saving xml file:",err);
+    console.log("error while saving xml file:", err);
     res.status(500).json({
       message: "Couldn't save Text File. err: " + err,
       completed: "N"
@@ -100,27 +100,27 @@ router.put("", checkAuth, (req, res, next) => {
   });
 });
 
-router.get("/:fileName", checkAuth,(req, res, next) =>{
+router.get("/:fileName", checkAuth, (req, res, next) => {
   console.log("in xml get fileName")
   // const mail = req.query.user;
   const mail = req.userData.email;
   const bucketName = req.userData.bucketName;
-  console.log("bucketName inside get fileName XML ",bucketName);
-  console.log("mail inside get fileName XML ",mail);
+  console.log("bucketName inside get fileName XML ", bucketName);
+  console.log("mail inside get fileName XML ", mail);
 
-  console.log("ImagefileName in get XML fileName call "+req.params.fileName);
-  const xmlFileName = req.params.fileName.slice(0,-3) + 'xml';
-  console.log("xmlFileName in get XML fileName call "+xmlFileName);
-  getItem(bucketName, xmlFileName,"GET").then(content => {
-    if(content == "The specified key does not exists in bucket") {
-      console.log("error while retrieving:",content);
+  console.log("ImagefileName in get XML fileName call " + req.params.fileName);
+  const xmlFileName = req.params.fileName.slice(0, -3) + 'xml';
+  console.log("xmlFileName in get XML fileName call " + xmlFileName);
+  getItem(bucketName, xmlFileName, "GET").then(content => {
+    if (content == "The specified key does not exists in bucket") {
+      console.log("error while retrieving:", content);
       res.status(400).json({
         message: content,
         xmlData: ""
       });
     }
     else {
-      console.log("content  retrieved for downloading XML:",content);
+      console.log("content  retrieved for downloading XML:", content);
       res.status(201).json({
         message: "xml read successfully",
         xmlData: content
@@ -130,20 +130,20 @@ router.get("/:fileName", checkAuth,(req, res, next) =>{
 });
 
 
-router.get("", checkAuth,(req, res, next) =>{
+router.get("", checkAuth, (req, res, next) => {
   console.log("in run ocr xml get fileName")
   const mail = req.userData.email;
   const bucketName = req.userData.bucketName;
-  console.log("bucketName inside get fileName XML ",bucketName);
-  console.log("mail inside get fileName XML ",mail);
-  console.log("fileName inside get XML ",req.query.fileName);
-  console.log("type inside get XML ",req.query.type);
-  if(req.query.type == "GET-XML") {
-    const xmlFileName = req.query.fileName.slice(0,-3) + 'xml';
-    console.log("xmlFileName in get call "+xmlFileName);
+  console.log("bucketName inside get fileName XML ", bucketName);
+  console.log("mail inside get fileName XML ", mail);
+  console.log("fileName inside get XML ", req.query.fileName);
+  console.log("type inside get XML ", req.query.type);
+  if (req.query.type == "GET-XML") {
+    const xmlFileName = req.query.fileName.slice(0, -3) + 'xml';
+    console.log("xmlFileName in get call " + xmlFileName);
     getItem(bucketName, xmlFileName, "GET").then(xmlContent => {
-      if(xmlContent == "The specified key does not exists in bucket") {
-        console.log("error while retrieving:",xmlContent);
+      if (xmlContent == "The specified key does not exists in bucket") {
+        console.log("error while retrieving:", xmlContent);
         res.status(400).json({
           message: xmlContent,
           xmlData: ""
@@ -152,7 +152,7 @@ router.get("", checkAuth,(req, res, next) =>{
       else {
         // console.log("xmlContent retrieved for XML",xmlContent);
         xml2js.parseString(xmlContent, function (err, result) {
-          console.log("xml result as JSON in "+JSON.stringify(result));
+          console.log("xml result as JSON in " + JSON.stringify(result));
           res.status(201).json({
             message: "xml read successfully",
             xmlData: result
@@ -161,12 +161,12 @@ router.get("", checkAuth,(req, res, next) =>{
       }
     });
   }
-  else if(req.query.type == "GET-OCR-XML"){
-    const xmlFileName = req.query.fileName.slice(0,-3) + 'xml';
-    console.log("xmlFileName in get call "+xmlFileName);
+  else if (req.query.type == "GET-OCR-XML") {
+    const xmlFileName = req.query.fileName.slice(0, -3) + 'xml';
+    console.log("xmlFileName in get call " + xmlFileName);
     getItem(bucketName, xmlFileName, "GET").then(xmlContent => {
-      if(xmlContent == "The specified key does not exists in bucket") {
-        console.log("error while retrieving:",xmlContent);
+      if (xmlContent == "The specified key does not exists in bucket") {
+        console.log("error while retrieving:", xmlContent);
         res.status(400).json({
           message: xmlContent,
           xmlData: ""
@@ -174,11 +174,11 @@ router.get("", checkAuth,(req, res, next) =>{
       }
       else {
         // console.log("content retrieved for XML while running OCR:",content);
-        console.log("getting Image Data for",req.query.fileName);
+        console.log("getting Image Data for", req.query.fileName);
 
         getItem(bucketName, req.query.fileName, "OCR").then(imgContent => {
-          if(imgContent == "The specified key does not exists in bucket") {
-            console.log("error while retrieving:",imgContent);
+          if (imgContent == "The specified key does not exists in bucket") {
+            console.log("error while retrieving:", imgContent);
             res.status(400).json({
               message: imgContent,
               xmlData: ""
@@ -186,11 +186,11 @@ router.get("", checkAuth,(req, res, next) =>{
           }
           else {
             console.log("Base64String image Data retrieved in get Request for RUN-OCR");
-            console.log("data before appending imageData",xmlContent);
+            console.log("data before appending imageData", xmlContent);
             xml2js.parseString(xmlContent, (err, result) => {
-              console.log("xml result inside xml2js.parse",result);
+              console.log("xml result inside xml2js.parse", result);
               // result["page"]["imageData"] =  imgContent;
-              result["page"]["imageData"] =  imgContent;
+              result["page"]["imageData"] = imgContent;
               const builder = new xml2js.Builder();
               xmlContent = builder.buildObject(result);
               // console.log("data after appending imageData",xmlContent);
@@ -217,20 +217,20 @@ router.get("", checkAuth,(req, res, next) =>{
               // writeStream.end();
             });
             request.post({
-                url: process.env.RUN_OCR_ADDRESS,
-                port: process.env.RUN_OCR_PORT,
-                method:"POST",
-                headers:{
-                    'Content-Type': 'application/xml',
-                },
-                 body: xmlContent
+              url: process.env.RUN_OCR_ADDRESS,
+              port: process.env.RUN_OCR_PORT,
+              method: "POST",
+              headers: {
+                'Content-Type': 'application/xml',
+              },
+              body: xmlContent
             },
-            function(error, response, body){
+              function (error, response, body) {
                 console.log(response.statusCode);
-                if(error == null) {
-                  console.log("output on RUN-OCR",body);
+                if (error == null) {
+                  console.log("output on RUN-OCR", body);
                   xml2js.parseString(body, function (err, result) {
-                    console.log("xml result as JSON in "+JSON.stringify(result));
+                    console.log("xml result as JSON in " + JSON.stringify(result));
                     res.status(201).json({
                       message: "xml read successfully",
                       xmlData: result
@@ -239,17 +239,17 @@ router.get("", checkAuth,(req, res, next) =>{
                   doCreateObject(bucketName, xmlFileName, body).then(() => {
                     console.log("saved OCR output xml file");
                   }).catch((err) => {
-                    console.log("error while saving xml file:",err);
+                    console.log("error while saving xml file:", err);
                   });
                 }
                 else {
-                  console.log("error while RUN-OCR",error);
+                  console.log("error while RUN-OCR", error);
                   res.status(400).json({
                     message: error,
                     xmlData: ""
                   });
                 }
-            });
+              });
           }
         });
       }
