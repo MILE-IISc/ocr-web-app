@@ -449,6 +449,37 @@
         parent._remove(id);
         fireEvent("changed");
       },
+      splitSelection = function (event) {
+        console.log("Inside double-click handler");
+        cancelEvent(event);
+        focus();
+
+        var mousePosition = getMousePosition(event);
+        var newHeight = mousePosition[1] - selectionOrigin[1];
+        var oldHeight = area.height;
+
+        area.height = newHeight;
+
+        var newArea = {
+          x: area.x,
+          y: mousePosition[1],
+          width: area.width,
+          height: oldHeight - newHeight,
+        };
+        $('img#imgToRead').selectAreas('add', newArea);
+
+        fireEvent("changed");
+        refresh("releaseSelection");
+      },
+      menuOnSelection = function (event) {
+        console.log("Inside right click handler");
+        cancelEvent(event);
+        focus();
+        isMenuOpen = true;
+        $("#menu").css("display", "block");
+        $("#menu").css("left", event.clientX + "px");
+        $("#menu").css("top", event.clientY + "px");
+      },
 	    updateBlockNumbers = function (event) {
         var updateButton = document.getElementById("btUpdateBlockNumbers")
         updateButton.click();
@@ -541,36 +572,11 @@
       $selection.mousedown(pickSelection).bind("touchstart", pickSelection);
     }
 
-    // Allow right click on block
-    $selection.contextmenu((e) => {
-      console.log("Inside right click handler");
-      e.preventDefault();
-      this.isMenuOpen = true;
-      $("#menu").css("display", "block");
-      $("#menu").css("left", e.clientX + "px");
-      $("#menu").css("top", e.clientY + "px");
-    });
-
     // Allow double on block
-    $selection.dblclick((e) => {
-      console.log("Inside double click handler");
-      var parent = $(".select-areas-background-area").parent();
-      var clickedPoint = {
-        x: e.clientX - parent.offset().left,
-        y: e.clientY- parent.offset().top
-      };
-      var doubleClickedArea = $('img#imgToRead').selectAreas('contains', clickedPoint);
-      var doubleClickedAreaNewHeight = clickedPoint.y - doubleClickedArea.y;
-      var newArea = {
-        x: doubleClickedArea.x,
-        y: clickedPoint.y,
-        width: doubleClickedArea.width,
-        height: doubleClickedArea.height - doubleClickedAreaNewHeight,
-      };
-      doubleClickedArea.height = doubleClickedAreaNewHeight;
-      $('img#imgToRead').selectAreas('add', newArea);
-      $('img#imgToRead').selectAreas('_refresh');
-    });
+    $selection.dblclick(splitSelection);
+
+    // Allow right click on block
+    $selection.contextmenu(menuOnSelection);
 
     focus();
 
