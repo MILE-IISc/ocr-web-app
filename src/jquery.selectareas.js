@@ -5,18 +5,16 @@
 //  */
 
 (function ($) {
-  var $x = 1;
   var isMenuOpen = true;
   $.imageArea = function (parent, id) {
-
     var options = parent.options,
       $image = parent.$image,
       $trigger = parent.$trigger,
       $outline,
-      $blockNumber,
       $selection,
       $resizeHandlers = {},
       $btDelete,
+      $blockNumber,
       resizeHorizontally = true,
       resizeVertically = true,
       selectionOffset = [0, 0],
@@ -81,7 +79,6 @@
         }
       },
       updateSelection = function () {
-
         // Update the outline layer
         $outline.css({
           cursor: "default",
@@ -103,7 +100,6 @@
           "z-index": area.z + 2
         });
       },
-
       updateResizeHandlers = function (show) {
         if (!options.allowResize) {
           return;
@@ -223,7 +219,6 @@
       },
       startSelection = function (event) {
         cancelEvent(event);
-        $x = $x + 1;
 
         // Reset the selection size
         area.width = options.minSize[0];
@@ -439,15 +434,6 @@
         if (area.width < 15 || area.height < 15) {
           deleteSelection();
         }
-        // autoSave();
-      },
-      blockNumberUpdate = function (event) {
-        var updateButton = document.getElementById("blockno")
-        updateButton.click();
-      },
-      autoSave = function (event) {
-        var saveToXML = document.getElementById("SaveToXML");
-        saveToXML.click();
       },
       deleteSelection = function (event) {
         cancelEvent(event);
@@ -462,6 +448,10 @@
         }
         parent._remove(id);
         fireEvent("changed");
+      },
+	    updateBlockNumbers = function (event) {
+        var updateButton = document.getElementById("btUpdateBlockNumbers")
+        updateButton.click();
       },
       getElementOffset = function (object) {
         var offset = $(object).offset();
@@ -495,7 +485,7 @@
 
 
     // Initialize an outline layer and place it above the trigger layer
-    $outline = $("<div class=\"select-areas-outline\" id=\"outline\" />")
+    $outline = $("<div class=\"select-areas-outline\" />")
       .css({
         display: "block",
         opacity: options.outlineOpacity,
@@ -504,7 +494,7 @@
       .insertAfter($trigger);
 
     // Initialize a selection layer and place it above the outline layer
-    $selection = $("<div (click)='$openMenu' id=\"backgroundArea\"/>")
+    $selection = $("<div (click)='$openMenu'/>")
       .addClass("select-areas-background-area")
       .css({
         // background : "#fff url(" + $image.attr("src") + ") no-repeat",
@@ -516,7 +506,7 @@
     // Initialize all handlers
     if (options.allowResize) {
       $.each(["nw", "n", "ne", "e", "se", "s", "sw", "w"], function (key, card) {
-        $resizeHandlers[card] = $("<div class=\"select-areas-resize-handler " + card + "\" id=\"selectarea\"/>")
+        $resizeHandlers[card] = $("<div class=\"select-areas-resize-handler " + card + "\"/>")
           .css({
             opacity: 0.5,
             position: "absolute",
@@ -532,7 +522,7 @@
     if (options.allowDelete) {
       var bindToDelete = function ($obj) {
         $obj.click(deleteSelection)
-        $obj.click(blockNumberUpdate)
+          .click(updateBlockNumbers)
           .bind("touchstart", deleteSelection)
           .bind("tap", deleteSelection);
         return $obj;
@@ -551,10 +541,8 @@
       $selection.mousedown(pickSelection).bind("touchstart", pickSelection);
     }
 
-    focus();
-
     // Allow right click on block
-    $('.select-areas-background-area').bind('contextmenu', (e) => {
+    $selection.contextmenu((e) => {
       console.log("Inside right click handler");
       e.preventDefault();
       this.isMenuOpen = true;
@@ -564,12 +552,12 @@
     });
 
     // Allow double on block
-    $(".select-areas-background-area").dblclick((event) => {
+    $selection.dblclick((e) => {
       console.log("Inside double click handler");
       var parent = $(".select-areas-background-area").parent();
       var clickedPoint = {
-        x: event.clientX - parent.offset().left,
-        y: event.clientY- parent.offset().top
+        x: e.clientX - parent.offset().left,
+        y: e.clientY- parent.offset().top
       };
       var doubleClickedArea = $('img#imgToRead').selectAreas('contains', clickedPoint);
       var doubleClickedAreaNewHeight = clickedPoint.y - doubleClickedArea.y;
@@ -583,6 +571,8 @@
       $('img#imgToRead').selectAreas('add', newArea);
       $('img#imgToRead').selectAreas('_refresh');
     });
+
+    focus();
 
     return {
       getData: getData,
