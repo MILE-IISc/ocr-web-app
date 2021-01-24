@@ -47,11 +47,11 @@
     <mat-icon>get_app</mat-icon>
     </button>
 
-    <button mat-icon-button data-toggle="tooltip" title="Save(Ctrl+s)" (click)="onSave()">
+    <button mat-icon-button data-toggle="tooltip" title="Save Blocks(Ctrl+s)" (click)="onSave()">
       <mat-icon>save</mat-icon>
       </button>
 
-      <button mat-icon-button data-toggle="tooltip" title="Save XML(Ctrl+s)" (click)="deleteblocks()">
+      <button mat-icon-button data-toggle="tooltip" title="Delete Blocks" (click)="deleteblocks()">
         <mat-icon>delete_outline</mat-icon>
         </button>
 
@@ -123,7 +123,7 @@
           [style.top.px]="text.lineRowStart*(this.percentage/100)"
           [style.margin-inline-start.px]="text.lineColStart*(this.percentage/100)"
 
-          [style.left.px]="text.lineColStart*(this.percentage/100)"
+
           [style.height.px]="text.txtheight*(this.percentage/100)">
 
       </span>
