@@ -139,10 +139,13 @@ import { SaveDetectorDirective } from './shared/savedirective';
     MatNativeDateModule
   ],
   providers: [
-    { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'fill' } }
-    , HeaderService, AuthService, ImageService,
+    { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'fill' } },
+    HeaderService,
+    AuthService,
+    ImageService,
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
-    { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },],
+    { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
+  ],
   bootstrap: [AppComponent],
   entryComponents: [ErrorComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
