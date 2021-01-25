@@ -2,11 +2,12 @@
 
 ## 1. Build docker image
 
+Trigger build using `docker build` command
 ```
 $ docker build -t ocr-web-app .
 ```
 
-This will take some time to complete.
+This will take some time to complete, and you would see output as shown below:
 ```
 $ docker build -t ocr-web-app .
 Sending build context to Docker daemon  105.8MB
