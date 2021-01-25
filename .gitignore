@@ -52,3 +52,4 @@ Thumbs.db
 !/backend/images/.gitkeep
 /backend/OCR-WEB-UI/*
 **nodemon.json
+**.env
