@@ -100,14 +100,15 @@ Open http://localhost:8080/ in your browser.
 
 # Troubleshooting
 
-## 1. See logs of `Node.js` backend:
+1. See logs of `Node.js` backend:
 
 ```
 $ docker logs iisc-ocr-web-app
 ```
 
-## 2. See logs of `Angular` frontend code
-Press Ctrl+Shift+I (on Chrome/Firefix) to open `Developer tools` and click on `Console`
+2. See logs of `Angular` frontend code
+
+  Press Ctrl+Shift+I (on Chrome/Firefix) to open `Developer tools` and click on `Console`
 
 # References
 1. [Download and install Docker](https://docs.docker.com/get-docker/)
