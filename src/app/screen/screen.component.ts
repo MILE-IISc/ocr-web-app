@@ -84,6 +84,7 @@ export class ScreenComponent implements OnInit{
   callOne = true;
   obtainblock=false;
   ocrMessage ="";
+  isLoadingfromServer = false;
 
   sideOpen() {
 
@@ -132,9 +133,16 @@ export class ScreenComponent implements OnInit{
 
 
     this.userName = this.authService.getUserName();
+    
+    this.isLoadingfromServer = true;
     this.imageService.getServerImages().then(() => {
-      console.log("got serverImages in screen ngOnInit");
+      // this.isLoadingfromServer = false;
     });
+
+    this.imageService.isLoadingFromServerChange.subscribe((isLoadingFromServer)=>{
+      this.isLoadingfromServer = isLoadingFromServer;
+    });
+
     this.percentage = this.headerService.getpercentagevary();
     $("#SaveToXML").hide();
     $("#btUpdateBlockNumbers").hide();
@@ -211,6 +219,7 @@ export class ScreenComponent implements OnInit{
           if (this.isDiv == true) {
             $('.holderClass').remove();
           }
+          this.isLoadingfromServer = true;
           this.isLoading = true;
           this.ImageIs = true;
           if(imageLength > 1) {
@@ -218,6 +227,7 @@ export class ScreenComponent implements OnInit{
             this.imageService.nextImageChange.emit(this.nextImage);
           }
           this.isLoading = false;
+          this.isLoadingfromServer = false;
           console.log("this.localImages[0].fileName: ------------_> ", this.localImages[0].fileName);
           if(this.localImages[0].dataUrl == "" || this.localImages[0].dataUrl == null) {
             this.localImages[0].dataUrl = await this.imageService.loadArray(this.localImages[0].fileName);
