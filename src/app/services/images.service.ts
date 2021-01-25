@@ -70,6 +70,8 @@ export class ImageService implements OnInit {
   obtainblock = false;
   isRunningOcr = false;
   isRunningOcrChange = new EventEmitter<any>();
+  isLoadingFromServer = false;
+  isLoadingFromServerChange = new EventEmitter<any>();
 
   constructor(rendererFactory: RendererFactory2, private http: HttpClient, private router: Router, private authService: AuthService, private headerService: HeaderService, @Inject(DOCUMENT) private document: Document) {
     this.IMAGE_BACKEND_URL = this.authService.BACKEND_URL + "/api/image/";
@@ -104,16 +106,22 @@ export class ImageService implements OnInit {
             console.log("message" + responseData.message);
             console.log("server images length--" + this.localImages.length);
             this.imagesUpdated.next({localImages: [...this.localImages]});
+            // this.isLoadingFromServer = false;
+            this.isLoadingFromServerChange.emit(false);
           }
           else {
             console.log("message" + responseData.message);
             this.localImages = responseData.images;
             this.imagesUpdated.next({localImages: []});
+            // this.isLoadingFromServer = false;
+            this.isLoadingFromServerChange.emit(false);
           }
           resolve(this.localImages);
         });
+        
     });
     return promise;
+    
   }
 
   getXmlFileAsJson(fileName: any) {

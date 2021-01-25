@@ -111,7 +111,7 @@
 
         <img [src]="localUrl" *ngIf="localUrl && !isLoading" id="imgToRead" class="imgToRead" />
          <mat-spinner *ngIf="isLoading"></mat-spinner>
-
+         <mat-spinner *ngIf="isLoadingfromServer"></mat-spinner>
       </as-split-area>
     </as-split>
   </as-split-area>
