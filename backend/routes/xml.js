@@ -232,7 +232,7 @@ router.get("", checkAuth, (req, res, next) => {
                   xml2js.parseString(body, function (err, result) {
                     console.log("xml result as JSON in " + JSON.stringify(result));
                     res.status(201).json({
-                      message: "xml read successfully",
+                      message: "OCR-RUN is successfull !!!",
                       xmlData: result
                     });
                   });
@@ -245,7 +245,7 @@ router.get("", checkAuth, (req, res, next) => {
                 else {
                   console.log("error while RUN-OCR", error);
                   res.status(400).json({
-                    message: error,
+                    message: "Error occured while running the OCR "+error,
                     xmlData: ""
                   });
                 }

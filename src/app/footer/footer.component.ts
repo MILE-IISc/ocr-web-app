@@ -45,6 +45,7 @@ export class FooterComponent implements OnInit {
   xmlFileName;
   urlOcr;
   JsonObj;
+  isRunningOcr = false;
 
   constructor(private headerService: HeaderService, private imageService: ImageService,
     private renderer: Renderer2,private authService:AuthService) { }
@@ -185,12 +186,14 @@ export class FooterComponent implements OnInit {
   }
 
   loadXMLDoc() {
+    this.imageService.isRunningOcr = true;
+    this.imageService.isRunningOcrChange.emit(this.imageService.isRunningOcr);
+    console.log("inside footer isRunningOcr "+this.imageService.isRunningOcr);
     this.localImages = this.imageService.getLocalImages();
     this.fileName = this.localImages[this.imageService.imgFileCount].fileName;
     console.log("``````````````````````````````````````````````````this.fileName==="+this.fileName);
     console.log("this.fileCompleted==="+this.localImages[this.imageService.imgFileCount].completed);
     this.imageService.getXmlFileAsJson(this.fileName);
-
   }
 
   blocksize() {

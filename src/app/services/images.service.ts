@@ -47,6 +47,7 @@ export class ImageService implements OnInit {
   documentChange = new EventEmitter<any>();
   fileNameChange = new EventEmitter<any>();
   invalidMessageChange = new EventEmitter<any>();
+  ocrMessageChange = new EventEmitter<any>();
   ready = false;
 
   btnImgArray: any[] = [];
@@ -59,6 +60,7 @@ export class ImageService implements OnInit {
   IMAGE_BACKEND_URL;
   XML_BACKEND_URL;
   invalidMessage;
+  ocrMessage;
   value: string;
   fit: string;
   public percentage: number;
@@ -66,6 +68,8 @@ export class ImageService implements OnInit {
   private renderer: Renderer2;
   public clientpercent;
   obtainblock = false;
+  isRunningOcr = false;
+  isRunningOcrChange = new EventEmitter<any>();
 
   constructor(rendererFactory: RendererFactory2, private http: HttpClient, private router: Router, private authService: AuthService, private headerService: HeaderService, @Inject(DOCUMENT) private document: Document) {
     this.IMAGE_BACKEND_URL = this.authService.BACKEND_URL + "/api/image/";
@@ -114,12 +118,15 @@ export class ImageService implements OnInit {
 
   getXmlFileAsJson(fileName: any) {
     console.log("file name in run ocr " + fileName)
-
     const queryParams = `?fileName=${fileName}&type=GET-OCR-XML`;
     this.http.get<{ message: string; xmlData: any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
       console.log("xml as json string on RUN-OCR" + JSON.stringify(response.xmlData));
       XmlModel.jsonObject = response.xmlData;
       this.updateXmlModel(XmlModel.jsonObject);
+      this.isRunningOcr = false;
+      this.isRunningOcrChange.emit(this.isRunningOcr);
+      this.ocrMessage = response.message;
+      this.ocrMessageChange.emit(this.ocrMessage);
     });
   }
 

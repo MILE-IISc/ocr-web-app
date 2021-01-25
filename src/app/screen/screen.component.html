@@ -27,6 +27,8 @@
 
   <div id="snackbar">{{ invalidMessage }}</div>
 
+  <div id="footerSnackBar">{{ ocrMessage }}</div>
+
   <button mat-icon-button data-toggle="tooltip" title="Save Blocks(Ctrl+s)" style="margin-right:3px;"(click)="onSave()">
     <mat-icon>save</mat-icon>
     </button>
@@ -122,11 +124,9 @@
           [style.font-size.px]="text.txtheight*5/8*(this.percentage/100)"
           [style.top.px]="text.lineRowStart*(this.percentage/100)"
           [style.margin-inline-start.px]="text.lineColStart*(this.percentage/100)"
-
-
           [style.height.px]="text.txtheight*(this.percentage/100)">
-
       </span>
+      <mat-spinner *ngIf="isRunningOcr"></mat-spinner>
     </div>
   </as-split-area>
 </as-split>

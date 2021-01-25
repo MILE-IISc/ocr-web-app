@@ -35,6 +35,7 @@ export class ScreenComponent implements OnInit{
   imageList = "";
   displayarea: any;
   isLoading = false;
+  isRunningOcr = false;
   title = 'Layout';
   public value: string;
   imagewidth;
@@ -80,8 +81,9 @@ export class ScreenComponent implements OnInit{
   size3 = 50;
   Isopen = true;
   invalidMessage ="";
-   callOne = true;
-   obtainblock=false;
+  callOne = true;
+  obtainblock=false;
+  ocrMessage ="";
 
   sideOpen() {
 
@@ -183,6 +185,23 @@ export class ScreenComponent implements OnInit{
           }
         });
 
+        this.imageService.ocrMessageChange
+        .subscribe(
+          (ocrMessage: string) => {
+            this.ocrMessage = ocrMessage;
+            if (this.ocrMessage != "" || this.ocrMessage!=null) {
+              console.log("ocr message in screen "+this.ocrMessage);
+              var x = document.getElementById("footerSnackBar");
+              console.log("x in footer " + x);
+              if (x != null) {
+                x.className = "show";
+                setTimeout(() => {
+                  x.className = x.className.replace("show", "");
+                }, 5000);
+              }
+            }
+          });
+
     this.waveSub = this.imageService
       .getImageUpdateListener()
       .subscribe(async (imageData: { localImages: Images[] }) => {
@@ -251,6 +270,11 @@ export class ScreenComponent implements OnInit{
     this.imageService.previousImageChange.subscribe((previousImages: boolean) => {
       console.log("nextImages inside footer: " + previousImages);
       this.previousImages = previousImages;
+    });
+
+    this.imageService.isRunningOcrChange.subscribe((isRunningOcr:boolean)=>{
+      console.log("isRunni9ng ocr in screen "+isRunningOcr);
+      this.isRunningOcr = isRunningOcr;
     });
   }
 
