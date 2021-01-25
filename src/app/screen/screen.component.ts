@@ -1,33 +1,31 @@
-
-import { Component, HostListener, OnInit,Renderer2} from '@angular/core';
-declare var $:any;
+import { Component, HostListener, OnInit, Renderer2 } from '@angular/core';
+declare var $: any;
 import { fromEvent, Subscription } from 'rxjs';
 import { map, buffer, filter, debounceTime } from 'rxjs/operators';
 import * as $ from 'jquery';
 import * as JSZip from 'jszip';
 // import * as $ from 'jquery';
 import * as xml2js from 'xml2js';
-import { BlockModel} from '../shared/block-model';
-declare var $:any
+import { BlockModel } from '../shared/block-model';
+declare var $: any
 declare var Tiff: any;
 import { HeaderService } from '../services/header.service';
 import { ImageService } from '../services/images.service';
 import { Images } from '../shared/images.model';
 // import { ViewerService } from '../services/viewer.service';
-import { XmlModel,retain } from '../shared/xml-model';
+import { XmlModel, retain } from '../shared/xml-model';
 import { AuthService } from '../auth/auth.service';
 import * as fileSaver from 'file-saver';
 import { FileService } from '../services/file.service';
 import { MatIconRegistry } from "@angular/material/icon";
 
-
 @Component({
- selector: 'app-screen',
- templateUrl: './screen.component.html',
- styleUrls: ['./screen.component.css'],
+  selector: 'app-screen',
+  templateUrl: './screen.component.html',
+  styleUrls: ['./screen.component.css'],
 })
 
-export class ScreenComponent implements OnInit{
+export class ScreenComponent implements OnInit {
   opened: boolean;
   events: string[] = [];
   private waveSub: Subscription;
@@ -60,11 +58,11 @@ export class ScreenComponent implements OnInit{
   public percentage = 0;
   public angle = 0;
   btnImgArray: any[] = [];
-  display="none";
+  display = "none";
   images: Images[];
   ImageIs = true;
   isDiv = false;
-  myHeight = (window.innerHeight-55.5);
+  myHeight = (window.innerHeight - 55.5);
   userName: string;
   userIsAuthenticated = false;
   isAdmin;
@@ -80,18 +78,17 @@ export class ScreenComponent implements OnInit{
   area2 = 50;
   size3 = 50;
   Isopen = true;
-  invalidMessage ="";
+  invalidMessage = "";
   callOne = true;
-  obtainblock=false;
-  ocrMessage ="";
+  obtainblock = false;
+  ocrMessage = "";
   isLoadingfromServer = false;
 
   sideOpen() {
-
-      this.sidesize1 = 30;
-      this.sidesize2 = 70;
-      this.localImages = this.imageService.getLocalImages();
-      this.imageService.openModalDialog(this.localImages);
+    this.sidesize1 = 30;
+    this.sidesize2 = 70;
+    this.localImages = this.imageService.getLocalImages();
+    this.imageService.openModalDialog(this.localImages);
 
     $("#OpenBar").hide();
     $("#CloseBar").show();
@@ -116,7 +113,6 @@ export class ScreenComponent implements OnInit{
     this.authListenerSubs.unsubscribe();
   }
 
-
   ngOnInit(): void {
     $("#CloseBar").hide();
     // authentication related
@@ -131,15 +127,14 @@ export class ScreenComponent implements OnInit{
         this.isAdmin = this.authService.getIsAdmin();
       });
 
-
     this.userName = this.authService.getUserName();
-    
+
     this.isLoadingfromServer = true;
     this.imageService.getServerImages().then(() => {
       // this.isLoadingfromServer = false;
     });
 
-    this.imageService.isLoadingFromServerChange.subscribe((isLoadingFromServer)=>{
+    this.imageService.isLoadingFromServerChange.subscribe((isLoadingFromServer) => {
       this.isLoadingfromServer = isLoadingFromServer;
     });
 
@@ -193,22 +188,22 @@ export class ScreenComponent implements OnInit{
           }
         });
 
-        this.imageService.ocrMessageChange
-        .subscribe(
-          (ocrMessage: string) => {
-            this.ocrMessage = ocrMessage;
-            if (this.ocrMessage != "" || this.ocrMessage!=null) {
-              console.log("ocr message in screen "+this.ocrMessage);
-              var x = document.getElementById("footerSnackBar");
-              console.log("x in footer " + x);
-              if (x != null) {
-                x.className = "show";
-                setTimeout(() => {
-                  x.className = x.className.replace("show", "");
-                }, 5000);
-              }
+    this.imageService.ocrMessageChange
+      .subscribe(
+        (ocrMessage: string) => {
+          this.ocrMessage = ocrMessage;
+          if (this.ocrMessage != "" || this.ocrMessage != null) {
+            console.log("ocr message in screen " + this.ocrMessage);
+            var x = document.getElementById("footerSnackBar");
+            console.log("x in footer " + x);
+            if (x != null) {
+              x.className = "show";
+              setTimeout(() => {
+                x.className = x.className.replace("show", "");
+              }, 5000);
             }
-          });
+          }
+        });
 
     this.waveSub = this.imageService
       .getImageUpdateListener()
@@ -222,14 +217,14 @@ export class ScreenComponent implements OnInit{
           this.isLoadingfromServer = true;
           this.isLoading = true;
           this.ImageIs = true;
-          if(imageLength > 1) {
+          if (imageLength > 1) {
             this.nextImage = false;
             this.imageService.nextImageChange.emit(this.nextImage);
           }
           this.isLoading = false;
           this.isLoadingfromServer = false;
           console.log("this.localImages[0].fileName: ------------_> ", this.localImages[0].fileName);
-          if(this.localImages[0].dataUrl == "" || this.localImages[0].dataUrl == null) {
+          if (this.localImages[0].dataUrl == "" || this.localImages[0].dataUrl == null) {
             this.localImages[0].dataUrl = await this.imageService.loadArray(this.localImages[0].fileName);
           }
           this.localUrl = this.localImages[0].dataUrl;
@@ -282,8 +277,8 @@ export class ScreenComponent implements OnInit{
       this.previousImages = previousImages;
     });
 
-    this.imageService.isRunningOcrChange.subscribe((isRunningOcr:boolean)=>{
-      console.log("isRunni9ng ocr in screen "+isRunningOcr);
+    this.imageService.isRunningOcrChange.subscribe((isRunningOcr: boolean) => {
+      console.log("isRunni9ng ocr in screen " + isRunningOcr);
       this.isRunningOcr = isRunningOcr;
     });
   }
@@ -297,8 +292,8 @@ export class ScreenComponent implements OnInit{
     $(".textSpanDiv").empty();
     for (let i = 0; i < this.localImages.length; i++) {
       if (this.localImages[i].fileName == id) {
-        console.log("this.localImages["+i+"].fileName",this.localImages[i].fileName,"dataUrl",this.localImages[i].dataUrl);
-        if(this.localImages[i].dataUrl == null || this.localImages[i].dataUrl == "") {
+        console.log("this.localImages[" + i + "].fileName", this.localImages[i].fileName, "dataUrl", this.localImages[i].dataUrl);
+        if (this.localImages[i].dataUrl == null || this.localImages[i].dataUrl == "") {
           this.localImages[i].dataUrl = await this.imageService.loadArray(this.localImages[i].fileName);
         }
         this.localUrl = this.localImages[i].dataUrl;
@@ -348,11 +343,10 @@ export class ScreenComponent implements OnInit{
   fitwidth() {
     this.imageService.fitwidth()
     this.percentage = this.imageService.percentage;
-    console.log("this.percentage before header in fitwidth",this.percentage);
+    console.log("this.percentage before header in fitwidth", this.percentage);
     this.headerService.setpercentagevary(this.percentage);
-    console.log("this.percentage after header in fitwidth",this.percentage);
+    console.log("this.percentage after header in fitwidth", this.percentage);
   }
-
 
   imgSize() {
     var myImg;
@@ -365,17 +359,17 @@ export class ScreenComponent implements OnInit{
   orginalsize() {
     this.imageService.orginalsize();
     this.percentage = this.imageService.percentage;
-    console.log("this.percentage before header in orginalsize",this.percentage);
+    console.log("this.percentage before header in orginalsize", this.percentage);
     this.headerService.setpercentagevary(this.percentage);
-    console.log("this.percentage after header in orginalsize",this.percentage);
+    console.log("this.percentage after header in orginalsize", this.percentage);
   }
 
   loadXMLDoc() {
     this.localImages = this.imageService.getLocalImages();
-    if(this.localImages.length>0){
+    if (this.localImages.length > 0) {
       this.fileName = this.localImages[this.imageService.imgFileCount].fileName;
       this.imageService.getXmlFileAsJson(this.fileName);
-    }else{
+    } else {
       this.localImages = this.imageService.getLocalImages();
       this.fileName = this.localImages[this.imageService.imgFileCount].fileName;
       this.imageService.getXmlFileAsJson(this.fileName);
@@ -422,13 +416,11 @@ export class ScreenComponent implements OnInit{
 
   selectBlock() {
     $("#blockselect").css("background-color", "hsl(210, 100%, 20%)");
-    this.obtainblock=true;
+    this.obtainblock = true;
     console.log("inside script");
     this.isDiv = true;
-    this.imageService. selectBlockservice();
+    this.imageService.selectBlockservice();
     this.imageService.onXml();
-
-
 
     // $('#nextImg').click(function () {
     //   // console.log("onclick");
@@ -447,21 +439,19 @@ export class ScreenComponent implements OnInit{
     $('.sidebody').click(function () {
       $('#imgToRead').selectAreas('reset');
     });
-  // });
+    // });
   }
-  deleteblocks(){
+
+  deleteblocks() {
     var r = confirm("This action will delete all the blocks on the current page including any recognized or corrected text. Are you sure you want to continue?");
-    if (r == true){
-    $('#imgToRead').selectAreas('reset');
-    console.log("empty the right side screen");
-    $(".textElementsDiv").not(':first').remove();
-    $(".textSpanDiv").empty();
-    this.onSave();
+    if (r == true) {
+      $('#imgToRead').selectAreas('reset');
+      console.log("empty the right side screen");
+      $(".textElementsDiv").not(':first').remove();
+      $(".textSpanDiv").empty();
+      this.onSave();
     }
-
-
   }
-
 
   onSave() {
     console.log("in xml save");
@@ -469,9 +459,9 @@ export class ScreenComponent implements OnInit{
     var prolog = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
     var ns1 = 'http://mile.ee.iisc.ernet.in/schemas/ocr_output';
     var xmlDocument = document.implementation.createDocument(null, "page", null);
-    xmlDocument.documentElement.setAttribute("xmlns",ns1);
+    xmlDocument.documentElement.setAttribute("xmlns", ns1);
     for (let i = 0; i < areas.length; i++) {
-      var blockElem = xmlDocument.createElementNS(null,"block");
+      var blockElem = xmlDocument.createElementNS(null, "block");
       blockElem.setAttribute("type", "Text");
       var blockNumberElems = $(".select-areas-blockNumber-area");
       console.log("-----blockNumberElems------" + blockNumberElems.length);
@@ -480,7 +470,7 @@ export class ScreenComponent implements OnInit{
       blockElem.setAttribute("BlockNumber", blockNumber[(blockNumberElems.length - 1) - i].innerHTML);
       blockElem.setAttribute("SubType", "paragraphProse");
       var y = ((areas[i].y * 100) / this.percentage).toString();
-      console.log("this.percentage--------"+this.percentage)
+      console.log("this.percentage--------" + this.percentage)
       blockElem.setAttribute("rowStart", (Math.ceil(parseInt(y))).toString());
       var height = ((areas[i].height * 100) / this.percentage);
       var rowEnd = (height + parseFloat(y)).toString();
@@ -494,7 +484,7 @@ export class ScreenComponent implements OnInit{
       xmlDocument.documentElement.appendChild(blockElem);
     }
     var xmlString = new XMLSerializer().serializeToString(xmlDocument);
-    console.log("xml string "+xmlString);
+    console.log("xml string " + xmlString);
 
     xml2js.parseString(xmlString, function (err, result) {
       var jsonString = JSON.stringify(result);
@@ -561,7 +551,7 @@ export class ScreenComponent implements OnInit{
     console.log("image length in export " + this.localImages.length);
     // var folderName = this.fileName.slice(0, -9);
     var folderName = "XML_Files";
-    console.log("folder Name",folderName);
+    console.log("folder Name", folderName);
     var zip = new JSZip();
     let count = 0;
     var folder = zip.folder(folderName);
@@ -573,10 +563,10 @@ export class ScreenComponent implements OnInit{
         console.log("curXmlFileName " + curXmlFileName);
         //changes have to be made in file service to get the xml file from backend
         await this.fileService.downloadFile(curXmlFileName).then(response => {
-          console.log("xml content while downloading",response.xmlData);
+          console.log("xml content while downloading", response.xmlData);
           let blob: any = new Blob([response.xmlData], { type: 'text/xml' });
-          console.log("blob==="+blob);
-          console.log("this.localImages[i].fileName.slice(0, -3) + 'xml'",this.localImages[i].fileName.slice(0, -3) + 'xml');
+          console.log("blob===" + blob);
+          console.log("this.localImages[i].fileName.slice(0, -3) + 'xml'", this.localImages[i].fileName.slice(0, -3) + 'xml');
           folder.file(this.localImages[i].fileName.slice(0, -3) + 'xml', blob);
         }), error => {
           console.log("error: " + error);
@@ -599,57 +589,57 @@ export class ScreenComponent implements OnInit{
     this.isMenuOpen = true;
     event.preventDefault();
     $("#menu").css("display", "block");
-    $("#menu").css("left", event.clientX+"px");
-    $("#menu").css("top", event.clientY+"px");
+    $("#menu").css("left", event.clientX + "px");
+    $("#menu").css("top", event.clientY + "px");
+  }
+  closeMenu() {
+    $("#menu").css("display", "none");
+  }
+  alertSize() {
+    var myWidth = 0, myHeight = 0;
+    if (typeof (window.innerWidth) == 'number') {
+      //Non-IE
+      myWidth = window.innerWidth;
+      myHeight = window.innerHeight;
+    } else if (document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)) {
+      //IE 6+ in 'standards compliant mode'
+      myWidth = document.documentElement.clientWidth;
+      myHeight = document.documentElement.clientHeight;
+    } else if (document.body && (document.body.clientWidth || document.body.clientHeight)) {
+      //IE 4 compatible
+      myWidth = document.body.clientWidth;
+      myHeight = document.body.clientHeight;
     }
-    closeMenu() {
-        $("#menu").css("display", "none");
-      }
-      alertSize() {
-        var myWidth = 0, myHeight = 0;
-        if( typeof( window.innerWidth ) == 'number' ) {
-          //Non-IE
-          myWidth = window.innerWidth;
-          myHeight = window.innerHeight;
-        } else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) {
-          //IE 6+ in 'standards compliant mode'
-          myWidth = document.documentElement.clientWidth;
-          myHeight = document.documentElement.clientHeight;
-        } else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) {
-          //IE 4 compatible
-          myWidth = document.body.clientWidth;
-          myHeight = document.body.clientHeight;
-        }
-        window.alert( 'Width = ' + myWidth );
-        window.alert( 'Height = ' + myHeight );
-      }
+    window.alert('Width = ' + myWidth);
+    window.alert('Height = ' + myHeight);
+  }
 
-      blockupdate(){
-        this.imageService.blocknumberupdate()
-      }
+  blockupdate() {
+    this.imageService.blocknumberupdate()
+  }
 
-      showTooltip() {
-        console.log("inside show tol tip");
-        this.correctionUpdate();
-      }
+  showTooltip() {
+    console.log("inside show tol tip");
+    this.correctionUpdate();
+  }
 
-      xmlonSave(){
-        console.log("inside xmlOnSave");
-        this.onSave();
-      }
+  xmlonSave() {
+    console.log("inside xmlOnSave");
+    this.onSave();
+  }
 
-  unselectBlock(){
+  unselectBlock() {
     $("#blockselect").css("background-color", "initial");
-    this.obtainblock=false;
+    this.obtainblock = false;
     this.imageService.unselectBlock();
 
   };
 
-  call(){
-    if(this.callOne) this.selectBlock();
-   else this.unselectBlock();
-   this.callOne = !this.callOne;
- };
+  call() {
+    if (this.callOne) this.selectBlock();
+    else this.unselectBlock();
+    this.callOne = !this.callOne;
+  };
 
 }
 
