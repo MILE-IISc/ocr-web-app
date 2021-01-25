@@ -105,23 +105,23 @@ export class ImageService implements OnInit {
             this.localImages = responseData.images;
             console.log("message" + responseData.message);
             console.log("server images length--" + this.localImages.length);
-            this.imagesUpdated.next({localImages: [...this.localImages]});
+            this.imagesUpdated.next({ localImages: [...this.localImages] });
             // this.isLoadingFromServer = false;
             this.isLoadingFromServerChange.emit(false);
           }
           else {
             console.log("message" + responseData.message);
             this.localImages = responseData.images;
-            this.imagesUpdated.next({localImages: []});
+            this.imagesUpdated.next({ localImages: [] });
             // this.isLoadingFromServer = false;
             this.isLoadingFromServerChange.emit(false);
           }
           resolve(this.localImages);
         });
-        
+
     });
     return promise;
-    
+
   }
 
   getXmlFileAsJson(fileName: any) {
@@ -139,9 +139,9 @@ export class ImageService implements OnInit {
   }
 
   updateXmlModel(jsonObj) {
-    console.log("jsonObj inside updateXmlModel after running OCR",jsonObj);
+    console.log("jsonObj inside updateXmlModel after running OCR", jsonObj);
     var blocks = [];
-    if(jsonObj['page'].block) {
+    if (jsonObj['page'].block) {
       blocks = jsonObj['page'].block;
     }
     console.log("block length " + blocks.length);
@@ -217,7 +217,7 @@ export class ImageService implements OnInit {
       console.log(fileRead.length)
       imageData.append("image", file);
     }
-    this.http.post<{ message: string }>(this.IMAGE_BACKEND_URL,imageData).subscribe(async responseData => {
+    this.http.post<{ message: string }>(this.IMAGE_BACKEND_URL, imageData).subscribe(async responseData => {
       this.invalidMessage = responseData.message;
       this.invalidMessageChange.emit(this.invalidMessage);
       console.log("image added+++++++++++++++++++: " + responseData.message);
@@ -256,8 +256,8 @@ export class ImageService implements OnInit {
       if (x > y) { return 1; }
       return 0;
     });
-    console.log("localImages Count after Upload",this.localImages.length);
-    this.imagesUpdated.next({localImages: [...this.localImages]});
+    console.log("localImages Count after Upload", this.localImages.length);
+    this.imagesUpdated.next({ localImages: [...this.localImages] });
     if (this.localImages.length > 1) {
       this.nextImages = false;
       this.nextImageChange.emit(this.nextImages);
@@ -368,9 +368,9 @@ export class ImageService implements OnInit {
     $(".textSpanDiv").empty();
 
     this.localImages = this.getLocalImages();
-    console.log("localImages count",this.localImages.length);
-    console.log("index of image to be displayed",this.imgFileCount);
-    if(this.localImages[this.imgFileCount].dataUrl == null || this.localImages[this.imgFileCount].dataUrl == "") {
+    console.log("localImages count", this.localImages.length);
+    console.log("index of image to be displayed", this.imgFileCount);
+    if (this.localImages[this.imgFileCount].dataUrl == null || this.localImages[this.imgFileCount].dataUrl == "") {
       this.localImages[this.imgFileCount].dataUrl = await this.loadArray(this.localImages[this.imgFileCount].fileName);
     }
     this.localUrl = this.localImages[this.imgFileCount].dataUrl;
@@ -409,9 +409,9 @@ export class ImageService implements OnInit {
     $(".textSpanDiv").empty();
 
     this.localImages = this.getLocalImages();
-    console.log("localImages count",this.localImages.length);
-    console.log("index of image to be displayed",this.imgFileCount);
-    if(this.localImages[this.imgFileCount].dataUrl == null || this.localImages[this.imgFileCount].dataUrl == "") {
+    console.log("localImages count", this.localImages.length);
+    console.log("index of image to be displayed", this.imgFileCount);
+    if (this.localImages[this.imgFileCount].dataUrl == null || this.localImages[this.imgFileCount].dataUrl == "") {
       this.localImages[this.imgFileCount].dataUrl = await this.loadArray(this.localImages[this.imgFileCount].fileName);
     }
     this.localUrl = this.localImages[this.imgFileCount].dataUrl;
@@ -443,7 +443,7 @@ export class ImageService implements OnInit {
     this.localImages = this.getLocalImages();
     this.imgFileCount = this.localImages.length - 1;
     this.imageCountChange.emit(this.imgFileCount);
-    if(this.localImages[this.imgFileCount].dataUrl == null || this.localImages[this.imgFileCount].dataUrl == "") {
+    if (this.localImages[this.imgFileCount].dataUrl == null || this.localImages[this.imgFileCount].dataUrl == "") {
       this.localImages[this.imgFileCount].dataUrl = await this.loadArray(this.localImages[this.imgFileCount].fileName);
     }
     this.localUrl = this.localImages[this.imgFileCount].dataUrl;
@@ -472,7 +472,7 @@ export class ImageService implements OnInit {
     $(".textSpanDiv").empty();
 
     this.localImages = this.getLocalImages();
-    if(this.localImages[this.imgFileCount].dataUrl == null || this.localImages[this.imgFileCount].dataUrl == "") {
+    if (this.localImages[this.imgFileCount].dataUrl == null || this.localImages[this.imgFileCount].dataUrl == "") {
       this.localImages[this.imgFileCount].dataUrl = await this.loadArray(this.localImages[this.imgFileCount].fileName);
     }
     this.localUrl = this.localImages[this.imgFileCount].dataUrl;
@@ -491,7 +491,7 @@ export class ImageService implements OnInit {
     }
   }
 
-  buttonenable(){
+  buttonenable() {
     if (this.localImages.length - 1 == 0) {
       this.nextImages = true;
       this.nextImageChange.emit(this.nextImages);
@@ -506,16 +506,16 @@ export class ImageService implements OnInit {
       this.previousImageChange.emit(this.previousImages);
     }
 
-     else if((this.localImages.length - 1 > 0) && (this.imgFileCount==0)) {
+    else if ((this.localImages.length - 1 > 0) && (this.imgFileCount == 0)) {
       this.nextImages = false;
       this.nextImageChange.emit(this.nextImages);
       this.previousImages = true;
       this.previousImageChange.emit(this.previousImages);
     }
-    else if((this.localImages.length - 1 > 0) && (this.localImages.length - 1 !== this.imgFileCount)) {
+    else if ((this.localImages.length - 1 > 0) && (this.localImages.length - 1 !== this.imgFileCount)) {
       this.nextImages = false;
       this.nextImageChange.emit(this.nextImages);
-      this.previousImages =false;
+      this.previousImages = false;
       this.previousImageChange.emit(this.previousImages);
     }
 

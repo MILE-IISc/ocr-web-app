@@ -1,51 +1,51 @@
 import { EventEmitter } from '@angular/core';
 
-export class HeaderService{
+export class HeaderService {
 
-    multileImages:boolean;
-    multiImageChange = new EventEmitter<boolean>();
+  multileImages: boolean;
+  multiImageChange = new EventEmitter<boolean>();
 
 
-    setMultipleImages(setimage){
-        this.multileImages = setimage;
-    }
-
-    getMultipleImage(){
-        return this.multileImages;
-    }
-
-    percentage:number;
-    percentageChange = new EventEmitter<number>();
-
-    setpercentagevary(imagezoomlevel){
-        this.percentage = imagezoomlevel;
-        this.percentageChange.emit(this.percentage);
-    }
-
-    getpercentagevary(){
-        return this.percentage;
-    }
-
-    headerValueChange=new EventEmitter<string>();
-    headerValue:string;
-
-    setHeaderValue(setimage){
-      this.headerValue = setimage;
-      this.headerValueChange.emit(this.headerValue);
+  setMultipleImages(setimage) {
+    this.multileImages = setimage;
   }
 
-  getHeaderValue(){
-      return this.headerValue;
+  getMultipleImage() {
+    return this.multileImages;
   }
 
-   loadingvaluechage=new EventEmitter<boolean>();
-     loadingvalue:boolean;
+  percentage: number;
+  percentageChange = new EventEmitter<number>();
 
-     setloadingvalue(load){
-       this.loadingvalue = load;
-       this.loadingvaluechage.emit(this.loadingvalue)
-     }
-     getloadingvalue(){
-       return this.loadingvalue;
-     }
+  setpercentagevary(imagezoomlevel) {
+    this.percentage = imagezoomlevel;
+    this.percentageChange.emit(this.percentage);
+  }
+
+  getpercentagevary() {
+    return this.percentage;
+  }
+
+  headerValueChange = new EventEmitter<string>();
+  headerValue: string;
+
+  setHeaderValue(setimage) {
+    this.headerValue = setimage;
+    this.headerValueChange.emit(this.headerValue);
+  }
+
+  getHeaderValue() {
+    return this.headerValue;
+  }
+
+  loadingvaluechage = new EventEmitter<boolean>();
+  loadingvalue: boolean;
+
+  setloadingvalue(load) {
+    this.loadingvalue = load;
+    this.loadingvaluechage.emit(this.loadingvalue)
+  }
+  getloadingvalue() {
+    return this.loadingvalue;
+  }
 }
