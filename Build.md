@@ -93,3 +93,23 @@ $ docker ps -a
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                    PORTS                    NAMES
 ac6c63d9cd06        ocr-web-app         "docker-entrypoint.s…"   10 seconds ago      Up 8 seconds              0.0.0.0:8080->8080/tcp   iisc-ocr-web-app
 ```
+
+## 4. Launch OCR Web App
+
+Open http://localhost:8080/ in your browser.
+
+# Troubleshooting
+
+## 1. See logs of `Node.js` backend:
+
+```
+$ docker logs iisc-ocr-web-app
+```
+
+## 2. See logs of `Angular` frontend code
+Press Ctrl+Shift+I (on Chrome/Firefix) to open `Developer tools` and click on `Console`
+
+# References
+1. [Download and install Docker](https://docs.docker.com/get-docker/)
+2. [How do I get into a Docker container's shell?](https://stackoverflow.com/questions/30172605/how-do-i-get-into-a-docker-containers-shell)
+3. [How To Run Commands In Stopped Docker Containers](https://thorsten-hans.com/how-to-run-commands-in-stopped-docker-containers)
