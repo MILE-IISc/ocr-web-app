@@ -159,7 +159,7 @@ router.get("", authChecker, (req, res, next) => {
     const xmlFileName = req.query.fileName.slice(0, -3) + 'xml';
     console.log("xmlFileName in get call " + xmlFileName);
     getItem(bucketName, xmlFileName, "GET").then(xmlContent => {
-      if (xmlContent == "The specified key does not exists in bucket") {
+      if (xmlContent.localeCompare("The specified key does not exists in bucket") == 0 || xmlContent == null || xmlContent.localeCompare("") == 0 ) {
         xmlContent =`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <page xmlns="http://mile.ee.iisc.ernet.in/schemas/ocr_output">
         </page>`;
@@ -197,9 +197,9 @@ router.get("", authChecker, (req, res, next) => {
               if (error == null) {
                 // console.log("output on RUN-OCR", body);
                 xml2js.parseString(body, function (err, result) {
-                  console.log("xml result as JSON in " + JSON.stringify(result));
+                  // console.log("xml result as JSON in " + JSON.stringify(result));
                   res.status(201).json({
-                    message: "OCR-RUN is successfull !!!",
+                    message: "OCR completed on" + req.query.fileName,
                     xmlData: result
                   });
                 });

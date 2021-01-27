@@ -191,9 +191,22 @@ export class FooterComponent implements OnInit {
     console.log("inside footer isRunningOcr "+this.imageService.isRunningOcr);
     this.localImages = this.imageService.getLocalImages();
     this.fileName = this.localImages[this.imageService.imgFileCount].fileName;
-    console.log("``````````````````````````````````````````````````this.fileName==="+this.fileName);
+    console.log("this.fileName==="+this.fileName);
     console.log("this.fileCompleted==="+this.localImages[this.imageService.imgFileCount].completed);
     this.imageService.getXmlFileAsJson(this.fileName);
+  }
+
+  loadXMLDocAll() {
+    this.imageService.isRunningOcr = true;
+    this.imageService.isRunningOcrChange.emit(this.imageService.isRunningOcr);
+    console.log("inside footer isRunningOcr "+this.imageService.isRunningOcr);
+    this.localImages = this.imageService.getLocalImages();
+    for(let i=0; i< this.localImages.length; i++) {
+      this.fileName = this.localImages[i].fileName;
+      console.log("this.fileName==="+this.fileName);
+      console.log("this.fileCompleted==="+this.localImages[i].completed);
+      this.imageService.getXmlFileAsJson2(this.fileName);
+    }
   }
 
   blocksize() {

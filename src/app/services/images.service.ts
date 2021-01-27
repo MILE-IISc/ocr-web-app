@@ -122,7 +122,7 @@ export class ImageService implements OnInit {
   }
 
   getXmlFileAsJson(fileName: any) {
-    console.log("file name in run ocr " + fileName)
+    console.log("Running OCR on " + fileName)
     const queryParams = `?fileName=${fileName}&type=GET-OCR-XML`;
     this.http.get<{ message: string; xmlData: any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
       console.log("xml as json string on RUN-OCR" + JSON.stringify(response.xmlData));
@@ -130,6 +130,17 @@ export class ImageService implements OnInit {
       this.updateXmlModel(XmlModel.jsonObject);
       this.isRunningOcr = false;
       this.isRunningOcrChange.emit(this.isRunningOcr);
+      this.ocrMessage = response.message;
+      this.ocrMessageChange.emit(this.ocrMessage);
+    });
+  }
+
+  getXmlFileAsJson2(fileName: any) {
+    console.log("Running OCR on " + fileName)
+    const queryParams = `?fileName=${fileName}&type=GET-OCR-XML`;
+    this.http.get<{ message: string; xmlData: any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
+      // this.isRunningOcr = false;
+      // this.isRunningOcrChange.emit(this.isRunningOcr);
       this.ocrMessage = response.message;
       this.ocrMessageChange.emit(this.ocrMessage);
     });
