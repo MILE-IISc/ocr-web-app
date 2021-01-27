@@ -280,18 +280,16 @@ router.get("", authChecker, (req, res, next) => {
         mismatchCount = 0;
         if (tiffImages.length == 0) {
           fetchedImages.push(jpegImage);
-          console.log("jpeg Image only", jpegImage);
+          // console.log("jpeg Image only", jpegImage);
         }
         else {
           tiffImages.map(tiffImage => {
-            console.log("mismatchCount before",mismatchCount);
             if (tiffImage.slice(0, -3).toLowerCase() != jpegImage.slice(0, -3).toLowerCase()) {
               mismatchCount = mismatchCount + 1;
             }
-
             if (tiffImage.slice(0, -3).toLowerCase() != jpegImage.slice(0, -3).toLowerCase() && mismatchCount == tiffImages.length) {
               fetchedImages.push(jpegImage);
-              console.log("jpeg Image only", jpegImage);
+              // console.log("jpeg Image only", jpegImage);
             }
           });
         }
