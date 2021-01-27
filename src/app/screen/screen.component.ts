@@ -115,7 +115,11 @@ export class ScreenComponent implements OnInit {
   }
 
   openDialog() {
-    const dialogRef = this.dialog.open(ScreenComponentDialog);
+    const dialogRef = this.dialog.open(ScreenComponentDialog, {
+      disableClose: true,
+      width: '450px',
+      panelClass: 'my-dialog'
+    });
 
     dialogRef.afterClosed().subscribe(result => {
       console.log(`Dialog result: ${result}`);
