@@ -146,7 +146,7 @@ router.get("", authChecker, (req, res, next) => {
       else {
         // console.log("xmlContent retrieved for XML",xmlContent);
         xml2js.parseString(xmlContent, function (err, result) {
-          console.log("xml result as JSON in " + JSON.stringify(result));
+          // console.log("xml result as JSON in " + JSON.stringify(result));
           res.status(201).json({
             message: "xml read successfully",
             xmlData: result
@@ -168,7 +168,7 @@ router.get("", authChecker, (req, res, next) => {
 
       getItem(bucketName, req.query.fileName, "OCR").then(imgContent => {
         if (imgContent == "The specified key does not exists in bucket") {
-          console.log("error while retrieving:", imgContent);
+          // console.log("error while retrieving:", imgContent);
           res.status(400).json({
             message: imgContent,
             xmlData: ""
@@ -176,9 +176,9 @@ router.get("", authChecker, (req, res, next) => {
         }
         else {
           console.log("Base64String image Data retrieved in get Request for RUN-OCR");
-          console.log("data before appending imageData", xmlContent);
+          // console.log("data before appending imageData", xmlContent);
           xml2js.parseString(xmlContent, (err, result) => {
-            console.log("xml result inside xml2js.parse", result);
+            // console.log("xml result inside xml2js.parse", result);
             result["page"]["imageData"] = imgContent;
             const builder = new xml2js.Builder();
             xmlContent = builder.buildObject(result);
@@ -195,7 +195,7 @@ router.get("", authChecker, (req, res, next) => {
             function (error, response, body) {
               console.log(response.statusCode);
               if (error == null) {
-                console.log("output on RUN-OCR", body);
+                // console.log("output on RUN-OCR", body);
                 xml2js.parseString(body, function (err, result) {
                   console.log("xml result as JSON in " + JSON.stringify(result));
                   res.status(201).json({
