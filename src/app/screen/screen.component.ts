@@ -18,6 +18,7 @@ import { AuthService } from '../auth/auth.service';
 import * as fileSaver from 'file-saver';
 import { FileService } from '../services/file.service';
 import { MatIconRegistry } from "@angular/material/icon";
+import {MatDialog} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-screen',
@@ -103,7 +104,7 @@ export class ScreenComponent implements OnInit {
   }
 
   constructor(private headerService: HeaderService, private imageService: ImageService,
-    public authService: AuthService, private fileService: FileService) { }
+    public authService: AuthService, private fileService: FileService,public dialog: MatDialog) { }
 
   onLogout() {
     this.authService.logout();
@@ -111,6 +112,14 @@ export class ScreenComponent implements OnInit {
 
   ngOnDestroy() {
     this.authListenerSubs.unsubscribe();
+  }
+
+  openDialog() {
+    const dialogRef = this.dialog.open(ScreenComponentDialog);
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log(`Dialog result: ${result}`);
+    });
   }
 
   ngOnInit(): void {
@@ -422,36 +431,18 @@ export class ScreenComponent implements OnInit {
     this.imageService.selectBlockservice();
     this.imageService.onXml();
 
-    // $('#nextImg').click(function () {
-    //   // console.log("onclick");
-    //   $('#imgToRead').selectAreas('reset');
-    // });
-    // $('#previousImg').click(function () {
-    //   $('#imgToRead').selectAreas('reset');
-    // });
-    // $('#firstImg').click(function () {
-    //   $('#imgToRead').selectAreas('reset');
-    // });
-    // $('#lastImg').click(function () {
-    //   $('#imgToRead').selectAreas('reset');
-    // });
+
 
     $('.sidebody').click(function () {
       $('#imgToRead').selectAreas('reset');
     });
-    // });
+
   }
 
-  deleteblocks() {
-    var r = confirm("This action will delete all the blocks on the current page including any recognized or corrected text. Are you sure you want to continue?");
-    if (r == true) {
-      $('#imgToRead').selectAreas('reset');
-      console.log("empty the right side screen");
-      $(".textElementsDiv").not(':first').remove();
-      $(".textSpanDiv").empty();
-      this.onSave();
-    }
-  }
+
+
+
+
 
   onSave() {
     console.log("in xml save");
@@ -641,6 +632,14 @@ export class ScreenComponent implements OnInit {
     this.callOne = !this.callOne;
   };
 
+  // openDialog() {
+  //   const dialogRef = this.dialog.open(ScreenComponentDialog);
+
+  //   dialogRef.afterClosed().subscribe(result => {
+  //     console.log(`Dialog result: ${result}`);
+  //   });
+  // }
+
 }
 
 function convertCanvasToImage(canvas) {
@@ -649,5 +648,23 @@ function convertCanvasToImage(canvas) {
   image.src = canvas.toDataURL("image/png");
   console.log("image.src: " + image.src);
   return image;
+}
+
+@Component({
+  selector: 'app-screen-Dialog',
+  templateUrl: './screen.component.dialog.html',
+
+})
+export class ScreenComponentDialog {
+  constructor(private imageService: ImageService){}
+
+  deleteblocks() {
+    $('#imgToRead').selectAreas('reset');
+    console.log("empty the right side screen");
+    $(".textElementsDiv").not(':first').remove();
+    $(".textSpanDiv").empty();
+    this.imageService.onSave();
+}
+
 }
 
