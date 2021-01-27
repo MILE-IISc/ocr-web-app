@@ -68,6 +68,9 @@ import { FooterComponent } from './footer/footer.component';
 import { ClickOutsideDirective } from './shared/click-outside.directive';
 import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
 import { SaveDetectorDirective } from './shared/savedirective';
+import {ScreenComponentDialog} from './screen/screen.component';
+
+
 
 @NgModule({
   declarations: [
@@ -78,7 +81,8 @@ import { SaveDetectorDirective } from './shared/savedirective';
     ClickOutsideDirective,
     CtrlsDetectorDirective,
     SaveDetectorDirective,
-    FooterComponent
+    FooterComponent,
+    ScreenComponentDialog
   ],
   exports: [
     MatIconModule
@@ -138,6 +142,7 @@ import { SaveDetectorDirective } from './shared/savedirective';
     AngularSplitModule,
     MatNativeDateModule
   ],
+
   providers: [
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'fill' } },
     HeaderService,
@@ -145,9 +150,10 @@ import { SaveDetectorDirective } from './shared/savedirective';
     ImageService,
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
+
   ],
   bootstrap: [AppComponent],
-  entryComponents: [ErrorComponent],
+  entryComponents: [ ScreenComponent,ScreenComponentDialog],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AppModule {

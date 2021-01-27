@@ -11,6 +11,7 @@ import { HeaderService } from '../services/header.service';
 import { XmlModel, retain } from '../shared/xml-model';
 import { BlockModel } from '../shared/block-model';
 // import { HeaderService } from '../services/header.service';
+import * as xml2js from 'xml2js';
 
 
 declare var Tiff: any;
@@ -940,6 +941,48 @@ export class ImageService implements OnInit {
     $('img#imgToRead').selectAreas('destroy');
 
   };
+
+  onSave() {
+    console.log("in xml save");
+    var areas = $('img#imgToRead').selectAreas('areas');
+    var prolog = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+    var ns1 = 'http://mile.ee.iisc.ernet.in/schemas/ocr_output';
+    var xmlDocument = document.implementation.createDocument(null, "page", null);
+    xmlDocument.documentElement.setAttribute("xmlns", ns1);
+    for (let i = 0; i < areas.length; i++) {
+      var blockElem = xmlDocument.createElementNS(null, "block");
+      blockElem.setAttribute("type", "Text");
+      var blockNumberElems = $(".select-areas-blockNumber-area");
+      console.log("-----blockNumberElems------" + blockNumberElems.length);
+      var blockNumber = document.getElementsByClassName('select-areas-blockNumber-area');
+      console.log("block number" + blockNumber[(blockNumberElems.length - 1) - i].innerHTML)
+      blockElem.setAttribute("BlockNumber", blockNumber[(blockNumberElems.length - 1) - i].innerHTML);
+      blockElem.setAttribute("SubType", "paragraphProse");
+      var y = ((areas[i].y * 100) / this.percentage).toString();
+      console.log("this.percentage--------" + this.percentage)
+      blockElem.setAttribute("rowStart", (Math.ceil(parseInt(y))).toString());
+      var height = ((areas[i].height * 100) / this.percentage);
+      var rowEnd = (height + parseFloat(y)).toString();
+      blockElem.setAttribute("rowEnd", (Math.ceil(parseInt(rowEnd))).toString());
+      var x = ((areas[i].x * 100) / this.percentage).toString();
+      blockElem.setAttribute("colStart", (Math.ceil(parseInt(x))).toString());
+      var width = ((areas[i].width * 100) / this.percentage);
+      var colEnd = (width + parseFloat(x)).toString();
+      blockElem.setAttribute("colEnd", (Math.ceil(parseInt(colEnd))).toString());
+      // blockElem.removeAttribute("xmlns");
+      xmlDocument.documentElement.appendChild(blockElem);
+    }
+    var xmlString = new XMLSerializer().serializeToString(xmlDocument);
+    console.log("xml string " + xmlString);
+
+    xml2js.parseString(xmlString, function (err, result) {
+      var jsonString = JSON.stringify(result);
+      XmlModel.jsonObject = result;
+    });
+    this.updateCorrectedXml(this.fileName);
+  }
+
+
 }
 function convertCanvasToImage(canvas) {
   console.log("In Tiff Image conversion");
