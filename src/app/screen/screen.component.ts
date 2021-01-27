@@ -130,6 +130,10 @@ export class ScreenComponent implements OnInit {
     this.userName = this.authService.getUserName();
     this.isLoadingfromServer = true;
 
+    this.imageService.getServerImages().then(() => {
+      console.log("Getting server images on Init");
+    });
+
     this.imageService.isLoadingFromServerChange.subscribe((isLoadingFromServer) => {
       this.isLoadingfromServer = isLoadingFromServer;
     });
