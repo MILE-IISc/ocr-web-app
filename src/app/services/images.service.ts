@@ -288,6 +288,7 @@ export class ImageService implements OnInit {
 
 
   async loadArray(serverImage: any) {
+    this.isLoadingFromServerChange.emit(true);
     console.log("inside load array");
     console.log("inside load array", serverImage);
 
@@ -295,6 +296,7 @@ export class ImageService implements OnInit {
       var user = this.authService.userName;
       const queryParams = `?user=${user}`;
       this.http.get<{ message: string; json: any }>(this.IMAGE_BACKEND_URL + serverImage + queryParams).subscribe(responseData => {
+        this.isLoadingFromServerChange.emit(false);
         resolve(responseData.json);
       });
     });
