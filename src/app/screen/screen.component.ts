@@ -128,11 +128,7 @@ export class ScreenComponent implements OnInit {
       });
 
     this.userName = this.authService.getUserName();
-
     this.isLoadingfromServer = true;
-    this.imageService.getServerImages().then(() => {
-      // this.isLoadingfromServer = false;
-    });
 
     this.imageService.isLoadingFromServerChange.subscribe((isLoadingFromServer) => {
       this.isLoadingfromServer = isLoadingFromServer;
@@ -214,7 +210,6 @@ export class ScreenComponent implements OnInit {
           if (this.isDiv == true) {
             $('.holderClass').remove();
           }
-          this.isLoadingfromServer = true;
           this.isLoading = true;
           this.ImageIs = true;
           if (imageLength > 1) {
