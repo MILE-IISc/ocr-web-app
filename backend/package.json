@@ -17,6 +17,7 @@
     "jimp": "^0.16.1",
     "js2xmlparser": "^4.0.1",
     "jsonwebtoken": "^8.2.1",
+    "jszip": "^3.5.0",
     "mongoose": "^5.1.2",
     "mongoose-unique-validator": "^2.0.1",
     "multer": "^1.4.2",
