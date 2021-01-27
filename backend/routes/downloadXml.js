@@ -4,6 +4,7 @@ var path = require('path');
 const router = express.Router();
 const { promise } = require("protractor");
 var JSZip = require('jszip');
+var request = require("request");
 const authChecker = require("../middleware/auth-checker");
 
 const cloudStorage = require('ibm-cos-sdk');
@@ -69,20 +70,34 @@ router.get("", authChecker, (req, res, next) => {
       getItem(bucketName, fileName, "GET").then(xmlContent => {
         count++;
         if (xmlContent != null) {
-          folder.file(fileName, xmlContent);
-        }
+          request.post({
+            url: process.env.RUN_OCR_ADDRESS + "/convert",
+            port: process.env.RUN_OCR_PORT,
+            method: "POST",
+            headers: {
+              'Content-Type': 'application/xml',
+            },
+            body: xmlContent
+          }, function (error, response, body) {
+              if (error == null) {
+                folder.file(fileName, body);
 
-        if (count == xmlFileNames.length) {
-          var zipFileName = bucketName + '_xml_files.zip';
-          zip
-            .generateNodeStream({ streamFiles: true })
-            .pipe(fs.createWriteStream(zipFileName))
-            .on('finish', function () {
-              console.log("Sending ZIP of XML files {zipFileName}");
-              // res.setHeader('Content-disposition', 'attachment; filename=out.zip');
-              // res.sendFile(zipFileName);
-              res.download(zipFileName);
-            })
+                if (count == xmlFileNames.length) {
+                  var zipFileName = bucketName + '_xml_files.zip';
+                  zip
+                    .generateNodeStream({ streamFiles: true })
+                    .pipe(fs.createWriteStream(zipFileName))
+                    .on('finish', function () {
+                      console.log("Sending ZIP of XML files {zipFileName}");
+                      // res.setHeader('Content-disposition', 'attachment; filename=out.zip');
+                      // res.sendFile(zipFileName);
+                      res.download(zipFileName);
+                    })
+                }
+              } else {
+                console.log("Error while converting to ALTO XML: ", error);
+              }
+            });
         }
       });
     });
