@@ -9,7 +9,7 @@ const { promise } = require("protractor");
 var util = require('util');
 const Jimp = require('jimp');
 
-const checkAuth = require("../middleware/check-auth");
+const authChecker = require("../middleware/auth-checker");
 const WaveController = require("../controllers/waves");
 const Image = require("../models/image");
 const User = require("../models/user");
@@ -160,7 +160,7 @@ var upload = multer({
 });
 
 router.post("",
-  checkAuth,
+  authChecker,
   upload.array("image", 4000),
   (req, res, next) => {
     console.log("inside post email ", req.body.email);
@@ -241,7 +241,7 @@ router.post("",
     }
   });
 
-router.get("", checkAuth, (req, res, next) => {
+router.get("", authChecker, (req, res, next) => {
   const url = req.protocol + "://" + req.get("host");
   const mail = req.query.user;
   const userId = req.userData.userId;
@@ -337,7 +337,7 @@ router.get("", checkAuth, (req, res, next) => {
   });
 });
 
-router.get("/:fileName", checkAuth, (req, res, next) => {
+router.get("/:fileName", authChecker, (req, res, next) => {
   const mail = req.query.user;
   let fetchedUser;
   let jpegFile = req.params.fileName;

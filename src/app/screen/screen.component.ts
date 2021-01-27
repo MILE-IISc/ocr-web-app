@@ -575,6 +575,16 @@ export class ScreenComponent implements OnInit {
     }
   }
 
+  async downloadXml2() {
+    await this.fileService.downloadZipFile().then(response => {
+      // show spinner
+      fileSaver(response, "OCR_output.zip");
+    }), error => {
+      console.log("Error while getting ZIP of XML files from server: " + error);
+      alert(error);
+    };
+  }
+
   openMenu(event) {
     this.isMenuOpen = true;
     event.preventDefault();

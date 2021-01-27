@@ -7,12 +7,8 @@ const router = express.Router();
 var format = require('xml-formatter');
 const { promise } = require("protractor");
 var util = require('util');
-
-
 var request = require("request");
-// var utf8 = require('utf8');
-
-const checkAuth = require("../middleware/check-auth");
+const authChecker = require("../middleware/auth-checker");
 const Image = require("../models/image");
 const User = require("../models/user");
 
@@ -70,7 +66,7 @@ function getItem(bucketName, itemName, type) {
     });
 }
 
-router.put("", checkAuth, (req, res, next) => {
+router.put("", authChecker, (req, res, next) => {
   xmlFileName = req.body.XmlfileName;
   const mail = req.userData.email;
   const bucketName = req.userData.bucketName;
@@ -100,7 +96,7 @@ router.put("", checkAuth, (req, res, next) => {
   });
 });
 
-router.get("/:fileName", checkAuth, (req, res, next) => {
+router.get("/:fileName", authChecker, (req, res, next) => {
   console.log("in xml get fileName")
   // const mail = req.query.user;
   const mail = req.userData.email;
@@ -130,7 +126,7 @@ router.get("/:fileName", checkAuth, (req, res, next) => {
 });
 
 
-router.get("", checkAuth, (req, res, next) => {
+router.get("", authChecker, (req, res, next) => {
   console.log("in run ocr xml get fileName")
   const mail = req.userData.email;
   const bucketName = req.userData.bucketName;
