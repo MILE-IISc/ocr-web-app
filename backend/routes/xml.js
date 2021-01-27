@@ -40,12 +40,10 @@ function getItem(bucketName, itemName, type) {
   }).promise()
     .then((data) => {
       if (data != null) {
-        // console.log('File Contents:\n' + Buffer.from(data.Body).toString());
         if (type == "OCR") {
           console.log("image Metadata", data.Metadata);
           console.log("image Type", data.ContentType);
           if (data.ContentType == "image/tiff") {
-            // console.log("base64Data",base64Data);
             console.log("inside get Tiff image base64");
             const tiffArrayBuff = Buffer.from(data.Body).buffer;
             base64Data = Buffer.from(tiffArrayBuff).toString('base64');
@@ -162,93 +160,65 @@ router.get("", authChecker, (req, res, next) => {
     console.log("xmlFileName in get call " + xmlFileName);
     getItem(bucketName, xmlFileName, "GET").then(xmlContent => {
       if (xmlContent == "The specified key does not exists in bucket") {
-        console.log("error while retrieving:", xmlContent);
-        res.status(400).json({
-          message: xmlContent,
-          xmlData: ""
-        });
+        xmlContent =`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <page xmlns="http://mile.ee.iisc.ernet.in/schemas/ocr_output">
+        </page>`;
       }
-      else {
-        // console.log("content retrieved for XML while running OCR:",content);
-        console.log("getting Image Data for", req.query.fileName);
+      console.log("getting Image Data for", req.query.fileName);
 
-        getItem(bucketName, req.query.fileName, "OCR").then(imgContent => {
-          if (imgContent == "The specified key does not exists in bucket") {
-            console.log("error while retrieving:", imgContent);
-            res.status(400).json({
-              message: imgContent,
-              xmlData: ""
-            });
-          }
-          else {
-            console.log("Base64String image Data retrieved in get Request for RUN-OCR");
-            console.log("data before appending imageData", xmlContent);
-            xml2js.parseString(xmlContent, (err, result) => {
-              console.log("xml result inside xml2js.parse", result);
-              // result["page"]["imageData"] =  imgContent;
-              result["page"]["imageData"] = imgContent;
-              const builder = new xml2js.Builder();
-              xmlContent = builder.buildObject(result);
-              // console.log("data after appending imageData",xmlContent);
-              // const user_xml_dir = './';
-              // var fs = require('fs');
-              // let dir = user_xml_dir;
-              // if (!fs.existsSync(dir)) {
-              //   fs.mkdirSync(dir);
-              // }
-
-              // let writeStream = fs.createWriteStream(dir + xmlFileName);
-              // writeStream.on('error', (err) => {
-              //   console.log(err);
-              //   writeStream.end();
-              //   res.status(500).json({
-              //     message: "Couldn't save Text File. err: " + err
-              //   });
-              // });
-              // writeStream.write(xmlContent);
-
-              // writeStream.on('finish', () => {
-              //   console.log("writestream completed-----");
-              // });
-              // writeStream.end();
-            });
-            request.post({
-              url: process.env.RUN_OCR_ADDRESS,
-              port: process.env.RUN_OCR_PORT,
-              method: "POST",
-              headers: {
-                'Content-Type': 'application/xml',
-              },
-              body: xmlContent
+      getItem(bucketName, req.query.fileName, "OCR").then(imgContent => {
+        if (imgContent == "The specified key does not exists in bucket") {
+          console.log("error while retrieving:", imgContent);
+          res.status(400).json({
+            message: imgContent,
+            xmlData: ""
+          });
+        }
+        else {
+          console.log("Base64String image Data retrieved in get Request for RUN-OCR");
+          console.log("data before appending imageData", xmlContent);
+          xml2js.parseString(xmlContent, (err, result) => {
+            console.log("xml result inside xml2js.parse", result);
+            result["page"]["imageData"] = imgContent;
+            const builder = new xml2js.Builder();
+            xmlContent = builder.buildObject(result);
+          });
+          request.post({
+            url: process.env.RUN_OCR_ADDRESS,
+            port: process.env.RUN_OCR_PORT,
+            method: "POST",
+            headers: {
+              'Content-Type': 'application/xml',
             },
-              function (error, response, body) {
-                console.log(response.statusCode);
-                if (error == null) {
-                  console.log("output on RUN-OCR", body);
-                  xml2js.parseString(body, function (err, result) {
-                    console.log("xml result as JSON in " + JSON.stringify(result));
-                    res.status(201).json({
-                      message: "OCR-RUN is successfull !!!",
-                      xmlData: result
-                    });
+            body: xmlContent
+          },
+            function (error, response, body) {
+              console.log(response.statusCode);
+              if (error == null) {
+                console.log("output on RUN-OCR", body);
+                xml2js.parseString(body, function (err, result) {
+                  console.log("xml result as JSON in " + JSON.stringify(result));
+                  res.status(201).json({
+                    message: "OCR-RUN is successfull !!!",
+                    xmlData: result
                   });
-                  doCreateObject(bucketName, xmlFileName, body).then(() => {
-                    console.log("saved OCR output xml file");
-                  }).catch((err) => {
-                    console.log("error while saving xml file:", err);
-                  });
-                }
-                else {
-                  console.log("error while RUN-OCR", error);
-                  res.status(400).json({
-                    message: "Error occured while running the OCR "+error,
-                    xmlData: ""
-                  });
-                }
-              });
-          }
-        });
-      }
+                });
+                doCreateObject(bucketName, xmlFileName, body).then(() => {
+                  console.log("saved OCR output xml file");
+                }).catch((err) => {
+                  console.log("error while saving xml file:", err);
+                });
+              }
+              else {
+                console.log("error while RUN-OCR", error);
+                res.status(400).json({
+                  message: "Error occured while running the OCR "+error,
+                  xmlData: ""
+                });
+              }
+            });
+        }
+      });
     });
   }
 });
