@@ -287,11 +287,9 @@ router.get("", authChecker, (req, res, next) => {
             console.log("mismatchCount before",mismatchCount);
             if (tiffImage.slice(0, -3).toLowerCase() != jpegImage.slice(0, -3).toLowerCase()) {
               mismatchCount = mismatchCount + 1;
-              console.log("mismatchCount inside if",mismatchCount);
             }
 
             if (tiffImage.slice(0, -3).toLowerCase() != jpegImage.slice(0, -3).toLowerCase() && mismatchCount == tiffImages.length) {
-              console.log("mismatchCount inside else if",mismatchCount);
               fetchedImages.push(jpegImage);
               console.log("jpeg Image only", jpegImage);
             }
