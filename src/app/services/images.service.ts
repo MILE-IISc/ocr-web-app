@@ -107,15 +107,11 @@ export class ImageService implements OnInit {
             console.log("message" + responseData.message);
             console.log("server images length--" + this.localImages.length);
             this.imagesUpdated.next({ localImages: [...this.localImages] });
-            // this.isLoadingFromServer = false;
-            this.isLoadingFromServerChange.emit(false);
           }
           else {
             console.log("message" + responseData.message);
             this.localImages = responseData.images;
             this.imagesUpdated.next({ localImages: [] });
-            // this.isLoadingFromServer = false;
-            this.isLoadingFromServerChange.emit(false);
           }
           resolve(this.localImages);
         });
@@ -289,6 +285,7 @@ export class ImageService implements OnInit {
 
 
   async loadArray(serverImage: any) {
+    this.isLoadingFromServerChange.emit(true);
     console.log("inside load array");
     console.log("inside load array", serverImage);
 
@@ -296,6 +293,7 @@ export class ImageService implements OnInit {
       var user = this.authService.userName;
       const queryParams = `?user=${user}`;
       this.http.get<{ message: string; json: any }>(this.IMAGE_BACKEND_URL + serverImage + queryParams).subscribe(responseData => {
+        this.isLoadingFromServerChange.emit(false);
         resolve(responseData.json);
       });
     });
