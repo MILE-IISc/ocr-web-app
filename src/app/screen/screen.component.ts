@@ -84,6 +84,7 @@ export class ScreenComponent implements OnInit {
   obtainblock = false;
   ocrMessage = "";
   isLoadingfromServer = false;
+  isDownloading = false;
 
   sideOpen() {
     this.sidesize1 = 30;
@@ -580,8 +581,9 @@ export class ScreenComponent implements OnInit {
   }
 
   async downloadXml2() {
+    this.isDownloading = true;
     await this.fileService.downloadZipFile().then(response => {
-      // show spinner
+      this.isDownloading = false;
       fileSaver(response, "OCR_output.zip");
     }), error => {
       console.log("Error while getting ZIP of XML files from server: " + error);

@@ -119,7 +119,8 @@
 
   <as-split-area (ctrls)="showTooltip()" class="split2" [size]=size3 style="overflow-x: auto; overflow-y: auto;"
     (scroll)="updatescroll(scrollOne, scrollTwo)" #scrollTwo>
-    <div id="image" class="textElementsDiv" [style.position]="'relative'">
+    <mat-spinner *ngIf="isDownloading"></mat-spinner>
+    <div id="image" class="textElementsDiv" [style.position]="'relative'" *ngIf="!isDownloading">
       <span *ngFor="let text of words;let i = index" class="textSpanDiv">
         <input class="text_input" id="{{text.lineNumber}}" value="{{text.unicode}}"
           [style.width.px]="text.txtwidth*(this.percentage/100)" [style.position]="'absolute'" [style.border]="'none'"
