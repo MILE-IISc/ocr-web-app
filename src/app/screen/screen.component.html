@@ -29,7 +29,7 @@
   <div id="footerSnackBar">{{ ocrMessage }}</div>
 
   <button mat-icon-button data-toggle="tooltip" title="Save Blocks (Ctrl+s)" style="margin-right:3px;"
-    (click)="onSave()">
+    (click)="onSave()" id="onSave">
     <mat-icon>save</mat-icon>
   </button>
 
@@ -110,7 +110,7 @@
           color="primary" id="CloseBar" (click)="sideClose()">
           <mat-icon>keyboard_arrow_left</mat-icon>
         </button>
-        <img [src]="localUrl" *ngIf="localUrl && !isLoading && !isLoadingfromServer" id="imgToRead" class="imgToRead" />
+        <img [src]="localUrl" *ngIf="localUrl && !isLoading" id="imgToRead" class="imgToRead" />
         <mat-spinner *ngIf="isLoading"></mat-spinner>
         <mat-spinner *ngIf="isLoadingfromServer"></mat-spinner>
       </as-split-area>
@@ -132,7 +132,7 @@
     </div>
   </as-split-area>
 </as-split>
-<!-- [style.margin-inline-start.px]="text.lineRowStart*(this.percentage/100)" -->
+<!-- [style.margin-inline-start.px]=" text.lineRowStart*(this.percentage/100)" -->
 <!-- [style.left.px]="text.lineColStart*(this.percentage/100)" -->
 <app-footer></app-footer>
 
