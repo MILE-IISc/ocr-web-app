@@ -1,23 +1,24 @@
 /* @import "../node_modules/@angular/material/prebuilt-themes/indigo-pink.css"; */
 
-/* input{
-
-  border-radius: 10px;
-  height: 30px !important;
-  color: black;
-} */
-
 .cdk-overlay-pane.my-dialog {
-  position: relative!important;
+  position:absolute!important;
 }
 
-.close {
+.heading{
   position: absolute;
   top: 0;
-  right: 0;
-  padding: 5px;
+  padding-left: 20px;
+}
 
-  min-width: auto;
+.dialog{
+  padding-top:23px;
+}
+
+.dialogbar{
+  position: absolute;
+  top: 0;
+  width:100%;
+  left:0;
 }
 
 label {
