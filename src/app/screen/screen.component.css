@@ -7,6 +7,19 @@
   color: black;
 } */
 
+.cdk-overlay-pane.my-dialog {
+  position: relative!important;
+}
+
+.close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 5px;
+
+  min-width: auto;
+}
+
 label {
   font-size: small;
 }

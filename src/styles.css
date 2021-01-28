@@ -12,14 +12,3 @@ purple-green.css */
     position: relative !important;
     overflow: auto;
 } */
-.cdk-overlay-pane.my-dialog {
-  position: relative!important;
-}
-.close.mat-button {
-  position: absolute;
-  top: 0;
-  right: 0;
-  padding: 5px;
-  line-height: 14px;
-  min-width: auto;
-}

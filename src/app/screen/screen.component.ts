@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, Renderer2 } from '@angular/core';
+import { Component, HostListener, OnInit, Renderer2,ViewEncapsulation } from '@angular/core';
 declare var $: any;
 import { fromEvent, Subscription } from 'rxjs';
 import { map, buffer, filter, debounceTime } from 'rxjs/operators';
@@ -668,6 +668,8 @@ function convertCanvasToImage(canvas) {
 @Component({
   selector: 'app-screen-Dialog',
   templateUrl: './screen.component.dialog.html',
+  styleUrls: ['./screen.component.css'],
+  encapsulation: ViewEncapsulation.None
 
 })
 export class ScreenComponentDialog {
