@@ -193,8 +193,10 @@ router.get("", authChecker, (req, res, next) => {
             body: xmlContent
           },
             function (error, response, body) {
-              console.log(response.statusCode);
-              if (error == null) {
+              // console.log("response.statusCode",response.statusCode);
+              // console.log("error",error);
+              // console.log("body",body);
+              if (response.statusCode  == 200) {
                 // console.log("output on RUN-OCR", body);
                 xml2js.parseString(body, function (err, result) {
                   // console.log("xml result as JSON in " + JSON.stringify(result));
