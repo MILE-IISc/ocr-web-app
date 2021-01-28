@@ -140,7 +140,7 @@ export class ImageService implements OnInit {
   }
 
   private handleError(error: HttpErrorResponse) {
-    console.error(
+    console.log(
       `Backend returned code ${error.status}, ` +
       `Error was: ${error.error.message}`);
     this.isRunningOcrChange.emit(false);
@@ -560,23 +560,11 @@ export class ImageService implements OnInit {
   }
 
   getFileAsJson(fileName: any) {
-    console.log("file name in run ocr " + fileName);
     const queryParams = `?fileName=${fileName}&type=GET-XML`;
     this.http.get<{ message: string; xmlData: any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
-      console.log("reponseData in getFileAsJson", response.xmlData);
-      console.log("xml as json string " + JSON.stringify(response.xmlData));
       XmlModel.jsonObject = response.xmlData;
       this.retain(XmlModel.jsonObject);
       this.updateXmlModel(XmlModel.jsonObject);
-      // if(XmlModel.jsonObject['page'].block){
-      //   var blocks = XmlModel.jsonObject['page'].block;
-      //   for(let i =0;i<blocks.length;i++){
-      //     if(blocks[i].line){
-      //       console.log("lines are present");
-      //       this.updateXmlModel(jsonObj)
-      //     }
-      //   }
-      // }
     });
   }
 
