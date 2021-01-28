@@ -374,6 +374,7 @@ export class ImageService implements OnInit {
   }
 
   async nextPage() {
+    this.isRunningOcrChange.emit(false);
     this.imgFileCount++;
     this.imageCountChange.emit(this.imgFileCount);
     this.localImages = this.getLocalImages();
@@ -416,6 +417,7 @@ export class ImageService implements OnInit {
   }
 
   async previousPage() {
+    this.isRunningOcrChange.emit(false);
     this.imgFileCount--;
     this.imageCountChange.emit(this.imgFileCount);
     if (this.obtainblock == true) {
@@ -450,6 +452,7 @@ export class ImageService implements OnInit {
   }
 
   async LastImage() {
+    this.isRunningOcrChange.emit(false);
     if (this.obtainblock == true) {
       $('#imgToRead').selectAreas('reset');
     }
@@ -479,6 +482,7 @@ export class ImageService implements OnInit {
   }
 
   async firstImage() {
+    this.isRunningOcrChange.emit(false);
     this.imgFileCount = 0;
     this.imageCountChange.emit(this.imgFileCount);
     if (this.obtainblock == true) {
@@ -509,6 +513,7 @@ export class ImageService implements OnInit {
   }
 
   buttonenable() {
+    this.isRunningOcrChange.emit(false);
     if (this.localImages.length - 1 == 0) {
       this.nextImages = true;
       this.nextImageChange.emit(this.nextImages);
