@@ -1,41 +1,57 @@
+<mat-toolbar color="primary" class="footer">
+  <span class="example-spacer1"></span>
 
-  <mat-toolbar color="primary" class="footer">
-    <span class="example-spacer1"></span>
-
-     <button  mat-icon-button id="firstImg" data-toggle="tooltip" title="First-Page" [disabled]="previousImages" (click)="firstImage()" >  <mat-icon>first_page</mat-icon></button>
-      <button mat-icon-button id="previousImg" data-toggle="tooltip" title="Previous-Page" [disabled]="previousImages"(click)="previousImage()"><mat-icon>navigate_before</mat-icon></button>
-    <button mat-icon-button id="nextImg" data-toggle="tooltip" title="Next-Page" [disabled]="nextImages" (click)="NextImage()"> <mat-icon>navigate_next</mat-icon></button>
-  <button mat-icon-button id="lastImg" data-toggle="tooltip" title="Last-Page" [disabled]="nextImages" (click)="lastImage()"> <mat-icon>last_page</mat-icon></button>
-
-
-
+  <button mat-icon-button id="firstImg" data-toggle="tooltip" title="First-Page" [disabled]="previousImages"
+    (click)="firstImage()">
+    <mat-icon>first_page</mat-icon>
+  </button>
+  <button mat-icon-button id="previousImg" data-toggle="tooltip" title="Previous-Page" [disabled]="previousImages"
+    (click)="previousImage()">
+    <mat-icon>navigate_before</mat-icon>
+  </button>
+  <button mat-icon-button id="nextImg" data-toggle="tooltip" title="Next-Page" [disabled]="nextImages"
+    (click)="NextImage()">
+    <mat-icon>navigate_next</mat-icon>
+  </button>
+  <button mat-icon-button id="lastImg" data-toggle="tooltip" title="Last-Page" [disabled]="nextImages"
+    (click)="lastImage()">
+    <mat-icon>last_page</mat-icon>
+  </button>
 
   <span class="example-spacer4"></span>
 
-  <label>Rotate:</label><input id="angle"  type="number" class="angleclass" step=".5"  (click)="onEnter(box.value)" style="width:45px;color:black;font-size: small;  " #box (keyup.enter)="onEnter(box.value)" value="{{angle}}">
-
-
+  <label>Rotate:</label><input id="angle" type="number" class="angleclass" step=".5" (click)="onEnter(box.value)"
+    style="width:45px;color:black;font-size: small;  " #box (keyup.enter)="onEnter(box.value)" value="{{angle}}">
 
   <span class="example-spacer3"></span>
-  <button mat-stroked-button  (click)="loadXMLDoc()"  style="height:100%;" title="Run-OCR" >Run-OCR</button>
-  <button mat-stroked-button  (click)="loadXMLDocAll()"  style="height:100%;" title="Run-OCR" >Run-OCR on All</button>
 
- <span class="example-spacer"></span>
+  <button mat-stroked-button (click)="loadXMLDoc()" style="height:100%;" title="Run-OCR">Run-OCR</button>
 
-
-
-  <button mat-icon-button data-toggle="tooltip" title="Zoom In" id="butZoomIn" (click)="zoomInFun()"> <mat-icon >zoom_in</mat-icon></button>
-  <button mat-icon-button data-toggle="tooltip" title="Zoom Out" id="butZoomOut" (click)="zoomOutFun()"> <mat-icon >zoom_out</mat-icon></button>
-  <button mat-icon-button data-toggle="tooltip" title="Fit Width" id="fitWidth" (click)="fitwidth()"><mat-icon >height</mat-icon>
-</button>
-  <button mat-icon-button data-toggle="tooltip" title="Fit Height" id="fitHeigth" (click)="fitheight()"><mat-icon >height</mat-icon></button>
-  <button mat-icon-button data-toggle="tooltip" title="Actual Size" id="orginalsize" (click)="orginalsize()"><mat-icon >height</mat-icon></button>
   <span class="example-spacer3"></span>
-  <label for="zoom">Zoom:</label><input id="zoom" style="width:45px;color:black;font-size: small;" #bo (keyup.enter)="onZoom(bo.value)" value="{{percentage}}">%
+
+  <button mat-stroked-button (click)="loadXMLDocAll()" style="height:100%;" title="Run-OCR">Run-OCR on All</button>
+
+  <span class="example-spacer"></span>
+
+  <button mat-icon-button data-toggle="tooltip" title="Zoom In" id="butZoomIn" (click)="zoomInFun()">
+    <mat-icon>zoom_in</mat-icon>
+  </button>
+  <button mat-icon-button data-toggle="tooltip" title="Zoom Out" id="butZoomOut" (click)="zoomOutFun()">
+    <mat-icon>zoom_out</mat-icon>
+  </button>
+  <button mat-icon-button data-toggle="tooltip" title="Fit Width" id="fitWidth" (click)="fitwidth()">
+    <mat-icon>height</mat-icon>
+  </button>
+  <button mat-icon-button data-toggle="tooltip" title="Fit Height" id="fitHeigth" (click)="fitheight()">
+    <mat-icon>height</mat-icon>
+  </button>
+  <button mat-icon-button data-toggle="tooltip" title="Actual Size" id="orginalsize" (click)="orginalsize()">
+    <mat-icon>height</mat-icon>
+  </button>
+  <span class="example-spacer3"></span>
+  <label for="zoom">Zoom:</label><input id="zoom" style="width:45px;color:black;font-size: small;" #bo
+    (keyup.enter)="onZoom(bo.value)" value="{{percentage}}">%
   <span class="example-spacer2"></span>
 </mat-toolbar>
 
-
-  <script src="https://cdn.rawgit.com/seikichi/tiff.js/master/tiff.min.js"></script>
-
-
+<script src="https://cdn.rawgit.com/seikichi/tiff.js/master/tiff.min.js"></script>

@@ -11,11 +11,12 @@ import { MatDialog } from "@angular/material/dialog";
 
 import { ErrorComponent } from "./error/error.component";
 import { ErrorService } from "./error/error.service";
+import { ImageService } from './services/images.service';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
 
-  constructor(private dialog: MatDialog, private errorService: ErrorService) {}
+  constructor(private dialog: MatDialog, private errorService: ErrorService, private imageService: ImageService) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler) {
     return next.handle(req).pipe(
@@ -23,6 +24,7 @@ export class ErrorInterceptor implements HttpInterceptor {
         let errorMessage = "An unknown error occurred!";
         if (error.error.message) {
           errorMessage = error.error.message;
+          this.imageService.isRunningOcrChange.emit(false);
         }
         this.dialog.open(ErrorComponent, {data: {message: errorMessage}});
         // this.errorService.throwError(errorMessage);

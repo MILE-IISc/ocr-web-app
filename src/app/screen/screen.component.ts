@@ -208,12 +208,11 @@ export class ScreenComponent implements OnInit {
           this.ocrMessage = ocrMessage;
           if (this.ocrMessage != "" || this.ocrMessage != null) {
             console.log("ocr message in screen " + this.ocrMessage);
-            var x = document.getElementById("footerSnackBar");
-            console.log("x in footer " + x);
-            if (x != null) {
-              x.className = "show";
+            var elem = document.getElementById("footerSnackBar");
+            if (elem != null) {
+              elem.className = "show";
               setTimeout(() => {
-                x.className = x.className.replace("show", "");
+                elem.className = elem.className.replace("show", "");
               }, 5000);
             }
           }
@@ -291,7 +290,7 @@ export class ScreenComponent implements OnInit {
     });
 
     this.imageService.isRunningOcrChange.subscribe((isRunningOcr: boolean) => {
-      console.log("isRunni9ng ocr in screen " + isRunningOcr);
+      console.log("isRunning ocr in screen " + isRunningOcr);
       this.isRunningOcr = isRunningOcr;
     });
   }
