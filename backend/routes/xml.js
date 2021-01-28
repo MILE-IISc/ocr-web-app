@@ -159,8 +159,8 @@ router.get("", authChecker, (req, res, next) => {
     const xmlFileName = req.query.fileName.slice(0, -3) + 'xml';
     console.log("xmlFileName in get call " + xmlFileName);
     getItem(bucketName, xmlFileName, "GET").then(xmlContent => {
-      if (xmlContent.localeCompare("The specified key does not exists in bucket") == 0 || xmlContent == null || xmlContent.localeCompare("") == 0 ) {
-        xmlContent =`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+      if (xmlContent.localeCompare("The specified key does not exists in bucket") == 0 || xmlContent == null || xmlContent.localeCompare("") == 0) {
+        xmlContent = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <page xmlns="http://mile.ee.iisc.ernet.in/schemas/ocr_output">
         </page>`;
       }
@@ -170,55 +170,60 @@ router.get("", authChecker, (req, res, next) => {
         if (imgContent == "The specified key does not exists in bucket") {
           // console.log("error while retrieving:", imgContent);
           res.status(400).json({
-            message: imgContent,
+            message: "Couldn't find the uploaded image on server",
             xmlData: ""
           });
-        }
-        else {
+        } else {
           console.log("Base64String image Data retrieved in get Request for RUN-OCR");
           // console.log("data before appending imageData", xmlContent);
           xml2js.parseString(xmlContent, (err, result) => {
+            if (err) {
+              res.status(500).send({
+                message: "Internal server error - xml2js.parseString failed",
+                xmlData: ""
+              });
+            }
             // console.log("xml result inside xml2js.parse", result);
             result["page"]["imageData"] = imgContent;
             const builder = new xml2js.Builder();
             xmlContent = builder.buildObject(result);
-          });
-          request.post({
-            url: process.env.RUN_OCR_ADDRESS,
-            port: process.env.RUN_OCR_PORT,
-            method: "POST",
-            headers: {
-              'Content-Type': 'application/xml',
-            },
-            body: xmlContent
-          },
-            function (error, response, body) {
+            request.post({
+              url: process.env.RUN_OCR_ADDRESS,
+              port: process.env.RUN_OCR_PORT,
+              method: "POST",
+              headers: {
+                'Content-Type': 'application/xml',
+              },
+              body: xmlContent
+            }, function (error, response, body) {
               // console.log("response.statusCode",response.statusCode);
-              // console.log("error",error);
-              // console.log("body",body);
-              if (response.statusCode  == 200) {
+              if (response.statusCode == 200) {
                 // console.log("output on RUN-OCR", body);
-                xml2js.parseString(body, function (err, result) {
-                  // console.log("xml result as JSON in " + JSON.stringify(result));
-                  res.status(200).json({
-                    message: "OCR completed on" + req.query.fileName,
-                    xmlData: result
+                doCreateObject(bucketName, xmlFileName, body).then(() => {
+                  console.log("Saved OCR output XML to COS");
+                  xml2js.parseString(body, function (err, result) {
+                    // console.log("xml result as JSON in " + JSON.stringify(result));
+                    res.status(200).json({
+                      message: "OCR completed on" + req.query.fileName,
+                      xmlData: result
+                    });
+                  });
+                }).catch((error) => {
+                  console.log("Error while saving XML to COS: ", error);
+                  res.status(500).json({
+                    message: "Internal server error - Failed to save OCR XML to object storage: " + error,
+                    xmlData: ""
                   });
                 });
-                doCreateObject(bucketName, xmlFileName, body).then(() => {
-                  console.log("saved OCR output xml file");
-                }).catch((err) => {
-                  console.log("error while saving xml file:", err);
-                });
-              }
-              else {
-                console.log("error while RUN-OCR", error);
-                res.status(200).json({
-                  message: "Error occured while running the OCR ",
+              } else {
+                console.log("Error occurred while running the OCR: ", error);
+                res.status(500).json({
+                  message: "Internal server error occurred while running the OCR: " + error,
                   xmlData: ""
                 });
               }
             });
+          });
         }
       });
     });

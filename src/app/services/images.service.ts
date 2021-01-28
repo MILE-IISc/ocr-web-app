@@ -1,6 +1,8 @@
 import { Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError, retry } from 'rxjs/operators';
 import { EventEmitter, Injectable, OnInit, Renderer2, RendererFactory2 } from '@angular/core';
 import { Router } from '@angular/router';
 import * as $ from 'jquery';
@@ -61,7 +63,6 @@ export class ImageService implements OnInit {
   IMAGE_BACKEND_URL;
   XML_BACKEND_URL;
   invalidMessage;
-  ocrMessage;
   value: string;
   fit: string;
   public percentage: number;
@@ -69,7 +70,6 @@ export class ImageService implements OnInit {
   private renderer: Renderer2;
   public clientpercent;
   obtainblock = false;
-  isRunningOcr = false;
   isRunningOcrChange = new EventEmitter<any>();
   isLoadingFromServer = false;
   isLoadingFromServerChange = new EventEmitter<any>();
@@ -86,6 +86,9 @@ export class ImageService implements OnInit {
     return this.localImages.slice();
   }
 
+  getCurrentImageName() {
+    return this.localImages[this.imgFileCount].fileName;
+  }
 
   getBtnImages() {
     return this.btnImgArray.slice();
@@ -122,66 +125,69 @@ export class ImageService implements OnInit {
   }
 
   getXmlFileAsJson(fileName: any) {
+    this.isRunningOcrChange.emit(true);
     console.log("Running OCR on " + fileName)
     const queryParams = `?fileName=${fileName}&type=GET-OCR-XML`;
-    this.http.get<{ message: string; xmlData: any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
-      console.log("xml as json string on RUN-OCR" + JSON.stringify(response.xmlData));
+    this.http.get<{ message: string; xmlData: any }>(this.XML_BACKEND_URL + queryParams).pipe(
+      catchError(this.handleError)
+    ).subscribe(response => {
+      // console.log("xml as json string on RUN-OCR" + JSON.stringify(response.xmlData));
+      this.isRunningOcrChange.emit(false);
+      this.ocrMessageChange.emit(response.message);
       XmlModel.jsonObject = response.xmlData;
-      this.isRunningOcr = false;
-      this.isRunningOcrChange.emit(this.isRunningOcr);
-      this.ocrMessage = response.message;
-      this.ocrMessageChange.emit(this.ocrMessage);
       this.updateXmlModel(XmlModel.jsonObject);
     });
+  }
+
+  private handleError(error: HttpErrorResponse) {
+    console.error(
+      `Backend returned code ${error.status}, ` +
+      `Error was: ${error.error.message}`);
+    this.isRunningOcrChange.emit(false);
+    return throwError(
+      'Something bad happened; please try again later.');
   }
 
   getXmlFileAsJson2(fileName: any) {
     console.log("Running OCR on " + fileName)
     const queryParams = `?fileName=${fileName}&type=GET-OCR-XML`;
     this.http.get<{ message: string; xmlData: any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
-      // this.isRunningOcr = false;
-      // this.isRunningOcrChange.emit(this.isRunningOcr);
-      this.ocrMessage = response.message;
-      this.ocrMessageChange.emit(this.ocrMessage);
+      this.ocrMessageChange.emit(response.message);
     });
   }
 
   updateXmlModel(jsonObj) {
-    if (jsonObj) {
+    if (jsonObj && jsonObj['page']) {
       var blocks = [];
       if (jsonObj['page'].block) {
         blocks = jsonObj['page'].block;
       }
-      console.log("block length " + blocks.length);
-      for (var i = 0; i < blocks.length; i++) {
-        if (blocks[i].line) {
-          var lines = blocks[i].line;
-          console.log("line====" + lines.length);
-          for (var j = 0; j < lines.length; j++) {
-            if (lines[j].word) {
-              var txt = "";
-              var words = lines[j].word;
-              console.log("words length " + words.length);
-              for (var k = 0; k < words.length; k++) {
-                if (words[k]["$"].unicode != null) {
-                  console.log("words[" + k + "][\"$\"].unicode", words[k]["$"].unicode);
-                  txt = txt + " " + words[k]["$"].unicode;
+      for (var b = 0; b < blocks.length; b++) {
+        var block = blocks[b];
+        if (block.line) {
+          var lines = block.line;
+          for (var l = 0; l < lines.length; l++) {
+            var line = lines[l];
+            if (line.word) {
+              var lineText = "";
+              var words = line.word;
+              for (var w = 0; w < words.length; w++) {
+                var wordText = words[w]["$"].unicode;
+                if (wordText != null) {
+                  lineText += " " + wordText;
                 }
               }
-              var lineRowStart = lines[j]["$"].rowStart;
-              var lineRowEnd = lines[j]["$"].rowEnd;
-              var lineColStart = lines[j]["$"].colStart;
-              var lineColEnd = lines[j]["$"].colEnd;
-              var lineNumber = lines[j]["$"].LineNumber;
-              var blockNumber = blocks[i]["$"].BlockNumber;
-              var txtwidth = (lineColEnd - lineColStart);
-              var txtheight = (lineRowEnd - lineRowStart);
-              var wordValue = new XmlModel(txt, lineRowStart, lineRowEnd, lineColStart, lineColEnd, txtwidth, txtheight, lineNumber, blockNumber);
-              XmlModel.textArray.push(wordValue);
-              console.log("textarray length" + XmlModel.textArray.length);
+              var lineRowStart = line["$"].rowStart;
+              var lineRowEnd = line["$"].rowEnd;
+              var lineColStart = line["$"].colStart;
+              var lineColEnd = line["$"].colEnd;
+              var lineNumber = line["$"].LineNumber;
+              var blockNumber = block["$"].BlockNumber;
+              var lineWidth = lineColEnd - lineColStart + 1;
+              var lineHeight = lineRowEnd - lineRowStart + 1;
+              var lineInfo = new XmlModel(lineText, lineRowStart, lineRowEnd, lineColStart, lineColEnd, lineWidth, lineHeight, lineNumber, blockNumber);
+              XmlModel.textArray.push(lineInfo);
               XmlModel.textArray.slice(0, XmlModel.textArray.length);
-              console.log("textarray after length" + XmlModel.textArray.length);
-              console.log("text " + txt);
             }
           }
         }
@@ -578,7 +584,7 @@ export class ImageService implements OnInit {
     let areaarray = [];
     // var jsonObj = JSON.parse(json);
     console.log("inside retain jsonObj: " + JSON.stringify(jsonObj));
-    if (jsonObj['page'].block) {
+    if (jsonObj && jsonObj['page'] && jsonObj['page'].block) {
       var blocks = jsonObj['page'].block;
       //  console.log("block length " + blocks.length);
 
