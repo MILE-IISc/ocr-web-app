@@ -200,7 +200,7 @@ router.get("", authChecker, (req, res, next) => {
                 // console.log("output on RUN-OCR", body);
                 xml2js.parseString(body, function (err, result) {
                   // console.log("xml result as JSON in " + JSON.stringify(result));
-                  res.status(201).json({
+                  res.status(200).json({
                     message: "OCR completed on" + req.query.fileName,
                     xmlData: result
                   });
@@ -213,8 +213,8 @@ router.get("", authChecker, (req, res, next) => {
               }
               else {
                 console.log("error while RUN-OCR", error);
-                res.status(400).json({
-                  message: "Error occured while running the OCR "+error,
+                res.status(200).json({
+                  message: "Error occured while running the OCR ",
                   xmlData: ""
                 });
               }

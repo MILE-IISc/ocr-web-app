@@ -127,11 +127,11 @@ export class ImageService implements OnInit {
     this.http.get<{ message: string; xmlData: any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
       console.log("xml as json string on RUN-OCR" + JSON.stringify(response.xmlData));
       XmlModel.jsonObject = response.xmlData;
-      this.updateXmlModel(XmlModel.jsonObject);
       this.isRunningOcr = false;
       this.isRunningOcrChange.emit(this.isRunningOcr);
       this.ocrMessage = response.message;
       this.ocrMessageChange.emit(this.ocrMessage);
+      this.updateXmlModel(XmlModel.jsonObject);
     });
   }
 
@@ -147,41 +147,42 @@ export class ImageService implements OnInit {
   }
 
   updateXmlModel(jsonObj) {
-    console.log("jsonObj inside updateXmlModel after running OCR", jsonObj);
-    var blocks = [];
-    if (jsonObj['page'].block) {
-      blocks = jsonObj['page'].block;
-    }
-    console.log("block length " + blocks.length);
-    for (var i = 0; i < blocks.length; i++) {
-      if (blocks[i].line) {
-        var lines = blocks[i].line;
-        console.log("line====" + lines.length);
-        for (var j = 0; j < lines.length; j++) {
-          if (lines[j].word) {
-            var txt = "";
-            var words = lines[j].word;
-            console.log("words length " + words.length);
-            for (var k = 0; k < words.length; k++) {
-              if (words[k]["$"].unicode != null) {
-                console.log("words[" + k + "][\"$\"].unicode", words[k]["$"].unicode);
-                txt = txt + " " + words[k]["$"].unicode;
+    if (jsonObj) {
+      var blocks = [];
+      if (jsonObj['page'].block) {
+        blocks = jsonObj['page'].block;
+      }
+      console.log("block length " + blocks.length);
+      for (var i = 0; i < blocks.length; i++) {
+        if (blocks[i].line) {
+          var lines = blocks[i].line;
+          console.log("line====" + lines.length);
+          for (var j = 0; j < lines.length; j++) {
+            if (lines[j].word) {
+              var txt = "";
+              var words = lines[j].word;
+              console.log("words length " + words.length);
+              for (var k = 0; k < words.length; k++) {
+                if (words[k]["$"].unicode != null) {
+                  console.log("words[" + k + "][\"$\"].unicode", words[k]["$"].unicode);
+                  txt = txt + " " + words[k]["$"].unicode;
+                }
               }
+              var lineRowStart = lines[j]["$"].rowStart;
+              var lineRowEnd = lines[j]["$"].rowEnd;
+              var lineColStart = lines[j]["$"].colStart;
+              var lineColEnd = lines[j]["$"].colEnd;
+              var lineNumber = lines[j]["$"].LineNumber;
+              var blockNumber = blocks[i]["$"].BlockNumber;
+              var txtwidth = (lineColEnd - lineColStart);
+              var txtheight = (lineRowEnd - lineRowStart);
+              var wordValue = new XmlModel(txt, lineRowStart, lineRowEnd, lineColStart, lineColEnd, txtwidth, txtheight, lineNumber, blockNumber);
+              XmlModel.textArray.push(wordValue);
+              console.log("textarray length" + XmlModel.textArray.length);
+              XmlModel.textArray.slice(0, XmlModel.textArray.length);
+              console.log("textarray after length" + XmlModel.textArray.length);
+              console.log("text " + txt);
             }
-            var lineRowStart = lines[j]["$"].rowStart;
-            var lineRowEnd = lines[j]["$"].rowEnd;
-            var lineColStart = lines[j]["$"].colStart;
-            var lineColEnd = lines[j]["$"].colEnd;
-            var lineNumber = lines[j]["$"].LineNumber;
-            var blockNumber = blocks[i]["$"].BlockNumber;
-            var txtwidth = (lineColEnd - lineColStart);
-            var txtheight = (lineRowEnd - lineRowStart);
-            var wordValue = new XmlModel(txt, lineRowStart, lineRowEnd, lineColStart, lineColEnd, txtwidth, txtheight, lineNumber, blockNumber);
-            XmlModel.textArray.push(wordValue);
-            console.log("textarray length" + XmlModel.textArray.length);
-            XmlModel.textArray.slice(0, XmlModel.textArray.length);
-            console.log("textarray after length" + XmlModel.textArray.length);
-            console.log("text " + txt);
           }
         }
       }
