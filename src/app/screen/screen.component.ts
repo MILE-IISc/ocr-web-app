@@ -317,7 +317,7 @@ export class ScreenComponent implements OnInit {
 
     }
     this.imageService.buttonenable();
-    this.imageService.onXMLservice();
+    this.imageService.onXml();
     setTimeout(() => this.imageService.screenview(), 50);
     setTimeout(() => this.setpercentage(), 60);
   }

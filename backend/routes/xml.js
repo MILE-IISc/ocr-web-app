@@ -205,6 +205,7 @@ router.get("", authChecker, (req, res, next) => {
                     // console.log("xml result as JSON in " + JSON.stringify(result));
                     res.status(200).json({
                       message: "OCR completed on" + req.query.fileName,
+                      completed: "Y",
                       xmlData: result
                     });
                   });

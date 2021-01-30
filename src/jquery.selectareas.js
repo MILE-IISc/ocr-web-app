@@ -475,10 +475,33 @@
         console.log("Inside right click handler");
         cancelEvent(event);
         focus();
-        isMenuOpen = true;
-        $("#menu").css("display", "block");
-        $("#menu").css("left", event.clientX + "px");
-        $("#menu").css("top", event.clientY + "px");
+        var windowHeight = $(window).height()/2;
+        var windowWidth = $(window).width()/4;
+        if(event.clientY > windowHeight && event.clientX <= windowWidth) {
+          $("#menu").css("display", "block");
+          $("#menu").css("left", event.clientX + "px");
+          $("#menu").css("bottom", ($(window).height()-event.clientY)+ "px");
+          $("#menu").css("right", "auto");
+          $("#menu").css("top", "auto");
+        } else if(event.clientY > windowHeight && event.clientX > windowWidth) {
+          $("#menu").css("display", "block");
+          $("#menu").css("right", ($(window).width()-event.clientX) + "px");
+          $("#menu").css("bottom", ($(window).height()-event.clientY))+ "px";
+          $("#menu").css("left", "auto");
+          $("#menu").css("top", "auto");
+        } else if(event.clientY <= windowHeight && event.clientX  <= windowWidth) {
+          $("#menu").css("display", "block");
+          $("#menu").css("left", event.clientX + "px");
+          $("#menu").css("top", event.clientY)+ "px";
+          $("#menu").css("right", "auto");
+          $("#menu").css("bottom", "auto");
+        } else {
+          $("#menu").css("display", "block");
+          $("#menu").css("right", ($(window).width()-event.clientX )+ "px");
+          $("#menu").css("top",event.clientY+ "px");
+          $("#menu").css("left", "auto");
+          $("#menu").css("bottom", "auto");
+        }
       },
 	    updateBlockNumbers = function (event) {
         var updateButton = document.getElementById("btUpdateBlockNumbers")

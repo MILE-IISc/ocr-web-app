@@ -116,22 +116,32 @@ export class ImageService implements OnInit {
             this.localImages = responseData.images;
             this.imagesUpdated.next({ localImages: [] });
           }
+          this.onXml();
           resolve(this.localImages);
         });
 
     });
     return promise;
-
   }
 
   getXmlFileAsJson(fileName: any) {
     this.isRunningOcrChange.emit(true);
     console.log("Running OCR on " + fileName)
     const queryParams = `?fileName=${fileName}&type=GET-OCR-XML`;
-    this.http.get<{ message: string; xmlData: any }>(this.XML_BACKEND_URL + queryParams).pipe(
+    this.http.get<{ message: string; completed: string; xmlData: any }>(this.XML_BACKEND_URL + queryParams).pipe(
       catchError(this.handleError)
     ).subscribe(response => {
-      // console.log("xml as json string on RUN-OCR" + JSON.stringify(response.xmlData));
+      this.localImages = this.getLocalImages();
+      if (this.localImages.length > 0) {
+        for (let i = 0; i < this.localImages.length; i++) {
+          if (this.localImages[i].fileName == fileName) {
+            console.log("name" + this.localImages[i].fileName);
+            this.localImages[i].completed = response.completed;
+            console.log("response completed " + response.completed);
+            console.log("completed" + this.localImages[i].completed);
+          }
+        }
+      }
       this.isRunningOcrChange.emit(false);
       this.ocrMessageChange.emit(response.message);
       XmlModel.jsonObject = response.xmlData;
@@ -396,6 +406,7 @@ export class ImageService implements OnInit {
     this.fileName = this.localImages[this.imgFileCount].fileName;
     this.fileNameChange.emit(this.fileName);
     console.log("inside Next this.imgFileCount after incrementing: " + this.imgFileCount);
+    this.onXml();
 
     if (this.localImages.length - 1 == this.imgFileCount) {
       this.nextImages = true;
@@ -404,15 +415,6 @@ export class ImageService implements OnInit {
     if (this.imgFileCount > 0) {
       this.previousImages = false;
       this.previousImageChange.emit(this.previousImages);
-    }
-    if (this.obtainblock == true) {
-      this.onXml();
-    }
-  }
-
-  onXMLservice() {
-    if (this.obtainblock == true) {
-      this.onXml();
     }
   }
 
@@ -438,6 +440,7 @@ export class ImageService implements OnInit {
     this.fileName = this.localImages[this.imgFileCount].fileName;
     this.fileNameChange.emit(this.fileName);
     console.log("inside Next this.imgFileCount after decrementing: " + this.imgFileCount);
+    this.onXml();
     if (this.localImages.length - 1 > this.imgFileCount) {
       this.nextImages = false;
       this.nextImageChange.emit(this.nextImages);
@@ -445,9 +448,6 @@ export class ImageService implements OnInit {
     if (this.imgFileCount == 0) {
       this.previousImages = true;
       this.previousImageChange.emit(this.previousImages);
-    }
-    if (this.obtainblock == true) {
-      this.onXml();
     }
   }
 
@@ -470,14 +470,12 @@ export class ImageService implements OnInit {
     this.urlChanged.emit(this.localUrl.slice());
     this.fileName = this.localImages[this.imgFileCount].fileName;
     this.fileNameChange.emit(this.fileName);
+    this.onXml();
     if (this.localImages.length - 1 == this.imgFileCount) {
       this.nextImages = true;
       this.nextImageChange.emit(this.nextImages);
       this.previousImages = false;
       this.previousImageChange.emit(this.previousImages);
-    }
-    if (this.obtainblock == true) {
-      this.onXml();
     }
   }
 
@@ -500,15 +498,13 @@ export class ImageService implements OnInit {
     this.urlChanged.emit(this.localUrl.slice());
     this.fileName = this.localImages[this.imgFileCount].fileName;
     this.fileNameChange.emit(this.fileName);
+    this.onXml();
 
     if (this.imgFileCount == 0) {
       this.previousImages = true;
       this.previousImageChange.emit(this.previousImages);
       this.nextImages = false;
       this.nextImageChange.emit(this.nextImages);
-    }
-    if (this.obtainblock == true) {
-      this.onXml();
     }
   }
 
@@ -567,6 +563,9 @@ export class ImageService implements OnInit {
   getFileAsJson(fileName: any) {
     const queryParams = `?fileName=${fileName}&type=GET-XML`;
     this.http.get<{ message: string; xmlData: any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
+      console.log("empty the right side screen");
+    $(".textElementsDiv").not(':first').remove();
+    $(".textSpanDiv").empty();
       XmlModel.jsonObject = response.xmlData;
       this.retain(XmlModel.jsonObject);
       this.updateXmlModel(XmlModel.jsonObject);
@@ -574,6 +573,7 @@ export class ImageService implements OnInit {
   }
 
   retain(jsonObj) {
+    if (this.obtainblock == true) {
     let areaarray = [];
     // var jsonObj = JSON.parse(json);
     console.log("inside retain jsonObj: " + JSON.stringify(jsonObj));
@@ -621,6 +621,7 @@ export class ImageService implements OnInit {
       this.displayarea = areas;
       console.log(areas.length + " this.displayarea", arguments);
     };
+   }
   }
 
   screenview() {
