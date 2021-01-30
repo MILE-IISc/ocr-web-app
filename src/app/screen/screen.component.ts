@@ -146,6 +146,7 @@ export class ScreenComponent implements OnInit {
 
     this.imageService.getServerImages().then(() => {
       console.log("Getting server images on Init");
+
     });
 
     this.imageService.isLoadingFromServerChange.subscribe((isLoadingFromServer) => {
@@ -168,7 +169,7 @@ export class ScreenComponent implements OnInit {
     this.headerService.loadingvaluechage
       .subscribe(
         (spin: boolean) => {
-          this.isLoading = spin;
+          this.isLoadingfromServer = spin;
         });
 
     this.value = this.headerService.getHeaderValue();

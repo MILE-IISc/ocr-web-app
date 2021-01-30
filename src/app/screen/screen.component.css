@@ -25,14 +25,6 @@ label {
   font-size: small;
 }
 
-.mat-spinner {
-  position: relative;
-  margin-left: 50%;
-  /* transform: translateX(-50%);
-  transform: translateY(-50%); */
-  margin-top: 50%;
-}
-
 .footer {
   position: fixed;
   width: 100%;
@@ -61,15 +53,6 @@ label {
 .btn-group {
   height: 100%;
 }
-
-/* .arrowup{
-  height: .25em;
-
-}
-.arrowdown{
-  height: .15em;
-
-} */
 
 #fitWidth {
   transform: rotate(90deg);
@@ -137,13 +120,6 @@ label {
   opacity: 0.3;
 }
 
-/* .text_input{
-  margin: 0px !important;
-  display: inline-block !important;
-  padding: 0px !important;
-} */
-
-/* div { position: relative; } */
 
 #menu {
   position: absolute;
@@ -389,3 +365,4 @@ label {
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
 }
+

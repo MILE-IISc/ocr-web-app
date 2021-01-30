@@ -56,6 +56,7 @@ export class ImageService implements OnInit {
   btnImgArray: any[] = [];
   public localUrl: any;
   public documentElement;
+  isLoadingfromServer;
   postedImages: any;
   serverUrl: any
   dataUrl: any;
@@ -110,13 +111,15 @@ export class ImageService implements OnInit {
             console.log("message" + responseData.message);
             console.log("server images length--" + this.localImages.length);
             this.imagesUpdated.next({ localImages: [...this.localImages] });
+            this.onXml();
           }
           else {
+            this.isLoadingfromServer = false;
+            this.headerService. setloadingvalue(this.isLoadingfromServer);
             console.log("message" + responseData.message);
             this.localImages = responseData.images;
             this.imagesUpdated.next({ localImages: [] });
           }
-          this.onXml();
           resolve(this.localImages);
         });
 

@@ -110,8 +110,9 @@
           color="primary" id="CloseBar" (click)="sideClose()">
           <mat-icon>keyboard_arrow_left</mat-icon>
         </button>
-        <mat-spinner *ngIf="isLoading"></mat-spinner>
-        <mat-spinner *ngIf="isLoadingfromServer"></mat-spinner>
+        <mat-spinner style="top:50%;left:50%;z-index:999;" *ngIf="isLoading"></mat-spinner>
+
+        <mat-spinner  style="top:50%;left:50%;z-index:999;" *ngIf="isLoadingfromServer"></mat-spinner>
         <img [src]="localUrl" *ngIf="localUrl && !isLoading" id="imgToRead" class="imgToRead" />
       </as-split-area>
     </as-split>
