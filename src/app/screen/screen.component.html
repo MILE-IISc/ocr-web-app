@@ -124,7 +124,7 @@
     <div id="image" class="textElementsDiv" [style.position]="'relative'" *ngIf="!isDownloading">
       <span *ngFor="let text of words;let i = index" class="textSpanDiv">
         <input class="text_input" id="{{text.lineNumber}}" value="{{text.unicode}}"
-          [style.width.px]="text.txtwidth*(this.percentage/100)" [style.position]="'absolute'" [style.border]="'none'"
+          [style.width.px]="text.txtwidth*(this.percentage/100)" [style.position]="'absolute'" [style.border]="'none'" [style.font-weight]= "550"
           [style.font-size.px]="text.txtheight*5/8*(this.percentage/100)"
           [style.top.px]="text.lineRowStart*(this.percentage/100)"
           [style.margin-inline-start.px]="text.lineColStart*(this.percentage/100)"
