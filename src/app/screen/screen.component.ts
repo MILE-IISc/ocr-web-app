@@ -85,6 +85,7 @@ export class ScreenComponent implements OnInit {
   ocrMessage = "";
   isLoadingfromServer = false;
   isDownloading = false;
+  savemessage;
 
   sideOpen() {
     this.sidesize1 = 30;
@@ -178,6 +179,24 @@ export class ScreenComponent implements OnInit {
         (val: string) => {
           this.value = val;
         });
+
+    this.savemessage = this.headerService.getloadmessage();
+    this.headerService.messageemit
+        .subscribe(
+          (message: string) => {
+            console
+            this.savemessage = message;
+              if (this.savemessage != "") {
+              var x = document.getElementById("updatemessage");
+              console.log("x in screen " + x);
+              if (x != null) {
+               x.className = "show";
+               setTimeout(() => {
+                x.className = x.className.replace("show", "");
+                 }, 5000);
+               }
+             }
+         });
 
     this.nextImage = this.headerService.getMultipleImage();
     this.headerService.multiImageChange

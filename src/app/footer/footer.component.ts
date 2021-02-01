@@ -186,6 +186,8 @@ export class FooterComponent implements OnInit {
   }
 
   loadXMLDoc() {
+    $(".textElementsDiv").not(':first').remove();
+    $(".textSpanDiv").empty();
     this.imageService.getXmlFileAsJson(this.imageService.getCurrentImageName());
   }
 

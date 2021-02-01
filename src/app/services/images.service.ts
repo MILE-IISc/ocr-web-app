@@ -343,11 +343,12 @@ export class ImageService implements OnInit {
       .put<{ message: string, completed: string }>(this.XML_BACKEND_URL, jsonData)
       .subscribe(response => {
         console.log("response message after correction " + response.message);
+        this.headerService.setloadmessage(response.message);
         this.localImages = this.getLocalImages();
         console.log("server image length in update " + this.localImages.length);
         if (this.localImages.length > 0) {
           for (let i = 0; i < this.localImages.length; i++) {
-            console.log("jsonData.XmlfileName ", jsonData.XmlfileName, "this.localImages[" + i + "].fileName ", this.localImages[i].fileName);
+            // console.log("jsonData.XmlfileName ", jsonData.XmlfileName, "this.localImages[" + i + "].fileName ", this.localImages[i].fileName);
             if (this.localImages[i].fileName.slice(0, -3) + 'xml' == jsonData.XmlfileName) {
               console.log("name" + this.localImages[i].fileName);
               this.localImages[i].completed = response.completed;

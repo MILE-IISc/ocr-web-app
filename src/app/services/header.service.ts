@@ -48,4 +48,17 @@ export class HeaderService {
   getloadingvalue() {
     return this.loadingvalue;
   }
+
+
+ messageemit = new EventEmitter<string>();
+  loadmessage:string;
+
+  setloadmessage(message) {
+    this.loadmessage = message;
+    this.messageemit.emit(this.loadmessage);
+    }
+
+  getloadmessage() {
+    return this.loadmessage;
+  }
 }

@@ -27,6 +27,7 @@
   <div id="snackbar">{{ invalidMessage }}</div>
 
   <div id="footerSnackBar">{{ ocrMessage }}</div>
+  <div id="updatemessage">{{ savemessage }}</div>
 
   <button mat-icon-button data-toggle="tooltip" title="Save Blocks (Ctrl+s)" style="margin-right:3px;"
     (click)="onSave()" id="onSave">
@@ -110,9 +111,9 @@
           color="primary" id="CloseBar" (click)="sideClose()">
           <mat-icon>keyboard_arrow_left</mat-icon>
         </button>
-        <mat-spinner style="top:50%;left:50%;z-index:999;" *ngIf="isLoading"></mat-spinner>
+        <mat-spinner style="top:50%;left:50%;z-index:2;" *ngIf="isLoading"></mat-spinner>
 
-        <mat-spinner  style="top:50%;left:50%;z-index:999;" *ngIf="isLoadingfromServer"></mat-spinner>
+        <mat-spinner  style="top:50%;left:50%;z-index:2;" *ngIf="isLoadingfromServer"></mat-spinner>
         <img [src]="localUrl" *ngIf="localUrl && !isLoading" id="imgToRead" class="imgToRead" />
       </as-split-area>
     </as-split>
@@ -130,7 +131,7 @@
           [style.margin-inline-start.px]="text.lineColStart*(this.percentage/100)"
           [style.height.px]="text.txtheight*(this.percentage/100)">
       </span>
-      <mat-spinner *ngIf="isRunningOcr"></mat-spinner>
+      <mat-spinner style="top:30%;left:50%;z-index:2;" *ngIf="isRunningOcr"></mat-spinner>
     </div>
   </as-split-area>
 </as-split>
