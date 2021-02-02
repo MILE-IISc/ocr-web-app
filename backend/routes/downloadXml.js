@@ -100,7 +100,7 @@ router.get("", authChecker, (req, res, next) => {
 
     var n = xmlFileNames.length;
     function processXml(i, cb) {
-      getXmlConvertToAltoAndAddToZip(xmlFileNames[i], folder).then((data) => {
+      getXmlConvertToAltoAndAddToZip(xmlFileNames[i - 1], folder).then((data) => {
         if (i == n) {
           cb();
           return;
