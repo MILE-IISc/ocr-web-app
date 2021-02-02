@@ -161,11 +161,30 @@ export class ImageService implements OnInit {
       'Something bad happened; please try again later.');
   }
 
-  getXmlFileAsJson2(fileName: any) {
-    console.log("Running OCR on " + fileName)
-    const queryParams = `?fileName=${fileName}&type=GET-OCR-XML`;
-    this.http.get<{ message: string; xmlData: any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
-      this.ocrMessageChange.emit(response.message);
+  getXmlFileAsJson2() {
+    this.localImages = this.getLocalImages();
+    if (this.localImages.length > 0) {
+      var RunOCRonAll = (x) => {
+        if (x < this.localImages.length) {
+          let fileName = this.localImages[x].fileName;
+          console.log("Running OCR on " + fileName);
+          const queryParams = `?fileName=${fileName}&type=GET-OCR-XML-ALL`;
+          this.runOCR(queryParams).then((status: string) => {
+            this.localImages[x].completed = status;
+            RunOCRonAll(x + 1);
+          });
+        }
+      }
+      RunOCRonAll(0);
+    }
+  }
+
+  runOCR = (queryParams) => {
+    return new Promise((resolve, reject) => {
+      this.http.get<{ message: string; completed: string }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
+        this.ocrMessageChange.emit(response.message);
+        resolve(response.completed);
+      });
     });
   }
 

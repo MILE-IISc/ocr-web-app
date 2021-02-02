@@ -154,8 +154,7 @@ router.get("", authChecker, (req, res, next) => {
         });
       }
     });
-  }
-  else if (req.query.type == "GET-OCR-XML") {
+  }  else if (req.query.type == "GET-OCR-XML" || req.query.type == "GET-OCR-XML-ALL") {
     const xmlFileName = req.query.fileName.slice(0, -3) + 'xml';
     console.log("xmlFileName in get call " + xmlFileName);
     getItem(bucketName, xmlFileName, "GET").then(xmlContent => {
@@ -167,20 +166,24 @@ router.get("", authChecker, (req, res, next) => {
       console.log("getting Image Data for", req.query.fileName);
 
       getItem(bucketName, req.query.fileName, "OCR").then(imgContent => {
-        if (imgContent == "The specified key does not exists in bucket") {
-          // console.log("error while retrieving:", imgContent);
-          res.status(400).json({
+        if (imgContent.localeCompare("The specified key does not exists in bucket") == 0 || imgContent == null || imgContent.localeCompare("") == 0) {
+          console.log("error while retrieving:", imgContent);
+          var statusCode = req.query.type == "GET-OCR-XML" ? 400 : 200;
+          res.status(statusCode).json({
             message: "Couldn't find the uploaded image on server",
-            xmlData: ""
+            xmlData: "",
+            completed: "N"
           });
         } else {
           console.log("Base64String image Data retrieved in get Request for RUN-OCR");
           // console.log("data before appending imageData", xmlContent);
           xml2js.parseString(xmlContent, (err, result) => {
             if (err) {
-              res.status(500).send({
+              var statusCode = req.query.type == "GET-OCR-XML" ? 500 : 200;
+              res.status(statusCode).send({
                 message: "Internal server error - xml2js.parseString failed",
-                xmlData: ""
+                xmlData: "",
+                completed: "N"
               });
             }
             // console.log("xml result inside xml2js.parse", result);
@@ -201,26 +204,36 @@ router.get("", authChecker, (req, res, next) => {
                 // console.log("output on RUN-OCR", body);
                 doCreateObject(bucketName, xmlFileName, body).then(() => {
                   console.log("Saved OCR output XML to COS");
-                  xml2js.parseString(body, function (err, result) {
-                    // console.log("xml result as JSON in " + JSON.stringify(result));
-                    res.status(200).json({
-                      message: "OCR completed on" + req.query.fileName,
-                      completed: "Y",
-                      xmlData: result
+                  if (req.query.type == "GET-OCR-XML") {
+                    xml2js.parseString(body, function (err, result) {
+                      res.status(201).json({
+                        message: "OCR completed on " + req.query.fileName,
+                        completed: "Y",
+                        xmlData: result
+                      });
                     });
-                  });
+                  } else {
+                    res.status(201).json({
+                      message: "OCR completed on " + req.query.fileName,
+                      completed: "Y"
+                    });
+                  }
                 }).catch((error) => {
                   console.log("Error while saving XML to COS: ", error);
-                  res.status(500).json({
+                  var statusCode = req.query.type == "GET-OCR-XML" ? 500 : 200;
+                  res.status(statusCode).json({
                     message: "Internal server error - Failed to save OCR XML to object storage: " + error,
-                    xmlData: ""
+                    xmlData: "",
+                    completed: "N"
                   });
                 });
               } else {
                 console.log("Error occurred while running the OCR: ", error);
-                res.status(500).json({
+                var statusCode = req.query.type == "GET-OCR-XML" ? 500 : 200;
+                res.status(statusCode).json({
                   message: "Internal server error occurred while running the OCR: " + error,
-                  xmlData: ""
+                  xmlData: "",
+                  completed: "N"
                 });
               }
             });
