@@ -158,7 +158,7 @@ router.get("", authChecker, (req, res, next) => {
     const xmlFileName = req.query.fileName.slice(0, -3) + 'xml';
     console.log("xmlFileName in get call " + xmlFileName);
     getItem(bucketName, xmlFileName, "GET").then(xmlContent => {
-      if (xmlContent.localeCompare("The specified key does not exists in bucket") == 0 || xmlContent == null || xmlContent.localeCompare("") == 0) {
+      if (xmlContent == null || xmlContent.localeCompare("") == 0 || xmlContent.localeCompare("The specified key does not exists in bucket") == 0) {
         xmlContent = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <page xmlns="http://mile.ee.iisc.ernet.in/schemas/ocr_output">
         </page>`;
@@ -166,8 +166,7 @@ router.get("", authChecker, (req, res, next) => {
       console.log("getting Image Data for", req.query.fileName);
 
       getItem(bucketName, req.query.fileName, "OCR").then(imgContent => {
-        if (imgContent.localeCompare("The specified key does not exists in bucket") == 0 || imgContent == null || imgContent.localeCompare("") == 0) {
-          console.log("error while retrieving:", imgContent);
+        if (imgContent == null || imgContent.localeCompare("") == 0 || imgContent.localeCompare("The specified key does not exists in bucket") == 0) {
           var statusCode = req.query.type == "GET-OCR-XML" ? 400 : 200;
           res.status(statusCode).json({
             message: "Couldn't find the uploaded image on server",
@@ -175,8 +174,6 @@ router.get("", authChecker, (req, res, next) => {
             completed: "N"
           });
         } else {
-          console.log("Base64String image Data retrieved in get Request for RUN-OCR");
-          // console.log("data before appending imageData", xmlContent);
           xml2js.parseString(xmlContent, (err, result) => {
             if (err) {
               var statusCode = req.query.type == "GET-OCR-XML" ? 500 : 200;
@@ -186,7 +183,6 @@ router.get("", authChecker, (req, res, next) => {
                 completed: "N"
               });
             }
-            // console.log("xml result inside xml2js.parse", result);
             result["page"]["imageData"] = imgContent;
             const builder = new xml2js.Builder();
             xmlContent = builder.buildObject(result);
@@ -199,11 +195,8 @@ router.get("", authChecker, (req, res, next) => {
               },
               body: xmlContent
             }, function (error, response, body) {
-              // console.log("response.statusCode",response.statusCode);
               if (response.statusCode == 200) {
-                // console.log("output on RUN-OCR", body);
                 doCreateObject(bucketName, xmlFileName, body).then(() => {
-                  console.log("Saved OCR output XML to COS");
                   if (req.query.type == "GET-OCR-XML") {
                     xml2js.parseString(body, function (err, result) {
                       res.status(201).json({
