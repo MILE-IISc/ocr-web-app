@@ -17,7 +17,6 @@ var config = {
 var cos = new cloudStorage.S3(config);
 
 function getBucketContents(bucketName) {
-  console.log(`Retrieving bucket contents from: ${bucketName}`);
   return cos.listObjects(
     { Bucket: bucketName },
   ).promise()
@@ -47,60 +46,84 @@ function getItem(bucketName, itemName, type) {
       if (data != null) {
         return Buffer.from(data.Body).toString();
       }
-    })
-    .catch((e) => {
-      console.error(`Error while fetching item={itemName} from bucket={bucketName}: ${e.code} - ${e.message}\n`);
+    }).catch((e) => {
+      console.error(`Error while fetching item=${itemName} from bucket=${bucketName}: ${e.code} - ${e.message}\n`);
       return null;
     });
+}
+
+function getXmlConvertToAltoAndAddToZip(fileName, folder) {
+  return new Promise((resolve, reject) => {
+    getItem(bucketName, fileName, "GET").then(xmlContent => {
+      if (xmlContent != null) {
+        console.log(`Fetched XML: ${fileName} from COS. Converting it to ALTO XML ...`);
+        request.post({
+          url: process.env.RUN_OCR_ADDRESS + "/convert",
+          port: process.env.RUN_OCR_PORT,
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/xml',
+          },
+          body: xmlContent
+        }, function (error, response, body) {
+          if (response.statusCode == 200) {
+            console.log(`Converted ${fileName} to ALTO XML`);
+            folder.file(fileName, body);
+            console.log(`Added ${fileName} to ZIP folder`);
+            resolve(true);
+          } else {
+            console.log("Error while converting to ALTO XML: " + error);
+            resolve(false);
+          }
+        });
+      } else {
+        resolve(false);
+      }
+    });
+  });
 }
 
 router.get("", authChecker, (req, res, next) => {
   bucketName = req.userData.bucketName;
   getBucketContents(bucketName).then((bucketFilesList) => {
+    console.log(`Got list of objects inside the bucket: ${bucketName}. Count = ${bucketFilesList.length}`);
     let xmlFileNames = [];
     bucketFilesList.forEach(fileName => {
       if (path.extname(fileName).toLowerCase() == ".xml") {
         xmlFileNames.push(fileName);
       }
     });
+    console.log(`Count of XML files = `, xmlFileNames.length);
+
     var zip = new JSZip();
     var folder = zip.folder(bucketName + "_xml_files");
-    var count = 0;
-    xmlFileNames.forEach(fileName => {
-      getItem(bucketName, fileName, "GET").then(xmlContent => {
-        count++;
-        if (xmlContent != null) {
-          request.post({
-            url: process.env.RUN_OCR_ADDRESS + "/convert",
-            port: process.env.RUN_OCR_PORT,
-            method: "POST",
-            headers: {
-              'Content-Type': 'application/xml',
-            },
-            body: xmlContent
-          }, function (error, response, body) {
-              if (error == null) {
-                folder.file(fileName, body);
 
-                if (count == xmlFileNames.length) {
-                  var zipFileName = bucketName + '_xml_files.zip';
-                  zip
-                    .generateNodeStream({ streamFiles: true })
-                    .pipe(fs.createWriteStream(zipFileName))
-                    .on('finish', function () {
-                      console.log("Sending ZIP of XML files {zipFileName}");
-                      // res.setHeader('Content-disposition', 'attachment; filename=out.zip');
-                      // res.sendFile(zipFileName);
-                      res.download(zipFileName);
-                    })
-                }
-              } else {
-                console.log("Error while converting to ALTO XML: ", error);
-              }
-            });
+    var n = xmlFileNames.length;
+    function processXml(i, cb) {
+      getXmlConvertToAltoAndAddToZip(xmlFileNames[i], folder).then((data) => {
+        if (i == n) {
+          cb();
+          return;
         }
+        // "Asynchronous recursion".
+        // Schedule next operation asynchronously.
+        setImmediate(processXml.bind(null, i + 1, cb));
       });
-    });
+    };
+    function createZip() {
+      console.log(`Processed all XML files. Creating zip file now.`);
+      var zipFileName = bucketName + '_xml_files.zip';
+      zip
+        .generateNodeStream({ streamFiles: true })
+        .pipe(fs.createWriteStream(zipFileName))
+        .on('finish', function () {
+          console.log("Sending ZIP of XML files {zipFileName}");
+          // res.setHeader('Content-disposition', 'attachment; filename=out.zip');
+          // res.sendFile(zipFileName);
+          res.download(zipFileName);
+        })
+    };
+    processXml(1, createZip);
   });
 });
 
