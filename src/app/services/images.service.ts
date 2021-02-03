@@ -8,12 +8,14 @@ import { Router } from '@angular/router';
 import * as $ from 'jquery';
 import { Subject, Subscription } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
-import { Images } from '../shared/images.model';
+import { Images, ProgressInfo } from '../shared/images.model';
 import { HeaderService } from '../services/header.service';
 import { XmlModel, retain } from '../shared/xml-model';
 import { BlockModel } from '../shared/block-model';
 // import { HeaderService } from '../services/header.service';
 import * as xml2js from 'xml2js';
+import { MatDialog } from '@angular/material/dialog';
+import { ProgressDialogComponent } from '../screen/progress-dialog/progress-dialog.component';
 
 
 declare var Tiff: any;
@@ -51,6 +53,7 @@ export class ImageService implements OnInit {
   fileNameChange = new EventEmitter<any>();
   invalidMessageChange = new EventEmitter<any>();
   ocrMessageChange = new EventEmitter<any>();
+  progressInfoChange = new EventEmitter<any>();
   ready = false;
 
   btnImgArray: any[] = [];
@@ -74,8 +77,9 @@ export class ImageService implements OnInit {
   isRunningOcrChange = new EventEmitter<any>();
   isLoadingFromServer = false;
   isLoadingFromServerChange = new EventEmitter<any>();
+  progressInfos : ProgressInfo[] =[];
 
-  constructor(rendererFactory: RendererFactory2, private http: HttpClient, private router: Router, private authService: AuthService, private headerService: HeaderService, @Inject(DOCUMENT) private document: Document) {
+  constructor(rendererFactory: RendererFactory2, private http: HttpClient, private router: Router, private authService: AuthService, private headerService: HeaderService, @Inject(DOCUMENT) private document: Document,public dialog: MatDialog) {
     this.IMAGE_BACKEND_URL = this.authService.BACKEND_URL + "/api/image/";
     this.XML_BACKEND_URL = this.authService.BACKEND_URL + "/api/xml/";
     console.log("IMAGE_BACKEND_URL " + this.IMAGE_BACKEND_URL);
@@ -93,6 +97,10 @@ export class ImageService implements OnInit {
 
   getBtnImages() {
     return this.btnImgArray.slice();
+  }
+
+  getProgressInfos(){
+    return this.progressInfos.slice();
   }
 
   async getServerImages() {
@@ -163,15 +171,33 @@ export class ImageService implements OnInit {
 
   getXmlFileAsJson2() {
     this.localImages = this.getLocalImages();
+    this.progressInfos.splice(0,this.progressInfos.length);
+    this.openProgressDialog();
     if (this.localImages.length > 0) {
+      for(let i=0;i<this.localImages.length;i++){
+        var status = 'Pending';
+        const progress = new ProgressInfo(this.localImages[i].fileName,status);
+        this.progressInfos.push(progress);
+        this.progressInfoChange.emit(this.progressInfos);
+      }
       var runOcr = (x) => {
         if (x < this.localImages.length) {
           let fileName = this.localImages[x].fileName;
           console.log("Running OCR on " + fileName);
+          this.progressInfos[x].value = 'Running';
+          this.progressInfoChange.emit(this.progressInfos.slice());
           const queryParams = `?fileName=${fileName}&type=GET-OCR-XML-ALL`;
           this.http.get<{ message: string; completed: string }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
             this.ocrMessageChange.emit(response.message);
-            this.localImages[x].completed = status;
+            if(response.completed == 'Y'){
+              this.localImages[x].completed = response.completed;
+              this.progressInfos[x].value = 'Completed';
+              this.progressInfoChange.emit(this.progressInfos.slice());
+            }else{
+              this.progressInfos[x].value = 'Failed';
+              this.progressInfoChange.emit(this.progressInfos.slice());
+            }
+            
             runOcr(x + 1);
           });
         }
@@ -396,6 +422,19 @@ export class ImageService implements OnInit {
     }
     console.log("opening........")
 
+  }
+
+  openProgressDialog() {
+    const dialogRef = this.dialog.open(ProgressDialogComponent, {
+      disableClose: false,
+      height:'300px',
+      width: '600px',
+      panelClass: 'my-dialog'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log(`Dialog result: ${result}`);
+    });
   }
 
   async nextPage() {
@@ -976,17 +1015,15 @@ export class ImageService implements OnInit {
     var ns1 = 'http://mile.ee.iisc.ernet.in/schemas/ocr_output';
     var xmlDocument = document.implementation.createDocument(null, "page", null);
     xmlDocument.documentElement.setAttribute("xmlns", ns1);
+    xmlDocument.documentElement.setAttribute("skew",this.angle.toString())
     for (let i = 0; i < areas.length; i++) {
       var blockElem = xmlDocument.createElementNS(null, "block");
       blockElem.setAttribute("type", "Text");
       var blockNumberElems = $(".select-areas-blockNumber-area");
-      console.log("-----blockNumberElems------" + blockNumberElems.length);
       var blockNumber = document.getElementsByClassName('select-areas-blockNumber-area');
-      console.log("block number" + blockNumber[(blockNumberElems.length - 1) - i].innerHTML)
       blockElem.setAttribute("BlockNumber", blockNumber[(blockNumberElems.length - 1) - i].innerHTML);
       blockElem.setAttribute("SubType", "paragraphProse");
       var y = ((areas[i].y * 100) / this.percentage).toString();
-      console.log("this.percentage--------" + this.percentage)
       blockElem.setAttribute("rowStart", (Math.ceil(parseInt(y))).toString());
       var height = ((areas[i].height * 100) / this.percentage);
       var rowEnd = (height + parseFloat(y)).toString();
@@ -996,11 +1033,9 @@ export class ImageService implements OnInit {
       var width = ((areas[i].width * 100) / this.percentage);
       var colEnd = (width + parseFloat(x)).toString();
       blockElem.setAttribute("colEnd", (Math.ceil(parseInt(colEnd))).toString());
-      // blockElem.removeAttribute("xmlns");
       xmlDocument.documentElement.appendChild(blockElem);
     }
     var xmlString = new XMLSerializer().serializeToString(xmlDocument);
-    console.log("xml string " + xmlString);
 
     xml2js.parseString(xmlString, function (err, result) {
       var jsonString = JSON.stringify(result);

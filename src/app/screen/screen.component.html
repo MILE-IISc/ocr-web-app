@@ -57,6 +57,10 @@
     <mat-icon>delete_outline</mat-icon>
   </button>
 
+  <button mat-icon-button data-toggle="tooltip" title="Progress Info" (click)="openProgressDialog()">
+    <mat-icon>donut_large</mat-icon>
+  </button>
+
   <span class="example-spacer2"></span>
 
   <div *ngIf="!isLoading">
