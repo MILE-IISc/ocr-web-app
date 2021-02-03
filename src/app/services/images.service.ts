@@ -1015,7 +1015,9 @@ export class ImageService implements OnInit {
     var ns1 = 'http://mile.ee.iisc.ernet.in/schemas/ocr_output';
     var xmlDocument = document.implementation.createDocument(null, "page", null);
     xmlDocument.documentElement.setAttribute("xmlns", ns1);
-    xmlDocument.documentElement.setAttribute("skew",this.angle.toString())
+    if (this.angle != 0) {
+      xmlDocument.documentElement.setAttribute("rotationAngle", this.angle.toString());
+    }
     for (let i = 0; i < areas.length; i++) {
       var blockElem = xmlDocument.createElementNS(null, "block");
       blockElem.setAttribute("type", "Text");
