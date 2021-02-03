@@ -171,7 +171,7 @@ export class ImageService implements OnInit {
           const queryParams = `?fileName=${fileName}&type=GET-OCR-XML-ALL`;
           this.http.get<{ message: string; completed: string }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
             this.ocrMessageChange.emit(response.message);
-            this.localImages[x].completed = status;
+            this.localImages[x].completed = response.completed;
             runOcr(x + 1);
           });
         }
