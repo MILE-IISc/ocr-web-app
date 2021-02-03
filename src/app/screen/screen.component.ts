@@ -193,7 +193,7 @@ export class ScreenComponent implements OnInit {
                x.className = "show";
                setTimeout(() => {
                 x.className = x.className.replace("show", "");
-                 }, 5000);
+                 }, 2000);
                }
              }
          });
@@ -217,7 +217,7 @@ export class ScreenComponent implements OnInit {
               x.className = "show";
               setTimeout(() => {
                 x.className = x.className.replace("show", "");
-              }, 5000);
+              }, 2000);
             }
           }
         });
@@ -233,7 +233,7 @@ export class ScreenComponent implements OnInit {
               elem.className = "show";
               setTimeout(() => {
                 elem.className = elem.className.replace("show", "");
-              }, 5000);
+              }, 2000);
             }
           }
         });
