@@ -1,0 +1,24 @@
+.contentBar{
+    padding-top:43px;
+  }
+
+.cdk-overlay-pane.my-dialog {
+    position:absolute!important;
+  }
+  
+  .heading{
+    position: absolute;
+    padding-left: 20px;
+  }
+  
+  .dialogbar{
+    position: absolute;
+    top: 0;
+    width:100%;
+    left:0;
+  }
+
+  .example-spacer1 {
+    flex: 3 auto;
+  }
+  

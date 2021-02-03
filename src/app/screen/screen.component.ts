@@ -453,58 +453,14 @@ export class ScreenComponent implements OnInit {
     this.isDiv = true;
     this.imageService.selectBlockservice();
     this.imageService.onXml();
-
-
-
     $('.sidebody').click(function () {
       $('#imgToRead').selectAreas('reset');
     });
 
   }
 
-
-
-
-
-
   onSave() {
-    console.log("in xml save");
-    var areas = $('img#imgToRead').selectAreas('areas');
-    var prolog = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
-    var ns1 = 'http://mile.ee.iisc.ernet.in/schemas/ocr_output';
-    var xmlDocument = document.implementation.createDocument(null, "page", null);
-    xmlDocument.documentElement.setAttribute("xmlns", ns1);
-    for (let i = 0; i < areas.length; i++) {
-      var blockElem = xmlDocument.createElementNS(null, "block");
-      blockElem.setAttribute("type", "Text");
-      var blockNumberElems = $(".select-areas-blockNumber-area");
-      console.log("-----blockNumberElems------" + blockNumberElems.length);
-      var blockNumber = document.getElementsByClassName('select-areas-blockNumber-area');
-      console.log("block number" + blockNumber[(blockNumberElems.length - 1) - i].innerHTML)
-      blockElem.setAttribute("BlockNumber", blockNumber[(blockNumberElems.length - 1) - i].innerHTML);
-      blockElem.setAttribute("SubType", "paragraphProse");
-      var y = ((areas[i].y * 100) / this.percentage).toString();
-      console.log("this.percentage--------" + this.percentage)
-      blockElem.setAttribute("rowStart", (Math.ceil(parseInt(y))).toString());
-      var height = ((areas[i].height * 100) / this.percentage);
-      var rowEnd = (height + parseFloat(y)).toString();
-      blockElem.setAttribute("rowEnd", (Math.ceil(parseInt(rowEnd))).toString());
-      var x = ((areas[i].x * 100) / this.percentage).toString();
-      blockElem.setAttribute("colStart", (Math.ceil(parseInt(x))).toString());
-      var width = ((areas[i].width * 100) / this.percentage);
-      var colEnd = (width + parseFloat(x)).toString();
-      blockElem.setAttribute("colEnd", (Math.ceil(parseInt(colEnd))).toString());
-      // blockElem.removeAttribute("xmlns");
-      xmlDocument.documentElement.appendChild(blockElem);
-    }
-    var xmlString = new XMLSerializer().serializeToString(xmlDocument);
-    console.log("xml string " + xmlString);
-
-    xml2js.parseString(xmlString, function (err, result) {
-      var jsonString = JSON.stringify(result);
-      XmlModel.jsonObject = result;
-    });
-    this.imageService.updateCorrectedXml(this.fileName);
+    this.imageService.onSave();
   }
 
   correctionUpdate() {
@@ -666,14 +622,9 @@ export class ScreenComponent implements OnInit {
     this.callOne = !this.callOne;
   };
 
-  // openDialog() {
-  //   const dialogRef = this.dialog.open(ScreenComponentDialog);
-
-  //   dialogRef.afterClosed().subscribe(result => {
-  //     console.log(`Dialog result: ${result}`);
-  //   });
-  // }
-
+  openProgressDialog() {
+    this.imageService.openProgressDialog();
+  }
 }
 
 function convertCanvasToImage(canvas) {
