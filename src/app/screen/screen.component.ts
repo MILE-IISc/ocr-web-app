@@ -87,6 +87,7 @@ export class ScreenComponent implements OnInit {
   isLoadingfromServer = false;
   isDownloading = false;
   savemessage;
+  filesToBeUploaded;
 
   sideOpen() {
     this.sidesize1 = 30;
@@ -169,6 +170,10 @@ export class ScreenComponent implements OnInit {
       this.isLoadingfromServer = isLoadingFromServer;
     });
 
+    this.imageService.ResumeUploadEvent.subscribe(() => {
+      this.invokeUploadImage();
+    });
+
     this.percentage = this.headerService.getpercentagevary();
     $("#SaveToXML").hide();
     $("#btUpdateBlockNumbers").hide();
@@ -199,7 +204,6 @@ export class ScreenComponent implements OnInit {
     this.headerService.messageemit
         .subscribe(
           (message: string) => {
-            console
             this.savemessage = message;
               if (this.savemessage != "") {
               var x = document.getElementById("updatemessage");
@@ -208,7 +212,7 @@ export class ScreenComponent implements OnInit {
                x.className = "show";
                setTimeout(() => {
                 x.className = x.className.replace("show", "");
-                 }, 5000);
+                 }, 2000);
                }
              }
          });
@@ -232,7 +236,7 @@ export class ScreenComponent implements OnInit {
               x.className = "show";
               setTimeout(() => {
                 x.className = x.className.replace("show", "");
-              }, 5000);
+              }, 2000);
             }
           }
         });
@@ -248,7 +252,7 @@ export class ScreenComponent implements OnInit {
               elem.className = "show";
               setTimeout(() => {
                 elem.className = elem.className.replace("show", "");
-              }, 5000);
+              }, 2000);
             }
           }
         });
@@ -270,7 +274,6 @@ export class ScreenComponent implements OnInit {
           }
           this.isLoading = false;
           this.isLoadingfromServer = false;
-          console.log("this.localImages[0].fileName: ------------_> ", this.localImages[0].fileName);
           if (this.localImages[0].dataUrl == "" || this.localImages[0].dataUrl == null) {
             this.localImages[0].dataUrl = await this.imageService.loadArray(this.localImages[0].fileName);
           }
@@ -343,7 +346,6 @@ export class ScreenComponent implements OnInit {
     $(".textSpanDiv").empty();
     for (let i = 0; i < this.localImages.length; i++) {
       if (this.localImages[i].fileName == id) {
-        console.log("this.localImages[" + i + "].fileName", this.localImages[i].fileName, "dataUrl", this.localImages[i].dataUrl);
         if (this.localImages[i].dataUrl == null || this.localImages[i].dataUrl == "") {
           this.localImages[i].dataUrl = await this.imageService.loadArray(this.localImages[i].fileName);
         }
@@ -363,14 +365,18 @@ export class ScreenComponent implements OnInit {
 
   importFile(event) {
     this.anotherTryVisible = true;
-    var fileRead = (event.target as HTMLInputElement).files;
+    this.filesToBeUploaded = (event.target as HTMLInputElement).files;
     var filesCount = event.target.files.length;
     this.isLoading = true;
-    if (event.target.files && fileRead) {
-      this.imageService.addImage(fileRead);
+    if (event.target.files && this.filesToBeUploaded) {
+      this.invokeUploadImage();
     }
     setTimeout(() => this.fitwidth(), 50);
     setTimeout(() => this.setpercentage(), 60);
+  }
+
+  invokeUploadImage(){
+    this.imageService.addImage(this.filesToBeUploaded);
   }
 
   asVertical() {
@@ -394,9 +400,9 @@ export class ScreenComponent implements OnInit {
   fitwidth() {
     this.imageService.fitwidth()
     this.percentage = this.imageService.percentage;
-    console.log("this.percentage before header in fitwidth", this.percentage);
+    // console.log("this.percentage before header in fitwidth", this.percentage);
     this.headerService.setpercentagevary(this.percentage);
-    console.log("this.percentage after header in fitwidth", this.percentage);
+    // console.log("this.percentage after header in fitwidth", this.percentage);
   }
 
   imgSize() {
@@ -410,9 +416,9 @@ export class ScreenComponent implements OnInit {
   orginalsize() {
     this.imageService.orginalsize();
     this.percentage = this.imageService.percentage;
-    console.log("this.percentage before header in orginalsize", this.percentage);
+    // console.log("this.percentage before header in orginalsize", this.percentage);
     this.headerService.setpercentagevary(this.percentage);
-    console.log("this.percentage after header in orginalsize", this.percentage);
+    // console.log("this.percentage after header in orginalsize", this.percentage);
   }
 
   loadXMLDoc() {
@@ -468,62 +474,17 @@ export class ScreenComponent implements OnInit {
   selectBlock() {
     $("#blockselect").css("background-color", "hsl(210, 100%, 20%)");
     this.obtainblock = true;
-    console.log("inside script");
     this.isDiv = true;
     this.imageService.selectBlockservice();
     this.imageService.onXml();
-
-
-
     $('.sidebody').click(function () {
       $('#imgToRead').selectAreas('reset');
     });
 
   }
 
-
-
-
-
-
   onSave() {
-    console.log("in xml save");
-    var areas = $('img#imgToRead').selectAreas('areas');
-    var prolog = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
-    var ns1 = 'http://mile.ee.iisc.ernet.in/schemas/ocr_output';
-    var xmlDocument = document.implementation.createDocument(null, "page", null);
-    xmlDocument.documentElement.setAttribute("xmlns", ns1);
-    for (let i = 0; i < areas.length; i++) {
-      var blockElem = xmlDocument.createElementNS(null, "block");
-      blockElem.setAttribute("type", "Text");
-      var blockNumberElems = $(".select-areas-blockNumber-area");
-      console.log("-----blockNumberElems------" + blockNumberElems.length);
-      var blockNumber = document.getElementsByClassName('select-areas-blockNumber-area');
-      console.log("block number" + blockNumber[(blockNumberElems.length - 1) - i].innerHTML)
-      blockElem.setAttribute("BlockNumber", blockNumber[(blockNumberElems.length - 1) - i].innerHTML);
-      blockElem.setAttribute("SubType", "paragraphProse");
-      var y = ((areas[i].y * 100) / this.percentage).toString();
-      console.log("this.percentage--------" + this.percentage)
-      blockElem.setAttribute("rowStart", (Math.ceil(parseInt(y))).toString());
-      var height = ((areas[i].height * 100) / this.percentage);
-      var rowEnd = (height + parseFloat(y)).toString();
-      blockElem.setAttribute("rowEnd", (Math.ceil(parseInt(rowEnd))).toString());
-      var x = ((areas[i].x * 100) / this.percentage).toString();
-      blockElem.setAttribute("colStart", (Math.ceil(parseInt(x))).toString());
-      var width = ((areas[i].width * 100) / this.percentage);
-      var colEnd = (width + parseFloat(x)).toString();
-      blockElem.setAttribute("colEnd", (Math.ceil(parseInt(colEnd))).toString());
-      // blockElem.removeAttribute("xmlns");
-      xmlDocument.documentElement.appendChild(blockElem);
-    }
-    var xmlString = new XMLSerializer().serializeToString(xmlDocument);
-    console.log("xml string " + xmlString);
-
-    xml2js.parseString(xmlString, function (err, result) {
-      var jsonString = JSON.stringify(result);
-      XmlModel.jsonObject = result;
-    });
-    this.imageService.updateCorrectedXml(this.fileName);
+    this.imageService.onSave();
   }
 
   correctionUpdate() {
@@ -539,33 +500,33 @@ export class ScreenComponent implements OnInit {
             if (lines[j].word) {
               var words = lines[j].word;
               if (lines[j]["$"].LineNumber == texts[l].getAttribute("id")) {
-                console.log((texts[l] as HTMLInputElement).value);
+                // console.log((texts[l] as HTMLInputElement).value);
                 var text = (texts[l] as HTMLInputElement).value;
                 if (words.length > 1) {
-                  console.log("word array length " + words.length)
+                  // console.log("word array length " + words.length);
                   var textArray = text.split(/(\s+)/).filter(function (e) { return e.trim().length > 0; });
-                  console.log("text array length " + textArray.length)
+                  // console.log("text array length " + textArray.length);
                   if (words.length == textArray.length) {
                     for (let k = 0; k < words.length; k++) {
                       words[k]["$"].unicode = textArray[k].trim();
                     }
                   } else if (textArray.length > words.length || textArray.length < words.length) {
-                    console.log("in text array greater ");
+                    // console.log("in text array greater ");
                     var txt = "";
                     for (let m = 0; m < textArray.length; m++) {
                       txt = txt + " " + textArray[m];
                     }
                     words[0]["$"].unicode = txt.trim();
                     words[0]["$"].colEnd = words[words.length - 1].colEnd;
-                    console.log("word[0] " + words[0]["$"].unicode);
-                    console.log("word[1] " + words[1]["$"].unicode);
+                    // console.log("word[0] " + words[0]["$"].unicode);
+                    // console.log("word[1] " + words[1]["$"].unicode);
                     for (let n = 1; n < words.length; n++) {
-                      console.log("words.length", words.length, "n", n, "lines inndex", j)
+                      // console.log("words.length", words.length, "n", n, "lines inndex", j);
                       words[n]["$"].unicode = "";
                     }
                   }
                 } else {
-                  console.log("in else block of update");
+                  // console.log("in else block of update");
                   words[0]["$"].unicode = text.trim();
                 }
               }
@@ -640,12 +601,12 @@ export class ScreenComponent implements OnInit {
   }
 
   showTooltip() {
-    console.log("inside show tol tip");
+    // console.log("inside show tol tip");
     this.correctionUpdate();
   }
 
   xmlonSave() {
-    console.log("inside xmlOnSave");
+    // console.log("inside xmlOnSave");
     this.onSave();
   }
 
@@ -662,22 +623,9 @@ export class ScreenComponent implements OnInit {
     this.callOne = !this.callOne;
   };
 
-  // openDialog() {
-  //   const dialogRef = this.dialog.open(ScreenComponentDialog);
-
-  //   dialogRef.afterClosed().subscribe(result => {
-  //     console.log(`Dialog result: ${result}`);
-  //   });
-  // }
-
-}
-
-function convertCanvasToImage(canvas) {
-  console.log("in convert................");
-  var image = new Image();
-  image.src = canvas.toDataURL("image/png");
-  console.log("image.src: " + image.src);
-  return image;
+  openProgressDialog() {
+    this.imageService.openProgressDialog();
+  }
 }
 
 @Component({
@@ -799,6 +747,8 @@ export class ScreenComponentConfirmDialog {
 
   deleteImagesConfirm(){
     $('#imgToRead').selectAreas('destroy');
+    $(".textElementsDiv").not(':first').remove();
+    $(".textSpanDiv").empty();
     console.log("delete images");
     this.imageService.deleteImages();
   }

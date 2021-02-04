@@ -192,13 +192,7 @@ export class FooterComponent implements OnInit {
   }
 
   loadXMLDocAll() {
-    this.localImages = this.imageService.getLocalImages();
-    for(let i=0; i< this.localImages.length; i++) {
-      this.fileName = this.localImages[i].fileName;
-      console.log("this.fileName==="+this.fileName);
-      console.log("this.fileCompleted==="+this.localImages[i].completed);
-      this.imageService.getXmlFileAsJson2(this.fileName);
-    }
+    this.imageService.getXmlFileAsJson2();
   }
 
   blocksize() {
@@ -232,12 +226,4 @@ export class FooterComponent implements OnInit {
       this.imageService.selectBlockservice()
     }
   }
-}
-
-function convertCanvasToImage(canvas) {
-  console.log("in convert................");
-  var image = new Image();
-  image.src = canvas.toDataURL("image/png");
-  console.log("image.src: " + image.src);
-  return image;
 }

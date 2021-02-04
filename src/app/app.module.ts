@@ -71,6 +71,9 @@ import { SaveDetectorDirective } from './shared/savedirective';
 import { ScreenComponentDialog } from './screen/screen.component';
 import { ScreenComponentDeleteImage } from'./screen/screen.component';
 import { ScreenComponentConfirmDialog } from'./screen/screen.component';
+import { ProgressDialogComponent } from './screen/progress-dialog/progress-dialog.component';
+import { confirmationDialog } from './screen/progress-dialog/progress-dialog.component';
+
 
 @NgModule({
   declarations: [
@@ -84,7 +87,9 @@ import { ScreenComponentConfirmDialog } from'./screen/screen.component';
     FooterComponent,
     ScreenComponentDialog,
     ScreenComponentDeleteImage,
-    ScreenComponentConfirmDialog
+    ScreenComponentConfirmDialog,
+    ProgressDialogComponent,
+    confirmationDialog
   ],
   exports: [
     MatIconModule
@@ -155,7 +160,7 @@ import { ScreenComponentConfirmDialog } from'./screen/screen.component';
 
   ],
   bootstrap: [AppComponent],
-  entryComponents: [ScreenComponent, ScreenComponentDialog, ScreenComponentDeleteImage, ScreenComponentConfirmDialog],
+  entryComponents: [ScreenComponent, ScreenComponentDialog, ScreenComponentDeleteImage, ScreenComponentConfirmDialog, ProgressDialogComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AppModule {

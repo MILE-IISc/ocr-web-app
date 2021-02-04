@@ -100,13 +100,13 @@ function getItem(bucketName, itemName, mail, requestType) {
 
           console.log("mail===========> ", mail);
           Jimp.read(Buffer.from(tiffArrayBuff, 'base64')).then((file) => {
-            console.log("Jimp file ", file);
-            console.log("file width", file.getWidth());
+            // console.log("Jimp file ", file);
+            // console.log("file width", file.getWidth());
             file
               .quality(75)
               .writeAsync('./images/' + mail + "/" + itemName.slice(0, -3) + 'jpg').then(() => {
                 console.log("file is ready for", mail, " fileName ", itemName.slice(0, -3).toLowerCase() + 'jpg');
-                console.log("image content retrieved and converted");
+                // console.log("image content retrieved and converted");
                 let tiffToJpg = itemName.slice(0, -3) + 'jpg';
                 const filePath = './images/' + mail + "/" + tiffToJpg;
                 console.log("file Path " + filePath);
@@ -133,6 +133,7 @@ function getItem(bucketName, itemName, mail, requestType) {
 const fileFilter = (req, file, cb) => {
   const isValid = MIME_TYPE_MAP[file.mimetype];
   if (isValid) {
+    invalid = ""
     cb(null, true);
   } else {
     invalid = "And invalid file types were skipped. "
@@ -161,82 +162,103 @@ var upload = multer({
 
 router.post("",
   authChecker,
-  upload.array("image", 4000),
+  upload.single("image"),
   (req, res, next) => {
     console.log("inside post email ", req.body.email);
     bucketName = req.userData.bucketName;
     console.log("bucketName inside post images ", bucketName);
-    let postJpegImages = [];
-    let postTiffImages = [];
-    let postFetchedImages = [];
-    if (res.statusCode === 200 && req.files.length > 0) {
-      console.log("file list length for upload", req.files.length);
-      console.log("invoked multer and sending response", Date());
-      cos.listObjects(
-        { Bucket: bucketName },
-      ).promise()
-        .then((data) => {
-          console.log("data.Contents.length in post", data.Contents.length);
-          for (let i = 0; i < data.Contents.length; i++) {
-            if (path.extname(data.Contents[i].Key).toLowerCase() == ".tif") {
-              postTiffImages.push(data.Contents[i].Key.trim());
-              console.log("TiffImage in post",data.Contents[i].Key.trim());
-            }
-            else if (path.extname(data.Contents[i].Key).toLowerCase() == ".jpg") {
-              postJpegImages.push(data.Contents[i].Key.trim());
-              console.log("JpegImage in post",data.Contents[i].Key.trim());
-            }
-          }
-          console.log("post for loop finished with postTiffImages.length",postTiffImages.length);
-          console.log("post for loop finished with postJpegImages.length",postJpegImages.length);
-          console.log("post for loop finished with postFetchedImages.length",postFetchedImages.length);
-
-          if(postTiffImages.length > 0) {
-            postTiffImages.map(postTiffImage => {
-              mismatchCount = 0;
-              if(postJpegImages.length == 0) {
-                postFetchedImages.push(postTiffImage);
-              }
-              else {
-                postJpegImages.map(postJpegImage => {
-                  if(postJpegImage.slice(0, -3).toLowerCase() != postTiffImage.slice(0, -3).toLowerCase()) {
-                    mismatchCount = mismatchCount + 1;
-                  }
-
-                  if(postJpegImage.slice(0, -3).toLowerCase() != postTiffImage.slice(0, -3).toLowerCase() && mismatchCount == postJpegImages.length) {
-                    postFetchedImages.push(postTiffImage);
-                    console.log("Tiff without Jpeg", postTiffImage);
-                  }
-                });
-              }
+    console.log("req.file details",req.file.originalname);
+    // let postJpegImages = [];
+    // let postTiffImages = [];
+    // let postFetchedImages = [];
+    if (res.statusCode === 200 && req.file) {
+      console.log("multer upload response");
+      if(req.file.mimetype == "image/tiff") {
+        getItem(bucketName, req.file.originalname, req.body.email, "POST").then((itemData) => {
+          res.status(201).json({
+            message: req.file.originalname + " Image uploaded successfully" + invalid,
+            uploaded: "Y"
+          });
+          if (itemData == "The specified key does not exists in bucket") {
+            console.log("error while retrieving and converting image:", itemData);
+            res.status(200).json({
+              message: req.file.originalname + " Image upload failed" + invalid,
+              uploaded: "N"
             });
           }
-
-          for (let i = 0; i < postFetchedImages.length; i++) {
-            console.log("Tiff to be converted and uploaded back " + postFetchedImages[i]);
-            if (path.extname(postFetchedImages[i]).toLowerCase() == ".tif") {
-              console.log("tiff files", postFetchedImages[i]);
-              getItem(bucketName, postFetchedImages[i], req.body.email, "POST").then((itemData) => {
-                if (data == "The specified key does not exists in bucket") {
-                  console.log("error while retrieving and converting image:", itemData);
-                }
-              });
-            }
-          }
-        })
-        .catch((e) => {
-          console.error(`ERROR: ${e.code} - ${e.message}\n`);
         });
+      }
+      // cos.listObjects(
+      //   { Bucket: bucketName },
+      // ).promise()
+      //   .then((data) => {
+      //     console.log("data.Contents.length in post", data.Contents.length);
+      //     for (let i = 0; i < data.Contents.length; i++) {
+      //       if (path.extname(data.Contents[i].Key).toLowerCase() == ".tif") {
+      //         postTiffImages.push(data.Contents[i].Key.trim());
+      //         // console.log("TiffImage in post",data.Contents[i].Key.trim());
+      //       }
+      //       else if (path.extname(data.Contents[i].Key).toLowerCase() == ".jpg") {
+      //         postJpegImages.push(data.Contents[i].Key.trim());
+      //         // console.log("JpegImage in post",data.Contents[i].Key.trim());
+      //       }
+      //     }
+      //     console.log("post for loop finished with postTiffImages.length",postTiffImages.length);
+      //     console.log("post for loop finished with postJpegImages.length",postJpegImages.length);
+      //     console.log("post for loop finished with postFetchedImages.length",postFetchedImages.length);
 
-      console.log("invalid " + invalid);
-      res.status(201).json({
-        message: "Images uploaded successfully!!! " + invalid,
-      });
+      //     if(postTiffImages.length > 0) {
+      //       postTiffImages.map(postTiffImage => {
+      //         mismatchCount = 0;
+      //         if(postJpegImages.length == 0) {
+      //           postFetchedImages.push(postTiffImage);
+      //         }
+      //         else {
+      //           postJpegImages.map(postJpegImage => {
+      //             if(postJpegImage.slice(0, -3).toLowerCase() != postTiffImage.slice(0, -3).toLowerCase()) {
+      //               mismatchCount = mismatchCount + 1;
+      //             }
+
+      //             if(postJpegImage.slice(0, -3).toLowerCase() != postTiffImage.slice(0, -3).toLowerCase() && mismatchCount == postJpegImages.length) {
+      //               postFetchedImages.push(postTiffImage);
+      //               console.log("Tiff without Jpeg", postTiffImage);
+      //             }
+      //           });
+      //         }
+      //       });
+      //     }
+
+      //     if(postFetchedImages.length > 0) {
+      //       for (let i = 0; i < postFetchedImages.length; i++) {
+      //         console.log("Tiff to be converted and uploaded back " + postFetchedImages[i]);
+      //         if (path.extname(postFetchedImages[i]).toLowerCase() == ".tif") {
+      //           console.log("tiff files", postFetchedImages[i]);
+      //           getItem(bucketName, postFetchedImages[i], req.body.email, "POST").then((itemData) => {
+      //             console.log("invalid " + invalid);
+      //             res.status(201).json({
+      //               message: "Images uploaded successfully!!! " + invalid,
+      //             });
+      //             if (data == "The specified key does not exists in bucket") {
+      //               console.log("error while retrieving and converting image:", itemData);
+      //             }
+      //           });
+      //         }
+      //       }
+      //     } else {
+      //       res.status(200).json({
+      //         message: "Images uploaded successfully!!! " + invalid,
+      //       });
+      //     }
+      //   })
+      //   .catch((e) => {
+      //     console.error(`ERROR: ${e.code} - ${e.message}\n`);
+      //   });
     }
     else {
       console.log("error in filelist  " + err);
-      res.status(500).json({
-        message: "error in adding images",
+      res.status(200).json({
+        message: req.file.originalname + " Image upload failed " + invalid,
+        uploaded: "N"
       });
     }
   });

@@ -1,0 +1,21 @@
+<mat-toolbar class="dialogbar" color="primary">
+  <h4 class="heading">Progress</h4>
+  <span class="example-spacer1"></span>
+  <button mat-icon-button mat-dialog-close>
+      <mat-icon>clear</mat-icon>
+  </button>
+</mat-toolbar>
+<div class="dialog">
+  <ul class="listcontent">
+<div *ngFor="let progressInfo of progressInfos">
+  <li>{{ progressInfo.fileName }} ----- {{ progressInfo.value }}</li>
+</div>
+</ul>
+</div>
+
+<mat-dialog-actions align="end">
+  <div  style=" position: absolute; height: 3em; bottom:1px;">
+<button id="pauseButton" color="primary" mat-button (click)="pauseOcrRun()" value="Pause">Pause</button>
+<button color="primary" mat-button (click)="cancel()">Cancel</button>
+</div>
+</mat-dialog-actions>

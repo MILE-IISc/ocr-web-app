@@ -7,3 +7,10 @@ export class Images {
     public dataUrl : any
   ) {}
 }
+
+export class ProgressInfo{
+  constructor(
+  public fileName : any,
+  public value:any
+  ){}
+}
