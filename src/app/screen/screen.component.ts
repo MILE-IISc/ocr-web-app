@@ -184,7 +184,6 @@ export class ScreenComponent implements OnInit {
     this.headerService.messageemit
         .subscribe(
           (message: string) => {
-            console
             this.savemessage = message;
               if (this.savemessage != "") {
               var x = document.getElementById("updatemessage");
@@ -255,7 +254,6 @@ export class ScreenComponent implements OnInit {
           }
           this.isLoading = false;
           this.isLoadingfromServer = false;
-          console.log("this.localImages[0].fileName: ------------_> ", this.localImages[0].fileName);
           if (this.localImages[0].dataUrl == "" || this.localImages[0].dataUrl == null) {
             this.localImages[0].dataUrl = await this.imageService.loadArray(this.localImages[0].fileName);
           }
@@ -324,7 +322,6 @@ export class ScreenComponent implements OnInit {
     $(".textSpanDiv").empty();
     for (let i = 0; i < this.localImages.length; i++) {
       if (this.localImages[i].fileName == id) {
-        console.log("this.localImages[" + i + "].fileName", this.localImages[i].fileName, "dataUrl", this.localImages[i].dataUrl);
         if (this.localImages[i].dataUrl == null || this.localImages[i].dataUrl == "") {
           this.localImages[i].dataUrl = await this.imageService.loadArray(this.localImages[i].fileName);
         }
@@ -375,9 +372,9 @@ export class ScreenComponent implements OnInit {
   fitwidth() {
     this.imageService.fitwidth()
     this.percentage = this.imageService.percentage;
-    console.log("this.percentage before header in fitwidth", this.percentage);
+    // console.log("this.percentage before header in fitwidth", this.percentage);
     this.headerService.setpercentagevary(this.percentage);
-    console.log("this.percentage after header in fitwidth", this.percentage);
+    // console.log("this.percentage after header in fitwidth", this.percentage);
   }
 
   imgSize() {
@@ -391,9 +388,9 @@ export class ScreenComponent implements OnInit {
   orginalsize() {
     this.imageService.orginalsize();
     this.percentage = this.imageService.percentage;
-    console.log("this.percentage before header in orginalsize", this.percentage);
+    // console.log("this.percentage before header in orginalsize", this.percentage);
     this.headerService.setpercentagevary(this.percentage);
-    console.log("this.percentage after header in orginalsize", this.percentage);
+    // console.log("this.percentage after header in orginalsize", this.percentage);
   }
 
   loadXMLDoc() {
@@ -449,7 +446,6 @@ export class ScreenComponent implements OnInit {
   selectBlock() {
     $("#blockselect").css("background-color", "hsl(210, 100%, 20%)");
     this.obtainblock = true;
-    console.log("inside script");
     this.isDiv = true;
     this.imageService.selectBlockservice();
     this.imageService.onXml();
@@ -476,33 +472,33 @@ export class ScreenComponent implements OnInit {
             if (lines[j].word) {
               var words = lines[j].word;
               if (lines[j]["$"].LineNumber == texts[l].getAttribute("id")) {
-                console.log((texts[l] as HTMLInputElement).value);
+                // console.log((texts[l] as HTMLInputElement).value);
                 var text = (texts[l] as HTMLInputElement).value;
                 if (words.length > 1) {
-                  console.log("word array length " + words.length)
+                  // console.log("word array length " + words.length);
                   var textArray = text.split(/(\s+)/).filter(function (e) { return e.trim().length > 0; });
-                  console.log("text array length " + textArray.length)
+                  // console.log("text array length " + textArray.length);
                   if (words.length == textArray.length) {
                     for (let k = 0; k < words.length; k++) {
                       words[k]["$"].unicode = textArray[k].trim();
                     }
                   } else if (textArray.length > words.length || textArray.length < words.length) {
-                    console.log("in text array greater ");
+                    // console.log("in text array greater ");
                     var txt = "";
                     for (let m = 0; m < textArray.length; m++) {
                       txt = txt + " " + textArray[m];
                     }
                     words[0]["$"].unicode = txt.trim();
                     words[0]["$"].colEnd = words[words.length - 1].colEnd;
-                    console.log("word[0] " + words[0]["$"].unicode);
-                    console.log("word[1] " + words[1]["$"].unicode);
+                    // console.log("word[0] " + words[0]["$"].unicode);
+                    // console.log("word[1] " + words[1]["$"].unicode);
                     for (let n = 1; n < words.length; n++) {
-                      console.log("words.length", words.length, "n", n, "lines inndex", j)
+                      // console.log("words.length", words.length, "n", n, "lines inndex", j);
                       words[n]["$"].unicode = "";
                     }
                   }
                 } else {
-                  console.log("in else block of update");
+                  // console.log("in else block of update");
                   words[0]["$"].unicode = text.trim();
                 }
               }
@@ -600,12 +596,12 @@ export class ScreenComponent implements OnInit {
   }
 
   showTooltip() {
-    console.log("inside show tol tip");
+    // console.log("inside show tol tip");
     this.correctionUpdate();
   }
 
   xmlonSave() {
-    console.log("inside xmlOnSave");
+    // console.log("inside xmlOnSave");
     this.onSave();
   }
 
@@ -625,14 +621,6 @@ export class ScreenComponent implements OnInit {
   openProgressDialog() {
     this.imageService.openProgressDialog();
   }
-}
-
-function convertCanvasToImage(canvas) {
-  console.log("in convert................");
-  var image = new Image();
-  image.src = canvas.toDataURL("image/png");
-  console.log("image.src: " + image.src);
-  return image;
 }
 
 @Component({

@@ -70,6 +70,7 @@ import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
 import { SaveDetectorDirective } from './shared/savedirective';
 import {ScreenComponentDialog} from './screen/screen.component';
 import { ProgressDialogComponent } from './screen/progress-dialog/progress-dialog.component';
+import { runOcrConfirmationDialog } from './screen/progress-dialog/progress-dialog.component';
 
 
 
@@ -84,7 +85,8 @@ import { ProgressDialogComponent } from './screen/progress-dialog/progress-dialo
     SaveDetectorDirective,
     FooterComponent,
     ScreenComponentDialog,
-    ProgressDialogComponent
+    ProgressDialogComponent,
+    runOcrConfirmationDialog
   ],
   exports: [
     MatIconModule

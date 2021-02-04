@@ -227,11 +227,3 @@ export class FooterComponent implements OnInit {
     }
   }
 }
-
-function convertCanvasToImage(canvas) {
-  console.log("in convert................");
-  var image = new Image();
-  image.src = canvas.toDataURL("image/png");
-  console.log("image.src: " + image.src);
-  return image;
-}

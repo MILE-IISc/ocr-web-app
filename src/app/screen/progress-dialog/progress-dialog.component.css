@@ -5,12 +5,18 @@
 .cdk-overlay-pane.my-dialog {
     position:absolute!important;
   }
-  
+
   .heading{
     position: absolute;
+    top: 0;
     padding-left: 20px;
   }
-  
+
+  .mat-toolbar {
+    min-height: 30px !important;
+    height: 30px !important;
+  }
+
   .dialogbar{
     position: absolute;
     top: 0;
@@ -21,4 +27,7 @@
   .example-spacer1 {
     flex: 3 auto;
   }
-  
+
+  .dialog{
+    padding-top:40px;
+  }

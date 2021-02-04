@@ -78,6 +78,8 @@ export class ImageService implements OnInit {
   isLoadingFromServer = false;
   isLoadingFromServerChange = new EventEmitter<any>();
   progressInfos : ProgressInfo[] =[];
+  runOcrAllFlag = false;
+  runOcrLastIndex = 0;
 
   constructor(rendererFactory: RendererFactory2, private http: HttpClient, private router: Router, private authService: AuthService, private headerService: HeaderService, @Inject(DOCUMENT) private document: Document,public dialog: MatDialog) {
     this.IMAGE_BACKEND_URL = this.authService.BACKEND_URL + "/api/image/";
@@ -139,16 +141,13 @@ export class ImageService implements OnInit {
     this.isRunningOcrChange.emit(true);
     console.log("Running OCR on " + fileName)
     const queryParams = `?fileName=${fileName}&type=GET-OCR-XML`;
-    this.http.get<{ message: string; completed: string; xmlData: any }>(this.XML_BACKEND_URL + queryParams).pipe(
-      catchError(this.handleError)
-    ).subscribe(response => {
+    this.http.get<{ message: string; completed: string; xmlData: any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
       this.localImages = this.getLocalImages();
       if (this.localImages.length > 0) {
         for (let i = 0; i < this.localImages.length; i++) {
           if (this.localImages[i].fileName == fileName) {
             console.log("name" + this.localImages[i].fileName);
             this.localImages[i].completed = response.completed;
-            console.log("response completed " + response.completed);
             console.log("completed" + this.localImages[i].completed);
           }
         }
@@ -160,27 +159,20 @@ export class ImageService implements OnInit {
     });
   }
 
-  private handleError(error: HttpErrorResponse) {
-    console.log(
-      `Backend returned code ${error.status}, ` +
-      `Error was: ${error.error.message}`);
-    this.isRunningOcrChange.emit(false);
-    return throwError(
-      'Something bad happened; please try again later.');
-  }
-
   getXmlFileAsJson2() {
     this.localImages = this.getLocalImages();
-    this.progressInfos.splice(0,this.progressInfos.length);
-    this.openProgressDialog();
     if (this.localImages.length > 0) {
-      for(let i=0;i<this.localImages.length;i++){
-        var status = 'Pending';
-        const progress = new ProgressInfo(this.localImages[i].fileName,status);
-        this.progressInfos.push(progress);
-        this.progressInfoChange.emit(this.progressInfos);
-      }
       var runOcr = (x) => {
+        if(x == 0) {
+          this.progressInfos.splice(0,this.progressInfos.length);
+          this.openProgressDialog();
+          for(let i=0;i<this.localImages.length;i++){
+            var status = 'Pending';
+            const progress = new ProgressInfo(this.localImages[i].fileName,status);
+            this.progressInfos.push(progress);
+            this.progressInfoChange.emit(this.progressInfos);
+          }
+        }
         if (x < this.localImages.length) {
           let fileName = this.localImages[x].fileName;
           console.log("Running OCR on " + fileName);
@@ -197,13 +189,39 @@ export class ImageService implements OnInit {
               this.progressInfos[x].value = 'Failed';
               this.progressInfoChange.emit(this.progressInfos.slice());
             }
-
-            runOcr(x + 1);
+            // console.log("x inside runOcr http response",x);
+            this.runOcrLastIndex = x;
+            if(this.runOcrAllFlag == true ) {
+              runOcr(x + 1);
+            }
           });
         }
       }
-      runOcr(0);
+
+      // console.log("this.runOcrAllFlag before calling runOcr",this.runOcrAllFlag);
+      if(this.runOcrAllFlag == false) {
+        // console.log("inside if calling runOcr with index",this.runOcrLastIndex);
+        this.runOcrAllFlag = true;
+        runOcr(0);
+      } else {
+        // console.log("inside else calling runOcr with index",this.runOcrLastIndex);
+        runOcr(this.runOcrLastIndex);
+      }
     }
+  }
+
+  setRunOcrAllFlag(status) {
+    // console.log("status inside setRunOcrAllFlag",status);
+    this.runOcrAllFlag = status;
+  }
+
+  getRunOcrAllFlag() {
+    return this.runOcrAllFlag;
+  }
+
+  stopRunOcrOnAll() {
+    this.setRunOcrAllFlag(false);
+    this.runOcrLastIndex = 0;
   }
 
   updateXmlModel(jsonObj) {
@@ -279,7 +297,7 @@ export class ImageService implements OnInit {
     for (let i = 0; i < fileRead.length; i++) {
       var file = fileRead[i];
       console.log(file.name);
-      console.log(fileRead.length)
+      // console.log(fileRead.length);
       imageData.append("image", file);
     }
     this.http.post<{ message: string }>(this.IMAGE_BACKEND_URL, imageData).subscribe(async responseData => {
@@ -303,12 +321,12 @@ export class ImageService implements OnInit {
       this.localImages = [];
     }
     var filesCount = fileRead.length;
-    console.log("file count" + filesCount);
+    // console.log("file count" + filesCount);
     for (let i = 0; i < filesCount; i++) {
       var isImage = fileRead[i].type.includes("image");
       if (isImage) {
-        console.log("fileRead.type : " + fileRead[i].type);
-        console.log("fileRead[" + i + "].name : " + fileRead[i].name);
+        // console.log("fileRead.type : " + fileRead[i].type);
+        // console.log("fileRead[" + i + "].name : " + fileRead[i].name);
         let dataURL = await this.loadLocalImageData(fileRead, i);
         const imgValue = new Images(i, fileRead[i].name, 'N', this.authService.userName, dataURL);
         this.localImages.push(imgValue);
@@ -347,7 +365,7 @@ export class ImageService implements OnInit {
         reader.readAsDataURL(fileRead[i]);
       }
     });
-    console.log(result);
+    // console.log(result);
     return result;
   }
 
@@ -369,7 +387,7 @@ export class ImageService implements OnInit {
   }
 
   updateCorrectedXml(fileName: any) {
-    console.log("Corrected xml " + JSON.stringify(XmlModel.jsonObject));
+    // console.log("Corrected xml " + JSON.stringify(XmlModel.jsonObject));
     let jsonData: any;
     jsonData = {
       json: XmlModel.jsonObject,
@@ -389,7 +407,6 @@ export class ImageService implements OnInit {
             if (this.localImages[i].fileName.slice(0, -3) + 'xml' == jsonData.XmlfileName) {
               console.log("name" + this.localImages[i].fileName);
               this.localImages[i].completed = response.completed;
-              console.log("response completed " + response.completed);
               console.log("completed" + this.localImages[i].completed);
             }
           }
@@ -410,7 +427,7 @@ export class ImageService implements OnInit {
     this.btnImgArray.splice(0, this.btnImgArray.length);
     for (let i = 0; i < images.length; i++) {
       var btnImgEle = "<button  style=\"width: 100%; border: none;\" (click)=\"openThisImage()\" class=\"btnImg\" value=\"" + images[i].fileName + "\"  id=\"" + images[i]._id + "\">" + images[i].fileName + "</button>";
-      console.log("btnImgEle: " + btnImgEle);
+      // console.log("btnImgEle: " + btnImgEle);
       this.btnImgArray.push(btnImgEle);
       this.btnImgArrayChange.emit(this.btnImgArray.slice());
     }
@@ -420,20 +437,18 @@ export class ImageService implements OnInit {
       $(".sideBody").append(this.btnImgArray[i]);
 
     }
-    console.log("opening........")
-
   }
 
   openProgressDialog() {
     const dialogRef = this.dialog.open(ProgressDialogComponent, {
       disableClose: false,
-      height:'300px',
-      width: '600px',
+      height:'500px',
+      width: '400px',
       panelClass: 'my-dialog'
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log(`Dialog result: ${result}`);
+      // console.log(`Dialog result: ${result}`);
     });
   }
 
@@ -445,13 +460,13 @@ export class ImageService implements OnInit {
     if (this.obtainblock == true) {
       $('#imgToRead').selectAreas('reset');
     }
-    console.log("empty the right side screen");
+    // console.log("empty the right side screen");
     $(".textElementsDiv").not(':first').remove();
     $(".textSpanDiv").empty();
 
     this.localImages = this.getLocalImages();
-    console.log("localImages count", this.localImages.length);
-    console.log("index of image to be displayed", this.imgFileCount);
+    // console.log("localImages count", this.localImages.length);
+    // console.log("index of image to be displayed", this.imgFileCount);
     if (this.localImages[this.imgFileCount].dataUrl == null || this.localImages[this.imgFileCount].dataUrl == "") {
       this.localImages[this.imgFileCount].dataUrl = await this.loadArray(this.localImages[this.imgFileCount].fileName);
     }
@@ -459,7 +474,7 @@ export class ImageService implements OnInit {
     this.urlChanged.emit(this.localUrl.slice());
     this.fileName = this.localImages[this.imgFileCount].fileName;
     this.fileNameChange.emit(this.fileName);
-    console.log("inside Next this.imgFileCount after incrementing: " + this.imgFileCount);
+    // console.log("inside Next this.imgFileCount after incrementing: " + this.imgFileCount);
     this.onXml();
 
     if (this.localImages.length - 1 == this.imgFileCount) {
@@ -479,13 +494,13 @@ export class ImageService implements OnInit {
     if (this.obtainblock == true) {
       $('#imgToRead').selectAreas('reset');
     }
-    console.log("empty the right side screen");
+    // console.log("empty the right side screen");
     $(".textElementsDiv").not(':first').remove();
     $(".textSpanDiv").empty();
 
     this.localImages = this.getLocalImages();
-    console.log("localImages count", this.localImages.length);
-    console.log("index of image to be displayed", this.imgFileCount);
+    // console.log("localImages count", this.localImages.length);
+    // console.log("index of image to be displayed", this.imgFileCount);
     if (this.localImages[this.imgFileCount].dataUrl == null || this.localImages[this.imgFileCount].dataUrl == "") {
       this.localImages[this.imgFileCount].dataUrl = await this.loadArray(this.localImages[this.imgFileCount].fileName);
     }
@@ -493,7 +508,7 @@ export class ImageService implements OnInit {
     this.urlChanged.emit(this.localUrl.slice());
     this.fileName = this.localImages[this.imgFileCount].fileName;
     this.fileNameChange.emit(this.fileName);
-    console.log("inside Next this.imgFileCount after decrementing: " + this.imgFileCount);
+    // console.log("inside Next this.imgFileCount after decrementing: " + this.imgFileCount);
     this.onXml();
     if (this.localImages.length - 1 > this.imgFileCount) {
       this.nextImages = false;
@@ -510,7 +525,7 @@ export class ImageService implements OnInit {
     if (this.obtainblock == true) {
       $('#imgToRead').selectAreas('reset');
     }
-    console.log("empty the right side screen");
+    // console.log("empty the right side screen");
     $(".textElementsDiv").not(':first').remove();
     $(".textSpanDiv").empty();
 
@@ -540,7 +555,7 @@ export class ImageService implements OnInit {
     if (this.obtainblock == true) {
       $('#imgToRead').selectAreas('reset');
     }
-    console.log("empty the right side screen");
+    // console.log("empty the right side screen");
     $(".textElementsDiv").not(':first').remove();
     $(".textSpanDiv").empty();
 
@@ -595,19 +610,19 @@ export class ImageService implements OnInit {
 
   onXml() {
     this.localImages = this.getLocalImages();
-    console.log("localImages in onXml", this.localImages.length);
+    // console.log("localImages in onXml", this.localImages.length);
     if (this.localImages.length > 0) {
-      console.log("server image length " + this.localImages.length);
-      console.log("image file count " + this.imgFileCount);
+      // console.log("server image length " + this.localImages.length);
+      // console.log("image file count " + this.imgFileCount);
       this.fileName = this.localImages[this.imgFileCount].fileName;
-      console.log("completion status: ", this.localImages[this.imgFileCount].completed);
+      // console.log("completion status: ", this.localImages[this.imgFileCount].completed);
       if (this.localImages[this.imgFileCount].completed == "Y") {
         this.getFileAsJson(this.fileName);
       }
     } else {
       this.localImages = this.getLocalImages();
       this.fileName = this.localImages[this.imgFileCount].fileName;
-      console.log("completion status: ", this.localImages[this.imgFileCount].completed);
+      // console.log("completion status: ", this.localImages[this.imgFileCount].completed);
       if (this.localImages[this.imgFileCount].completed == "Y") {
         this.getFileAsJson(this.fileName);
       }
@@ -617,7 +632,7 @@ export class ImageService implements OnInit {
   getFileAsJson(fileName: any) {
     const queryParams = `?fileName=${fileName}&type=GET-XML`;
     this.http.get<{ message: string; xmlData: any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
-      console.log("empty the right side screen");
+      // console.log("empty the right side screen");
     $(".textElementsDiv").not(':first').remove();
     $(".textSpanDiv").empty();
       XmlModel.jsonObject = response.xmlData;
@@ -630,30 +645,29 @@ export class ImageService implements OnInit {
     if (this.obtainblock == true) {
     let areaarray = [];
     // var jsonObj = JSON.parse(json);
-    console.log("inside retain jsonObj: " + JSON.stringify(jsonObj));
     if (jsonObj && jsonObj['page'] && jsonObj['page'].block) {
       var blocks = jsonObj['page'].block;
       //  console.log("block length " + blocks.length);
 
       for (var i = 0; i < blocks.length; i++) {
         var blockNumber = (blocks[i]["$"].BlockNumber);
-        console.log("blockNumber" + blockNumber);
-        console.log("blockRowStart from json " + blocks[i].rowStart);
+        // console.log("blockNumber" + blockNumber);
+        // console.log("blockRowStart from json " + blocks[i].rowStart);
         var blockRowStart = blocks[i]["$"].rowStart;
         var blockRowEnd = blocks[i]["$"].rowEnd;
         var blockColStart = blocks[i]["$"].colStart;
         var blockColEnd = blocks[i]["$"].colEnd;
         var x = (blockColEnd - blockColStart);
-        console.log("x in retain " + x);
-        console.log("percentage in retain ***************" + this.percentage);
+        // console.log("x in retain " + x);
+        // console.log("percentage in retain ***************" + this.percentage);
         var blockwidth = (blockColEnd - blockColStart) * this.percentage / 100;
-        console.log("blockwidth" + blockwidth);
+        // console.log("blockwidth" + blockwidth);
         var blockheight = (blockRowEnd - blockRowStart) * this.percentage / 100;
-        console.log("blockheight" + blockheight);
+        // console.log("blockheight" + blockheight);
         var X = blockColStart * this.percentage / 100;
-        console.log("blockX" + X);
+        // console.log("blockX" + X);
         var Y = blockRowStart * this.percentage / 100;
-        console.log("blockY" + Y);
+        // console.log("blockY" + Y);
         areaarray[i] = { "id": blockNumber, "x": X, "y": Y, "width": blockwidth, "height": blockheight };
       }
     }
@@ -664,16 +678,16 @@ export class ImageService implements OnInit {
     });
 
     $('#buttonXml').click(function () {
-      console.log("onclick");
+      // console.log("onclick");
       $('#imgToRead').selectAreas('destroy');
     });
     $('.btnImg').click(function () {
       $('#imgToRead').selectAreas('reset');
     });
     function debugQtyAreas(event, id, areas) {
-      console.log(areas.length + " areas", arguments);
+      // console.log(areas.length + " areas", arguments);
       this.displayarea = areas;
-      console.log(areas.length + " this.displayarea", arguments);
+      // console.log(areas.length + " this.displayarea", arguments);
     };
    }
   }
@@ -699,7 +713,7 @@ export class ImageService implements OnInit {
 
   };
   asVertical() {
-    console.log("inside asVertical of Viewer");
+    // console.log("inside asVertical of Viewer");
     this.value = 'horizontal';
     // console.log("fit: "+fit);
 
@@ -709,7 +723,7 @@ export class ImageService implements OnInit {
   }
   asHorizontal() {
     this.value = 'vertical';
-    console.log("fit inside screen Horizontal: " + this.fit);
+    // console.log("fit inside screen Horizontal: " + this.fit);
     this.screenview()
   }
 
@@ -717,17 +731,17 @@ export class ImageService implements OnInit {
 
   fitheight() {
     this.clientpercent = this.percentage;
-    console.log("inside fitheight of Viewer");
+    // console.log("inside fitheight of Viewer");
     this.fit = 'height';
     var myImg;
     var falseimg;
     myImg = document.getElementById("imgToRead");
     falseimg = document.getElementById("image")
-    console.log("myImg: " + myImg);
+    // console.log("myImg: " + myImg);
 
 
     var divheight = document.getElementById("content").offsetHeight;
-    console.log("divelementheight " + divheight)
+    // console.log("divelementheight " + divheight);
     myImg.style.height = divheight + "px";
     falseimg.style.height = myImg.style.height;
     var currHeight = myImg.clientHeight;
@@ -755,8 +769,7 @@ export class ImageService implements OnInit {
 
 
     var divwidth = document.getElementById('content').offsetWidth;
-    console.log("divelementheight", divwidth);
-    console.log("myImg on fitwidth", myImg);
+    // console.log("divelementheight", divwidth);
     if (myImg != null) {
       myImg.style.width = divwidth + "px";
       falseimg.style.width = myImg.style.width;
@@ -783,10 +796,10 @@ export class ImageService implements OnInit {
     myImg.style.width = myImg.naturalWidth + "px";
 
     falseimg.style.width = myImg.style.width;
-    console.log("currwidth" + myImg.naturalWidth)
+    // console.log("currwidth" + myImg.naturalWidth);
     myImg.style.height = myImg.naturalHeight + "px";
     falseimg.style.height = myImg.style.height;
-    console.log("currheight" + myImg.naturalHeight)
+    // console.log("currheight" + myImg.naturalHeight);
     this.percentage = 100;
     this.headerService.setpercentagevary(this.percentage);
 
@@ -814,9 +827,9 @@ export class ImageService implements OnInit {
     var currWidth = myImg.clientWidth;
     var currHeight = myImg.clientHeight;
     myImg.style.width = (realWidth * zoomlevel / 100) + "px";
-    console.log("currwidth" + currWidth)
+    // console.log("currwidth" + currWidth);
     myImg.style.height = (realHeight * zoomlevel / 100) + "px";
-    console.log("currheight" + currHeight)
+    // console.log("currheight" + currHeight);
     falseimg.style.width = myImg.style.width;
     falseimg.style.height = myImg.style.height;
     //  this.blocksize();
@@ -858,9 +871,9 @@ export class ImageService implements OnInit {
     var currWidth = myImg.clientWidth;
     var currHeight = myImg.clientHeight;
     myImg.style.width = (realWidth * this.percentage / 100) + "px";
-    console.log("currwidth" + currWidth)
+    // console.log("currwidth" + currWidth);
     myImg.style.height = (realHeight * this.percentage / 100) + "px";
-    console.log("currheight" + currHeight)
+    // console.log("currheight" + currHeight);
     falseimg.style.width = myImg.style.width;
     falseimg.style.height = myImg.style.height;
   }
@@ -883,9 +896,9 @@ export class ImageService implements OnInit {
     var currWidth = myImg.clientWidth;
     var currHeight = myImg.clientHeight;
     myImg.style.width = (realWidth * this.percentage / 100) + "px";
-    console.log("currwidth" + currWidth)
+    // console.log("currwidth" + currWidth);
     myImg.style.height = (realHeight * this.percentage / 100) + "px";
-    console.log("currheight" + currHeight)
+    // console.log("currheight" + currHeight);
     falseimg.style.width = myImg.style.width;
     falseimg.style.height = myImg.style.height;
   }
@@ -928,10 +941,7 @@ export class ImageService implements OnInit {
   selectBlockservice() {
     this.obtainblock = true;
     $('img#imgToRead').selectAreas('destroy');
-    console.log("inside script");
     let areasarray = BlockModel.blockArray.reverse();
-    console.log("block.model.arrray^^^^   ^^" + JSON.stringify(areasarray));
-    // areasarray
     $('img#imgToRead').selectAreas({
       position: "absolute",
       onChanged: debugQtyAreas,
@@ -939,17 +949,17 @@ export class ImageService implements OnInit {
     });
 
     function debugQtyAreas(event, id, areas) {
-      console.log(areas.length + " areas", arguments);
+      // console.log(areas.length + " areas", arguments);
       this.displayarea = areas;
     };
 
     var elems = $('.select-areas-background-area');
     var len = elems.length;
-    console.log("select-areas-background-area length: " + len);
+    // console.log("select-areas-background-area length: " + len);
     if (len > 0) {
       for (var i = 0; i < len; i++) {
-        console.log("elem[" + i + "]" + elems[i]);
-        console.log("elem[" + i + "]" + $('.select-areas-background-area').css("background"));
+        // console.log("elem[" + i + "]" + elems[i]);
+        // console.log("elem[" + i + "]" + $('.select-areas-background-area').css("background"));
         $('.select-areas-background-area').bind()
       }
     }
@@ -985,9 +995,7 @@ export class ImageService implements OnInit {
       }
 
       $('img#imgToRead').selectAreas('destroy');
-      console.log("inside script");
       let areasarray = BlockModel.blockArray.reverse();
-      console.log("block.model.arrray^^^^   ^^" + JSON.stringify(areasarray));
       $('img#imgToRead').selectAreas({
         position: "absolute",
 

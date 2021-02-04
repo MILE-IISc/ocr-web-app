@@ -5,11 +5,12 @@
         <mat-icon>clear</mat-icon>
     </button>
 </mat-toolbar>
+
 <div class="contentBar" *ngFor="let progressInfo of progressInfos">
     <li>{{ progressInfo.fileName }}----{{ progressInfo.value }}</li>
 </div>
 
 <mat-dialog-actions align="end">
-    <!-- <button id="pauseButton" color="primary" mat-button (click)="pauseOcrRun()">Pause</button>
-    <button color="primary" mat-button>Cancel</button> -->
+  <button id="pauseButton" color="primary" mat-button (click)="pauseOcrRun()" value="Pause">Pause</button>
+  <button color="primary" mat-button (click)="cancelOcrRun()">Cancel</button>
 </mat-dialog-actions>
