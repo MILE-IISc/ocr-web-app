@@ -53,10 +53,18 @@
     <mat-icon>get_app</mat-icon>
   </button>
 
-  <button mat-icon-button data-toggle="tooltip" title="Delete Blocks" (click)="openDialog()">
+  <button mat-icon-button data-toggle="tooltip" title="Delete" [matMenuTriggerFor]="delete" >
     <mat-icon>delete_outline</mat-icon>
   </button>
-
+  <mat-menu #delete="matMenu">
+    <button mat-stroked-button data-toggle="tooltip" title="Delete Blocks"  (click)="openDialog()">
+       Blocks<mat-icon>delete_outline</mat-icon>
+    </button>
+    
+  <button mat-stroked-button data-toggle="tooltip" title="Delete Images" (click)="openDeleteDialog()">
+      Images<mat-icon>delete_outline</mat-icon>
+  </button>
+  </mat-menu>
   <span class="example-spacer2"></span>
 
   <div *ngIf="!isLoading">

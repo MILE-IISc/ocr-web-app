@@ -74,6 +74,8 @@ export class ImageService implements OnInit {
   isRunningOcrChange = new EventEmitter<any>();
   isLoadingFromServer = false;
   isLoadingFromServerChange = new EventEmitter<any>();
+  deleteImagesList = [];
+  deleteFilesLastIndex = 0;
 
   constructor(rendererFactory: RendererFactory2, private http: HttpClient, private router: Router, private authService: AuthService, private headerService: HeaderService, @Inject(DOCUMENT) private document: Document) {
     this.IMAGE_BACKEND_URL = this.authService.BACKEND_URL + "/api/image/";
@@ -115,7 +117,7 @@ export class ImageService implements OnInit {
           }
           else {
             this.isLoadingfromServer = false;
-            this.headerService. setloadingvalue(this.isLoadingfromServer);
+            this.headerService.setloadingvalue(this.isLoadingfromServer);
             console.log("message" + responseData.message);
             this.localImages = responseData.images;
             this.imagesUpdated.next({ localImages: [] });
@@ -568,8 +570,8 @@ export class ImageService implements OnInit {
     const queryParams = `?fileName=${fileName}&type=GET-XML`;
     this.http.get<{ message: string; xmlData: any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
       console.log("empty the right side screen");
-    $(".textElementsDiv").not(':first').remove();
-    $(".textSpanDiv").empty();
+      $(".textElementsDiv").not(':first').remove();
+      $(".textSpanDiv").empty();
       XmlModel.jsonObject = response.xmlData;
       this.retain(XmlModel.jsonObject);
       this.updateXmlModel(XmlModel.jsonObject);
@@ -578,54 +580,54 @@ export class ImageService implements OnInit {
 
   retain(jsonObj) {
     if (this.obtainblock == true) {
-    let areaarray = [];
-    // var jsonObj = JSON.parse(json);
-    console.log("inside retain jsonObj: " + JSON.stringify(jsonObj));
-    if (jsonObj && jsonObj['page'] && jsonObj['page'].block) {
-      var blocks = jsonObj['page'].block;
-      //  console.log("block length " + blocks.length);
+      let areaarray = [];
+      // var jsonObj = JSON.parse(json);
+      console.log("inside retain jsonObj: " + JSON.stringify(jsonObj));
+      if (jsonObj && jsonObj['page'] && jsonObj['page'].block) {
+        var blocks = jsonObj['page'].block;
+        //  console.log("block length " + blocks.length);
 
-      for (var i = 0; i < blocks.length; i++) {
-        var blockNumber = (blocks[i]["$"].BlockNumber);
-        console.log("blockNumber" + blockNumber);
-        console.log("blockRowStart from json " + blocks[i].rowStart);
-        var blockRowStart = blocks[i]["$"].rowStart;
-        var blockRowEnd = blocks[i]["$"].rowEnd;
-        var blockColStart = blocks[i]["$"].colStart;
-        var blockColEnd = blocks[i]["$"].colEnd;
-        var x = (blockColEnd - blockColStart);
-        console.log("x in retain " + x);
-        console.log("percentage in retain ***************" + this.percentage);
-        var blockwidth = (blockColEnd - blockColStart) * this.percentage / 100;
-        console.log("blockwidth" + blockwidth);
-        var blockheight = (blockRowEnd - blockRowStart) * this.percentage / 100;
-        console.log("blockheight" + blockheight);
-        var X = blockColStart * this.percentage / 100;
-        console.log("blockX" + X);
-        var Y = blockRowStart * this.percentage / 100;
-        console.log("blockY" + Y);
-        areaarray[i] = { "id": blockNumber, "x": X, "y": Y, "width": blockwidth, "height": blockheight };
+        for (var i = 0; i < blocks.length; i++) {
+          var blockNumber = (blocks[i]["$"].BlockNumber);
+          console.log("blockNumber" + blockNumber);
+          console.log("blockRowStart from json " + blocks[i].rowStart);
+          var blockRowStart = blocks[i]["$"].rowStart;
+          var blockRowEnd = blocks[i]["$"].rowEnd;
+          var blockColStart = blocks[i]["$"].colStart;
+          var blockColEnd = blocks[i]["$"].colEnd;
+          var x = (blockColEnd - blockColStart);
+          console.log("x in retain " + x);
+          console.log("percentage in retain ***************" + this.percentage);
+          var blockwidth = (blockColEnd - blockColStart) * this.percentage / 100;
+          console.log("blockwidth" + blockwidth);
+          var blockheight = (blockRowEnd - blockRowStart) * this.percentage / 100;
+          console.log("blockheight" + blockheight);
+          var X = blockColStart * this.percentage / 100;
+          console.log("blockX" + X);
+          var Y = blockRowStart * this.percentage / 100;
+          console.log("blockY" + Y);
+          areaarray[i] = { "id": blockNumber, "x": X, "y": Y, "width": blockwidth, "height": blockheight };
+        }
       }
-    }
-    $('img#imgToRead').selectAreas('destroy');
-    $('img#imgToRead').selectAreas({
-      onChanged: debugQtyAreas,
-      areas: areaarray
-    });
+      $('img#imgToRead').selectAreas('destroy');
+      $('img#imgToRead').selectAreas({
+        onChanged: debugQtyAreas,
+        areas: areaarray
+      });
 
-    $('#buttonXml').click(function () {
-      console.log("onclick");
-      $('#imgToRead').selectAreas('destroy');
-    });
-    $('.btnImg').click(function () {
-      $('#imgToRead').selectAreas('reset');
-    });
-    function debugQtyAreas(event, id, areas) {
-      console.log(areas.length + " areas", arguments);
-      this.displayarea = areas;
-      console.log(areas.length + " this.displayarea", arguments);
-    };
-   }
+      $('#buttonXml').click(function () {
+        console.log("onclick");
+        $('#imgToRead').selectAreas('destroy');
+      });
+      $('.btnImg').click(function () {
+        $('#imgToRead').selectAreas('reset');
+      });
+      function debugQtyAreas(event, id, areas) {
+        console.log(areas.length + " areas", arguments);
+        this.displayarea = areas;
+        console.log(areas.length + " this.displayarea", arguments);
+      };
+    }
   }
 
   screenview() {
@@ -998,8 +1000,34 @@ export class ImageService implements OnInit {
     this.updateCorrectedXml(this.fileName);
   }
 
+  setDeleteImagesList(list: any) {
+    this.deleteImagesList = list;
+    if (this.deleteImagesList.length > 0) {
+      for (let i = 0; i < this.deleteImagesList.length; i++) {
+        console.log("this.deleteImagesList[" + i + "] in imageService setDeleteImagesList function", this.deleteImagesList[i]);
+      }
+    }
+  }
 
+  deleteImages() {
+    if (this.deleteImagesList.length > 0) {
+      var deleteImage = (x) => {
+        if (x < this.deleteImagesList.length) {
+          let fileName = this.deleteImagesList[x];
+          console.log("Deleting " + fileName);
+          this.http.delete<{ message: string; completed: string }>(this.IMAGE_BACKEND_URL + fileName).subscribe(response => {
+            console.log("response on deletion",response.message);
+            deleteImage(x + 1);
+          });
+        } else {
+          this.getServerImages();
+        }
+      }
+      deleteImage(0);
+    }
+  }
 }
+
 function convertCanvasToImage(canvas) {
   console.log("In Tiff Image conversion");
   var image = new Image();

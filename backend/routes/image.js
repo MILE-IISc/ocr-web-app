@@ -360,6 +360,40 @@ router.get("/:fileName", authChecker, (req, res, next) => {
   });
 });
 
+router.delete("/:fileName", authChecker, (req, res, next) => {
+  const filesToBeDeleted = [];
+  filesToBeDeleted.push(req.params.fileName);
+  filesToBeDeleted.push(req.params.fileName.slice(0,-3) + 'xml');
+  if (path.extname(req.params.fileName).toLowerCase() == ".tif") {
+    filesToBeDeleted.push(req.params.fileName.slice(0,-3) + 'jpg');
+  }
+  
+  bucketName = req.userData.bucketName;
+  count = 0;
+  for (i = 0; i < filesToBeDeleted.length; i++) {
+    deleteItem(bucketName,filesToBeDeleted[i]).then((response) => {
+      count = count + 1;
+      if (count == filesToBeDeleted.length) {
+        res.status(200).json({
+          message: filesToBeDeleted[0] + " deleted successfully"
+        });
+      }
+    });
+  }
+});
+
+function deleteItem(bucketName, itemName) {
+  return cos.deleteObject({
+      Bucket: bucketName,
+      Key: itemName
+  }).promise()
+  .then(() =>{
+      return `Item: ${itemName} deleted!`;
+  }).catch((e) => {
+      return `ERROR: ${e.code} - ${e.message}\n while deleting Item: ${itemName}`;
+  });
+}
+
 function multiPartUpload(bucketName, itemName, filePath) {
   var uploadID = null;
 

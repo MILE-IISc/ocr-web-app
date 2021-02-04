@@ -1,0 +1,14 @@
+<mat-toolbar class="dialogbar" color="primary">
+  <h4 class="heading">Confirm delete of images?</h4>
+  <span class="example-spacer1"></span>
+  <button mat-icon-button mat-dialog-close>
+    <mat-icon>clear</mat-icon>
+  </button>
+</mat-toolbar>
+
+<p class="dialog">This action will delete all the selected images. Are you sure you want to continue? </p>
+
+<mat-dialog-actions align="end">
+  <button color="primary" mat-button mat-dialog-close cdkFocusInitial>No</button>
+  <button color="primary" mat-button [mat-dialog-close]="true" (click)="deleteImagesConfirm()">Yes</button>
+</mat-dialog-actions>

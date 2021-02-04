@@ -10,6 +10,16 @@
   padding-left: 20px;
 }
 
+.listcontent{
+    left:.5em;
+    right:.5em;
+    position: absolute;
+    top: 3em;
+    bottom: 3em;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; 
+  }
+
 .dialog{
   padding-top:23px;
 }

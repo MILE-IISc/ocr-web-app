@@ -1,0 +1,30 @@
+<mat-toolbar class="dialogbar" color="primary">
+  <h4 class="heading">Delete of Images</h4>
+  <span class="example-spacer1"></span>
+  <button mat-icon-button mat-dialog-close>
+    <mat-icon>clear</mat-icon>
+  </button>
+</mat-toolbar>
+
+<div class="dialog">
+  <ol class="listcontent">
+    <li *ngFor="let deleteImage of image.deleteImage">
+      <mat-checkbox [(ngModel)]="deleteImage.completed" [color]="deleteImage.color"
+        (ngModelChange)="updateAllComplete()">
+        {{deleteImage.name}}
+      </mat-checkbox>
+    </li>
+  </ol>
+</div>
+
+<mat-dialog-actions align="end">
+  <div style=" position: absolute;height: 3em;bottom:1px;">
+    <mat-checkbox style="left:1px;" [checked]="allComplete" [color]="image.color" [SelectAll]="someComplete()"
+      (change)="setAll($event.checked)">
+      {{image.name}}
+    </mat-checkbox>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <button color="primary" mat-button mat-dialog-close cdkFocusInitial>Cancel</button>
+    <button color="primary" mat-button [mat-dialog-close]="true" (click)="confirmdialog()">Delete</button>
+  </div>
+</mat-dialog-actions>

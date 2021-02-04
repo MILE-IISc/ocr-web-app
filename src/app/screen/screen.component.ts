@@ -18,7 +18,8 @@ import { AuthService } from '../auth/auth.service';
 import * as fileSaver from 'file-saver';
 import { FileService } from '../services/file.service';
 import { MatIconRegistry } from "@angular/material/icon";
-import {MatDialog} from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
+import { ThemePalette } from "@angular/material/core";
 
 @Component({
   selector: 'app-screen',
@@ -126,6 +127,20 @@ export class ScreenComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       console.log(`Dialog result: ${result}`);
     });
+  }
+
+  openDeleteDialog() {
+    const dialogRef = this.dialog.open(ScreenComponentDeleteImage, {
+      disableClose: true,
+      width: '450px',
+      height: '450px',
+       panelClass: 'my-dialog'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log(`Dialog result: ${result}`);
+    });
+    
   }
 
   ngOnInit(): void {
@@ -265,8 +280,12 @@ export class ScreenComponent implements OnInit {
           setTimeout(() => this.setpercentage(), 60);
         }
         else {
+          $(".textElementsDiv").not(':first').remove();
+          $(".textSpanDiv").empty();
           this.ImageIs = false;
           this.fileName = "No files have been Uploaded";
+          this.localUrl = null;
+          this.imageService.buttonenable()
         }
       });
 
@@ -610,34 +629,11 @@ export class ScreenComponent implements OnInit {
     };
   }
 
-  openMenu(event) {
-    this.isMenuOpen = true;
-    event.preventDefault();
-    $("#menu").css("display", "block");
-    $("#menu").css("left", event.clientX + "px");
-    $("#menu").css("top", event.clientY + "px");
-  }
+  
   closeMenu() {
     $("#menu").css("display", "none");
   }
-  alertSize() {
-    var myWidth = 0, myHeight = 0;
-    if (typeof (window.innerWidth) == 'number') {
-      //Non-IE
-      myWidth = window.innerWidth;
-      myHeight = window.innerHeight;
-    } else if (document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)) {
-      //IE 6+ in 'standards compliant mode'
-      myWidth = document.documentElement.clientWidth;
-      myHeight = document.documentElement.clientHeight;
-    } else if (document.body && (document.body.clientWidth || document.body.clientHeight)) {
-      //IE 4 compatible
-      myWidth = document.body.clientWidth;
-      myHeight = document.body.clientHeight;
-    }
-    window.alert('Width = ' + myWidth);
-    window.alert('Height = ' + myHeight);
-  }
+  
 
   blockupdate() {
     this.imageService.blocknumberupdate()
@@ -704,3 +700,106 @@ export class ScreenComponentDialog {
 
 }
 
+@Component({
+  selector: 'app-screen-DeleteImage',
+  templateUrl: './screen.component.deleteimage.html',
+  styleUrls: ['./screen.component.css'],
+  encapsulation: ViewEncapsulation.None
+
+})
+export class ScreenComponentDeleteImage implements OnInit{
+  localImages: Images[] = [];
+  finalDeletionList = []
+  constructor(private imageService: ImageService,public dialog: MatDialog){}
+
+
+  image: DeleteImageList = {
+    name: "SelectAll",
+    completed: false,
+    color: "warn",
+    deleteImage: []
+  };
+
+  image_1: DeleteImageList = {
+    name: "SelectAll",
+    completed: false,
+    color: "warn",
+    deleteImage: []
+  };
+
+  ngOnInit(): void {
+    this.localImages = this.imageService.getLocalImages();
+    for(let i = 0; i< this.localImages.length; i++) {
+      console.log("this.localImages["+i+"].fileName",this.localImages[i].fileName);
+      this.image_1 = { name: this.localImages[i].fileName, completed: false, color: "warn"};
+      this.image.deleteImage.push(this.image_1);
+    }
+  }
+
+  confirmdialog() {
+
+    for(let i = 0; i < this.image.deleteImage.length; i++) {
+      if(this.image.deleteImage[i].completed == true) {
+        this.finalDeletionList.push(this.image.deleteImage[i].name.slice());
+      }
+    }
+    console.log("finalDeletionList====="+this.finalDeletionList.length);
+    this.imageService.setDeleteImagesList(this.finalDeletionList);
+
+    const dialogRef = this.dialog.open(ScreenComponentConfirmDialog, {
+      disableClose: true,
+      width: '450px',
+      panelClass: 'my-dialog'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log(`Dialog result: ${result}`);
+    });
+  }
+   
+  allComplete: boolean = false;
+  updateAllComplete() {
+    this.allComplete =
+      this.image.deleteImage != null && this.image.deleteImage.every(t => t.completed);
+  }
+
+  someComplete(): boolean {
+    if (this.image.deleteImage == null) {
+      return false;
+    }
+    return (
+      this.image.deleteImage.filter(t => t.completed).length > 0 &&
+      !this.allComplete
+    );
+  }
+  setAll(completed: boolean) {
+    this.allComplete = completed;
+    if (this.image.deleteImage == null) {
+      return;
+    }
+    this.image.deleteImage.forEach(t => (t.completed = completed));
+  }
+}
+export interface DeleteImageList {
+  name: string;
+  completed: boolean;
+  color: ThemePalette;
+  deleteImage?: DeleteImageList[];
+}
+
+@Component({
+  selector: 'app-screen-ConfirmDialog',
+  templateUrl: './screen.component.confirmdialog.html',
+  styleUrls: ['./screen.component.css'],
+  encapsulation: ViewEncapsulation.None
+
+})
+export class ScreenComponentConfirmDialog {
+  constructor(private imageService: ImageService,public dialog: MatDialog){}
+
+  deleteImagesConfirm(){
+    $('#imgToRead').selectAreas('destroy');
+    console.log("delete images");
+    this.imageService.deleteImages();
+  }
+}

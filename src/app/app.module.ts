@@ -68,9 +68,9 @@ import { FooterComponent } from './footer/footer.component';
 import { ClickOutsideDirective } from './shared/click-outside.directive';
 import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
 import { SaveDetectorDirective } from './shared/savedirective';
-import {ScreenComponentDialog} from './screen/screen.component';
-
-
+import { ScreenComponentDialog } from './screen/screen.component';
+import { ScreenComponentDeleteImage } from'./screen/screen.component';
+import { ScreenComponentConfirmDialog } from'./screen/screen.component';
 
 @NgModule({
   declarations: [
@@ -82,7 +82,9 @@ import {ScreenComponentDialog} from './screen/screen.component';
     CtrlsDetectorDirective,
     SaveDetectorDirective,
     FooterComponent,
-    ScreenComponentDialog
+    ScreenComponentDialog,
+    ScreenComponentDeleteImage,
+    ScreenComponentConfirmDialog
   ],
   exports: [
     MatIconModule
@@ -153,7 +155,7 @@ import {ScreenComponentDialog} from './screen/screen.component';
 
   ],
   bootstrap: [AppComponent],
-  entryComponents: [ ScreenComponent,ScreenComponentDialog],
+  entryComponents: [ScreenComponent, ScreenComponentDialog, ScreenComponentDeleteImage, ScreenComponentConfirmDialog],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AppModule {
