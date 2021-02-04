@@ -86,6 +86,7 @@ export class ScreenComponent implements OnInit {
   isLoadingfromServer = false;
   isDownloading = false;
   savemessage;
+  filesToBeUploaded;
 
   sideOpen() {
     this.sidesize1 = 30;
@@ -152,6 +153,10 @@ export class ScreenComponent implements OnInit {
 
     this.imageService.isLoadingFromServerChange.subscribe((isLoadingFromServer) => {
       this.isLoadingfromServer = isLoadingFromServer;
+    });
+
+    this.imageService.ResumeUploadEvent.subscribe(() => {
+      this.invokeUploadImage();
     });
 
     this.percentage = this.headerService.getpercentagevary();
@@ -341,14 +346,18 @@ export class ScreenComponent implements OnInit {
 
   importFile(event) {
     this.anotherTryVisible = true;
-    var fileRead = (event.target as HTMLInputElement).files;
+    this.filesToBeUploaded = (event.target as HTMLInputElement).files;
     var filesCount = event.target.files.length;
     this.isLoading = true;
-    if (event.target.files && fileRead) {
-      this.imageService.addImage(fileRead);
+    if (event.target.files && this.filesToBeUploaded) {
+      this.invokeUploadImage();
     }
     setTimeout(() => this.fitwidth(), 50);
     setTimeout(() => this.setpercentage(), 60);
+  }
+
+  invokeUploadImage(){
+    this.imageService.addImage(this.filesToBeUploaded);
   }
 
   asVertical() {
@@ -642,4 +651,3 @@ export class ScreenComponentDialog {
 }
 
 }
-

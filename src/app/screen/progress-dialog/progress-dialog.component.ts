@@ -29,26 +29,39 @@ export class ProgressDialogComponent implements OnInit {
     var btn = document.getElementById("pauseButton");
     if(this.resume == false){
       btn.innerHTML = 'Resume';
-      this.imageService.setRunOcrAllFlag(false);
+      let progressType = this.imageService.getProgressType();
+      if(progressType == 'UPLOAD_IMAGE'){
+        this.imageService.setUploadImageFlag(false);
+      }else if(progressType == 'RUN_OCR'){
+        this.imageService.setRunOcrAllFlag(false);
+      }
+
     }
     else if(this.resume == true){
       this.resume = true;
       btn.innerHTML = 'Pause';
-      this.imageService.setRunOcrAllFlag(true);
-      this.imageService.getXmlFileAsJson2();
+      let progressType = this.imageService.getProgressType();
+      if(progressType == 'UPLOAD_IMAGE'){
+        this.imageService.setUploadImageFlag(true);
+        this.imageService.resumeUploadImages();
+      }else if(progressType == 'RUN_OCR'){
+        this.imageService.setRunOcrAllFlag(true);
+        this.imageService.getXmlFileAsJson2();
+      }
+
     }
     this.resume = !this.resume;
   }
 
-  cancelOcrRun() {
-    const dialogRef = this.dialog.open(runOcrConfirmationDialog, {
+  cancel() {
+    const dialogRef = this.dialog.open(confirmationDialog, {
       disableClose: true,
       width: '450px',
       panelClass: 'my-dialog'
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log(`Dialog result: ${result}`);
+      // console.log(`Dialog result: ${result}`);
     });
   }
 
@@ -56,17 +69,39 @@ export class ProgressDialogComponent implements OnInit {
 
 
 @Component({
-  selector: 'run-ocr-confirmation-dialog',
-  templateUrl: './runOcrConfirmation.dialog.html',
+  selector: 'confirmation-dialog',
+  templateUrl: './confirmation.dialog.html',
   styleUrls: ['./progress-dialog.component.css'],
   encapsulation: ViewEncapsulation.None
-
 })
-export class runOcrConfirmationDialog {
-  constructor(private imageService: ImageService){}
+export class confirmationDialog implements OnInit{
 
-  stopOcrRun() {
-    this.imageService.stopRunOcrOnAll();
-}
+  dialogInfo = "";
+  header = "";
+  constructor(private imageService: ImageService) { }
 
+  ngOnInit(): void {
+    let progressType = this.imageService.getProgressType();
+    // console.log("progressType|"+progressType+"|");
+    if (progressType == 'UPLOAD_IMAGE') {
+      this.header = "Terminate Upload Image Operation";
+      this.dialogInfo = "Confirm whether to cancel upload of rest of the images. Are you sure you want to continue? ";
+      // console.log("dialog header", this.header,"dialog message",this.dialogInfo);
+    } else if (progressType == 'RUN_OCR') {
+      this.header = "Terminate RUN-OCR Operation";
+      this.dialogInfo = "Confirm whether to cancel running OCR on rest of the pages. Are you sure you want to continue? ";
+      // console.log("dialog header", this.header,"dialog message",this.dialogInfo);
+    }
+  }
+
+
+  stopOperation() {
+    let progressType = this.imageService.getProgressType();
+    // console.log("progressType|"+progressType+"|");
+    if (progressType == 'UPLOAD_IMAGE') {
+      this.imageService.stopUploadImage();
+    } else if (progressType == 'RUN_OCR') {
+      this.imageService.stopRunOcrOnAll();
+    }
+  }
 }

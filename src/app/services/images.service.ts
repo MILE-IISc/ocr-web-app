@@ -54,6 +54,7 @@ export class ImageService implements OnInit {
   invalidMessageChange = new EventEmitter<any>();
   ocrMessageChange = new EventEmitter<any>();
   progressInfoChange = new EventEmitter<any>();
+  ResumeUploadEvent = new EventEmitter<any>();
   ready = false;
 
   btnImgArray: any[] = [];
@@ -79,7 +80,10 @@ export class ImageService implements OnInit {
   isLoadingFromServerChange = new EventEmitter<any>();
   progressInfos : ProgressInfo[] =[];
   runOcrAllFlag = false;
+  uploadImageFlag = false;
   runOcrLastIndex = 0;
+  uploadImageLastIndex = 0;
+  progressType = "";
 
   constructor(rendererFactory: RendererFactory2, private http: HttpClient, private router: Router, private authService: AuthService, private headerService: HeaderService, @Inject(DOCUMENT) private document: Document,public dialog: MatDialog) {
     this.IMAGE_BACKEND_URL = this.authService.BACKEND_URL + "/api/image/";
@@ -103,6 +107,14 @@ export class ImageService implements OnInit {
 
   getProgressInfos(){
     return this.progressInfos.slice();
+  }
+
+  getProgressType(){
+    return this.progressType;
+  }
+
+  resumeUploadImages(){
+    this.ResumeUploadEvent.emit();
   }
 
   async getServerImages() {
@@ -160,6 +172,7 @@ export class ImageService implements OnInit {
   }
 
   getXmlFileAsJson2() {
+    this.progressType = 'RUN_OCR';
     this.localImages = this.getLocalImages();
     if (this.localImages.length > 0) {
       var runOcr = (x) => {
@@ -189,7 +202,6 @@ export class ImageService implements OnInit {
               this.progressInfos[x].value = 'Failed';
               this.progressInfoChange.emit(this.progressInfos.slice());
             }
-            // console.log("x inside runOcr http response",x);
             this.runOcrLastIndex = x;
             if(this.runOcrAllFlag == true ) {
               runOcr(x + 1);
@@ -289,30 +301,79 @@ export class ImageService implements OnInit {
     return this.url;
   }
 
-  async addImage(fileRead) {
-    await this.getServerImages();
-    console.log("server file count before post" + this.localImages.length);
-    let imageData = new FormData();
-    imageData.append("email", this.authService.userName);
-    for (let i = 0; i < fileRead.length; i++) {
-      var file = fileRead[i];
-      console.log(file.name);
-      // console.log(fileRead.length);
-      imageData.append("image", file);
-    }
-    this.http.post<{ message: string }>(this.IMAGE_BACKEND_URL, imageData).subscribe(async responseData => {
-      this.invalidMessage = responseData.message;
-      this.invalidMessageChange.emit(this.invalidMessage);
-      console.log("image added+++++++++++++++++++: " + responseData.message);
-    });
+  async addImage(filesToBeUploaded) {
+    this.progressType = 'UPLOAD_IMAGE';
 
-    console.log("server file count" + this.localImages.length);
-    if (this.localImages.length == 0) {
-      this.loadLocalImages(fileRead, "NEW");
+    if (filesToBeUploaded.length > 0) {
+      var uploadImage = (x) => {
+        if(x == 0) {
+          this.progressInfos.splice(0,this.progressInfos.length);
+          this.openProgressDialog();
+          for(let i=0;i<filesToBeUploaded.length;i++){
+            var status = 'Pending';
+            const progress = new ProgressInfo(filesToBeUploaded[i].name,status);
+            this.progressInfos.push(progress);
+            this.progressInfoChange.emit(this.progressInfos);
+          }
+        }
+        if (x < filesToBeUploaded.length) {
+          let fileName = filesToBeUploaded[x].name;
+          this.progressInfos[x].value = 'Uploading';
+          this.progressInfoChange.emit(this.progressInfos.slice());
+
+          let imageData = new FormData();
+          imageData.append("email", this.authService.userName);
+          var file = filesToBeUploaded[x];
+          console.log("file name==="+file.name);
+          imageData.append("image", file);
+          this.http.post<{ message: string, uploaded: string }>(this.IMAGE_BACKEND_URL, imageData).subscribe(async response => {
+            this.invalidMessage = response.message;
+            this.invalidMessageChange.emit(this.invalidMessage);
+            if(response.uploaded == "Y") {
+              this.progressInfos[x].value = 'Uploaded';
+            } else {
+              this.progressInfos[x].value = 'Failed';
+            }
+            this.progressInfoChange.emit(this.progressInfos.slice());
+            this.uploadImageLastIndex = x;
+            if(this.uploadImageFlag == true ) {
+              uploadImage(x + 1);
+            }
+          });
+        }
+      }
+      // console.log("this.uploadImageFlag before calling runOcr",this.uploadImageFlag);
+      if(this.uploadImageFlag == false) {
+        await this.getServerImages();
+        console.log("server file count before post" + this.localImages.length);
+        console.log("filesToBeUploaded length",filesToBeUploaded.length);
+        if (this.localImages.length == 0) {
+          this.loadLocalImages(filesToBeUploaded, "NEW");
+        }
+        else {
+          this.loadLocalImages(filesToBeUploaded, "APPEND");
+        }
+        this.uploadImageFlag = true;
+        uploadImage(0);
+      } else {
+        // console.log("inside else calling runOcr with index",this.uploadImageLastIndex);
+        uploadImage(this.uploadImageLastIndex);
+      }
     }
-    else {
-      this.loadLocalImages(fileRead, "APPEND");
-    }
+  }
+
+  setUploadImageFlag(status) {
+    // console.log("status inside setUploadImageFlag",status);
+    this.uploadImageFlag = status;
+  }
+
+  getuploadImageFlag() {
+    return this.uploadImageFlag;
+  }
+
+  stopUploadImage() {
+    this.setUploadImageFlag(false);
+    this.uploadImageLastIndex = 0;
   }
 
   async loadLocalImages(fileRead, type) {
@@ -443,7 +504,7 @@ export class ImageService implements OnInit {
     const dialogRef = this.dialog.open(ProgressDialogComponent, {
       disableClose: false,
       height:'500px',
-      width: '400px',
+      width: '500px',
       panelClass: 'my-dialog'
     });
 

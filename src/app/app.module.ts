@@ -70,8 +70,7 @@ import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
 import { SaveDetectorDirective } from './shared/savedirective';
 import {ScreenComponentDialog} from './screen/screen.component';
 import { ProgressDialogComponent } from './screen/progress-dialog/progress-dialog.component';
-import { runOcrConfirmationDialog } from './screen/progress-dialog/progress-dialog.component';
-
+import { confirmationDialog } from './screen/progress-dialog/progress-dialog.component';
 
 
 @NgModule({
@@ -86,7 +85,7 @@ import { runOcrConfirmationDialog } from './screen/progress-dialog/progress-dial
     FooterComponent,
     ScreenComponentDialog,
     ProgressDialogComponent,
-    runOcrConfirmationDialog
+    confirmationDialog
   ],
   exports: [
     MatIconModule
