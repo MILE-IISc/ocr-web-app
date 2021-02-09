@@ -397,7 +397,8 @@ router.delete("/:fileName", authChecker, (req, res, next) => {
       count = count + 1;
       if (count == filesToBeDeleted.length) {
         res.status(200).json({
-          message: filesToBeDeleted[0] + " deleted successfully"
+          message: filesToBeDeleted[0] + " deleted successfully",
+          completed : 'Y'
         });
       }
     });

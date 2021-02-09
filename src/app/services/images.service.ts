@@ -55,6 +55,8 @@ export class ImageService implements OnInit {
   ocrMessageChange = new EventEmitter<any>();
   progressInfoChange = new EventEmitter<any>();
   ResumeUploadEvent = new EventEmitter<any>();
+  uploadMessageChange = new EventEmitter<any>();
+  angleChange = new EventEmitter<any>();
   ready = false;
 
   btnImgArray: any[] = [];
@@ -80,12 +82,15 @@ export class ImageService implements OnInit {
   isLoadingFromServerChange = new EventEmitter<any>();
   progressInfos: ProgressInfo[] = [];
   runOcrAllFlag = false;
+  deleteFlag = false;
   uploadImageFlag = false;
   runOcrLastIndex = 0;
+  deleteLastIndex = 0;
   uploadImageLastIndex = 0;
   progressType = "";
   deleteImagesList = [];
   deleteFilesLastIndex = 0;
+  uploadMessage="";
 
   constructor(rendererFactory: RendererFactory2, private http: HttpClient, private router: Router, private authService: AuthService, private headerService: HeaderService, @Inject(DOCUMENT) private document: Document, public dialog: MatDialog) {
     this.IMAGE_BACKEND_URL = this.authService.BACKEND_URL + "/api/image/";
@@ -179,6 +184,8 @@ export class ImageService implements OnInit {
     if (this.localImages.length > 0) {
       var runOcr = (x) => {
         if (x == 0) {
+          this.uploadMessage = "";
+          this.uploadMessageChange.emit(this.uploadMessage);
           this.progressInfos.splice(0, this.progressInfos.length);
           this.openProgressDialog();
           for (let i = 0; i < this.localImages.length; i++) {
@@ -205,6 +212,12 @@ export class ImageService implements OnInit {
               this.progressInfoChange.emit(this.progressInfos.slice());
             }
             this.runOcrLastIndex = x;
+            if(this.runOcrLastIndex == (this.localImages.length-1)){
+              this.uploadMessage = "Run-OCR on all images is successfull !!"
+              this.uploadMessageChange.emit(this.uploadMessage);
+              var btn = document.getElementById("pauseButton");
+              btn.innerHTML = 'Ok';
+            }
             if (this.runOcrAllFlag == true) {
               runOcr(x + 1);
             }
@@ -212,20 +225,16 @@ export class ImageService implements OnInit {
         }
       }
 
-      // console.log("this.runOcrAllFlag before calling runOcr",this.runOcrAllFlag);
       if (this.runOcrAllFlag == false) {
-        // console.log("inside if calling runOcr with index",this.runOcrLastIndex);
         this.runOcrAllFlag = true;
         runOcr(0);
       } else {
-        // console.log("inside else calling runOcr with index",this.runOcrLastIndex);
         runOcr(this.runOcrLastIndex);
       }
     }
   }
 
   setRunOcrAllFlag(status) {
-    // console.log("status inside setRunOcrAllFlag",status);
     this.runOcrAllFlag = status;
   }
 
@@ -243,6 +252,11 @@ export class ImageService implements OnInit {
       var blocks = [];
       if (jsonObj['page'].block) {
         blocks = jsonObj['page'].block;
+      }
+      if(jsonObj['page']["$"].rotationAngle){
+        console.log("rotation angle "+jsonObj['page']["$"].rotationAngle)
+        this.angle = jsonObj['page']["$"].rotationAngle;
+        this.angleChange.emit(this.angle);
       }
       for (var b = 0; b < blocks.length; b++) {
         var block = blocks[b];
@@ -303,6 +317,10 @@ export class ImageService implements OnInit {
     return this.url;
   }
 
+  getUploadMessage(){
+    return this.uploadMessage;
+  }
+
   async addImage(filesToBeUploaded) {
     this.progressType = 'UPLOAD_IMAGE';
 
@@ -310,6 +328,8 @@ export class ImageService implements OnInit {
       var uploadImage = (x) => {
         if (x == 0) {
           this.progressInfos.splice(0, this.progressInfos.length);
+          this.uploadMessage = "";
+          this.uploadMessageChange.emit(this.uploadMessage);
           this.openProgressDialog();
           for (let i = 0; i < filesToBeUploaded.length; i++) {
             var status = 'Pending';
@@ -338,13 +358,18 @@ export class ImageService implements OnInit {
             }
             this.progressInfoChange.emit(this.progressInfos.slice());
             this.uploadImageLastIndex = x;
+            if(this.uploadImageLastIndex == (filesToBeUploaded.length-1)){
+              this.uploadMessage = "Images Uploaded Successfully !!"
+              this.uploadMessageChange.emit(this.uploadMessage);
+              var btn = document.getElementById("pauseButton");
+              btn.innerHTML = 'Ok';
+            }
             if (this.uploadImageFlag == true) {
               uploadImage(x + 1);
-            }
+            }            
           });
         }
       }
-      // console.log("this.uploadImageFlag before calling runOcr",this.uploadImageFlag);
       if (this.uploadImageFlag == false) {
         await this.getServerImages();
         console.log("server file count before post" + this.localImages.length);
@@ -358,14 +383,12 @@ export class ImageService implements OnInit {
         this.uploadImageFlag = true;
         uploadImage(0);
       } else {
-        // console.log("inside else calling runOcr with index",this.uploadImageLastIndex);
         uploadImage(this.uploadImageLastIndex);
       }
     }
   }
 
   setUploadImageFlag(status) {
-    // console.log("status inside setUploadImageFlag",status);
     this.uploadImageFlag = status;
   }
 
@@ -513,6 +536,10 @@ export class ImageService implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       // console.log(`Dialog result: ${result}`);
     });
+  }
+
+  closeProgressDialog(){
+    this.dialog.closeAll();
   }
 
   async nextPage() {
@@ -1127,21 +1154,70 @@ export class ImageService implements OnInit {
     }
 
     deleteImages() {
+      this.progressType = 'DELETE_IMAGES';
       if (this.deleteImagesList.length > 0) {
         var deleteImage = (x) => {
+          if (x == 0) {
+            this.uploadMessage = "";
+            this.uploadMessageChange.emit(this.uploadMessage);
+            this.progressInfos.splice(0, this.progressInfos.length);
+            this.openProgressDialog();
+            for (let i = 0; i < this.deleteImagesList.length; i++) {
+              var status = 'Pending';
+              const progress = new ProgressInfo(this.deleteImagesList[i], status);
+              this.progressInfos.push(progress);
+              this.progressInfoChange.emit(this.progressInfos);
+            }
+          }
           if (x < this.deleteImagesList.length) {
             let fileName = this.deleteImagesList[x];
             console.log("Deleting " + fileName);
+            this.progressInfos[x].value = 'Deleting';
+            this.progressInfoChange.emit(this.progressInfos.slice());
             this.http.delete<{ message: string; completed: string }>(this.IMAGE_BACKEND_URL + fileName).subscribe(response => {
               console.log("response on deletion", response.message);
-              deleteImage(x + 1);
+              if(response.completed == 'Y'){
+                this.progressInfos[x].value = 'Deleted';
+                this.progressInfoChange.emit(this.progressInfos.slice());
+              }else{
+                this.progressInfos[x].value = 'Failed';
+                this.progressInfoChange.emit(this.progressInfos.slice());
+              }
+              this.deleteLastIndex = x;
+              if(this.deleteLastIndex == (this.deleteImagesList.length-1)){
+                this.uploadMessage = "Deletion of Images is successfull"
+                this.uploadMessageChange.emit(this.uploadMessage);
+                var btn = document.getElementById("pauseButton");
+                btn.innerHTML = 'Ok';
+              }
+              if(this.deleteFlag == true){
+                deleteImage(x + 1);
+              }
             });
           } else {
             this.getServerImages();
           }
         }
-        deleteImage(0);
+        if (this.deleteFlag == false) {
+          this.deleteFlag = true;
+          deleteImage(0);
+        } else {
+          deleteImage(this.deleteLastIndex);
+        }
       }
+    }
+
+    setDeleteFlag(status) {
+      this.deleteFlag = status;
+    }
+  
+    getDeleteFlag() {
+      return this.deleteFlag;
+    }
+  
+    stopDeletion() {
+      this.setDeleteFlag(false);
+      this.deleteLastIndex = 0;
     }
   }
 

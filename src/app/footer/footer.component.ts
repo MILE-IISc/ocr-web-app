@@ -70,6 +70,11 @@ export class FooterComponent implements OnInit {
       console.log("nextImages inside footer: " + previousImages);
       this.previousImages = previousImages;
     });
+
+    this.imageService.angleChange.subscribe(rotationAngle =>{
+      this.angle = rotationAngle;
+      setTimeout(() => this.onEnter( this.angle), 2500);
+    })
   }
 
   onEnter(value: number) {
@@ -110,7 +115,6 @@ export class FooterComponent implements OnInit {
   }
 
   fitwidth() {
-    // this.viewerService.fitwidth();
     this.clientpercent = this.percentage;
     this.imageService.fitwidth()
     this.percentage = this.imageService.percentage;
@@ -155,34 +159,28 @@ export class FooterComponent implements OnInit {
   orginalsize() {
     this.imageService.orginalsize();
     this.percentage = this.imageService.percentage;
-    console.log("this.percentage before header in orginalsize",this.percentage);
     this.headerService.setpercentagevary(this.percentage);
-    console.log("this.percentage after header in orginalsize",this.percentage);
   }
 
   NextImage() {
 
     this.onEnter(0);
     this.imageService.nextPage();
-    // this.imageService.onXml();
  }
 
   previousImage() {
     this.onEnter(0);
     this.imageService.previousPage();
-    // this.imageService.onXml();
   }
 
   lastImage() {
     this.onEnter(0);
     this.imageService.LastImage();
-    // this.imageService.onXml();
   }
 
   firstImage() {
     this.onEnter(0);
     this.imageService.firstImage();
-    // this.imageService.onXml();
   }
 
   loadXMLDoc() {
@@ -217,12 +215,7 @@ export class FooterComponent implements OnInit {
         var z = 0
         var blockValue = new BlockModel(height, id, width, x, y, z);
         BlockModel.blockArray.push(blockValue);
-        // this.viewerService. selectBlockservice()
-        // setTimeout(() => this.imageService.selectBlockservice(), .001);
       }
-      // var SaveToXML = document.getElementById("SaveToXML");
-      //   console.log("SaveToXML: " + SaveToXML);
-      //   SaveToXML.click();
       this.imageService.selectBlockservice()
     }
   }

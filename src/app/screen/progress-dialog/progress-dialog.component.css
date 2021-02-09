@@ -21,7 +21,10 @@ dialog{
   -webkit-overflow-scrolling: touch;
 
 }
-
+.success{
+  position:absolute;
+  padding-left: 10px;
+}
 
 .heading{
   position: absolute;
@@ -43,6 +46,10 @@ dialog{
 
 .example-spacer1 {
   flex: 3 auto;
+}
+
+.example-spacer3{
+  flex:.9 auto;
 }
 
 .dialog{
