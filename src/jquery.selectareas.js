@@ -429,6 +429,28 @@
 
         fireEvent("changed");
 
+        console.log("parent area length"+parent.areas().length);
+        AREAS = parent.areas();
+
+        if (parent.areas().length > 0) {
+          AREAS.map(AREA_1 => {
+            console.log("inside first map");
+            AREAS.map(AREA_2 => {
+              console.log("inside second map");
+              if (AREA_1.id != AREA_2.id &&
+                AREA_1.x <= AREA_2.x &&
+                AREA_1.y <= AREA_2.y &&
+                (AREA_1.width + AREA_1.x) >= (AREA_2.width + AREA_2.x) &&
+                (AREA_1.height + AREA_1.y) >= (AREA_2.height + AREA_2.y)) {
+                // AREA_1.id = AREA_2.id;
+                console.log("area with id", AREA_1.id, "has blocks to be merged with small block id", AREA_2.id);
+                $('img#imgToRead').selectAreas('remove', AREA_2.id);
+               
+              }
+            })
+          });
+        }
+        
         refresh("releaseSelection");
 
         if (area.width < 15 || area.height < 15) {
