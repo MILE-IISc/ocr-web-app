@@ -73,6 +73,7 @@ import { ScreenComponentDeleteImage } from'./screen/screen.component';
 import { ScreenComponentConfirmDialog } from'./screen/screen.component';
 import { ProgressDialogComponent } from './screen/progress-dialog/progress-dialog.component';
 import { confirmationDialog } from './screen/progress-dialog/progress-dialog.component';
+import { BooksinfoComponent } from './booksinfo/booksinfo.component';
 
 
 @NgModule({
@@ -89,7 +90,8 @@ import { confirmationDialog } from './screen/progress-dialog/progress-dialog.com
     ScreenComponentDeleteImage,
     ScreenComponentConfirmDialog,
     ProgressDialogComponent,
-    confirmationDialog
+    confirmationDialog,
+    BooksinfoComponent
   ],
   exports: [
     MatIconModule

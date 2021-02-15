@@ -65,9 +65,11 @@ function getItem(bucketName, itemName, type) {
 }
 
 router.put("", authChecker, (req, res, next) => {
-  xmlFileName = req.body.XmlfileName;
+  fileName = req.body.XmlfileName;
   const mail = req.userData.email;
   const bucketName = req.userData.bucketName;
+  const bookName = req.query.folderName;
+  xmlFileName = fileName + "-" + bookName;
   console.log("bucketName inside put XML ", bucketName);
   console.log("mail inside put XML ", mail);
   console.log("xmlFileName inside put XML ", xmlFileName);
@@ -103,9 +105,10 @@ router.get("/:fileName", authChecker, (req, res, next) => {
   console.log("mail inside get fileName XML ", mail);
 
   console.log("ImagefileName in get XML fileName call " + req.params.fileName);
-  const xmlFileName = req.params.fileName.slice(0, -3) + 'xml';
+  const fileName = req.params.fileName.split("-");
+  const xmlFileName = fileName[0].slice(0, -3) + 'xml';
   console.log("xmlFileName in get XML fileName call " + xmlFileName);
-  getItem(bucketName, xmlFileName, "GET").then(content => {
+  getItem(bucketName, xmlFileName + "-" + fileName[1], "GET").then(content => {
     if (content == "The specified key does not exists in bucket") {
       console.log("error while retrieving:", content);
       res.status(400).json({
@@ -133,7 +136,9 @@ router.get("", authChecker, (req, res, next) => {
   console.log("fileName inside get XML ", req.query.fileName);
   console.log("type inside get XML ", req.query.type);
   if (req.query.type == "GET-XML") {
-    const xmlFileName = req.query.fileName.slice(0, -3) + 'xml';
+    const fileName = req.query.fileName.split("-");
+    const name = fileName[0].slice(0, -3) + 'xml';
+    const xmlFileName = name + "-" + fileName[1];
     console.log("xmlFileName in get call " + xmlFileName);
     getItem(bucketName, xmlFileName, "GET").then(xmlContent => {
       if (xmlContent == "The specified key does not exists in bucket") {
@@ -155,7 +160,10 @@ router.get("", authChecker, (req, res, next) => {
       }
     });
   }  else if (req.query.type == "GET-OCR-XML" || req.query.type == "GET-OCR-XML-ALL") {
-    const xmlFileName = req.query.fileName.slice(0, -3) + 'xml';
+    const fileName = req.query.fileName.split("-");
+    const name = fileName[0].slice(0, -3) + 'xml';
+    const xmlFileName = name + "-" + fileName[1];
+    const ocrFileName = fileName[0] + "-" + 
     console.log("xmlFileName in get call " + xmlFileName);
     getItem(bucketName, xmlFileName, "GET").then(xmlContent => {
       if (xmlContent == null || xmlContent.localeCompare("") == 0 || xmlContent.localeCompare("The specified key does not exists in bucket") == 0) {
@@ -164,7 +172,6 @@ router.get("", authChecker, (req, res, next) => {
         </page>`;
       }
       console.log("getting Image Data for", req.query.fileName);
-
       getItem(bucketName, req.query.fileName, "OCR").then(imgContent => {
         if (imgContent == null || imgContent.localeCompare("") == 0 || imgContent.localeCompare("The specified key does not exists in bucket") == 0) {
           var statusCode = req.query.type == "GET-OCR-XML" ? 400 : 200;

@@ -20,6 +20,7 @@ import { FileService } from '../services/file.service';
 import { MatIconRegistry } from "@angular/material/icon";
 import { MatDialog } from '@angular/material/dialog';
 import { ThemePalette } from "@angular/material/core";
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-screen',
@@ -88,6 +89,7 @@ export class ScreenComponent implements OnInit {
   isDownloading = false;
   savemessage;
   filesToBeUploaded;
+  bookName;
 
   sideOpen() {
     this.sidesize1 = 30;
@@ -108,7 +110,7 @@ export class ScreenComponent implements OnInit {
   }
 
   constructor(private headerService: HeaderService, private imageService: ImageService,
-    public authService: AuthService, private fileService: FileService,public dialog: MatDialog) { }
+    public authService: AuthService, private fileService: FileService,public dialog: MatDialog,private route: ActivatedRoute) { }
 
   onLogout() {
     this.authService.logout();
@@ -357,6 +359,7 @@ export class ScreenComponent implements OnInit {
       }
 
     }
+
     this.imageService.buttonenable();
     this.imageService.onXml();
     setTimeout(() => this.imageService.screenview(), 50);
@@ -367,16 +370,28 @@ export class ScreenComponent implements OnInit {
     this.anotherTryVisible = true;
     this.filesToBeUploaded = (event.target as HTMLInputElement).files;
     var filesCount = event.target.files.length;
+    var filesToUpload = event.target.files;
+    var relativePath = filesToUpload[0].webkitRelativePath;
+    if(event.target.files && this.filesToBeUploaded && filesToUpload.length == 1){
+      var folderName = this.route.snapshot.queryParams['data'];
+      this.bookName = folderName;
+      this.invokeUploadImage();
+    }else if(event.target.files && this.filesToBeUploaded && filesToUpload.length>1){
+      var folderName = relativePath.split("/");
+      this.bookName = folderName[0];
+      this.invokeUploadImage();
+    }
     this.isLoading = true;
     if (event.target.files && this.filesToBeUploaded) {
-      this.invokeUploadImage();
+      
     }
     setTimeout(() => this.fitwidth(), 50);
     setTimeout(() => this.setpercentage(), 60);
   }
+  
 
   invokeUploadImage(){
-    this.imageService.addImage(this.filesToBeUploaded);
+    this.imageService.addImage(this.filesToBeUploaded,this.bookName);
   }
 
   asVertical() {
@@ -750,6 +765,7 @@ export class ScreenComponentConfirmDialog {
     $(".textElementsDiv").not(':first').remove();
     $(".textSpanDiv").empty();
     console.log("delete images");
+    
     this.imageService.deleteImages();
   }
 }

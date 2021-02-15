@@ -90,9 +90,9 @@ function getItem(bucketName, itemName, mail, requestType) {
   }).promise()
     .then((data) => {
       if (data != null) {
-        console.log("path.extname(itemName).toLowerCase() ", path.extname(itemName).toLowerCase(), " requestType ", requestType);
-        if (path.extname(itemName).toLowerCase() == ".tif" && requestType == "POST") {
-          console.log('reached getting tif data in getItem\n', itemName);
+        var splitFileName = itemName.split("-");
+        if (path.extname(splitFileName[0]).toLowerCase() == ".tif" && requestType == "POST") {
+          console.log('reached getting tif data in getItem\n', splitFileName[0]);
           const tiffArrayBuff = Buffer.from(data.Body).buffer;
           console.log("tiff ", data.Metadata);
           console.log("tiff ", data.ContentType);
@@ -104,18 +104,18 @@ function getItem(bucketName, itemName, mail, requestType) {
             // console.log("file width", file.getWidth());
             file
               .quality(75)
-              .writeAsync('./images/' + mail + "/" + itemName.slice(0, -3) + 'jpg').then(() => {
-                console.log("file is ready for", mail, " fileName ", itemName.slice(0, -3).toLowerCase() + 'jpg');
+              .writeAsync('./images/' + mail + "/" + splitFileName[0].slice(0, -3) + 'jpg').then(() => {
+                console.log("file is ready for", mail, " fileName ", splitFileName[0].slice(0, -3).toLowerCase() + 'jpg');
                 // console.log("image content retrieved and converted");
-                let tiffToJpg = itemName.slice(0, -3) + 'jpg';
+                let tiffToJpg = splitFileName[0].slice(0, -3) + 'jpg';
                 const filePath = './images/' + mail + "/" + tiffToJpg;
                 console.log("file Path " + filePath);
                 console.log("calling multiPartUpload");
-                multiPartUpload(bucketName, tiffToJpg, filePath);
+                multiPartUpload(bucketName, tiffToJpg + "-" + splitFileName[1], filePath);
               });
           });
         }
-        else if (path.extname(itemName).toLowerCase() == ".png" || path.extname(itemName).toLowerCase() == ".jpg" || path.extname(itemName).toLowerCase() == ".bmp") {
+        else if (path.extname(splitFileName[0]).toLowerCase() == ".png" || path.extname(splitFileName[0]).toLowerCase() == ".jpg" || path.extname(splitFileName[0]).toLowerCase() == ".bmp") {
           console.log("itemName", itemName, "data.ContentType", data.ContentType);
           let prefix = "data:image/jpeg;base64,";
           let base64 = Buffer.from(data.Body).toString('base64');
@@ -155,7 +155,7 @@ var upload = multer({
     },
     key: function (req, file, cb) {
       console.log(file.originalname, file);
-      cb(null, file.originalname);
+      cb(null, file.originalname + "-" + req.query.folderName);
     }
   })
 });
@@ -167,14 +167,13 @@ router.post("",
     console.log("inside post email ", req.body.email);
     bucketName = req.userData.bucketName;
     console.log("bucketName inside post images ", bucketName);
-    console.log("req.file details",req.file.originalname);
     // let postJpegImages = [];
     // let postTiffImages = [];
     // let postFetchedImages = [];
     if (res.statusCode === 200 && req.file) {
       console.log("multer upload response");
-      if(req.file.mimetype == "image/tiff") {
-        getItem(bucketName, req.file.originalname, req.body.email, "POST").then((itemData) => {
+      if (req.file.mimetype == "image/tiff") {
+        getItem(bucketName, req.file.originalname + "-" + req.query.folderName, req.body.email, "POST").then((itemData) => {
           res.status(201).json({
             message: req.file.originalname + " Image uploaded successfully" + invalid,
             uploaded: "Y"
@@ -265,8 +264,9 @@ router.post("",
 
 router.get("", authChecker, (req, res, next) => {
   const url = req.protocol + "://" + req.get("host");
-  const mail = req.query.user;
+  const mail = req.userData.email;
   const userId = req.userData.userId;
+  const folderName = req.query.folderName;
   console.log("inside get request start mail", mail);
   var fetchedImages = [];
   var tiffImages = [];
@@ -283,21 +283,24 @@ router.get("", authChecker, (req, res, next) => {
     targetFiles = bucketFilesList;
     console.log("targetFiles.length:", targetFiles.length);
     targetFiles.forEach(file => {
-      if (path.extname(file).toLowerCase() == ".tif") {
-        tiffImages.push(file.trim());
-        fetchedImages.push(file.trim());
-      }
-      else if (path.extname(file).toLowerCase() == ".jpg") {
-        jpegImages.push(file.trim());
-      }
-      else if (path.extname(file).toLowerCase() == ".png" || path.extname(file).toLowerCase() == ".bmp") {
-        fetchedImages.push(file.trim());
-      } else if (path.extname(file).toLowerCase() == ".xml") {
-        xmlArrayList.push(file);
+      if (file.includes(folderName)) {
+        var splitFileName = file.split("-");
+        if (path.extname(splitFileName[0]).toLowerCase() == ".tif") {
+          tiffImages.push(splitFileName[0].trim());
+          fetchedImages.push(splitFileName[0].trim());
+        }
+        else if (path.extname(splitFileName[0]).toLowerCase() == ".jpg") {
+          jpegImages.push(splitFileName[0].trim());
+        }
+        else if (path.extname(splitFileName[0]).toLowerCase() == ".png" || path.extname(splitFileName[0]).toLowerCase() == ".bmp") {
+          fetchedImages.push(splitFileName[0].trim());
+        } else if (path.extname(splitFileName[0]).toLowerCase() == ".xml") {
+          xmlArrayList.push(splitFileName[0]);
+        }
       }
     });
 
-    if(jpegImages.length > 0) {
+    if (jpegImages.length > 0) {
       jpegImages.map(jpegImage => {
         mismatchCount = 0;
         if (tiffImages.length == 0) {
@@ -356,7 +359,7 @@ router.get("", authChecker, (req, res, next) => {
 });
 
 router.get("/:fileName", authChecker, (req, res, next) => {
-  const mail = req.query.user;
+  const folderName = req.query.folderName;
   let fetchedUser;
   let jpegFile = req.params.fileName;
   console.log("req.params.fileName", jpegFile);
@@ -365,7 +368,7 @@ router.get("/:fileName", authChecker, (req, res, next) => {
   }
   bucketName = req.userData.bucketName;
   console.log("bucketName inside get specific Image ", bucketName);
-  getItem(bucketName, jpegFile, req.query.user, "GET").then((data) => {
+  getItem(bucketName, jpegFile + "-" + folderName, req.query.user, "GET").then((data) => {
     if (data == "The specified key does not exists in bucket") {
       console.log("error while retrieving image:", data);
       res.status(400).json({
@@ -385,20 +388,23 @@ router.get("/:fileName", authChecker, (req, res, next) => {
 router.delete("/:fileName", authChecker, (req, res, next) => {
   const filesToBeDeleted = [];
   filesToBeDeleted.push(req.params.fileName);
-  filesToBeDeleted.push(req.params.fileName.slice(0,-3) + 'xml');
-  if (path.extname(req.params.fileName).toLowerCase() == ".tif") {
-    filesToBeDeleted.push(req.params.fileName.slice(0,-3) + 'jpg');
+  fileName = req.params.fileName.split("-");
+  xmlFileName = fileName[0].slice(0,-3) + 'xml';
+  filesToBeDeleted.push(xmlFileName + "-" + fileName[1]);
+  if (path.extname(fileName[0]).toLowerCase() == ".tif") {
+    tifFileName = fileName[0].slice(0,-3) + 'jpg';
+    filesToBeDeleted.push(tifFileName + "-" + fileName[1]);
   }
-  
+
   bucketName = req.userData.bucketName;
   count = 0;
   for (i = 0; i < filesToBeDeleted.length; i++) {
-    deleteItem(bucketName,filesToBeDeleted[i]).then((response) => {
+    deleteItem(bucketName, filesToBeDeleted[i]).then((response) => {
       count = count + 1;
       if (count == filesToBeDeleted.length) {
         res.status(200).json({
           message: filesToBeDeleted[0] + " deleted successfully",
-          completed : 'Y'
+          completed: 'Y'
         });
       }
     });
@@ -407,14 +413,14 @@ router.delete("/:fileName", authChecker, (req, res, next) => {
 
 function deleteItem(bucketName, itemName) {
   return cos.deleteObject({
-      Bucket: bucketName,
-      Key: itemName
+    Bucket: bucketName,
+    Key: itemName
   }).promise()
-  .then(() =>{
+    .then(() => {
       return `Item: ${itemName} deleted!`;
-  }).catch((e) => {
+    }).catch((e) => {
       return `ERROR: ${e.code} - ${e.message}\n while deleting Item: ${itemName}`;
-  });
+    });
 }
 
 function multiPartUpload(bucketName, itemName, filePath) {

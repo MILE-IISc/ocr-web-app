@@ -64,7 +64,7 @@ export class AuthService {
     const authData: AuthData = { email: email, password: password, type: type};
     this.http.post(this.AUTH_BACKEND_URL + "/signup", authData).subscribe(
       () => {
-        this.router.navigate(["/screen"]);
+        this.router.navigate(["/booksdashboard"]);
       },
       error => {
         this.authStatusListener.next(false);
@@ -97,7 +97,7 @@ export class AuthService {
               now.getTime() + expiresInDuration * 1000
             );
             this.saveAuthData(token, expirationDate, this.userId, this.userName, this.isAdmin, this.bucketName);
-            this.router.navigate(["/screen"]);
+            this.router.navigate(["/booksdashboard"]);
           }
         },
         error => {
@@ -123,7 +123,7 @@ export class AuthService {
       this.isAdmin = authInformation.isAdmin;
       this.setAuthTimer(expiresIn / 1000);
       this.authStatusListener.next(true);
-      this.router.navigate(["/screen"]);
+      this.router.navigate(["/booksdashboard"]);
     }
   }
 

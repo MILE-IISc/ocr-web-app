@@ -1,0 +1,75 @@
+<mat-toolbar class="header" color="primary">
+  <button mat-icon-button data-toggle="tooltip" title="Upload Images" style="margin-right:3px;"
+    [matMenuTriggerFor]="upload">
+    <mat-icon>cloud_upload</mat-icon>
+  </button>
+
+  <mat-menu #upload="matMenu">
+    <input #fileUpload type="file" (click)="fileUpload.value = null" (change)="importFile($event)" style="display:none"
+      accept="image/*">
+    <button mat-icon-button data-toggle="tooltip" (click)="fileUpload.click()" title="Upload Image"
+      style=" margin-right:3px;">
+      <mat-icon>text_snippet</mat-icon>
+    </button>
+    <input #folderUpload type="file" name="fileList" (click)="folderUpload.value = null" webkitdirectory multiple
+      (change)="importFile($event)" style="display:none" />
+    <button mat-icon-button data-toggle="tooltip" title="Upload Directory" style="margin-right:3px;"
+      (click)="folderUpload.click()">
+      <mat-icon>folder_open</mat-icon>
+    </button>
+  </mat-menu>
+
+  <button mat-icon-button data-toggle="tooltip" title="Progress Info" (click)="openProgressDialog()">
+    <mat-icon>donut_large</mat-icon>
+  </button>
+
+  <span class="example-spacer1"></span>
+
+  <h5>Books</h5>
+
+  <span class="example-spacer1"></span>
+  <a mat-icon-button data-toggle="tooltip" title="Help" href="/help.html" target="_blank">
+    <mat-icon>help_outline</mat-icon>
+  </a>
+
+  <button mat-icon-button [matMenuTriggerFor]="user">
+    <mat-icon>account_circle</mat-icon>
+  </button>
+
+  <mat-menu #user="matMenu">
+    <div mat-menu-item *ngIf="userIsAuthenticated">
+      <h5> {{ userName }}</h5>
+    </div>
+    <br>
+    <div mat-menu-item *ngIf="userIsAuthenticated">
+      <button mat-stroked-button (click)="onLogout()">
+        <h5>Logout</h5>
+      </button>
+    </div>
+  </mat-menu>
+
+</mat-toolbar>
+
+<div class="container height-max" style="width: 100%;">
+  <mat-toolbar class="bookList">
+    <span style="padding-left: 5px;padding-top:25px; color:#34568B; font-size: 30px">{{ bookMessage }}</span>
+  </mat-toolbar>
+  <br>
+  <div class="btn-group bookList" *ngFor="let book of books" (click)="navtoscreen($event)"
+    (contextmenu)="openMenu($event)">
+
+    <button height="100px" width="100px">
+      <mat-spinner diameter="40" style="top:50%;left:50%;z-index:2;" *ngIf="isLoading"></mat-spinner>
+      <img *ngIf="!isLoading" height="300px" width="300px" [src]="book.dataUrl" id="book" value={{book.folderName}}>
+    </button>
+    <p id="book" style="color:#023485;position :relative;padding-left:0px;font-size:20px;">{{book.folderName}}</p>
+  </div>
+</div>
+
+<div id="menu">
+  <div class="dropdown-content" (clickOutside)="closeMenu()">
+    <a (click)=" deleteBook()">Delete</a>
+    <a> Rename</a>
+    <a (click)=" downloadXml2()"> Download Xml</a>
+  </div>
+</div>

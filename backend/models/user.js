@@ -6,7 +6,8 @@ const userSchema = mongoose.Schema({
   password: { type: String, required: true },
   type: { type: String, required: true },
   filesListLoaded: { type: String, required: false },
-  bucketName: { type: String, required: true }
+  bucketName: { type: String, required: true },
+  folderName:[{ type:String, required: true}]
 });
 
 userSchema.plugin(uniqueValidator);

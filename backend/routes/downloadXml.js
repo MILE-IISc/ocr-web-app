@@ -89,7 +89,8 @@ router.get("", authChecker, (req, res, next) => {
     console.log(`Got list of objects inside the bucket: ${bucketName}. Count = ${bucketFilesList.length}`);
     let xmlFileNames = [];
     bucketFilesList.forEach(fileName => {
-      if (path.extname(fileName).toLowerCase() == ".xml") {
+      let xmlFileName = fileName.split("-");
+      if (path.extname(xmlFileName[0]).toLowerCase() == ".xml") {
         xmlFileNames.push(fileName);
       }
     });
