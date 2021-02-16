@@ -1,0 +1,225 @@
+#menu {
+    position: fixed;
+    display: none; 
+    width: fit-content; 
+    height: fit-content; 
+    background-color: none;
+    z-index: 5;
+    cursor: pointer;
+  }
+  
+  ::ng-deep .menu button {
+    background-color: #4CAF50;
+    border: 1px solid green; 
+    color: white; 
+    padding: 0px !important;
+    cursor: pointer; 
+    display: inline-block;
+    outline: none;
+    margin: 0px !important;
+    border-width: solid;
+  }
+  
+  button[disabled] {
+    filter: blur(1px);
+    cursor: not-allowed;
+  }
+  
+  input.playLoop {
+    width: 30px; 
+    height: 30px;
+    vertical-align: middle;
+  }
+  
+  /* Split Screen Related */
+  
+  ::ng-deep .as-split-gutter-icon {
+      background-image: none !important;
+      background-color: teal;
+      transition: opacity 0.3s;
+      opacity: 0.3;
+      width: 3px !important;
+  }
+  
+  .height-max {
+      height: calc(100vh);
+  }
+  
+  /* Wave Listing Related */
+  
+  ::ng-deep .btn-group button {
+      color: white; 
+      padding: 10px 30px;
+      cursor: pointer; 
+      width: 100%; 
+      display: block;
+      word-break: break-all;
+      padding-right: 60px;
+    }
+  
+  .btn-group {
+      padding-bottom: 5px;
+  }
+  
+  
+  /* Wave Viewer Component Related */
+  ::ng-deep .textgrid-segment {
+      color: black;
+      border-right: 1px solid;
+      height: 50px;
+      text-align: left;
+      overflow: hidden;
+      position: relative;
+      vertical-align: middle;
+    text-overflow: ellipsis;
+    font-size: 32px;
+  }
+  
+  .gap{
+    height:50px;
+  }
+  
+  .heading-border{
+    border-left: 1px solid;
+  }
+  
+  .right-border{
+    border-right:1px solid;
+  }
+  
+  ::ng-deep #textgrid-overflow {
+    position: relative;
+    left: 0px;
+    top: 0px;
+    width: initial;
+    overflow: hidden;
+  }
+  
+  ::ng-deep .textgrid-overflow  {
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: 32px;
+  }
+  
+  
+  ::ng-deep #textgrid-resize { 
+    width: inherit;
+  }
+  
+  #textgrid-outside {
+    display: block;
+    position: relative;
+    padding-left: 100px;
+    padding-right: 40px;
+    padding-top: 20px;
+  }
+  
+  ::ng-deep .textgrid-tier {
+    position: relative;
+    overflow: hidden;
+    text-align: left;
+  }
+  
+  ::ng-deep .textgrid-tier ::ng-deep .textgrid-segment {
+    display: inline-block;
+  }
+  
+  #waveform{
+    padding-left: 100px;
+    padding-right: 40px;
+  }
+  
+  #waveform-timeline{
+    padding-left: 100px;
+    padding-right: 40px;
+  }
+  
+  
+  /*----Angular-----*/
+  
+  /* button {
+      margin-left: 16px;
+      margin-top: 16px;
+  } */
+  
+  /*---------General.CSS-----------*/
+  
+  .serif{
+      font-family: serif;
+  }
+  
+  .large-font{
+      font-size: 22px;
+  }
+  .mat-toolbar {
+    min-height: 30px !important;
+    height: 30px !important;
+  }
+  .example-spacer1 {
+    flex: 3 auto;
+  }
+  #menu {
+    position: absolute;
+    display: none;
+    width: fit-content;
+    height: fit-content;
+    background-color: none;
+    z-index: 500;
+    cursor: pointer;
+  }
+  
+  .dropdown-submenu:hover>.dropdown-menu {
+    display: block;
+  }
+  
+  .filler {
+    flex: 1 auto;
+  }
+  
+  .dropdown-submenu>a:after {
+    display: block;
+    content: " ";
+    float: right;
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-style: solid;
+    border-width: 5px 0 5px 5px;
+    border-left-color: #ccc;
+    margin-top: 5px;
+    margin-right: -10px;
+  }
+  
+  .dropdown-content {
+    /* display: none; */
+    position: relative;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    padding: 12px 16px;
+    /* z-index: 1;  */
+  }
+  
+  .sideBar:hover {
+    font-size: large;
+  }
+  
+  .dropdown-content a {
+    color: black;
+    /* padding: 12px 16px; */
+    text-decoration: none;
+    display: block;
+    /* height: 40px; */
+    padding-bottom: 0px;
+    padding-top: 0px
+  }
+  
+  .dropdown-content a:hover {
+    background-color: #f1f1f1
+  }
+  
+  .dropdown-submenu:hover>.dropdown-menu {
+    display: block;
+  }
+  
+  

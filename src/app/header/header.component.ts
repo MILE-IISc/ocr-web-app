@@ -83,21 +83,21 @@ export class HeaderComponent implements OnInit, OnDestroy {
   selectedImage: string;
   anotherTryVisible: boolean;
 
-  importFile(event) {
-    this.anotherTryVisible = true;
-    var fileRead = event.target.files;
-    var filesCount = event.target.files.length;
-    if(filesCount > 0)
-      {
-        this.nextImage = false;
-        this.headerService.setMultipleImages(this.nextImage);
-        this.isLoading = true;
-        this.headerService. setloadingvalue(this.isLoading);
-      }
-    if (event.target.files && fileRead) {
-      this.imageService.addImage(fileRead);
-    }
-  }
+  // importFile(event) {
+  //   this.anotherTryVisible = true;
+  //   var fileRead = event.target.files;
+  //   var filesCount = event.target.files.length;
+  //   if(filesCount > 0)
+  //     {
+  //       this.nextImage = false;
+  //       this.headerService.setMultipleImages(this.nextImage);
+  //       this.isLoading = true;
+  //       this.headerService. setloadingvalue(this.isLoading);
+  //     }
+  //   if (event.target.files && fileRead) {
+  //     this.imageService.addImage(fileRead);
+  //   }
+  // }
 
 
 

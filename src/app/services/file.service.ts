@@ -1,19 +1,22 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { AuthService } from '../auth/auth.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class FileService {
   XML_BACKEND_URL;
   DOWNLOAD_XML_BACKEND_URL;
-  constructor(private httpClient: HttpClient, private authService: AuthService) {
+  constructor(private httpClient: HttpClient, private authService: AuthService,private route: ActivatedRoute) {
     this.XML_BACKEND_URL = this.authService.BACKEND_URL + "/api/xml/";
     this.DOWNLOAD_XML_BACKEND_URL = this.authService.BACKEND_URL + "/api/downloadXml/";
   }
 
   downloadFile(fileName: any) {
+    var bookName = this.route.snapshot.queryParams['data'];
+    var xmlFileName = fileName + "-" + bookName;
     console.log("fileName in download XML", fileName);
-    return this.httpClient.get<{ message: string; xmlData: any }>(this.XML_BACKEND_URL + fileName).toPromise();
+    return this.httpClient.get<{ message: string; xmlData: any }>(this.XML_BACKEND_URL + xmlFileName).toPromise();
   }
 
   downloadZipFile() {

@@ -75,6 +75,7 @@ import { confirmationDialog } from './screen/progress-dialog/progress-dialog.com
 // import { MatButtonModule, MatDialogModule, MatDividerModule } from '@angular/material';
 import { ModalContentComponent } from './footer/modal-content.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { BooksinfoComponent } from './booksinfo/booksinfo.component';
 
 
 @NgModule({
@@ -91,7 +92,8 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     ScreenComponentConfirmDialog,
     ProgressDialogComponent,
     confirmationDialog,
-    ModalContentComponent
+    ModalContentComponent,
+    BooksinfoComponent
   ],
   exports: [
     MatIconModule

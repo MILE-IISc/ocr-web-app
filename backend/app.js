@@ -7,6 +7,7 @@ const imageRoutes = require("./routes/image");
 const userRoutes = require("./routes/user");
 const xmlRoutes = require("./routes/xml");
 const downloadXml = require("./routes/downloadXml");
+const folderRoutes = require("./routes/folder");
 
 const app = express();
 mongoose
@@ -45,6 +46,7 @@ app.use("/api/image", imageRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/xml", xmlRoutes);
 app.use("/api/downloadXml", downloadXml);
+app.use("/api/folder", folderRoutes);
 app.use((req, res, next) => {
   res.sendFile(path.join(__dirname, "OCR-WEB-UI", "index.html"));
 });
