@@ -10,6 +10,12 @@ import { Images } from '../shared/images.model';
 import { XmlModel } from '../shared/xml-model';
 import { BlockModel} from '../shared/block-model';
 import { AuthService } from '../auth/auth.service';
+import {  MatDialogModule } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDividerModule } from '@angular/material/divider'
+import { ModalContentComponent } from './modal-content.component';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-footer',
@@ -47,9 +53,19 @@ export class FooterComponent implements OnInit {
   JsonObj;
   isRunningOcr = false;
 
-  constructor(private headerService: HeaderService, private imageService: ImageService,
-    private renderer: Renderer2,private authService:AuthService) { }
 
+  constructor(private headerService: HeaderService, private imageService: ImageService,
+    private renderer: Renderer2,private authService:AuthService,public dialog: MatDialog) { }
+
+    async openDialog() {
+      this.dialog.open(ModalContentComponent, {
+        width: '700px',
+        height: '1000px',
+  
+      })
+  
+
+}
   ngOnInit(): void {
     console.log("this.headerService.getpercentagevary()",this.headerService.getpercentagevary());
     this.percentage = this.headerService.getpercentagevary();

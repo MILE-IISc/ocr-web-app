@@ -69,8 +69,8 @@
   <button mat-icon-button data-toggle="tooltip" title="Progress Info" (click)="openProgressDialog()">
     <mat-icon>donut_large</mat-icon>
   </button>
-
-  <span class="example-spacer2"></span>
+ 
+<span class="example-spacer2"></span>
 
   <div *ngIf="!isLoading">
     <h5>{{ fileName }}</h5>
@@ -132,8 +132,9 @@
     </as-split>
   </as-split-area>
 
-  <as-split-area (ctrls)="showTooltip()" class="split2" [size]=size3 style="overflow-x: auto; overflow-y: auto;"
+  <as-split-area  class="split2" [size]=size3 style="overflow-x: auto; overflow-y: auto;"
     (scroll)="updatescroll(scrollOne, scrollTwo)" #scrollTwo>
+    <!-- (ctrls)="showTooltip()" -->
     <mat-spinner *ngIf="isDownloading"></mat-spinner>
     <div id="image" class="textElementsDiv" [style.position]="'relative'" *ngIf="!isDownloading">
       <span *ngFor="let text of words;let i = index" class="textSpanDiv">
@@ -142,7 +143,7 @@
           [style.font-size.px]="text.txtheight*5/8*(this.percentage/100)"
           [style.top.px]="text.lineRowStart*(this.percentage/100)"
           [style.margin-inline-start.px]="text.lineColStart*(this.percentage/100)"
-          [style.height.px]="text.txtheight*(this.percentage/100)">
+          [style.height.px]="text.txtheight*(this.percentage/100)" (keydown.enter)="onKeypress($event)">
       </span>
       <mat-spinner style="top:30%;left:50%;z-index:2;" *ngIf="isRunningOcr"></mat-spinner>
     </div>

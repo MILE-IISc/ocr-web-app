@@ -1,0 +1,31 @@
+<h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>
+  <mat-toolbar class="dialogbar" color="primary">
+    <img width="20" alt="Angular Logo" src="assets/images/mile_logo.png" />
+    <span class="gap"></span>
+    <h3>Word Correct </h3>
+    <span class="example-spacer1"></span>
+    <button mat-icon-button (click)="closeDialog()">
+      <mat-icon>clear</mat-icon>
+    </button>
+  </mat-toolbar>
+</h1>
+
+<!-- model Body -->
+<div class="WordModelBody">
+  <div class="buttons">
+    <button mat-raised-button data-toggle="tooltip" title="previous word" (click)="previousWordCorrect()">
+      <mat-icon>arrow_left</mat-icon>
+    </button>
+    <button mat-raised-button data-toggle="tooltip" title="next Word" id="nextWord" (click)="nextWordCorrect()">
+      <mat-icon>arrow_right</mat-icon>
+    </button>
+  </div>
+  <div class="WordText">
+    <p>Word Text</p>
+    <textarea rows="5" cols="10" class="txtWord" id="{{lineNumber}}" value="{{unicode}}" (keydown.enter)="OnEnter($event)"></textarea>
+  </div>
+  <div class="WordImg">
+    <p>Word Image</p>
+    <img id="ImgWord" width="500" height="700" />
+  </div>
+</div>

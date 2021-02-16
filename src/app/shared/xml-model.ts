@@ -20,3 +20,21 @@ export class retain{
   public static xmlname;
   public static imgname;
 }
+export class WordModel{
+  constructor(
+    public unicode: string,
+    public wordRowStart: number,
+    public wordRowEnd: number,
+    public wordColStart: number,
+    public wordColEnd:number,
+    public wordwidth:number,
+    public wordheight:number,
+    public wordNumber:number,
+
+
+  
+  ){}
+  public static WordArray = [];
+ 
+
+}

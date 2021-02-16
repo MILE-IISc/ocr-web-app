@@ -106,7 +106,7 @@ export class ScreenComponent implements OnInit {
     $("#OpenBar").show();
     $("#CloseBar").hide();
   }
-
+ 
   constructor(private headerService: HeaderService, private imageService: ImageService,
     public authService: AuthService, private fileService: FileService,public dialog: MatDialog) { }
 
@@ -143,10 +143,16 @@ export class ScreenComponent implements OnInit {
     });
     
   }
+  
+  onKeypress(event) {    
+    console.log("enter")
+    this.correctionUpdate();
+    console.log("func called")
+  }
 
   ngOnInit(): void {
     $("#CloseBar").hide();
-    // authentication related
+     // authentication related
     this.userIsAuthenticated = this.authService.getIsAuth();
     this.userName = this.authService.getUserName();
     this.isAdmin = this.authService.getIsAdmin();
@@ -599,12 +605,6 @@ export class ScreenComponent implements OnInit {
   blockupdate() {
     this.imageService.blocknumberupdate()
   }
-
-  showTooltip() {
-    // console.log("inside show tol tip");
-    this.correctionUpdate();
-  }
-
   xmlonSave() {
     // console.log("inside xmlOnSave");
     this.onSave();

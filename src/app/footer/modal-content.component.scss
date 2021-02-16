@@ -1,0 +1,55 @@
+button {
+    width: 90px;
+    height: 36px;
+    font-weight: 100;
+  }
+  
+  .buttons {
+    grid-template-columns: auto auto ;
+    display: grid;
+    font-size: 14px;
+    color: #fff;
+    justify-content: center;
+    margin: 10px;
+    .save {
+      background-color: #E37B00;
+      margin-left: 2px;
+    }
+    .close {
+      background-color: #747578;
+      margin-right: 2px
+    }
+  }
+  
+  ::ng-deep.mat-dialog-container {
+    resize: both; 
+    overflow: auto;
+    background: #fff;
+  }
+  
+  
+  [mat-dialog-title] {
+    margin: -24px -24px 0px -24px !important;
+    padding: 10px 24px;
+    color: #fff;
+    cursor: move;
+    text-align: center;
+  }
+
+  .WordModelBody{
+   position: absolute;
+   border-style: inset;
+   height: fit-content;
+   width: fit-content;
+} 
+
+ .WordText{
+  // display:inline-block;
+  float:left;
+ } 
+  
+ .WordImg{
+   display: inline-block;
+  //  position: relative;
+  //  overflow: hidden;
+ }

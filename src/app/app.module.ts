@@ -9,7 +9,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { A11yModule } from '@angular/cdk/a11y';
 import { ClipboardModule } from '@angular/cdk/clipboard';
-import { DragDropModule } from '@angular/cdk/drag-drop';
+// import { DragDropModule } from '@angular/cdk/drag-drop';
 import { PortalModule } from '@angular/cdk/portal';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CdkStepperModule } from '@angular/cdk/stepper';
@@ -66,13 +66,15 @@ import { HTTP_INTERCEPTORS } from "@angular/common/http";
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { FooterComponent } from './footer/footer.component';
 import { ClickOutsideDirective } from './shared/click-outside.directive';
-import { CtrlsDetectorDirective } from './shared/CtrlS.directive';
 import { SaveDetectorDirective } from './shared/savedirective';
 import { ScreenComponentDialog } from './screen/screen.component';
 import { ScreenComponentDeleteImage } from'./screen/screen.component';
 import { ScreenComponentConfirmDialog } from'./screen/screen.component';
 import { ProgressDialogComponent } from './screen/progress-dialog/progress-dialog.component';
 import { confirmationDialog } from './screen/progress-dialog/progress-dialog.component';
+// import { MatButtonModule, MatDialogModule, MatDividerModule } from '@angular/material';
+import { ModalContentComponent } from './footer/modal-content.component';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 
 @NgModule({
@@ -82,19 +84,23 @@ import { confirmationDialog } from './screen/progress-dialog/progress-dialog.com
     HeaderComponent,
     ScreenComponent,
     ClickOutsideDirective,
-    CtrlsDetectorDirective,
     SaveDetectorDirective,
     FooterComponent,
     ScreenComponentDialog,
     ScreenComponentDeleteImage,
     ScreenComponentConfirmDialog,
     ProgressDialogComponent,
-    confirmationDialog
+    confirmationDialog,
+    ModalContentComponent
   ],
   exports: [
     MatIconModule
   ],
   imports: [
+    MatButtonModule,
+     MatDialogModule, 
+     MatDividerModule,
+  
     A11yModule,
     ClipboardModule,
     CdkStepperModule,
