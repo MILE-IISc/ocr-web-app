@@ -76,6 +76,7 @@ import { confirmationDialog } from './screen/progress-dialog/progress-dialog.com
 import { ModalContentComponent } from './footer/modal-content.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { BooksinfoComponent } from './booksinfo/booksinfo.component';
+import { PouchService } from '../app/services/pouch.service';
 
 
 @NgModule({
@@ -100,9 +101,9 @@ import { BooksinfoComponent } from './booksinfo/booksinfo.component';
   ],
   imports: [
     MatButtonModule,
-     MatDialogModule, 
+     MatDialogModule,
      MatDividerModule,
-  
+
     A11yModule,
     ClipboardModule,
     CdkStepperModule,
@@ -165,7 +166,7 @@ import { BooksinfoComponent } from './booksinfo/booksinfo.component';
     ImageService,
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
-
+    PouchService
   ],
   bootstrap: [AppComponent],
   entryComponents: [ScreenComponent, ScreenComponentDialog, ScreenComponentDeleteImage, ScreenComponentConfirmDialog, ProgressDialogComponent],

@@ -5,60 +5,138 @@ import { Subject } from "rxjs";
 import { environment } from "../../environments/environment";
 import { AuthService } from "../auth/auth.service";
 import { Book } from "../shared/images.model";
+import { PouchService } from "./pouch.service";
 
 
 @Injectable({ providedIn: "root" })
 export class BookService {
 
-    FOLDER_BACKEND_URL;
-    private books: Book[] = [];
-    dataUrlChange = new EventEmitter<any>();
-    private booksUpdated = new Subject<{ books: Book[] }>();
-    isLoading = false;
-    isLoadingChange = new EventEmitter<any>();
+  FOLDER_BACKEND_URL;
+  private books: any = [];
+  dataUrlChange = new EventEmitter<any>();
+  private booksUpdated = new Subject<{ books }>();
+  isLoading = false;
+  isLoadingChange = new EventEmitter<any>();
 
-    constructor(private http: HttpClient, private router: Router, private authService: AuthService,
-    ) {
-        this.FOLDER_BACKEND_URL = this.authService.BACKEND_URL + "/api/folder/";
+  // pouchDb & couchDb related declaration
+  data;
+
+  constructor(private http: HttpClient, private router: Router, private authService: AuthService, private pouchService: PouchService) {
+    this.FOLDER_BACKEND_URL = this.authService.BACKEND_URL + "/api/folder/";
+  }
+
+  async handleChange(change) {
+
+    let changedDoc = null;
+    let changedIndex = null;
+    console.log("id of change on handleChange of bookService", change.id);
+    console.log("doc of change on handleChange of bookService", change.doc);
+
+    this.books.forEach((book: any, index) => {
+      if (book._id === change.id) {
+        changedDoc = book;
+        changedIndex = index;
+      }
+    });
+
+    //A document was deleted
+    if (change.deleted) {
+      this.books.splice(changedIndex, 1);
+    }
+    else {
+      //A document was updated
+      if (changedDoc) {
+        this.books[changedIndex] = change.doc;
+      }
+
+      //A document was added
+      else {
+        this.books.push(change.doc);
+      }
+    }
+    this.books = await this.sortBookList(this.books);
+    this.booksUpdated.next({
+      books: [...this.books]
+    });
+
+  }
+
+  async sortBookList(books) {
+    return new Promise(async (resolve, reject) => {
+      await books.sort((a, b) => {
+        var x = a.bookName.toLowerCase();
+        var y = b.bookName.toLowerCase();
+        if (x < y) { return -1; }
+        if (x > y) { return 1; }
+        return 0;
+      });
+      resolve(books);
+    });
+  }
+
+  async getBooks() {
+    // localUserDb Instance related
+    let userDbDetails = await this.authService.getUserDbDetails();
+    let localUserDbInstance = await this.pouchService.createPouchDbInstance(userDbDetails.userDb);
+    await this.pouchService.checkDbStatus(localUserDbInstance).then(status => {
+      console.log("status of localDb of", userDbDetails.userDb, "is: ", status);
+    });
+
+    await localUserDbInstance.allDocs({
+      include_docs: true
+    }).then((result) => {
+      this.books = [];
+      console.log("books Info from db", result.rows.length);
+      let docs = result.rows.map((row) => {
+        this.books.push(row.doc);
+      });
+    }).catch((error) => {
+      console.log(error);
+    });
+
+    // Initial checking of bookDetails in Memory
+    if (this.books.length > 0) {
+      console.log("books Length", this.books.length);
+      console.log("sending Initial bookDetails from Memory as its length is greater than 0");
+      this.books = await this.sortBookList(this.books);
+      this.booksUpdated.next({
+        books: [...this.books]
+      });
+    }
+    else {
+      console.log("sending empty bookDetails from Memory as its length is not greater than 0");
+      this.booksUpdated.next({
+        books: []
+      });
     }
 
-    getBooks() {
-        var user = this.authService.userName;
-        const queryParams = `?user=${user}`;
-        this.http
-            .get<{ message: string; book: any }>(
-                this.FOLDER_BACKEND_URL + queryParams
-            )
-            .subscribe(responseData => {
-                const bookListLength = responseData.book.length;
-                console.log("responseData.book.length "+responseData.book.length);
-                if (bookListLength > 0) {
-                    this.books = responseData.book;
-                    this.booksUpdated.next({
-                        books: [...this.books]
-                    });
-                    console.log("book length in book service "+this.books.length)
-                    for (let i = 0; i < this.books.length; i++) {
-                        this.isLoadingChange.emit(true);
-                        this.http.get<{ message: string; json: any; fileList: any }>(this.FOLDER_BACKEND_URL + this.books[i].folderName + queryParams).subscribe(responseData => {
-                            this.books[i].dataUrl = responseData.json;
-                            this.books[i].fileList = responseData.fileList;
-                            this.isLoadingChange.emit(false);
-                        });
-                    }
-                }
-                else {
-                    this.books = responseData.book;
-                    this.booksUpdated.next({
-                        books: []
-                    });
-                }
+    // remoteUserDb Instance related
+    let remoteUserDbInstance = await this.pouchService.createRemoteDbInstance(userDbDetails.userDb, userDbDetails.userDbKey, userDbDetails.userDbPwd);
+    await this.pouchService.checkDbStatus(remoteUserDbInstance).then(status => {
+      console.log("status of remoteDb of", userDbDetails.userDb, "is: ", status);
+    });
 
-            });
-    }
+    // Based on localUserDb Instance changes, filling the memory
+    let options = {
+      live: true,
+      retry: true,
+      continuous: true
+    };
 
-    getBookUpdateListener() {
-        return this.booksUpdated.asObservable();
+    localUserDbInstance.changes({
+      live: true, since: 'now', include_docs: true
+    }).on('change', (change) => {
+      console.log("calling handleChanges on localDbInstance change event");
+      this.handleChange(change);
+    }).on('error', function (err) {
+      // handle error
+      console.log("info on changes error", err);
+    });
+    localUserDbInstance.sync(remoteUserDbInstance, options);
+  }
 
-    }
+  getBookUpdateListener() {
+    return this.booksUpdated.asObservable();
+
+  }
 }

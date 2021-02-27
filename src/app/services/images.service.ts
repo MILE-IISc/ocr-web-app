@@ -17,6 +17,8 @@ import * as xml2js from 'xml2js';
 import { MatDialog } from '@angular/material/dialog';
 import { ProgressDialogComponent } from '../screen/progress-dialog/progress-dialog.component';
 import { BookService } from './book.service';
+import { PouchService } from './pouch.service';
+import PouchDB from 'node_modules/pouchdb';
 
 
 declare var Tiff: any;
@@ -37,7 +39,7 @@ export class ImageService implements OnInit {
   }
 
   images: Array<Images> = [];
-  localImages: Array<Images> = [];
+  localImages: Array<Images> = [];// This array will be used for storing imagesInfo of corresponding book from pouchDb
   imgFileCount = 0;
   private imagesUpdated = new Subject<{ localImages: Images[] }>();
 
@@ -98,17 +100,17 @@ export class ImageService implements OnInit {
   folderName = "";
   bookName = "";
 
-  constructor(private route: ActivatedRoute, rendererFactory: RendererFactory2, private http: HttpClient, private router: Router, private authService: AuthService, private headerService: HeaderService, @Inject(DOCUMENT) private document: Document, public dialog: MatDialog, private bookService: BookService) {
+  // pouchDb related declarations
+  uploadLocalBookDbInstance;
+  uploadRemoteBookDbInstance;
+
+  constructor(private route: ActivatedRoute, rendererFactory: RendererFactory2, private http: HttpClient, private router: Router, private authService: AuthService, private headerService: HeaderService, @Inject(DOCUMENT) private document: Document, public dialog: MatDialog, private bookService: BookService, private pouchService: PouchService) {
     this.IMAGE_BACKEND_URL = this.authService.BACKEND_URL + "/api/image/";
     this.XML_BACKEND_URL = this.authService.BACKEND_URL + "/api/xml/";
     this.FOLDER_BACKEND_URL = this.authService.BACKEND_URL + "/api/folder/";
     console.log("IMAGE_BACKEND_URL " + this.IMAGE_BACKEND_URL);
     console.log("XML_BACKEND_URL " + this.XML_BACKEND_URL);
     this.renderer = rendererFactory.createRenderer(null, null);
-  }
-
-  getLocalImages() {
-    return this.localImages.slice();
   }
 
   getCurrentImageName() {
@@ -131,20 +133,20 @@ export class ImageService implements OnInit {
     this.ResumeUploadEvent.emit();
   }
 
-  getbookName(){
+  getbookName() {
     return this.bookName;
   }
 
-  setBookName(bookName){
+  setBookName(bookName) {
     this.bookName = bookName;
   }
 
   async getServerImages() {
-    var bookName = this.route.snapshot.queryParams['data']
+    var bookName = this.route.snapshot.queryParams['data'];
     var folderName = bookName;
     const queryParams = `?folderName=${folderName}`;
 
-    console.log("enter get server from screen")
+    console.log("enter get server from screen");
     let promise = new Promise((resolve, reject) => {
       this.http
         .get<{ message: string; images: [] }>(
@@ -342,34 +344,96 @@ export class ImageService implements OnInit {
     return this.uploadMessage;
   }
 
+  getLocalImages() {
+    return this.localImages.slice();
+  }
+
   async addImage(filesToBeUploaded, folderName) {
+    let sortedFlesList = [];
     this.folderName = folderName;
+    let bookDbName = "";
     this.progressType = 'UPLOAD_IMAGE';
-    const queryParams = `?folderName=${folderName}`;
-    this.updateFolderNameinDB(folderName);
-    if (filesToBeUploaded.length > 0) {
-      
+    let queryParams = "";
+
+    await this.updateFolderNameinDB(folderName).then(async (response: any) => {
+      bookDbName = response.bookDbName;
+      queryParams = `?bookDbName=${bookDbName}`;
+      let userDbDetails = this.authService.getUserDbDetails();
+      console.log("response on bookInfoUpdate bookDbName", bookDbName, "bookDbKey", response.bookDbKey);
+      console.log("userDbDetails from AuthService userDbKey", userDbDetails.userDbKey, "userDbPwd", userDbDetails.userDbPwd);
+
+      // local BookDb Instance related
+      this.uploadLocalBookDbInstance = await this.pouchService.createPouchDbInstance(bookDbName);
+      await this.pouchService.checkDbStatus(this.uploadLocalBookDbInstance).then(status => {
+        console.log("status of localDb of", bookDbName, "is: ", status);
+      });
+
+      // remote BookDb Instance related
+      this.uploadRemoteBookDbInstance = await this.pouchService.createRemoteDbInstance(bookDbName, userDbDetails.userDbKey, userDbDetails.userDbPwd);
+      await this.pouchService.checkDbStatus(this.uploadRemoteBookDbInstance).then(status => {
+        console.log("status of remoteDb of", bookDbName, "is: ", status);
+      });
+
+      let options = {
+        live: true,
+        retry: true,
+        continuous: true
+      };
+
+      this.uploadLocalBookDbInstance.changes({
+        live: true, since: 'now', include_docs: true
+      }).on('change', (change) => {
+        console.log("calling handleChanges on localDbInstance change event");
+        // this.handleChange(change);
+      }).on('error', function (err) {
+        // handle error
+        console.log("info on changes error", err);
+      });
+      this.uploadLocalBookDbInstance.sync(this.uploadRemoteBookDbInstance, options);
+      console.log("localBookDb Instance sync executed");
+    });
+
+    for (let i = 0; i < filesToBeUploaded.length; i++) {
+      sortedFlesList.push(filesToBeUploaded[i]);
+    }
+    console.log("sortedFlesList", sortedFlesList);
+    console.log("sortedFlesList.length", sortedFlesList.length);
+    console.log("sortedFlesList[0]", sortedFlesList[0]);
+
+    console.log("sorting started");
+    sortedFlesList.sort((a, b) => {
+      var x = a.name.toLowerCase();
+      var y = b.name.toLowerCase();
+      if (x < y) { return -1; }
+      if (x > y) { return 1; }
+      return 0;
+    });
+    console.log("sorting completed");
+    console.log("sortedFlesList[0] after sorting", sortedFlesList[0]);
+    // return;
+    if (sortedFlesList.length > 0) {
+      console.log("after if condition of sortedFlesList.length > 0");
       var uploadImage = (x) => {
         if (x == 0) {
           this.progressInfos.splice(0, this.progressInfos.length);
           this.uploadMessage = "";
           this.uploadMessageChange.emit(this.uploadMessage);
           this.openProgressDialog();
-          for (let i = 0; i < filesToBeUploaded.length; i++) {
+          for (let i = 0; i < sortedFlesList.length; i++) {
             var status = 'Pending';
-            const progress = new ProgressInfo(filesToBeUploaded[i].name, status);
+            const progress = new ProgressInfo(sortedFlesList[i].name, status);
             this.progressInfos.push(progress);
             this.progressInfoChange.emit(this.progressInfos);
           }
         }
-        if (x < filesToBeUploaded.length) {
-          let fileName = filesToBeUploaded[x].name;
+        if (x < sortedFlesList.length) {
+          let fileName = sortedFlesList[x].name;
           this.progressInfos[x].value = 'Uploading';
           this.progressInfoChange.emit(this.progressInfos.slice());
 
           let imageData = new FormData();
           imageData.append("email", this.authService.userName);
-          var file = filesToBeUploaded[x];
+          var file = sortedFlesList[x];
           console.log("file name===" + file.name);
           imageData.append("image", file);
           this.http.post<{ message: string, uploaded: string }>(this.IMAGE_BACKEND_URL + queryParams, imageData).subscribe(async response => {
@@ -382,11 +446,14 @@ export class ImageService implements OnInit {
             }
             this.progressInfoChange.emit(this.progressInfos.slice());
             this.uploadImageLastIndex = x;
-            if (this.uploadImageLastIndex == (filesToBeUploaded.length - 1)) {
+            if (this.uploadImageLastIndex == (sortedFlesList.length - 1)) {
               this.uploadMessage = "Images Uploaded Successfully !!"
               this.uploadMessageChange.emit(this.uploadMessage);
               var btn = document.getElementById("pauseButton");
               btn.innerHTML = 'Ok';
+              this.updateBookThumbnail(bookDbName);
+              this.uploadLocalBookDbInstance.close();
+              this.uploadRemoteBookDbInstance.close();
               this.bookService.getBooks();
             }
             if (this.uploadImageFlag == true) {
@@ -397,16 +464,17 @@ export class ImageService implements OnInit {
       }
 
       if (this.uploadImageFlag == false) {
-        await this.getServerImages();
-        console.log("server file count before post" + this.localImages.length);
-        console.log("filesToBeUploaded length", filesToBeUploaded.length);
-        if (this.localImages.length == 0) {
-          this.loadLocalImages(filesToBeUploaded, "NEW");
-        }
-        else {
-          this.loadLocalImages(filesToBeUploaded, "APPEND");
-        }
+        // await this.getServerImages();
+        // console.log("server file count before post" + this.localImages.length);
+        // console.log("sortedFlesList length", sortedFlesList.length);
+        // if (this.localImages.length == 0) {
+        //   this.loadLocalImages(sortedFlesList, "NEW");
+        // }
+        // else {
+        //   this.loadLocalImages(sortedFlesList, "APPEND");
+        // }
         this.uploadImageFlag = true;
+        console.log("invoking uploadImage(0) ");
         uploadImage(0);
       } else {
         uploadImage(this.uploadImageLastIndex);
@@ -415,16 +483,75 @@ export class ImageService implements OnInit {
 
   }
 
-  updateFolderNameinDB(folderName) {
-    let jsonData: any;
-    jsonData = {
-      user: this.authService.userName,
-      folderName: folderName
-    };
-    this.authService.userName
-    this.http.post<{ message: string, uploaded: string }>(this.FOLDER_BACKEND_URL, jsonData).subscribe(async response => {
-      console.log("response message after folder updated " + response.message);
+  async updateBookThumbnail(bookDbName: string) {
+    // localUserDb Instance related
+    let userDbDetails = await this.authService.getUserDbDetails();
+    let bookImages: any = [];
+    let tempLocalUserDbInstance = await this.pouchService.createPouchDbInstance(userDbDetails.userDb);
+    await this.pouchService.checkDbStatus(tempLocalUserDbInstance).then(status => {
+      console.log("status of localDb of", userDbDetails.userDb, "is: ", status);
     });
+
+    // local BookDb Instance related
+    let tempLocalbookDbInstance = await this.pouchService.createPouchDbInstance(bookDbName);
+    await this.pouchService.checkDbStatus(tempLocalbookDbInstance).then(status => {
+      console.log("status of localDb of", bookDbName, "is: ", status);
+    });
+    await tempLocalbookDbInstance.allDocs({
+      include_docs: true
+    }).then(async (result) => {
+      console.log("books Info from db", result.rows.length);
+      await result.rows.map((row) => {
+        bookImages.push(row.doc);
+      });
+    });
+    bookImages = await this.sortBookImagesList(bookImages);
+    let thumbnailImage = bookImages[0].pageThumbnail;
+    let bookDocumentId = bookDbName.replace('mile_book_db_','');
+    let bookDocument = await tempLocalUserDbInstance.get(bookDocumentId).then((bookDocument) => {
+      console.log("bookDocument retrieved for updating thumbnail",bookDocument);
+      return bookDocument
+    }).catch((err) => {
+      console.log("Unable to retrieve the document for",);
+    });
+    bookDocument.bookThumbnailImage = thumbnailImage;
+    await tempLocalUserDbInstance.put(bookDocument).then((response) => {
+      console.log("bookThumbnail has been updated for",bookDocument.bookName,"with response",response);
+    }).catch((err) => {
+      console.log("error while updating bookThumbnail",err);
+    });
+    // emptying the bookImages List after its usage is completed and closing tempLocalbookDbInstance connection
+    bookImages = [];
+    tempLocalbookDbInstance.close();
+    tempLocalUserDbInstance.close();
+  }
+
+  async sortBookImagesList(books) {
+    return new Promise(async (resolve, reject) => {
+      await books.sort((a, b) => {
+        var x = a.pageName.toLowerCase();
+        var y = b.pageName.toLowerCase();
+        if (x < y) { return -1; }
+        if (x > y) { return 1; }
+        return 0;
+      });
+      resolve(books);
+    });
+  }
+
+  updateFolderNameinDB(folderName) {
+    return new Promise((resolve, reject) => {
+      let jsonData: any;
+      jsonData = {
+        user: this.authService.userName,
+        userDbName: this.authService.userDb,
+        folderName: folderName
+      };
+      this.http.post<{ message: string, bookDbName: string, bookDbKey: string }>(this.FOLDER_BACKEND_URL, jsonData).subscribe(async response => {
+        console.log("response message on book Db Creation", response.message, "bookDbName", response.bookDbName, "bookDbkey", response.bookDbKey);
+        resolve(response);
+      });
+    })
   }
 
   setUploadImageFlag(status) {
@@ -502,7 +629,7 @@ export class ImageService implements OnInit {
 
     let promise = new Promise((resolve, reject) => {
       var user = this.authService.userName;
-      var bookName = this.route.snapshot.queryParams['data']
+      var bookName = this.route.snapshot.queryParams['data'];
       var folderName = bookName;
       const queryParams = `?folderName=${folderName}`;
       this.http.get<{ message: string; json: any }>(this.IMAGE_BACKEND_URL + serverImage + queryParams).subscribe(responseData => {
