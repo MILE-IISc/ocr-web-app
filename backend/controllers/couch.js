@@ -27,7 +27,7 @@ module.exports.checkDatabase = async function (dbName) {
 // Create Database per User
 module.exports.createDatabase = async function (dbName) {
   return new Promise((resolve, reject) => {
-    cloudant.db.create(dbName, (err, response) => { // db created successful -> response: { ok: true }
+    cloudant.db.create(dbName, { revs_limit: 1, auto_compaction: true, skip_setup: true }, (err, response) => { // db created successful -> response: { ok: true }
       if (err) {
         if (err.statusCode == 412) { // db already exists error -> err: { statusCode: 412, error: file_exists, .... }
           console.log("error on creation of database", err.statusCode, "error key", err.error);

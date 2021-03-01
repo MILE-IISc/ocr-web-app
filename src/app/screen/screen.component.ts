@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, Renderer2,ViewEncapsulation } from '@angular/core';
+import { Component, HostListener, OnInit, Renderer2, ViewEncapsulation } from '@angular/core';
 declare var $: any;
 import { fromEvent, Subscription } from 'rxjs';
 import { map, buffer, filter, debounceTime } from 'rxjs/operators';
@@ -32,7 +32,9 @@ export class ScreenComponent implements OnInit {
   opened: boolean;
   events: string[] = [];
   private waveSub: Subscription;
+  private imageSub: Subscription;
   localImages: Images[] = [];
+  pouchImages: any = [];
   imageList = "";
   displayarea: any;
   isLoading = false;
@@ -95,7 +97,7 @@ export class ScreenComponent implements OnInit {
     this.sidesize1 = 30;
     this.sidesize2 = 70;
     this.localImages = this.imageService.getLocalImages();
-    this.imageService.openModalDialog(this.localImages);
+    this.imageService.openModalDialog();
 
     $("#OpenBar").hide();
     $("#CloseBar").show();
@@ -108,9 +110,9 @@ export class ScreenComponent implements OnInit {
     $("#OpenBar").show();
     $("#CloseBar").hide();
   }
- 
+
   constructor(private headerService: HeaderService, private imageService: ImageService,
-    public authService: AuthService, private fileService: FileService,public dialog: MatDialog,private route: ActivatedRoute) { }
+    public authService: AuthService, private fileService: FileService, public dialog: MatDialog, private route: ActivatedRoute) { }
 
   onLogout() {
     this.authService.logout();
@@ -137,16 +139,16 @@ export class ScreenComponent implements OnInit {
       disableClose: true,
       width: '450px',
       height: '450px',
-       panelClass: 'my-dialog'
+      panelClass: 'my-dialog'
     });
 
     dialogRef.afterClosed().subscribe(result => {
       console.log(`Dialog result: ${result}`);
     });
-    
+
   }
-  
-  onKeypress(event) {    
+
+  onKeypress(event) {
     console.log("enter")
     this.correctionUpdate();
     console.log("func called")
@@ -154,7 +156,7 @@ export class ScreenComponent implements OnInit {
 
   ngOnInit(): void {
     $("#CloseBar").hide();
-     // authentication related
+    // authentication related
     this.userIsAuthenticated = this.authService.getIsAuth();
     this.userName = this.authService.getUserName();
     this.isAdmin = this.authService.getIsAdmin();
@@ -210,20 +212,20 @@ export class ScreenComponent implements OnInit {
 
     this.savemessage = this.headerService.getloadmessage();
     this.headerService.messageemit
-        .subscribe(
-          (message: string) => {
-            this.savemessage = message;
-              if (this.savemessage != "") {
-              var x = document.getElementById("updatemessage");
-              console.log("x in screen " + x);
-              if (x != null) {
-               x.className = "show";
-               setTimeout(() => {
+      .subscribe(
+        (message: string) => {
+          this.savemessage = message;
+          if (this.savemessage != "") {
+            var x = document.getElementById("updatemessage");
+            console.log("x in screen " + x);
+            if (x != null) {
+              x.className = "show";
+              setTimeout(() => {
                 x.className = x.className.replace("show", "");
-                 }, 2000);
-               }
-             }
-         });
+              }, 2000);
+            }
+          }
+        });
 
     this.nextImage = this.headerService.getMultipleImage();
     this.headerService.multiImageChange
@@ -249,22 +251,53 @@ export class ScreenComponent implements OnInit {
           }
         });
 
-    this.imageService.ocrMessageChange
-      .subscribe(
-        (ocrMessage: string) => {
-          this.ocrMessage = ocrMessage;
-          if (this.ocrMessage != "" || this.ocrMessage != null) {
-            console.log("ocr message in screen " + this.ocrMessage);
-            var elem = document.getElementById("footerSnackBar");
-            if (elem != null) {
-              elem.className = "show";
-              setTimeout(() => {
-                elem.className = elem.className.replace("show", "");
-              }, 2000);
-            }
-          }
-        });
+    this.imageService.ocrMessageChange.subscribe((ocrMessage: string) => {
+      this.ocrMessage = ocrMessage;
+      if (this.ocrMessage != "" || this.ocrMessage != null) {
+        console.log("ocr message in screen " + this.ocrMessage);
+        var elem = document.getElementById("footerSnackBar");
+        if (elem != null) {
+          elem.className = "show";
+          setTimeout(() => {
+            elem.className = elem.className.replace("show", "");
+          }, 2000);
+        }
+      }
+    });
 
+    this.imageSub = this.imageService.getPouchImageUpdateListener().subscribe(async (pouchImagesList: {pouchImagesList: []}) => {
+      this.pouchImages = pouchImagesList.pouchImagesList;
+      console.log("pouchImages.length",this.pouchImages.length);
+      if(this.pouchImages.length > 0 ) {
+        for(let i = 0; i < this.pouchImages.length; i++) {
+          console.log("this.pouchImages["+i+"] data",this.pouchImages[i]);
+        }
+        if (this.isDiv == true) {
+          $('.holderClass').remove();
+        }
+        this.isLoading = true;
+        this.ImageIs = true;
+        if (this.pouchImages.length > 1) {
+          this.nextImage = false;
+          this.imageService.nextImageChange.emit(this.nextImage);
+        }
+        this.isLoading = false;
+        this.isLoadingfromServer = false;
+        this.localUrl = await this.imageService.loadArray(this.pouchImages[0].pageName);
+        this.fileName = this.pouchImages[0].pageName;
+        setTimeout(() => this.imageService.fitwidth(), 50);
+        setTimeout(() => this.setpercentage(), 60);
+      } else {
+        $(".textElementsDiv").not(':first').remove();
+        $(".textSpanDiv").empty();
+        this.ImageIs = false;
+        this.fileName = "No files have been Uploaded";
+        this.localUrl = null;
+        this.imageService.buttonEnable()
+      }
+    });
+
+    // can be removed as its implemented using pouchDb
     this.waveSub = this.imageService
       .getImageUpdateListener()
       .subscribe(async (imageData: { localImages: Images[] }) => {
@@ -296,10 +329,11 @@ export class ScreenComponent implements OnInit {
           this.ImageIs = false;
           this.fileName = "No files have been Uploaded";
           this.localUrl = null;
-          this.imageService.buttonenable()
+          this.imageService.buttonEnable()
         }
       });
 
+    // check its usage - It's not used anywhere
     this.imageService.displayChange.subscribe((display: any) => {
       this.display = display;
     });
@@ -347,18 +381,14 @@ export class ScreenComponent implements OnInit {
 
   async openThisImage(event) {
     var id = event.target.value;
-    this.localImages = this.imageService.getLocalImages();
     $('img#imgToRead').selectAreas('destroy');
     console.log("empty the right side screen");
     $(".textElementsDiv").not(':first').remove();
     $(".textSpanDiv").empty();
-    for (let i = 0; i < this.localImages.length; i++) {
-      if (this.localImages[i].fileName == id) {
-        if (this.localImages[i].dataUrl == null || this.localImages[i].dataUrl == "") {
-          this.localImages[i].dataUrl = await this.imageService.loadArray(this.localImages[i].fileName);
-        }
-        this.localUrl = this.localImages[i].dataUrl;
-        this.fileName = this.localImages[i].fileName;
+    for (let i = 0; i < this.pouchImages.length; i++) {
+      if (this.pouchImages[i].pageName == id) {
+        this.localUrl = await this.imageService.loadArray(this.pouchImages[i].pageName);
+        this.fileName = this.pouchImages[i].pageName;
         this.imageService.imgFileCount = i;
         this.imageService.imageCountChange.emit(this.imgFileCount);
         console.log("imgFileCount " + this.imgFileCount);
@@ -366,7 +396,7 @@ export class ScreenComponent implements OnInit {
 
     }
 
-    this.imageService.buttonenable();
+    this.imageService.buttonEnable();
     this.imageService.onXml();
     setTimeout(() => this.imageService.screenview(), 50);
     setTimeout(() => this.setpercentage(), 60);
@@ -378,26 +408,26 @@ export class ScreenComponent implements OnInit {
     var filesCount = event.target.files.length;
     var filesToUpload = event.target.files;
     var relativePath = filesToUpload[0].webkitRelativePath;
-    if(event.target.files && this.filesToBeUploaded && filesToUpload.length == 1){
+    if (event.target.files && this.filesToBeUploaded && filesToUpload.length == 1) {
       var folderName = this.route.snapshot.queryParams['data'];
       this.bookName = folderName;
       this.invokeUploadImage();
-    }else if(event.target.files && this.filesToBeUploaded && filesToUpload.length>1){
+    } else if (event.target.files && this.filesToBeUploaded && filesToUpload.length > 1) {
       var folderName = relativePath.split("/");
       this.bookName = folderName[0];
       this.invokeUploadImage();
     }
     this.isLoading = true;
     if (event.target.files && this.filesToBeUploaded) {
-      
+
     }
     setTimeout(() => this.fitwidth(), 50);
     setTimeout(() => this.setpercentage(), 60);
   }
-  
 
-  invokeUploadImage(){
-    this.imageService.addImage(this.filesToBeUploaded,this.bookName);
+
+  invokeUploadImage() {
+    this.imageService.addImage(this.filesToBeUploaded, this.bookName, "DISPLAY_IMAGES");
   }
 
   asVertical() {
@@ -611,11 +641,11 @@ export class ScreenComponent implements OnInit {
     };
   }
 
-  
+
   closeMenu() {
     $("#menu").css("display", "none");
   }
-  
+
 
   blockupdate() {
     this.imageService.blocknumberupdate()
@@ -651,7 +681,7 @@ export class ScreenComponent implements OnInit {
 
 })
 export class ScreenComponentDialog {
-  constructor(private imageService: ImageService){}
+  constructor(private imageService: ImageService) { }
 
   deleteblocks() {
     $('#imgToRead').selectAreas('reset');
@@ -659,7 +689,7 @@ export class ScreenComponentDialog {
     $(".textElementsDiv").not(':first').remove();
     $(".textSpanDiv").empty();
     this.imageService.onSave();
-}
+  }
 
 }
 
@@ -670,10 +700,10 @@ export class ScreenComponentDialog {
   encapsulation: ViewEncapsulation.None
 
 })
-export class ScreenComponentDeleteImage implements OnInit{
+export class ScreenComponentDeleteImage implements OnInit {
   localImages: Images[] = [];
   finalDeletionList = []
-  constructor(private imageService: ImageService,public dialog: MatDialog){}
+  constructor(private imageService: ImageService, public dialog: MatDialog) { }
 
 
   image: DeleteImageList = {
@@ -692,21 +722,21 @@ export class ScreenComponentDeleteImage implements OnInit{
 
   ngOnInit(): void {
     this.localImages = this.imageService.getLocalImages();
-    for(let i = 0; i< this.localImages.length; i++) {
-      console.log("this.localImages["+i+"].fileName",this.localImages[i].fileName);
-      this.image_1 = { name: this.localImages[i].fileName, completed: false, color: "warn"};
+    for (let i = 0; i < this.localImages.length; i++) {
+      console.log("this.localImages[" + i + "].fileName", this.localImages[i].fileName);
+      this.image_1 = { name: this.localImages[i].fileName, completed: false, color: "warn" };
       this.image.deleteImage.push(this.image_1);
     }
   }
 
   confirmdialog() {
 
-    for(let i = 0; i < this.image.deleteImage.length; i++) {
-      if(this.image.deleteImage[i].completed == true) {
+    for (let i = 0; i < this.image.deleteImage.length; i++) {
+      if (this.image.deleteImage[i].completed == true) {
         this.finalDeletionList.push(this.image.deleteImage[i].name.slice());
       }
     }
-    console.log("finalDeletionList====="+this.finalDeletionList.length);
+    console.log("finalDeletionList=====" + this.finalDeletionList.length);
     this.imageService.setDeleteImagesList(this.finalDeletionList);
 
     const dialogRef = this.dialog.open(ScreenComponentConfirmDialog, {
@@ -719,7 +749,7 @@ export class ScreenComponentDeleteImage implements OnInit{
       console.log(`Dialog result: ${result}`);
     });
   }
-   
+
   allComplete: boolean = false;
   updateAllComplete() {
     this.allComplete =
@@ -758,14 +788,14 @@ export interface DeleteImageList {
 
 })
 export class ScreenComponentConfirmDialog {
-  constructor(private imageService: ImageService,public dialog: MatDialog){}
+  constructor(private imageService: ImageService, public dialog: MatDialog) { }
 
-  deleteImagesConfirm(){
+  deleteImagesConfirm() {
     $('#imgToRead').selectAreas('destroy');
     $(".textElementsDiv").not(':first').remove();
     $(".textSpanDiv").empty();
     console.log("delete images");
-    
+
     this.imageService.deleteImages();
   }
 }

@@ -19,6 +19,7 @@ import { ProgressDialogComponent } from '../screen/progress-dialog/progress-dial
 import { BookService } from './book.service';
 import { PouchService } from './pouch.service';
 import PouchDB from 'node_modules/pouchdb';
+import { promises } from 'dns';
 
 
 declare var Tiff: any;
@@ -39,7 +40,10 @@ export class ImageService implements OnInit {
   }
 
   images: Array<Images> = [];
-  localImages: Array<Images> = [];// This array will be used for storing imagesInfo of corresponding book from pouchDb
+  localImages: Array<Images> = [];
+  pouchImagesList: any = [];// This array will be used for storing imagesInfo of corresponding book from pouchDb
+  private pouchImagesListUpdated = new Subject<{ pouchImagesList }>();
+  currentBookDb;
   imgFileCount = 0;
   private imagesUpdated = new Subject<{ localImages: Images[] }>();
 
@@ -63,6 +67,7 @@ export class ImageService implements OnInit {
   angleChange = new EventEmitter<any>();
   bookNameChange = new EventEmitter<any>();
   ready = false;
+  localImagesDb: any;
 
   btnImgArray: any[] = [];
   public localUrl: any;
@@ -103,6 +108,8 @@ export class ImageService implements OnInit {
   // pouchDb related declarations
   uploadLocalBookDbInstance;
   uploadRemoteBookDbInstance;
+  currentLocalBookDbInstance;
+  currentRemoteBookDbInstance;
 
   constructor(private route: ActivatedRoute, rendererFactory: RendererFactory2, private http: HttpClient, private router: Router, private authService: AuthService, private headerService: HeaderService, @Inject(DOCUMENT) private document: Document, public dialog: MatDialog, private bookService: BookService, private pouchService: PouchService) {
     this.IMAGE_BACKEND_URL = this.authService.BACKEND_URL + "/api/image/";
@@ -114,7 +121,7 @@ export class ImageService implements OnInit {
   }
 
   getCurrentImageName() {
-    return this.localImages[this.imgFileCount].fileName;
+    return this.pouchImagesList[this.imgFileCount].pageName;
   }
 
   getBtnImages() {
@@ -141,38 +148,152 @@ export class ImageService implements OnInit {
     this.bookName = bookName;
   }
 
+  async sortPouchImagesList(pouchImages) {
+    console.log("sorting images list");
+    return new Promise(async (resolve, reject) => {
+      await pouchImages.sort((a, b) => {
+        var x = a.pageName.toLowerCase();
+        var y = b.pageName.toLowerCase();
+        if (x < y) { return -1; }
+        if (x > y) { return 1; }
+        return 0;
+      });
+      resolve(pouchImages);
+    });
+  }
+
+  async handleChange(change) {
+
+    let changedDoc = null;
+    let changedIndex = null;
+    console.log("id of change on handleChange of imagesService", change.id);
+    console.log("doc of change on handleChange of imagesService", change.doc);
+
+    this.pouchImagesList.forEach((pouchImage: any, index) => {
+      console.log("pouchImage._id:",pouchImage._id);
+      console.log("change.id:",change.id);
+      if (pouchImage._id === change.id) {
+        changedDoc = pouchImage;
+        changedIndex = index;
+      }
+    });
+
+    //A document was deleted
+    if (change.deleted) {
+      this.pouchImagesList.splice(changedIndex, 1);
+    }
+    else {
+      //A document was updated
+      if (changedDoc) {
+        this.pouchImagesList[changedIndex] = change.doc;
+      }
+
+      //A document was added
+      else {
+        this.pouchImagesList.push(change.doc);
+      }
+    }
+    this.pouchImagesList = await this.sortPouchImagesList(this.pouchImagesList);
+    console.log("pouchImagesList length after handling changes",this.pouchImagesList.length);
+    this.pouchImagesListUpdated.next({
+      pouchImagesList: [...this.pouchImagesList]
+    });
+  }
+
   async getServerImages() {
     var bookName = this.route.snapshot.queryParams['data'];
     var folderName = bookName;
     const queryParams = `?folderName=${folderName}`;
 
     console.log("enter get server from screen");
-    let promise = new Promise((resolve, reject) => {
-      this.http
-        .get<{ message: string; images: [] }>(
-          this.IMAGE_BACKEND_URL + queryParams
-        ).toPromise()
-        .then(responseData => {
-          const imageLength = responseData.images.length;
-          if (imageLength > 0) {
-            this.localImages = responseData.images;
-            console.log("message" + responseData.message);
-            console.log("server images length--" + this.localImages.length);
-            this.imagesUpdated.next({ localImages: [...this.localImages] });
-            this.onXml();
-          }
-          else {
-            this.isLoadingfromServer = false;
-            this.headerService.setloadingvalue(this.isLoadingfromServer);
-            console.log("message" + responseData.message);
-            this.localImages = responseData.images;
-            this.imagesUpdated.next({ localImages: [] });
-          }
-          resolve(this.localImages);
-        });
-
+    return new Promise(async (resolve, reject) => {
+    // pouchDb usage starts here
+    // localUserDb Instance related
+    let books: any = [];
+    let userDbDetails = await this.authService.getUserDbDetails();
+    let localUserDbInstance = await this.pouchService.createPouchDbInstance(userDbDetails.userDb);
+    await this.pouchService.checkDbStatus(localUserDbInstance).then(status => {
+      console.log("status of localDb of", userDbDetails.userDb, "is: ", status);
     });
-    return promise;
+
+    await localUserDbInstance.allDocs({
+      include_docs: true
+    }).then((result) => {
+      books = [];
+      console.log("books Info from db", result.rows.length);
+      let docs = result.rows.map((row) => {
+        books.push(row.doc);
+      });
+    }).catch((error) => {
+      console.log(error);
+    });
+
+    for (let i = 0; i < books.length; i++) {
+      if (books[i].bookName == bookName) {
+        this.currentBookDb = "mile_book_db_" + books[i]._id;
+      }
+    }
+
+    // local BookDb Instance related
+    this.currentLocalBookDbInstance = await this.pouchService.createPouchDbInstance(this.currentBookDb);
+    await this.pouchService.checkDbStatus(this.currentLocalBookDbInstance).then(status => {
+      console.log("status of localDb of", this.currentBookDb, "is: ", status);
+    });
+
+    await this.currentLocalBookDbInstance.allDocs({
+      include_docs: true
+    }).then((result) => {
+      this.pouchImagesList = [];
+      console.log("pouchImagesList Info from db", result.rows.length);
+      let docs = result.rows.map((row) => {
+        this.pouchImagesList.push(row.doc);
+      });
+    }).catch((error) => {
+      console.log(error);
+    });
+
+    // Initial checking of imageDetails in local currentBookDb and filling the same in memory
+    if (this.pouchImagesList.length > 0) {
+      console.log("pouchImagesList Length", this.pouchImagesList.length);
+      console.log("sending Initial bookDetails from Memory as its length is greater than 0");
+      this.pouchImagesList = await this.sortPouchImagesList(this.pouchImagesList);
+      this.pouchImagesListUpdated.next({
+        pouchImagesList: [...this.pouchImagesList]
+      });
+    }
+    else {
+      console.log("sending empty bookDetails from Memory as its length is not greater than 0");
+      this.pouchImagesListUpdated.next({
+        pouchImagesList: []
+      });
+    }
+
+    // remote BookDb Instance related
+    this.currentRemoteBookDbInstance = await this.pouchService.createRemoteDbInstance(this.currentBookDb, userDbDetails.userDbKey, userDbDetails.userDbPwd);
+    await this.pouchService.checkDbStatus(this.currentRemoteBookDbInstance).then(status => {
+      console.log("status of remoteDb of", this.currentBookDb, "is: ", status);
+    });
+
+    // Based on localCurrentBookDb Instance changes, filling the memory
+    let options = {
+      live: true,
+      retry: true,
+      continuous: true
+    };
+
+    this.currentLocalBookDbInstance.changes({
+      live: true, since: 'now', include_docs: true
+    }).on('change', (change) => {
+      console.log("calling handleChanges on localDbInstance change event");
+      this.handleChange(change);
+    }).on('error', function (err) {
+      // handle error
+      console.log("info on changes error", err);
+    });
+    await this.currentLocalBookDbInstance.sync(this.currentRemoteBookDbInstance, options);
+    console.log("resolving in getServerImages");
+    resolve(true);
+  });
   }
 
   getXmlFileAsJson(fileName: any) {
@@ -318,6 +439,10 @@ export class ImageService implements OnInit {
     return this.imagesUpdated.asObservable();
   }
 
+  getPouchImageUpdateListener() {
+    return this.pouchImagesListUpdated.asObservable();
+  }
+
 
   setDocumentId(element) {
     this.documentElement = element;
@@ -348,8 +473,8 @@ export class ImageService implements OnInit {
     return this.localImages.slice();
   }
 
-  async addImage(filesToBeUploaded, folderName) {
-    let sortedFlesList = [];
+  async addImage(filesToBeUploaded, folderName, display) {
+    let sortedFilesList = [];
     this.folderName = folderName;
     let bookDbName = "";
     this.progressType = 'UPLOAD_IMAGE';
@@ -394,14 +519,14 @@ export class ImageService implements OnInit {
     });
 
     for (let i = 0; i < filesToBeUploaded.length; i++) {
-      sortedFlesList.push(filesToBeUploaded[i]);
+      sortedFilesList.push(filesToBeUploaded[i]);
     }
-    console.log("sortedFlesList", sortedFlesList);
-    console.log("sortedFlesList.length", sortedFlesList.length);
-    console.log("sortedFlesList[0]", sortedFlesList[0]);
+    console.log("sortedFilesList", sortedFilesList);
+    console.log("sortedFilesList.length", sortedFilesList.length);
+    console.log("sortedFilesList[0]", sortedFilesList[0]);
 
     console.log("sorting started");
-    sortedFlesList.sort((a, b) => {
+    sortedFilesList.sort((a, b) => {
       var x = a.name.toLowerCase();
       var y = b.name.toLowerCase();
       if (x < y) { return -1; }
@@ -409,31 +534,31 @@ export class ImageService implements OnInit {
       return 0;
     });
     console.log("sorting completed");
-    console.log("sortedFlesList[0] after sorting", sortedFlesList[0]);
+    console.log("sortedFilesList[0] after sorting", sortedFilesList[0]);
     // return;
-    if (sortedFlesList.length > 0) {
-      console.log("after if condition of sortedFlesList.length > 0");
+    if (sortedFilesList.length > 0) {
+      console.log("after if condition of sortedFilesList.length > 0");
       var uploadImage = (x) => {
         if (x == 0) {
           this.progressInfos.splice(0, this.progressInfos.length);
           this.uploadMessage = "";
           this.uploadMessageChange.emit(this.uploadMessage);
           this.openProgressDialog();
-          for (let i = 0; i < sortedFlesList.length; i++) {
+          for (let i = 0; i < sortedFilesList.length; i++) {
             var status = 'Pending';
-            const progress = new ProgressInfo(sortedFlesList[i].name, status);
+            const progress = new ProgressInfo(sortedFilesList[i].name, status);
             this.progressInfos.push(progress);
             this.progressInfoChange.emit(this.progressInfos);
           }
         }
-        if (x < sortedFlesList.length) {
-          let fileName = sortedFlesList[x].name;
+        if (x < sortedFilesList.length) {
+          let fileName = sortedFilesList[x].name;
           this.progressInfos[x].value = 'Uploading';
           this.progressInfoChange.emit(this.progressInfos.slice());
 
           let imageData = new FormData();
           imageData.append("email", this.authService.userName);
-          var file = sortedFlesList[x];
+          var file = sortedFilesList[x];
           console.log("file name===" + file.name);
           imageData.append("image", file);
           this.http.post<{ message: string, uploaded: string }>(this.IMAGE_BACKEND_URL + queryParams, imageData).subscribe(async response => {
@@ -446,15 +571,23 @@ export class ImageService implements OnInit {
             }
             this.progressInfoChange.emit(this.progressInfos.slice());
             this.uploadImageLastIndex = x;
-            if (this.uploadImageLastIndex == (sortedFlesList.length - 1)) {
+            if (this.uploadImageLastIndex == (sortedFilesList.length - 1)) {
               this.uploadMessage = "Images Uploaded Successfully !!"
               this.uploadMessageChange.emit(this.uploadMessage);
               var btn = document.getElementById("pauseButton");
               btn.innerHTML = 'Ok';
-              this.updateBookThumbnail(bookDbName);
               this.uploadLocalBookDbInstance.close();
               this.uploadRemoteBookDbInstance.close();
-              this.bookService.getBooks();
+              console.log("this.pouchImagesList.length",this.pouchImagesList.length);
+              console.log("calling updateBookThumbnail()");
+              await this.updateBookThumbnail(bookDbName);
+              if(display == "DISPLAY_BOOKS") {
+                console.log("calling getBooks()");
+                this.bookService.getBooks();
+              } else {
+                console.log("calling getServerImages()");
+                await this.getServerImages();
+              }
             }
             if (this.uploadImageFlag == true) {
               uploadImage(x + 1);
@@ -464,15 +597,6 @@ export class ImageService implements OnInit {
       }
 
       if (this.uploadImageFlag == false) {
-        // await this.getServerImages();
-        // console.log("server file count before post" + this.localImages.length);
-        // console.log("sortedFlesList length", sortedFlesList.length);
-        // if (this.localImages.length == 0) {
-        //   this.loadLocalImages(sortedFlesList, "NEW");
-        // }
-        // else {
-        //   this.loadLocalImages(sortedFlesList, "APPEND");
-        // }
         this.uploadImageFlag = true;
         console.log("invoking uploadImage(0) ");
         uploadImage(0);
@@ -507,18 +631,18 @@ export class ImageService implements OnInit {
     });
     bookImages = await this.sortBookImagesList(bookImages);
     let thumbnailImage = bookImages[0].pageThumbnail;
-    let bookDocumentId = bookDbName.replace('mile_book_db_','');
+    let bookDocumentId = bookDbName.replace('mile_book_db_', '');
     let bookDocument = await tempLocalUserDbInstance.get(bookDocumentId).then((bookDocument) => {
-      console.log("bookDocument retrieved for updating thumbnail",bookDocument);
-      return bookDocument
-    }).catch((err) => {
-      console.log("Unable to retrieve the document for",);
-    });
+        console.log("bookDocument retrieved for updating thumbnail", bookDocument);
+        return bookDocument;
+      }).catch((err) => {
+        console.log("Unable to retrieve the document for",bookDocumentId);
+      });
     bookDocument.bookThumbnailImage = thumbnailImage;
     await tempLocalUserDbInstance.put(bookDocument).then((response) => {
-      console.log("bookThumbnail has been updated for",bookDocument.bookName,"with response",response);
+      console.log("bookThumbnail has been updated for", bookDocument.bookName, "with response", response);
     }).catch((err) => {
-      console.log("error while updating bookThumbnail",err);
+      console.log("error while updating bookThumbnail", err);
     });
     // emptying the bookImages List after its usage is completed and closing tempLocalbookDbInstance connection
     bookImages = [];
@@ -622,7 +746,7 @@ export class ImageService implements OnInit {
   }
 
 
-  async loadArray(serverImage: any) {
+  async loadArray_old(serverImage: any) {
     this.isLoadingFromServerChange.emit(true);
     console.log("inside load array");
     console.log("inside load array", serverImage);
@@ -640,6 +764,156 @@ export class ImageService implements OnInit {
     return promise;
   }
 
+  async savePouchDbForm(id, data, ETag, LastModified) {
+    var imageform = {
+      _id: id,
+      name: id,
+      data: data,
+      ETag: ETag,
+      LastModified: LastModified
+    }
+    this.localImagesDb = new PouchDB("mile_images_db", {auto_compaction: true});
+    this.localImagesDb.put(imageform).then((result, error) => {
+      console.log("result", result);
+      console.log("error", error);
+      if (!error) {
+        console.log("Pouch form saved successfully");
+      }
+      return true;
+    });
+  }
+
+  async updatePouchDbForm(id, data, ETag, LastModified, revId) {
+    var imageform = {
+      _id: id,
+      name: id,
+      data: data,
+      ETag: ETag,
+      LastModified: LastModified,
+      _rev: revId
+    }
+    this.localImagesDb = new PouchDB("mile_images_db", {auto_compaction: true});
+    this.localImagesDb.put(imageform).then((result, error) => {
+      console.log("result", result);
+      console.log("error", error);
+      if (!error) {
+        console.log("Pouch form saved successfully");
+      }
+      return true;
+    });
+  }
+
+  async loadArray(serverImage: any) {
+    // getting all docs in list
+    this.localImagesDb = new PouchDB("mile_images_db", {auto_compaction: true});
+    this.localImagesDb.allDocs().then((result) => {
+      console.log("result.rows.length",result.rows.length);
+      for(let i = 0; i < result.rows.length; i++) {
+        console.log("id of doc "+i,result.rows[i].id);
+      }
+    });
+    this.isLoadingFromServerChange.emit(true);
+    let jpegFile = serverImage;
+    console.log("inside load array");
+    console.log("inside load array", serverImage);
+    let objectHeaderInfo: any = await this.getHeaderInfo(serverImage);
+    if (objectHeaderInfo != "") {
+      console.log("objectHeaderInfo for imagename", serverImage);
+      console.log("LastModified", objectHeaderInfo.LastModified);
+      console.log("ETag", objectHeaderInfo.ETag);
+      console.log("ContentType", objectHeaderInfo.ContentType);
+      this.localImagesDb = new PouchDB("mile_images_db", {auto_compaction: true});
+      if(serverImage.substr((serverImage.lastIndexOf('.') + 1)) == "tif") {
+        jpegFile = serverImage.slice(0, -3) + 'jpg';
+      }
+      let document = await this.localImagesDb.get(jpegFile).then(function (doc) {
+        return doc;
+      }).catch(function (err) {
+        console.log("error status", err.status);
+        if (err.status == "404") {
+          return "NOT_FOUND";
+        }
+      });
+
+      if (document == "NOT_FOUND") {
+        console.log("getting serverImageData for ",serverImage);
+        let data = await this.getServerImage(serverImage);
+        await this.savePouchDbForm(jpegFile, data, objectHeaderInfo.ETag, objectHeaderInfo.LastModified).then(() => {
+          console.log("saved image", jpegFile);
+        });
+        return data;
+      } else {
+        console.log("document from PouchDb for", document.name);
+        console.log("document.ETag", document.ETag);
+        console.log("document.LastModified", document.LastModified);
+        console.log("document.revId", document._rev);
+        if (jpegFile == document.name && document.ETag == objectHeaderInfo.ETag) {
+
+          console.log("date for both documents matches");
+          let pouchDbImageData = await this.localImagesDb.get(jpegFile);
+          return pouchDbImageData.data;
+          // Last Modified Date comparison between IbmCosObject & PouchDbObject --> Will be used for XML files
+          // let pouchDbDate = new Date(document.LastModified);
+          // let ibmCosDate = new Date(objectHeaderInfo.LastModified);
+          // console.log("ibmCosDate",ibmCosDate.getTime());
+          // console.log("pouchDbDate",pouchDbDate.getTime());
+          // if (ibmCosDate.getTime() > pouchDbDate.getTime()) {
+          //   console.log("ibmCosDate is greater than pouchDbDate");
+          //   let data = await this.getServerImage(serverImage);
+          //   this.updatePouchDbForm(jpegFile, data, objectHeaderInfo.ETag, objectHeaderInfo.LastModified, document._rev).then(() => {
+          //     console.log("updated image", jpegFile);
+          //   });
+          //   return data;
+          // } else if (ibmCosDate.getTime() === pouchDbDate.getTime()) {
+          //   console.log("date for both documents matches");
+          //   let pouchDbImageData = await this.localImagesDb.get(jpegFile);
+          //   return pouchDbImageData.data;
+          // } else {
+          //   console.log("date for both documents doesn't match");
+          // }
+        } else if (jpegFile == document.name && document.ETag != objectHeaderInfo.ETag) {
+          console.log("IbmCosObject ETag doesn't match with PouchDbObject ETag");
+          let data = await this.getServerImage(serverImage);
+          this.updatePouchDbForm(jpegFile, data, objectHeaderInfo.ETag, objectHeaderInfo.LastModified, document._rev).then(() => {
+            console.log("updated image", jpegFile);
+          });
+          return data;
+        }
+      }
+    }
+  }
+
+  async getServerImage(serverImage) {
+    let promise = new Promise((resolve, reject) => {
+      var bookName = this.route.snapshot.queryParams['data'];
+      var folderName = bookName;
+      const queryParams = `?folderName=${folderName}&type=GET-DATA`;
+      this.http.get<{ message: string; json: any }>(this.IMAGE_BACKEND_URL + serverImage + queryParams).subscribe(responseData => {
+        this.isLoadingFromServerChange.emit(false);
+        resolve(responseData.json);
+      });
+    });
+    return promise;
+  }
+
+  async getHeaderInfo(serverImage: any) {
+    this.isLoadingFromServerChange.emit(true);
+    console.log("inside load array", serverImage);
+
+    let promise = new Promise((resolve, reject) => {
+      var user = this.authService.userName;
+      const queryParams = `?user=${user}&type=GET-HEADER`;
+      this.http.get<{ message: string; json: any }>(this.IMAGE_BACKEND_URL + serverImage + queryParams).subscribe(responseData => {
+        this.isLoadingFromServerChange.emit(false);
+        if (responseData.json != "") {
+          console.log("got header info");
+        }
+        resolve(responseData.json);
+      });
+    });
+    return promise;
+  }
+
   updateCorrectedXml(fileName: any) {
     // console.log("Corrected xml " + JSON.stringify(XmlModel.jsonObject));
     var bookName = this.route.snapshot.queryParams['data']
@@ -651,9 +925,7 @@ export class ImageService implements OnInit {
       XmlfileName: fileName.slice(0, -3) + 'xml',
       user: this.authService.userName
     };
-    this.http
-      .put<{ message: string, completed: string }>(this.XML_BACKEND_URL + queryParams, jsonData)
-      .subscribe(response => {
+    this.http.put<{ message: string, completed: string }>(this.XML_BACKEND_URL + queryParams, jsonData).subscribe(response => {
         console.log("response message after correction " + response.message);
         this.headerService.setloadmessage(response.message);
         this.localImages = this.getLocalImages();
@@ -679,11 +951,11 @@ export class ImageService implements OnInit {
       });
   }
 
-  openModalDialog(images: Images[]) {
-    console.log("images count inside subscribe: " + images.length);
+  openModalDialog() {
+    console.log("images count inside subscribe: " + this.pouchImagesList.length);
     this.btnImgArray.splice(0, this.btnImgArray.length);
-    for (let i = 0; i < images.length; i++) {
-      var btnImgEle = "<button  style=\"width: 100%; border: none;\" (click)=\"openThisImage()\" class=\"btnImg\" value=\"" + images[i].fileName + "\"  id=\"" + images[i]._id + "\">" + images[i].fileName + "</button>";
+    for (let i = 0; i < this.pouchImagesList.length; i++) {
+      var btnImgEle = "<button  style=\"width: 100%; border: none;\" (click)=\"openThisImage()\" class=\"btnImg\" value=\"" + this.pouchImagesList[i].pageName + "\"  id=\"" + this.pouchImagesList[i]._id + "\">" + this.pouchImagesList[i].pageName + "</button>";
       // console.log("btnImgEle: " + btnImgEle);
       this.btnImgArray.push(btnImgEle);
       this.btnImgArrayChange.emit(this.btnImgArray.slice());
@@ -692,7 +964,6 @@ export class ImageService implements OnInit {
     $(".sideBody").empty();
     for (let i = 0; i < this.btnImgArray.length; i++) {
       $(".sideBody").append(this.btnImgArray[i]);
-
     }
   }
 
@@ -717,7 +988,6 @@ export class ImageService implements OnInit {
     this.isRunningOcrChange.emit(false);
     this.imgFileCount++;
     this.imageCountChange.emit(this.imgFileCount);
-    this.localImages = this.getLocalImages();
     if (this.obtainblock == true) {
       $('#imgToRead').selectAreas('reset');
     }
@@ -725,20 +995,14 @@ export class ImageService implements OnInit {
     $(".textElementsDiv").not(':first').remove();
     $(".textSpanDiv").empty();
 
-    this.localImages = this.getLocalImages();
-    // console.log("localImages count", this.localImages.length);
-    // console.log("index of image to be displayed", this.imgFileCount);
-    if (this.localImages[this.imgFileCount].dataUrl == null || this.localImages[this.imgFileCount].dataUrl == "") {
-      this.localImages[this.imgFileCount].dataUrl = await this.loadArray(this.localImages[this.imgFileCount].fileName);
-    }
-    this.localUrl = this.localImages[this.imgFileCount].dataUrl;
+    this.localUrl = await this.loadArray(this.pouchImagesList[this.imgFileCount].pageName);
     this.urlChanged.emit(this.localUrl.slice());
-    this.fileName = this.localImages[this.imgFileCount].fileName;
+    this.fileName = this.pouchImagesList[this.imgFileCount].pageName;
     this.fileNameChange.emit(this.fileName);
     // console.log("inside Next this.imgFileCount after incrementing: " + this.imgFileCount);
     this.onXml();
 
-    if (this.localImages.length - 1 == this.imgFileCount) {
+    if (this.pouchImagesList.length - 1 == this.imgFileCount) {
       this.nextImages = true;
       this.nextImageChange.emit(this.nextImages);
     }
@@ -758,20 +1022,13 @@ export class ImageService implements OnInit {
     // console.log("empty the right side screen");
     $(".textElementsDiv").not(':first').remove();
     $(".textSpanDiv").empty();
-
-    this.localImages = this.getLocalImages();
-    // console.log("localImages count", this.localImages.length);
-    // console.log("index of image to be displayed", this.imgFileCount);
-    if (this.localImages[this.imgFileCount].dataUrl == null || this.localImages[this.imgFileCount].dataUrl == "") {
-      this.localImages[this.imgFileCount].dataUrl = await this.loadArray(this.localImages[this.imgFileCount].fileName);
-    }
-    this.localUrl = this.localImages[this.imgFileCount].dataUrl;
+    this.localUrl = await this.loadArray(this.pouchImagesList[this.imgFileCount].pageName);
     this.urlChanged.emit(this.localUrl.slice());
-    this.fileName = this.localImages[this.imgFileCount].fileName;
+    this.fileName = this.pouchImagesList[this.imgFileCount].pageName;
     this.fileNameChange.emit(this.fileName);
     // console.log("inside Next this.imgFileCount after decrementing: " + this.imgFileCount);
     this.onXml();
-    if (this.localImages.length - 1 > this.imgFileCount) {
+    if (this.pouchImagesList.length - 1 > this.imgFileCount) {
       this.nextImages = false;
       this.nextImageChange.emit(this.nextImages);
     }
@@ -790,18 +1047,14 @@ export class ImageService implements OnInit {
     $(".textElementsDiv").not(':first').remove();
     $(".textSpanDiv").empty();
 
-    this.localImages = this.getLocalImages();
-    this.imgFileCount = this.localImages.length - 1;
+    this.imgFileCount = this.pouchImagesList.length - 1;
     this.imageCountChange.emit(this.imgFileCount);
-    if (this.localImages[this.imgFileCount].dataUrl == null || this.localImages[this.imgFileCount].dataUrl == "") {
-      this.localImages[this.imgFileCount].dataUrl = await this.loadArray(this.localImages[this.imgFileCount].fileName);
-    }
-    this.localUrl = this.localImages[this.imgFileCount].dataUrl;
+    this.localUrl = await this.loadArray(this.pouchImagesList[this.imgFileCount].pageName);
     this.urlChanged.emit(this.localUrl.slice());
-    this.fileName = this.localImages[this.imgFileCount].fileName;
+    this.fileName = this.pouchImagesList[this.imgFileCount].pageName;
     this.fileNameChange.emit(this.fileName);
     this.onXml();
-    if (this.localImages.length - 1 == this.imgFileCount) {
+    if (this.pouchImagesList.length - 1 == this.imgFileCount) {
       this.nextImages = true;
       this.nextImageChange.emit(this.nextImages);
       this.previousImages = false;
@@ -820,13 +1073,9 @@ export class ImageService implements OnInit {
     $(".textElementsDiv").not(':first').remove();
     $(".textSpanDiv").empty();
 
-    this.localImages = this.getLocalImages();
-    if (this.localImages[this.imgFileCount].dataUrl == null || this.localImages[this.imgFileCount].dataUrl == "") {
-      this.localImages[this.imgFileCount].dataUrl = await this.loadArray(this.localImages[this.imgFileCount].fileName);
-    }
-    this.localUrl = this.localImages[this.imgFileCount].dataUrl;
+    this.localUrl = await this.loadArray(this.pouchImagesList[this.imgFileCount].pageName);
     this.urlChanged.emit(this.localUrl.slice());
-    this.fileName = this.localImages[this.imgFileCount].fileName;
+    this.fileName = this.pouchImagesList[this.imgFileCount].pageName;
     this.fileNameChange.emit(this.fileName);
     this.onXml();
 
@@ -838,29 +1087,29 @@ export class ImageService implements OnInit {
     }
   }
 
-  buttonenable() {
+  buttonEnable() {
     this.isRunningOcrChange.emit(false);
-    if (this.localImages.length - 1 == 0) {
+    if (this.pouchImagesList.length - 1 == 0) {
       this.nextImages = true;
       this.nextImageChange.emit(this.nextImages);
       this.previousImages = true;
       this.previousImageChange.emit(this.previousImages);
     }
 
-    else if (this.localImages.length - 1 == this.imgFileCount) {
+    else if (this.pouchImagesList.length - 1 == this.imgFileCount) {
       this.nextImages = true;
       this.nextImageChange.emit(this.nextImages);
       this.previousImages = false;
       this.previousImageChange.emit(this.previousImages);
     }
 
-    else if ((this.localImages.length - 1 > 0) && (this.imgFileCount == 0)) {
+    else if ((this.pouchImagesList.length - 1 > 0) && (this.imgFileCount == 0)) {
       this.nextImages = false;
       this.nextImageChange.emit(this.nextImages);
       this.previousImages = true;
       this.previousImageChange.emit(this.previousImages);
     }
-    else if ((this.localImages.length - 1 > 0) && (this.localImages.length - 1 !== this.imgFileCount)) {
+    else if ((this.pouchImagesList.length - 1 > 0) && (this.pouchImagesList.length - 1 !== this.imgFileCount)) {
       this.nextImages = false;
       this.nextImageChange.emit(this.nextImages);
       this.previousImages = false;
@@ -870,24 +1119,12 @@ export class ImageService implements OnInit {
   }
 
   onXml() {
-    this.localImages = this.getLocalImages();
-    // console.log("localImages in onXml", this.localImages.length);
-    if (this.localImages.length > 0) {
-      // console.log("server image length " + this.localImages.length);
-      // console.log("image file count " + this.imgFileCount);
-      this.fileName = this.localImages[this.imgFileCount].fileName;
-      // console.log("completion status: ", this.localImages[this.imgFileCount].completed);
-      if (this.localImages[this.imgFileCount].completed == "Y") {
+      this.fileName = this.pouchImagesList[this.imgFileCount].pageName;
+      // console.log("completion status: ", this.pouchImagesList[this.imgFileCount].completed);
+      // code has to be modified for getting xml for corresponsing image
+      if (this.pouchImagesList[this.imgFileCount].completed == "Y") {
         this.getFileAsJson(this.fileName);
       }
-    } else {
-      this.localImages = this.getLocalImages();
-      this.fileName = this.localImages[this.imgFileCount].fileName;
-      // console.log("completion status: ", this.localImages[this.imgFileCount].completed);
-      if (this.localImages[this.imgFileCount].completed == "Y") {
-        this.getFileAsJson(this.fileName);
-      }
-    }
   }
 
   getFileAsJson(fileName: any) {
@@ -1223,10 +1460,9 @@ export class ImageService implements OnInit {
       for (var i = 0; i < len; i++) {
         // console.log("elem[" + i + "]" + elems[i]);
         // console.log("elem[" + i + "]" + $('.select-areas-background-area').css("background"));
-        $('.select-areas-background-area').bind()
+        $('.select-areas-background-area').bind();
       }
     }
-
   }
 
 

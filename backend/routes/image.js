@@ -80,56 +80,6 @@ function getBucketContents(bucketName) {
     });
 }
 
-
-function getItem(bucketName, itemName, mail, requestType) {
-  console.log("mail inside getItem first", mail)
-  console.log(`Retrieving item from bucket: ${bucketName}, key: ${itemName}`);
-  return cos.getObject({
-    Bucket: bucketName,
-    Key: itemName
-  }).promise()
-    .then((data) => {
-      if (data != null) {
-        var splitFileName = itemName.split("-");
-        if (path.extname(splitFileName[0]).toLowerCase() == ".tif" && requestType == "POST") {
-          console.log('reached getting tif data in getItem\n', splitFileName[0]);
-          const tiffArrayBuff = Buffer.from(data.Body).buffer;
-          console.log("tiff ", data.Metadata);
-          console.log("tiff ", data.ContentType);
-          console.log("tiffArrayBuff: " + tiffArrayBuff);
-
-          console.log("mail===========> ", mail);
-          Jimp.read(Buffer.from(tiffArrayBuff, 'base64')).then((file) => {
-            // console.log("Jimp file ", file);
-            // console.log("file width", file.getWidth());
-            file
-              .quality(75)
-              .writeAsync('./images/' + mail + "/" + splitFileName[0].slice(0, -3) + 'jpg').then(() => {
-                console.log("file is ready for", mail, " fileName ", splitFileName[0].slice(0, -3).toLowerCase() + 'jpg');
-                // console.log("image content retrieved and converted");
-                let tiffToJpg = splitFileName[0].slice(0, -3) + 'jpg';
-                const filePath = './images/' + mail + "/" + tiffToJpg;
-                console.log("file Path " + filePath);
-                console.log("calling multiPartUpload");
-                multiPartUpload(bucketName, tiffToJpg + "-" + splitFileName[1], filePath);
-              });
-          });
-        }
-        else if (path.extname(splitFileName[0]).toLowerCase() == ".png" || path.extname(splitFileName[0]).toLowerCase() == ".jpg" || path.extname(splitFileName[0]).toLowerCase() == ".bmp") {
-          console.log("itemName", itemName, "data.ContentType", data.ContentType);
-          let prefix = "data:image/jpeg;base64,";
-          let base64 = Buffer.from(data.Body).toString('base64');
-          let jpgData = prefix + base64;
-          return jpgData;
-        }
-      }
-    })
-    .catch((e) => {
-      console.error(`ERROR: ${e.code} - ${e.message}\n`);
-      return "ERROR: " + e.code + " - " + e.message + "\n";
-    });
-}
-
 // const fileFilter = (req, file, cb) => {
 //   const isValid = MIME_TYPE_MAP[file.mimetype];
 //   if (isValid) {
@@ -400,9 +350,48 @@ router.get("", authChecker, (req, res, next) => {
   });
 });
 
+function getItemHeader(bucketName, itemName) {
+  // console.log(`Retrieving item header from bucket: ${bucketName}, key: ${itemName}`);
+  return cos.headObject({
+    Bucket: bucketName,
+    Key: itemName
+  }).promise()
+  .then((data) => {
+    if (data != null) {
+      console.log(`Retrieved HEAD for item: ${itemName} from bucket: ${bucketName}`);
+      console.log("header data inside getItemheader",JSON.stringify(data, null, 4));
+      return data;
+    }
+  })
+  .catch((e) => {
+    console.error(`ERROR: ${e.code} - ${e.message}\n`);
+    return "";
+  });
+}
+
+function getItem(bucketName, itemName) {
+  console.log(`Retrieving item from bucket: ${bucketName}, key: ${itemName}`);
+  return cos.getObject({
+    Bucket: bucketName,
+    Key: itemName
+  }).promise()
+    .then((data) => {
+      if (data != null) {
+        console.log("itemName", itemName, "data.ContentType", data.ContentType);
+        let prefix = "data:image/jpeg;base64,";
+        let base64 = Buffer.from(data.Body).toString('base64');
+        let jpgData = prefix + base64;
+        return jpgData;
+      }
+    })
+    .catch((e) => {
+      console.error(`ERROR: ${e.code} - ${e.message}\n`);
+      return "ERROR: " + e.code + " - " + e.message + "\n";
+    });
+}
+
 router.get("/:fileName", authChecker, (req, res, next) => {
-  const folderName = req.query.folderName;
-  let fetchedUser;
+  let type = req.query.type;
   let jpegFile = req.params.fileName;
   console.log("req.params.fileName", jpegFile);
   if (path.extname(jpegFile).toLowerCase() == ".tif") {
@@ -410,21 +399,39 @@ router.get("/:fileName", authChecker, (req, res, next) => {
   }
   bucketName = req.userData.bucketName;
   console.log("bucketName inside get specific Image ", bucketName);
-  getItem(bucketName, jpegFile + "-" + folderName, req.query.user, "GET").then((data) => {
-    if (data == "The specified key does not exists in bucket") {
-      console.log("error while retrieving image:", data);
-      res.status(400).json({
-        message: data,
-        json: ""
-      });
-    }
-    else {
-      res.status(201).json({
-        message: "image fetched successfully",
-        json: data
-      });
-    }
-  });
+  if (type == "GET-HEADER" ) {
+    getItemHeader(bucketName, jpegFile).then((data) => {
+      if (data == "The specified key does not exists in bucket") {
+        console.log("error while retrieving image header info:", data);
+        res.status(400).json({
+          message: data,
+          json: ""
+        });
+      }
+      else {
+        res.status(201).json({
+          message: "image header info fetched successfully",
+          json: data
+        });
+      }
+    });
+  } else {
+    getItem(bucketName, jpegFile).then((data) => {
+      if (data == "The specified key does not exists in bucket") {
+        console.log("error while retrieving image:", data);
+        res.status(400).json({
+          message: data,
+          json: ""
+        });
+      }
+      else {
+        res.status(201).json({
+          message: "image fetched successfully",
+          json: data
+        });
+      }
+    });
+  }
 });
 
 router.delete("/:fileName", authChecker, (req, res, next) => {

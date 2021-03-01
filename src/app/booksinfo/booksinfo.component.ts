@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
 import { ImageService } from '../services/images.service';
 import { Book } from '../shared/images.model';
 import { AuthService } from '../auth/auth.service';
@@ -34,7 +34,7 @@ export class BooksinfoComponent implements OnInit {
   isDownloading = false;
 
   constructor(private imageService: ImageService, private router: Router, private fileService: FileService, private pouchService: PouchService,
-    public authService: AuthService, private bookService: BookService, public _d: DomSanitizer, private http: HttpClient, private changeDetection: ChangeDetectorRef) {
+    public authService: AuthService, private bookService: BookService, public _d: DomSanitizer, private http: HttpClient, private changeDetection: ChangeDetectorRef, private zone: NgZone) {
     this.FOLDER_BACKEND_URL = this.authService.BACKEND_URL + "/api/folder/";
   }
 
@@ -71,6 +71,10 @@ export class BooksinfoComponent implements OnInit {
     this.bookService.isLoadingChange.subscribe(isLoading => {
       this.isLoading = isLoading;
     });
+
+    this.imageService.ResumeUploadEvent.subscribe(() => {
+      this.invokeUploadImage();
+    });
   }
 
   navtoscreen(event) {
@@ -82,7 +86,9 @@ export class BooksinfoComponent implements OnInit {
       }
     }
 
-    this.router.navigate(["/screen"], navigationExtras);
+    this.zone.run(() => {
+      this.router.navigate(["/screen"], navigationExtras);
+  });
   }
 
   importFile(event) {
@@ -103,9 +109,8 @@ export class BooksinfoComponent implements OnInit {
     }
   }
 
-
   invokeUploadImage() {
-    this.imageService.addImage(this.filesToBeUploaded, this.bookName);
+    this.imageService.addImage(this.filesToBeUploaded, this.bookName, "DISPLAY_BOOKS");
   }
 
   openProgressDialog() {
