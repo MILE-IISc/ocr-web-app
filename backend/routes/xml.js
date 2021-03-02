@@ -151,7 +151,6 @@ router.get("", authChecker, (req, res, next) => {
         console.log("Unable connect to bookDb", currentBookDb);
         res.status(200).json({
           message: "Unable to connect to book database",
-          xmlData: "",
           completed: "N"
         });
       } else {
@@ -178,7 +177,6 @@ router.get("", authChecker, (req, res, next) => {
               console.log("Multiple XML documents found in book database", currentBookDb);
               res.status(200).json({
                 message: "Multiple XML documents found in book database",
-                xmlData: "",
                 completed: "N"
               });
             }
@@ -189,7 +187,6 @@ router.get("", authChecker, (req, res, next) => {
               var statusCode = req.query.type == "GET-OCR-XML" ? 400 : 200;
               res.status(statusCode).json({
                 message: "Couldn't find the uploaded image on server",
-                xmlData: "",
                 completed: "N"
               });
             } else {
@@ -233,8 +230,7 @@ router.get("", authChecker, (req, res, next) => {
                       });
                       res.status(201).json({
                         message: "OCR completed on " + req.query.fileName,
-                        completed: "Y",
-                        xmlData: result
+                        completed: "Y"
                       });
                     });
                   } else {
@@ -273,7 +269,6 @@ router.get("", authChecker, (req, res, next) => {
                   var statusCode = req.query.type == "GET-OCR-XML" ? 500 : 200;
                   res.status(statusCode).json({
                     message: "Internal server error occurred while running the OCR: " + error,
-                    xmlData: "",
                     completed: "N"
                   });
                 }
@@ -283,7 +278,6 @@ router.get("", authChecker, (req, res, next) => {
             console.log("Couldn't find the uploaded image on server", err);
             res.status(200).json({
               message: "Couldn't find the uploaded image on server",
-              xmlData: "",
               completed: "N"
             });
           });
@@ -293,7 +287,6 @@ router.get("", authChecker, (req, res, next) => {
       console.log("error while running OCR", err);
       res.status(200).json({
         message: "error while running OCR",
-        xmlData: "",
         completed: "N"
       });
     });

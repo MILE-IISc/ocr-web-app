@@ -199,6 +199,10 @@ export class ImageService implements OnInit {
         pouchImagesList: [...this.pouchImagesList]
       });
     }
+
+    if(change.id == (this.pouchImagesList[this.imgFileCount].pageName.slice(0, -3)+ "xml")) {
+      this.onXml();
+    }
   }
 
   async getServerImages() {
@@ -312,7 +316,7 @@ export class ImageService implements OnInit {
     this.isRunningOcrChange.emit(true);
     console.log("Running OCR on " + xmlFileName);
     const queryParams = `?fileName=${xmlFileName}&bookDb=${this.currentBookDb}&type=GET-OCR-XML`;
-    this.http.get<{ message: string; completed: string; xmlData: any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
+    this.http.get<{ message: string; completed: string }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
       this.localImages = this.getLocalImages();
       if (this.localImages.length > 0) {
         for (let i = 0; i < this.localImages.length; i++) {
@@ -325,8 +329,9 @@ export class ImageService implements OnInit {
       }
       this.isRunningOcrChange.emit(false);
       this.ocrMessageChange.emit(response.message);
-      XmlModel.jsonObject = response.xmlData;
-      this.updateXmlModel(XmlModel.jsonObject);
+      // this.onXml();
+      // XmlModel.jsonObject = response.xmlData;
+      // this.updateXmlModel(XmlModel.jsonObject);
     });
   }
 
