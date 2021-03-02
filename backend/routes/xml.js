@@ -11,6 +11,7 @@ var request = require("request");
 const authChecker = require("../middleware/auth-checker");
 const Image = require("../models/image");
 const User = require("../models/user");
+const couch = require('../controllers/couch');
 
 const cloudStorage = require('ibm-cos-sdk');
 // const bucket = process.env.OBJECT_STORAGE_BUCKET;
@@ -43,7 +44,7 @@ function getItem(bucketName, itemName, type) {
         if (type == "OCR") {
           console.log("image Metadata", data.Metadata);
           console.log("image Type", data.ContentType);
-          if (data.ContentType == "image/tiff") {
+          if (path.extname(itemName).toLowerCase() == ".tif") {
             console.log("inside get Tiff image base64");
             const tiffArrayBuff = Buffer.from(data.Body).buffer;
             base64Data = Buffer.from(tiffArrayBuff).toString('base64');
@@ -134,78 +135,102 @@ router.get("", authChecker, (req, res, next) => {
   console.log("bucketName inside get fileName XML ", bucketName);
   console.log("mail inside get fileName XML ", mail);
   console.log("fileName inside get XML ", req.query.fileName);
+  console.log("dbName inside get XML ", req.query.bookDb);
   console.log("type inside get XML ", req.query.type);
-  if (req.query.type == "GET-XML") {
-    const fileName = req.query.fileName.split("-");
-    const name = fileName[0].slice(0, -3) + 'xml';
-    const xmlFileName = name + "-" + fileName[1];
+  if (req.query.type == "GET-OCR-XML" || req.query.type == "GET-OCR-XML-ALL") {
+    const fileName = req.query.fileName;
+    const xmlFileName = fileName.slice(0, -3) + 'xml';
+    const currentBookDb = req.query.bookDb;
+    var xmlJsonObject;
+    var pageDocument = {};
     console.log("xmlFileName in get call " + xmlFileName);
-    getItem(bucketName, xmlFileName, "GET").then(xmlContent => {
-      if (xmlContent == "The specified key does not exists in bucket") {
-        console.log("error while retrieving:", xmlContent);
-        res.status(400).json({
-          message: xmlContent,
-          xmlData: ""
+    // CouchDb code starts here
+    couch.checkDatabase(currentBookDb).then(async (dbStatus) => {
+      console.log("checked Database existence for", currentBookDb, "with status", dbStatus);
+      if (!dbStatus) {
+        console.log("Unable connect to bookDb", currentBookDb);
+        res.status(200).json({
+          message: "Unable to connect to book database",
+          xmlData: "",
+          completed: "N"
         });
-      }
-      else {
-        // console.log("xmlContent retrieved for XML",xmlContent);
-        xml2js.parseString(xmlContent, function (err, result) {
-          // console.log("xml result as JSON in " + JSON.stringify(result));
-          res.status(201).json({
-            message: "xml read successfully",
-            xmlData: result
-          });
-        });
-      }
-    });
-  }  else if (req.query.type == "GET-OCR-XML" || req.query.type == "GET-OCR-XML-ALL") {
-    const fileName = req.query.fileName.split("-");
-    const name = fileName[0].slice(0, -3) + 'xml';
-    const xmlFileName = name + "-" + fileName[1];
-    const ocrFileName = fileName[0] + "-" + 
-    console.log("xmlFileName in get call " + xmlFileName);
-    getItem(bucketName, xmlFileName, "GET").then(xmlContent => {
-      if (xmlContent == null || xmlContent.localeCompare("") == 0 || xmlContent.localeCompare("The specified key does not exists in bucket") == 0) {
-        xmlContent = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-        <page xmlns="http://mile.ee.iisc.ernet.in/schemas/ocr_output">
-        </page>`;
-      }
-      console.log("getting Image Data for", req.query.fileName);
-      getItem(bucketName, req.query.fileName, "OCR").then(imgContent => {
-        if (imgContent == null || imgContent.localeCompare("") == 0 || imgContent.localeCompare("The specified key does not exists in bucket") == 0) {
-          var statusCode = req.query.type == "GET-OCR-XML" ? 400 : 200;
-          res.status(statusCode).json({
-            message: "Couldn't find the uploaded image on server",
-            xmlData: "",
-            completed: "N"
-          });
-        } else {
-          xml2js.parseString(xmlContent, (err, result) => {
-            if (err) {
-              var statusCode = req.query.type == "GET-OCR-XML" ? 500 : 200;
-              res.status(statusCode).send({
-                message: "Internal server error - xml2js.parseString failed",
+      } else {
+        await couch.findPage(currentBookDb, xmlFileName).then(async (response) => {
+          console.log("Got Output from find document for bookName", xmlFileName, "in", currentBookDb, "no. of documents", response.documents.docs.length);
+          if (response.statusCode == 404) {
+            // xmlContent = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            // <page xmlns="http://mile.ee.iisc.ernet.in/schemas/ocr_output">
+            // </page>`;
+            xmlJsonObject = {
+              "page": {
+               "$": {
+                "xmlns": "http://mile.ee.iisc.ernet.in/schemas/ocr_output"
+               }
+              }
+            }
+          } else {
+            if(response.documents.docs.length == 1) {
+              pageDocument = response.documents.docs[0];
+              console.log("pageDocument",pageDocument);
+              xmlJsonObject = pageDocument.data;
+              console.log("xmlContent in RUN-OCR",xmlJsonObject);
+            } else {
+              console.log("Multiple XML documents found in book database", currentBookDb);
+              res.status(200).json({
+                message: "Multiple XML documents found in book database",
                 xmlData: "",
                 completed: "N"
               });
             }
-            result["page"]["imageData"] = imgContent;
-            const builder = new xml2js.Builder();
-            xmlContent = builder.buildObject(result);
-            request.post({
-              url: process.env.RUN_OCR_ADDRESS,
-              port: process.env.RUN_OCR_PORT,
-              method: "POST",
-              headers: {
-                'Content-Type': 'application/xml',
-              },
-              body: xmlContent
-            }, function (error, response, body) {
-              if (response.statusCode == 200) {
-                doCreateObject(bucketName, xmlFileName, body).then(() => {
+          }
+          console.log("getting Image Data for", req.query.fileName);
+          getItem(bucketName, req.query.fileName, "OCR").then( (imgContent) => {
+            if (imgContent == null || imgContent.localeCompare("") == 0 || imgContent.localeCompare("The specified key does not exists in bucket") == 0) {
+              var statusCode = req.query.type == "GET-OCR-XML" ? 400 : 200;
+              res.status(statusCode).json({
+                message: "Couldn't find the uploaded image on server",
+                xmlData: "",
+                completed: "N"
+              });
+            } else {
+              xmlJsonObject["page"]["imageData"] = imgContent;
+              const builder = new xml2js.Builder();
+              xmlContent = builder.buildObject(xmlJsonObject);
+              request.post({
+                url: process.env.RUN_OCR_ADDRESS,
+                port: process.env.RUN_OCR_PORT,
+                method: "POST",
+                headers: {
+                  'Content-Type': 'application/xml',
+                },
+                body: xmlContent
+              }, function (error, response, body) {
+                if (response.statusCode == 200) {
                   if (req.query.type == "GET-OCR-XML") {
-                    xml2js.parseString(body, function (err, result) {
+                    console.log("response body on RUN-OCR",body);
+                    xml2js.parseString(body, async function (err, result) {
+                      console.log("xml2js.parseString result after RUN-OCR",result);
+                      let now = new Date();
+                      let date = now.toUTCString();
+                      if(pageDocument && Object.keys(pageDocument).length === 0 && pageDocument.constructor === Object) {
+                        console.log("Insert new XML document");
+                        pageDocument._id = xmlFileName;
+                        pageDocument.pageName = xmlFileName;
+                        pageDocument.data = result;
+                        pageDocument.LastModified = date;
+                      } else {
+                        console.log("Update existing XML document");
+                        pageDocument.data = result;
+                        pageDocument.LastModified = date;
+                      }
+                      await couch.insertDocument(currentBookDb, pageDocument).then((result) => {
+                        console.log("insert page Document result", result);
+                        if (result.ok == true) {
+                          console.log("page document has been inserted into database", currentBookDb);
+                        } else {
+                          console.log("Inserting page document to bookDb failed");
+                        }
+                      });
                       res.status(201).json({
                         message: "OCR completed on " + req.query.fileName,
                         completed: "Y",
@@ -218,29 +243,62 @@ router.get("", authChecker, (req, res, next) => {
                       completed: "Y"
                     });
                   }
-                }).catch((error) => {
-                  console.log("Error while saving XML to COS: ", error);
+                  // doCreateObject(bucketName, xmlFileName, body).then(() => {
+                  //   if (req.query.type == "GET-OCR-XML") {
+                  //     xml2js.parseString(body, function (err, result) {
+                  //       console.log("xml2js.parseString result after RUN-OCR",result);
+                  //       res.status(201).json({
+                  //         message: "OCR completed on " + req.query.fileName,
+                  //         completed: "Y",
+                  //         xmlData: result
+                  //       });
+                  //     });
+                  //   } else {
+                  //     res.status(201).json({
+                  //       message: "OCR completed on " + req.query.fileName,
+                  //       completed: "Y"
+                  //     });
+                  //   }
+                  // }).catch((error) => {
+                  //   console.log("Error while saving XML to COS: ", error);
+                  //   var statusCode = req.query.type == "GET-OCR-XML" ? 500 : 200;
+                  //   res.status(statusCode).json({
+                  //     message: "Internal server error - Failed to save OCR XML to object storage: " + error,
+                  //     xmlData: "",
+                  //     completed: "N"
+                  //   });
+                  // });
+                } else {
+                  console.log("Error occurred while running the OCR: ", error);
                   var statusCode = req.query.type == "GET-OCR-XML" ? 500 : 200;
                   res.status(statusCode).json({
-                    message: "Internal server error - Failed to save OCR XML to object storage: " + error,
+                    message: "Internal server error occurred while running the OCR: " + error,
                     xmlData: "",
                     completed: "N"
                   });
-                });
-              } else {
-                console.log("Error occurred while running the OCR: ", error);
-                var statusCode = req.query.type == "GET-OCR-XML" ? 500 : 200;
-                res.status(statusCode).json({
-                  message: "Internal server error occurred while running the OCR: " + error,
-                  xmlData: "",
-                  completed: "N"
-                });
-              }
+                }
+              });
+            }
+          }).catch((err) => {
+            console.log("Couldn't find the uploaded image on server", err);
+            res.status(200).json({
+              message: "Couldn't find the uploaded image on server",
+              xmlData: "",
+              completed: "N"
             });
           });
-        }
+        });
+      }
+    }).catch((err) => {
+      console.log("error while running OCR", err);
+      res.status(200).json({
+        message: "error while running OCR",
+        xmlData: "",
+        completed: "N"
       });
     });
+    // return;
+    // CouchDb code ends here
   }
 });
 
