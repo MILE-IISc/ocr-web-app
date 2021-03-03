@@ -11,8 +11,6 @@ const Jimp = require('jimp');
 
 const authChecker = require("../middleware/auth-checker");
 const couch = require('../controllers/couch');
-const Image = require("../models/image");
-const User = require("../models/user");
 const bucketFilesList = [];
 const MIME_TYPE_MAP = {
   "image/png": "png",
@@ -136,7 +134,6 @@ const storage = multer.diskStorage({
   }
 });
 
-
 async function deleteImage(filePath) {
   return new Promise((resolve, reject) => {
     fs.unlinkSync(filePath, function (err) {
@@ -157,6 +154,7 @@ async function deleteImage(filePath) {
     resolve(true);
   });
 }
+
 router.post("",
   authChecker,
   multer({ storage: storage }).single("image"),

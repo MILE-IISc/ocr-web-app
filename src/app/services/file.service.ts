@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { AuthService } from '../auth/auth.service';
 import { ActivatedRoute } from '@angular/router';
+import { ImageService } from './images.service';
 
 @Injectable({ providedIn: 'root' })
 export class FileService {
   XML_BACKEND_URL;
   DOWNLOAD_XML_BACKEND_URL;
-  constructor(private httpClient: HttpClient, private authService: AuthService,private route: ActivatedRoute) {
+  constructor(private httpClient: HttpClient, private authService: AuthService,private route: ActivatedRoute, private imageService: ImageService) {
     this.XML_BACKEND_URL = this.authService.BACKEND_URL + "/api/xml/";
     this.DOWNLOAD_XML_BACKEND_URL = this.authService.BACKEND_URL + "/api/downloadXml/";
   }
@@ -19,7 +20,8 @@ export class FileService {
     return this.httpClient.get<{ message: string; xmlData: any }>(this.XML_BACKEND_URL + xmlFileName).toPromise();
   }
 
-  downloadZipFile() {
+  downloadZipFile(bookDbName, bookName) {
+    const queryParams = `?bookDbName=${bookDbName}&bookName=${bookName}`;
     const options: any = {
       header: new HttpHeaders({
         'Content_Type': 'application/json',
@@ -27,6 +29,6 @@ export class FileService {
       }),
       responseType: 'blob' as 'json'
     };
-    return this.httpClient.get<Blob>(this.DOWNLOAD_XML_BACKEND_URL, options).toPromise();
+    return this.httpClient.get<Blob>(this.DOWNLOAD_XML_BACKEND_URL + queryParams, options).toPromise();
   }
 }

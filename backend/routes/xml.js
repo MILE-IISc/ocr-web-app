@@ -9,8 +9,6 @@ const { promise } = require("protractor");
 var util = require('util');
 var request = require("request");
 const authChecker = require("../middleware/auth-checker");
-const Image = require("../models/image");
-const User = require("../models/user");
 const couch = require('../controllers/couch');
 
 const cloudStorage = require('ibm-cos-sdk');

@@ -333,11 +333,6 @@ export class ScreenComponent implements OnInit {
         }
       });
 
-    // check its usage - It's not used anywhere
-    this.imageService.displayChange.subscribe((display: any) => {
-      this.display = display;
-    });
-
     this.imageService.urlChanged
       .subscribe(
         (url: any) => {
@@ -632,7 +627,9 @@ export class ScreenComponent implements OnInit {
 
   async downloadXml2() {
     this.isDownloading = true;
-    await this.fileService.downloadZipFile().then(response => {
+    let currentBookDb = this.imageService.getCurrentBookDb();
+    let bookName = this.route.snapshot.queryParams['data'];
+    await this.fileService.downloadZipFile(currentBookDb, bookName).then(response => {
       this.isDownloading = false;
       fileSaver(response, "OCR_output.zip");
     }), error => {

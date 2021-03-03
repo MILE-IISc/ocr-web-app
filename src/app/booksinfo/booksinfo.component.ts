@@ -24,7 +24,7 @@ export class BooksinfoComponent implements OnInit {
   authListenerSubs;
   isLoadingfromServer;
   private bookSub: Subscription
-  books: Book[] = [];
+  books = [];
   bookMessage = "";
   folderName = "";
   filesToBeUploaded;
@@ -151,15 +151,27 @@ export class BooksinfoComponent implements OnInit {
             this.bookService.getBooks();
           }
         });
-
       }
     }
-
   }
 
   async downloadXml2() {
     this.isDownloading = true;
-    await this.fileService.downloadZipFile().then(response => {
+    let bookDbName = "";
+    if(this.books.length > 0) {
+      for(let i = 0; i < this.books.length; i++) {
+        console.log("books["+i+"]:",this.books[i]);
+        if(this.bookName == this.books[i].bookName) {
+          bookDbName = "mile_book_db_"+this.books[i]._id;
+        }
+      }
+    } else {
+      console.log("Unable to find book details. Please re-login to download.");
+      alert("Unable to find book details. Please re-login to download.");
+    }
+    // return;
+    console.log("calling this.fileService.downloadZipFile()");
+    await this.fileService.downloadZipFile(bookDbName, this.bookName).then(response => {
       this.isDownloading = false;
       fileSaver(response, "OCR_output.zip");
     }), error => {

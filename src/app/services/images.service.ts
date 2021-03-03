@@ -54,7 +54,6 @@ export class ImageService implements OnInit {
   btnImgArrayChange = new EventEmitter<any>();
   nextImageChange = new EventEmitter<boolean>();
   isSelectBlockChange = new EventEmitter<boolean>();
-  displayChange = new EventEmitter<any>();
   nextValueChange = new EventEmitter<any>();
   previousImageChange = new EventEmitter<boolean>();
   documentChange = new EventEmitter<any>();
@@ -122,6 +121,10 @@ export class ImageService implements OnInit {
 
   getCurrentImageName() {
     return this.pouchImagesList[this.imgFileCount].pageName;
+  }
+
+  getCurrentBookDb() {
+    return this.currentBookDb;
   }
 
   getBtnImages() {
