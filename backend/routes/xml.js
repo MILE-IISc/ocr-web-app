@@ -155,9 +155,7 @@ router.get("", authChecker, (req, res, next) => {
         await couch.findPage(currentBookDb, xmlFileName).then(async (response) => {
           console.log("Got Output from find document for bookName", xmlFileName, "in", currentBookDb, "no. of documents", response.documents.docs.length);
           if (response.statusCode == 404) {
-            // xmlContent = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-            // <page xmlns="http://mile.ee.iisc.ernet.in/schemas/ocr_output">
-            // </page>`;
+            console.log("documnet not found. So, setting default page xml");
             xmlJsonObject = {
               "page": {
                "$": {
@@ -170,7 +168,6 @@ router.get("", authChecker, (req, res, next) => {
               pageDocument = response.documents.docs[0];
               console.log("pageDocument",pageDocument);
               xmlJsonObject = pageDocument.data;
-              console.log("xmlContent in RUN-OCR",xmlJsonObject);
             } else {
               console.log("Multiple XML documents found in book database", currentBookDb);
               res.status(200).json({
@@ -179,6 +176,7 @@ router.get("", authChecker, (req, res, next) => {
               });
             }
           }
+          console.log("xmlContent in RUN-OCR",xmlJsonObject);
           console.log("getting Image Data for", req.query.fileName);
           getItem(bucketName, req.query.fileName, "OCR").then( (imgContent) => {
             if (imgContent == null || imgContent.localeCompare("") == 0 || imgContent.localeCompare("The specified key does not exists in bucket") == 0) {
@@ -201,42 +199,35 @@ router.get("", authChecker, (req, res, next) => {
                 body: xmlContent
               }, function (error, response, body) {
                 if (response.statusCode == 200) {
-                  if (req.query.type == "GET-OCR-XML") {
-                    console.log("response body on RUN-OCR",body);
-                    xml2js.parseString(body, async function (err, result) {
-                      console.log("xml2js.parseString result after RUN-OCR",result);
-                      let now = new Date();
-                      let date = now.toUTCString();
-                      if(pageDocument && Object.keys(pageDocument).length === 0 && pageDocument.constructor === Object) {
-                        console.log("Insert new XML document");
-                        pageDocument._id = xmlFileName;
-                        pageDocument.pageName = xmlFileName;
-                        pageDocument.data = result;
-                        pageDocument.LastModified = date;
+                  // console.log("response body on RUN-OCR",body);
+                  xml2js.parseString(body, async function (err, result) {
+                    console.log("xml2js.parseString result after RUN-OCR",result);
+                    let now = new Date();
+                    let date = now.toUTCString();
+                    if(pageDocument && Object.keys(pageDocument).length === 0 && pageDocument.constructor === Object) {
+                      console.log("Insert new XML document");
+                      pageDocument._id = xmlFileName;
+                      pageDocument.pageName = xmlFileName;
+                      pageDocument.data = result;
+                      pageDocument.LastModified = date;
+                    } else {
+                      console.log("Update existing XML document");
+                      pageDocument.data = result;
+                      pageDocument.LastModified = date;
+                    }
+                    await couch.insertDocument(currentBookDb, pageDocument).then((result) => {
+                      console.log("insert page Document result", result);
+                      if (result.ok == true) {
+                        console.log("page document has been inserted into database", currentBookDb);
                       } else {
-                        console.log("Update existing XML document");
-                        pageDocument.data = result;
-                        pageDocument.LastModified = date;
+                        console.log("Inserting page document to bookDb failed");
                       }
-                      await couch.insertDocument(currentBookDb, pageDocument).then((result) => {
-                        console.log("insert page Document result", result);
-                        if (result.ok == true) {
-                          console.log("page document has been inserted into database", currentBookDb);
-                        } else {
-                          console.log("Inserting page document to bookDb failed");
-                        }
-                      });
-                      res.status(201).json({
-                        message: "OCR completed on " + req.query.fileName,
-                        completed: "Y"
-                      });
                     });
-                  } else {
                     res.status(201).json({
                       message: "OCR completed on " + req.query.fileName,
                       completed: "Y"
                     });
-                  }
+                  });
                   // doCreateObject(bucketName, xmlFileName, body).then(() => {
                   //   if (req.query.type == "GET-OCR-XML") {
                   //     xml2js.parseString(body, function (err, result) {
