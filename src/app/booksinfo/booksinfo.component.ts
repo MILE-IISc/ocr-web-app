@@ -143,14 +143,13 @@ export class BooksinfoComponent implements OnInit {
 
   deleteBook() {
     for (let i = 0; i < this.books.length; i++) {
-      if (this.books[i].folderName == this.bookName) {
-        this.http.delete<{ message: string; completed: string }>(this.FOLDER_BACKEND_URL + this.bookName).subscribe(response => {
-          if (response.completed == 'Y') {
-            this.imageService.setDeleteImagesList(this.books[i].fileList);
-            this.imageService.deleteImages();
-            this.bookService.getBooks();
-          }
-        });
+      console.log("this.books[i].bookName",this.books[i].bookName,"this.bookName",this.bookName);
+      if (this.books[i].bookName == this.bookName) {
+        console.log("Initaiating delete request");
+        let bookDbName = "mile_book_db_"+this.books[i]._id;
+        // this.imageService.setDeleteBookImagesList(bookDbName);
+        // this.imageService.deleteImages();
+        // this.bookService.getBooks();
       }
     }
   }
@@ -166,8 +165,8 @@ export class BooksinfoComponent implements OnInit {
         }
       }
     } else {
-      console.log("Unable to find book details. Please re-login to download.");
-      alert("Unable to find book details. Please re-login to download.");
+      console.log("Unable to find book details.");
+      alert("Unable to find book details.");
     }
     // return;
     console.log("calling this.fileService.downloadZipFile()");

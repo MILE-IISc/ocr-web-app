@@ -269,9 +269,9 @@ export class ScreenComponent implements OnInit {
       this.pouchImages = pouchImagesList.pouchImagesList;
       console.log("pouchImages.length",this.pouchImages.length);
       if(this.pouchImages.length > 0 ) {
-        for(let i = 0; i < this.pouchImages.length; i++) {
-          console.log("this.pouchImages["+i+"] data",this.pouchImages[i]);
-        }
+        // for(let i = 0; i < this.pouchImages.length; i++) {
+        //   console.log("this.pouchImages["+i+"] data",this.pouchImages[i].pageame);
+        // }
         if (this.isDiv == true) {
           $('.holderClass').remove();
         }
@@ -698,7 +698,7 @@ export class ScreenComponentDialog {
 
 })
 export class ScreenComponentDeleteImage implements OnInit {
-  localImages: Images[] = [];
+  pouchImages = [];
   finalDeletionList = []
   constructor(private imageService: ImageService, public dialog: MatDialog) { }
 
@@ -718,10 +718,10 @@ export class ScreenComponentDeleteImage implements OnInit {
   };
 
   ngOnInit(): void {
-    this.localImages = this.imageService.getLocalImages();
-    for (let i = 0; i < this.localImages.length; i++) {
-      console.log("this.localImages[" + i + "].fileName", this.localImages[i].fileName);
-      this.image_1 = { name: this.localImages[i].fileName, completed: false, color: "warn" };
+    this.pouchImages = this.imageService.getPouchImagesList();
+    for (let i = 0; i < this.pouchImages.length; i++) {
+      // console.log("this.pouchImages[" + i + "].pageName", this.pouchImages[i].pageName);
+      this.image_1 = { name: this.pouchImages[i].pageName, completed: false, color: "warn" };
       this.image.deleteImage.push(this.image_1);
     }
   }
@@ -788,7 +788,7 @@ export class ScreenComponentConfirmDialog {
   constructor(private imageService: ImageService, public dialog: MatDialog) { }
 
   deleteImagesConfirm() {
-    $('#imgToRead').selectAreas('destroy');
+    // $('#imgToRead').selectAreas('destroy');
     $(".textElementsDiv").not(':first').remove();
     $(".textSpanDiv").empty();
     console.log("delete images");

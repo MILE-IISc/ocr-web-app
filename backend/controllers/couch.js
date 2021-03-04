@@ -264,6 +264,19 @@ module.exports.insertDocument = async function (dbName, document) {
   });
 }
 
+// Insert Document into Database
+module.exports.deleteDocument = async function (dbName, documentId) {
+  return new Promise((resolve, reject) => {
+    var db = cloudant.use(dbName);
+    db.remove(documentId).then((result) => {
+      console.log("result", result);
+      resolve(result);
+    }).catch(err => {
+      console.log("error while delete in couch.js",err);
+    })
+  });
+}
+
 // Code for Learning & Reusage Purpose
 
 // get cloudant cors details

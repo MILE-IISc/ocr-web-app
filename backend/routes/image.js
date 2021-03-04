@@ -434,13 +434,14 @@ router.get("/:fileName", authChecker, (req, res, next) => {
 
 router.delete("/:fileName", authChecker, (req, res, next) => {
   const filesToBeDeleted = [];
+  const documentId = req.query.documentId;
+  const bookDbName = req.query.bookDbName;
+  console.log("documentId in delete",documentId);
   filesToBeDeleted.push(req.params.fileName);
-  fileName = req.params.fileName.split("-");
-  xmlFileName = fileName[0].slice(0, -3) + 'xml';
-  filesToBeDeleted.push(xmlFileName + "-" + fileName[1]);
-  if (path.extname(fileName[0]).toLowerCase() == ".tif") {
-    tifFileName = fileName[0].slice(0, -3) + 'jpg';
-    filesToBeDeleted.push(tifFileName + "-" + fileName[1]);
+  fileName = req.params.fileName;
+  if (path.extname(fileName).toLowerCase() == ".tif") {
+    tifJpegFileName = fileName.slice(0, -3) + 'jpg';
+    filesToBeDeleted.push(tifJpegFileName);
   }
 
   bucketName = req.userData.bucketName;
