@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, Renderer2, ViewEncapsulation } from '@angular/core';
+import { Component, HostListener, OnInit, Renderer2, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
 declare var $: any;
 import { fromEvent, Subscription } from 'rxjs';
 import { map, buffer, filter, debounceTime } from 'rxjs/operators';
@@ -96,8 +96,17 @@ export class ScreenComponent implements OnInit {
   sideOpen() {
     this.sidesize1 = 30;
     this.sidesize2 = 70;
-    this.localImages = this.imageService.getLocalImages();
-    this.imageService.openModalDialog();
+    this.imageService.openFileName();
+    $('.viewBtn1').css("border","solid 1px black");
+    $('.viewBtn2').css("border","none");
+    $('.viewBtn1').click(function () {
+      $('.viewBtn1').css("border","solid 1px black");
+      $('.viewBtn2').css("border","none");
+    });
+    $('.viewBtn2').click(function () {
+      $('.viewBtn2').css("border","solid 1px black");
+      $('.viewBtn1').css("border","none");
+    });
 
     $("#OpenBar").hide();
     $("#CloseBar").show();
@@ -111,7 +120,15 @@ export class ScreenComponent implements OnInit {
     $("#CloseBar").hide();
   }
 
-  constructor(private headerService: HeaderService, private imageService: ImageService,
+  openfileName(){
+    this.imageService.openFileName();
+  }
+
+  openPreview(){
+    this.imageService.openPreview();
+  }
+
+  constructor(private headerService: HeaderService, private imageService: ImageService, private changeDetection: ChangeDetectorRef,
     public authService: AuthService, private fileService: FileService, public dialog: MatDialog, private route: ActivatedRoute) { }
 
   onLogout() {
@@ -182,6 +199,10 @@ export class ScreenComponent implements OnInit {
 
     this.imageService.ResumeUploadEvent.subscribe(() => {
       this.invokeUploadImage();
+    });
+
+    this.imageService.xmlUpdateChange.subscribe((status) => {
+      this.changeDetection.detectChanges();
     });
 
     this.percentage = this.headerService.getpercentagevary();
@@ -293,7 +314,9 @@ export class ScreenComponent implements OnInit {
         this.ImageIs = false;
         this.fileName = "No files have been Uploaded";
         this.localUrl = null;
-        this.imageService.buttonEnable()
+        this.imageService.buttonEnable();
+        this.isLoading = false;
+        this.isLoadingfromServer = false;
       }
     });
 
@@ -375,7 +398,8 @@ export class ScreenComponent implements OnInit {
   }
 
   async openThisImage(event) {
-    var id = event.target.value;
+    console.log("event",event.target.id);
+    var id = event.target.id;
     $('img#imgToRead').selectAreas('destroy');
     console.log("empty the right side screen");
     $(".textElementsDiv").not(':first').remove();

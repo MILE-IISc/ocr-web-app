@@ -60,7 +60,7 @@
     <button mat-stroked-button data-toggle="tooltip" title="Delete Blocks"  (click)="openDialog()">
        Blocks<mat-icon>delete_outline</mat-icon>
     </button>
-    
+
     <button mat-stroked-button data-toggle="tooltip" title="Delete Images" (click)="openDeleteDialog()">
         Images<mat-icon>delete_outline</mat-icon>
     </button>
@@ -69,7 +69,7 @@
   <button mat-icon-button data-toggle="tooltip" title="Progress Info" (click)="openProgressDialog()">
     <mat-icon>donut_large</mat-icon>
   </button>
- 
+
 <span class="example-spacer2"></span>
 
   <div *ngIf="!isLoading">
@@ -106,11 +106,17 @@
       <as-split-area [size]=sidesize1>
         <div>
           <mat-toolbar style="width: 100%; text-align: center;">
+            <span class="example-spacer1"></span>
             <h6>Select the page</h6>
+           <span class="example-spacer3"></span>
             <button mat-icon-button class="sideBar" color="accent" title="view Image List" (click)="sideClose()">
               <mat-icon>close</mat-icon>
             </button>
           </mat-toolbar>
+          <div class="viewDiv">
+            <button mat-flat-button id="btnFileName" class="viewBtn1" (click)="openfileName()">FileName</button>
+            <button mat-flat-button id="btnpreview" class="viewBtn2" (click)="openPreview()">Preview</button>
+          </div>
           <div class="sideBody" (click)="openThisImage($event)"></div>
         </div>
       </as-split-area>
