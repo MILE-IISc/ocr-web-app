@@ -84,10 +84,10 @@ export class BookService {
 
     await localUserDbInstance.allDocs({
       include_docs: true
-    }).then((result) => {
+    }).then(async (result) => {
       this.books = [];
       console.log("books Info from db", result.rows.length);
-      let docs = result.rows.map((row) => {
+      let docs = await result.rows.map((row) => {
         this.books.push(row.doc);
       });
     }).catch((error) => {
@@ -111,7 +111,7 @@ export class BookService {
     }
 
     // remoteUserDb Instance related
-    let remoteUserDbInstance = await this.pouchService.createRemoteDbInstance(userDbDetails.userDb, userDbDetails.userDbKey, userDbDetails.userDbPwd);
+    let remoteUserDbInstance = await this.pouchService.createRemoteDbInstance(userDbDetails.dbUrl, userDbDetails.userDb, userDbDetails.userDbKey, userDbDetails.userDbPwd);
     await this.pouchService.checkDbStatus(remoteUserDbInstance).then(status => {
       console.log("status of remoteDb of", userDbDetails.userDb, "is: ", status);
     });

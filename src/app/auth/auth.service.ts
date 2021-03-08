@@ -25,6 +25,7 @@ export class AuthService {
   private AUTH_BACKEND_URL;
 
   // Pouch & Couch related details
+  private dbUrl: string;
   public userDb: string;
   private userDbKey: string;
   private userDbPwd: string;
@@ -48,6 +49,7 @@ export class AuthService {
 
   getUserDbDetails() {
     let userDbDetails = {
+      "dbUrl": this.dbUrl,
       "userDb": this.userDb,
       "userDbKey": this.userDbKey,
       "userDbPwd": this.userDbPwd,
@@ -90,7 +92,7 @@ export class AuthService {
   login(email: string, password: string) {
     const authData: AuthData = { email: email, password: password };
     this.http
-      .post<{ token: string; expiresIn: number; userId: string, email: string, role: string, isLoaded: string, bucketName: string, userDb: string, userDbKey: string, userDbPwd: string}>(
+      .post<{ token: string; expiresIn: number; userId: string, email: string, role: string, isLoaded: string, bucketName: string, dbUrl: string, userDb: string, userDbKey: string, userDbPwd: string}>(
         this.AUTH_BACKEND_URL + "/login",
         authData
       ).subscribe(
@@ -106,6 +108,7 @@ export class AuthService {
             this.isAdmin = (response.role == "admin") ? true : false;
             this.isLoaded = response.isLoaded;
             this.bucketName = response.bucketName;
+            this.dbUrl = response.dbUrl
             this.userDb = response.userDb;
             this.userDbKey = response.userDbKey;
             this.userDbPwd = response.userDbPwd;
@@ -114,7 +117,7 @@ export class AuthService {
             const expirationDate = new Date(
               now.getTime() + expiresInDuration * 1000
             );
-            this.saveAuthData(token, expirationDate, this.userId, this.userName, this.isAdmin, this.bucketName, this.userDb, this.userDbKey, this.userDbPwd);
+            this.saveAuthData(token, expirationDate, this.userId, this.userName, this.isAdmin, this.bucketName, this.dbUrl, this.userDb, this.userDbKey, this.userDbPwd);
             this.router.navigate(["/booksdashboard"]);
           }
         },
@@ -138,6 +141,7 @@ export class AuthService {
       this.userId = authInformation.userId;
       this.userName = authInformation.userName;
       this.bucketName = authInformation.bucketName;
+      this.dbUrl = authInformation.dbUrl;
       this.userDb = authInformation.userDb;
       this.userDbKey = authInformation.userDbKey;
       this.userDbPwd = authInformation.userDbPwd;
@@ -155,6 +159,7 @@ export class AuthService {
     this.userId = null;
     this.userName = null;
     this.bucketName = null;
+    this.dbUrl = null;
     this.userDb = null;
     this.userDbKey = null;
     this.userDbPwd = null;
@@ -169,13 +174,14 @@ export class AuthService {
     }, duration * 1000);
   }
 
-  private saveAuthData(token: string, expirationDate: Date, userId: string, userName: string, isAdmin, bucketName: string, userDb: string, userDbKey: string, userDbPwd: string) {
+  private saveAuthData(token: string, expirationDate: Date, userId: string, userName: string, isAdmin, bucketName: string, dbUrl: string, userDb: string, userDbKey: string, userDbPwd: string) {
     localStorage.setItem("token", token);
     localStorage.setItem("expiration", expirationDate.toISOString());
     localStorage.setItem("userId", userId);
     localStorage.setItem("userName", userName);
     localStorage.setItem("isAdmin", isAdmin);
     localStorage.setItem("bucketName", bucketName);
+    localStorage.setItem("dbUrl", dbUrl);
     localStorage.setItem("userDb", userDb);
     localStorage.setItem("userDbKey", userDbKey);
     localStorage.setItem("userDbPwd", userDbPwd);
@@ -188,6 +194,7 @@ export class AuthService {
     localStorage.removeItem("userName");
     localStorage.removeItem("isAdmin");
     localStorage.removeItem("bucketName");
+    localStorage.removeItem("dbUrl");
     localStorage.removeItem("userDb");
     localStorage.removeItem("userDbKey");
     localStorage.removeItem("userDbPwd");
@@ -199,6 +206,7 @@ export class AuthService {
     const userId = localStorage.getItem("userId");
     const userName = localStorage.getItem("userName");
     const bucketName = localStorage.getItem("bucketName");
+    const dbUrl = localStorage.getItem("dbUrl");
     const userDb = localStorage.getItem("userDb");
     const userDbKey = localStorage.getItem("userDbKey");
     const userDbPwd = localStorage.getItem("userDbPwd");
@@ -213,6 +221,7 @@ export class AuthService {
       userName: userName,
       isAdmin: isAdmin,
       bucketName: bucketName,
+      dbUrl: dbUrl,
       userDb: userDb,
       userDbKey: userDbKey,
       userDbPwd: userDbPwd

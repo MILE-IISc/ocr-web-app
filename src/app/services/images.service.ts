@@ -88,6 +88,7 @@ export class ImageService implements OnInit {
   isRunningOcrChange = new EventEmitter<any>();
   isLoadingFromServer = false;
   isLoadingFromServerChange = new EventEmitter<any>();
+  xmlUpdateChange = new EventEmitter<any>();
   progressInfos: ProgressInfo[] = [];
   runOcrAllFlag = false;
   deleteFlag = false;
@@ -149,6 +150,58 @@ export class ImageService implements OnInit {
     this.bookName = bookName;
   }
 
+  deleteBookDb(currentBookDb) {
+    console.log("No images in this Db so destroying currentBookDb in local and remote & deleting corresponding document in perUserDb");
+    this.currentRemoteBookDbInstance.destroy().then(() => {
+      console.log("remote bookDatabase destroyed",currentBookDb);
+      this.currentLocalBookDbInstance.destroy().then(async () => {
+        console.log("local bookDatabase destroyed",currentBookDb);
+        // Filling deletion List for xmlDoc and its revisions
+        var bookDbDocumentId = currentBookDb.replace("mile_book_db_", "");
+        let docs = [];
+        let bookDocumentWithRevs = await this.currentRemoteBookDbInstance.get(bookDbDocumentId, { revs: true, open_revs: 'all'}).then((document) => {
+          return document
+        }).catch((err) => {
+          console.log("Unable to retrieve the document for",bookDbDocumentId,"\nerror:" ,err);
+          console.log("error status", err.status);
+          if (err.status == "404") {
+            return "NOT_FOUND";
+          }
+        });
+        if(bookDocumentWithRevs != "NOT_FOUND") {
+          if (bookDocumentWithRevs.length > 0) {
+            for(let i = 0; i < bookDocumentWithRevs.length; i++) {
+              console.log("bookDocumentWithRevs["+i+"]:",bookDocumentWithRevs[i]);
+              console.log("bookDocumentWithRevs["+i+"]._id:",bookDocumentWithRevs[i]["ok"]._id);
+              let tempDeleteDoc = {_id : bookDocumentWithRevs[i]["ok"]._id, _rev: bookDocumentWithRevs[i]["ok"]._rev, _deleted : true };
+              docs.push(tempDeleteDoc);
+            }
+          }
+        }
+        console.log("docs to be deleted along with its revisions",docs);
+        if(docs.length > 0) {
+          let userDbDetails = await this.authService.getUserDbDetails();
+          let remoteUserDbInstance = await this.pouchService.createRemoteDbInstance(userDbDetails.dbUrl, userDbDetails.userDb, userDbDetails.userDbKey, userDbDetails.userDbPwd);
+          await this.pouchService.checkDbStatus(remoteUserDbInstance).then(status => {
+            console.log("status of remoteUserDbInstance of", userDbDetails.userDb, "is: ", status);
+          });
+          await remoteUserDbInstance.bulkDocs(docs, function(err, response) {
+            if (err) {
+                return console.log(err);
+            } else {
+                console.log(response+"Documents deleted Successfully");
+                this.router.navigate(["/booksdashboard"]);
+            }
+          });
+        }
+      }).catch((err) => {
+        console.log("error while destroying database",err);
+      });
+    }).catch((err) => {
+      console.log("error while destroying database",err);
+    });
+  }
+
   async sortPouchImagesList(pouchImages) {
     console.log("sorting images list");
     return new Promise(async (resolve, reject) => {
@@ -164,7 +217,6 @@ export class ImageService implements OnInit {
   }
 
   async handleChange(change) {
-
     let changedDoc = null;
     let changedIndex = null;
     console.log("id of change on handleChange of imagesService", change.id);
@@ -202,11 +254,20 @@ export class ImageService implements OnInit {
         }
       }
     }
-    this.pouchImagesList = await this.sortPouchImagesList(this.pouchImagesList);
-    console.log("pouchImagesList length after handling changes",this.pouchImagesList.length);
-    this.pouchImagesListUpdated.next({
-      pouchImagesList: [...this.pouchImagesList]
-    });
+    if(this.pouchImagesList.length > 0) {
+      this.pouchImagesList = await this.sortPouchImagesList(this.pouchImagesList);
+      console.log("pouchImagesList length after handling changes",this.pouchImagesList.length);
+      this.pouchImagesListUpdated.next({
+        pouchImagesList: [...this.pouchImagesList]
+      });
+    } else {
+      console.log("================>\nPouchImagesList Length is 0\n<=================");
+      console.log("pouchImagesList length after handling changes",this.pouchImagesList.length);
+      this.pouchImagesListUpdated.next({
+        pouchImagesList: [...this.pouchImagesList]
+      });
+      // this.deleteBookDb(this.currentBookDb);
+    }
   }
 
   async getServerImages() {
@@ -228,10 +289,10 @@ export class ImageService implements OnInit {
 
     await localUserDbInstance.allDocs({
       include_docs: true
-    }).then((result) => {
+    }).then(async (result) => {
       books = [];
       console.log("books Info from db", result.rows.length);
-      let docs = result.rows.map((row) => {
+      let docs = await result.rows.map((row) => {
         books.push(row.doc);
       });
     }).catch((error) => {
@@ -294,7 +355,7 @@ export class ImageService implements OnInit {
     }
 
     // remote BookDb Instance related
-    this.currentRemoteBookDbInstance = await this.pouchService.createRemoteDbInstance(this.currentBookDb, userDbDetails.userDbKey, userDbDetails.userDbPwd);
+    this.currentRemoteBookDbInstance = await this.pouchService.createRemoteDbInstance(userDbDetails.dbUrl, this.currentBookDb, userDbDetails.userDbKey, userDbDetails.userDbPwd);
     await this.pouchService.checkDbStatus(this.currentRemoteBookDbInstance).then(status => {
       console.log("status of remoteDb of", this.currentBookDb, "is: ", status);
     });
@@ -415,9 +476,12 @@ export class ImageService implements OnInit {
   }
 
   updateXmlModel(jsonObj) {
+    console.log("entered updateXmlModel");
     if (jsonObj && jsonObj['page']) {
+      console.log("page available");
       var blocks = [];
       if (jsonObj['page'].block) {
+        console.log("block available");
         blocks = jsonObj['page'].block;
       }
       if (jsonObj['page']["$"].rotationAngle) {
@@ -455,6 +519,9 @@ export class ImageService implements OnInit {
           }
         }
       }
+      this.xmlUpdateChange.emit(true);
+    } else {
+      console.log("page not available");
     }
   }
 
@@ -521,7 +588,7 @@ export class ImageService implements OnInit {
       });
 
       // remote BookDb Instance related
-      this.uploadRemoteBookDbInstance = await this.pouchService.createRemoteDbInstance(bookDbName, userDbDetails.userDbKey, userDbDetails.userDbPwd);
+      this.uploadRemoteBookDbInstance = await this.pouchService.createRemoteDbInstance(userDbDetails.dbUrl, bookDbName, userDbDetails.userDbKey, userDbDetails.userDbPwd);
       await this.pouchService.checkDbStatus(this.uploadRemoteBookDbInstance).then(status => {
         console.log("status of remoteDb of", bookDbName, "is: ", status);
       });
@@ -654,23 +721,25 @@ export class ImageService implements OnInit {
         bookImages.push(row.doc);
       });
     });
-    bookImages = await this.sortBookImagesList(bookImages);
-    let thumbnailImage = bookImages[0].pageThumbnail;
-    let bookDocumentId = bookDbName.replace('mile_book_db_', '');
-    let bookDocument = await tempLocalUserDbInstance.get(bookDocumentId).then((bookDocument) => {
-        console.log("bookDocument retrieved for updating thumbnail", bookDocument);
-        return bookDocument;
+    if(bookImages.length > 0) {
+      bookImages = await this.sortBookImagesList(bookImages);
+      let thumbnailImage = bookImages[0].pageThumbnail;
+      let bookDocumentId = bookDbName.replace('mile_book_db_', '');
+      let bookDocument = await tempLocalUserDbInstance.get(bookDocumentId).then((bookDocument) => {
+          console.log("bookDocument retrieved for updating thumbnail", bookDocument);
+          return bookDocument;
+        }).catch((err) => {
+          console.log("Unable to retrieve the document for",bookDocumentId);
+        });
+      bookDocument.bookThumbnailImage = thumbnailImage;
+      await tempLocalUserDbInstance.put(bookDocument).then((response) => {
+        console.log("bookThumbnail has been updated for", bookDocument.bookName, "with response", response);
       }).catch((err) => {
-        console.log("Unable to retrieve the document for",bookDocumentId);
+        console.log("error while updating bookThumbnail", err);
       });
-    bookDocument.bookThumbnailImage = thumbnailImage;
-    await tempLocalUserDbInstance.put(bookDocument).then((response) => {
-      console.log("bookThumbnail has been updated for", bookDocument.bookName, "with response", response);
-    }).catch((err) => {
-      console.log("error while updating bookThumbnail", err);
-    });
-    // emptying the bookImages List after its usage is completed and closing tempLocalbookDbInstance connection
-    bookImages = [];
+      // emptying the bookImages List after its usage is completed and closing tempLocalbookDbInstance connection
+      bookImages = [];
+    }
     tempLocalbookDbInstance.close();
     tempLocalUserDbInstance.close();
   }
@@ -837,30 +906,34 @@ export class ImageService implements OnInit {
       XmlfileName: fileName.slice(0, -3) + 'xml',
       user: this.authService.userName
     };
-    this.http.put<{ message: string, completed: string }>(this.XML_BACKEND_URL + queryParams, jsonData).subscribe(response => {
-        console.log("response message after correction " + response.message);
-        this.headerService.setloadmessage(response.message);
-        this.localImages = this.getLocalImages();
-        console.log("server image length in update " + this.localImages.length);
-        if (this.localImages.length > 0) {
-          for (let i = 0; i < this.localImages.length; i++) {
-            // console.log("jsonData.XmlfileName ", jsonData.XmlfileName, "this.localImages[" + i + "].fileName ", this.localImages[i].fileName);
-            if (this.localImages[i].fileName.slice(0, -3) + 'xml' == jsonData.XmlfileName) {
-              console.log("name" + this.localImages[i].fileName);
-              this.localImages[i].completed = response.completed;
-              console.log("completed" + this.localImages[i].completed);
-            }
-          }
-        } else {
-          for (let i = 0; i < this.localImages.length; i++) {
-            if (this.localImages[i].fileName.slice(0, -3) + 'xml' == jsonData.XmlfileName) {
-              console.log("name" + this.localImages[i].fileName);
-              this.localImages[i].completed = response.completed;
-              console.log("completed" + this.localImages[i].completed);
-            }
-          }
-        }
-      });
+    let xmlFileName = fileName.slice(0, -3) + 'xml'
+
+    this.updatelocalXml(xmlFileName, XmlModel.jsonObject);
+    this.onXml();
+    // this.http.put<{ message: string, completed: string }>(this.XML_BACKEND_URL + queryParams, jsonData).subscribe(response => {
+    //     console.log("response message after correction " + response.message);
+    //     this.headerService.setloadmessage(response.message);
+    //     this.localImages = this.getLocalImages();
+    //     console.log("server image length in update " + this.localImages.length);
+    //     if (this.localImages.length > 0) {
+    //       for (let i = 0; i < this.localImages.length; i++) {
+    //         // console.log("jsonData.XmlfileName ", jsonData.XmlfileName, "this.localImages[" + i + "].fileName ", this.localImages[i].fileName);
+    //         if (this.localImages[i].fileName.slice(0, -3) + 'xml' == jsonData.XmlfileName) {
+    //           console.log("name" + this.localImages[i].fileName);
+    //           this.localImages[i].completed = response.completed;
+    //           console.log("completed" + this.localImages[i].completed);
+    //         }
+    //       }
+    //     } else {
+    //       for (let i = 0; i < this.localImages.length; i++) {
+    //         if (this.localImages[i].fileName.slice(0, -3) + 'xml' == jsonData.XmlfileName) {
+    //           console.log("name" + this.localImages[i].fileName);
+    //           this.localImages[i].completed = response.completed;
+    //           console.log("completed" + this.localImages[i].completed);
+    //         }
+    //       }
+    //     }
+    //   });
   }
 
   openModalDialog() {
@@ -1465,14 +1538,12 @@ export class ImageService implements OnInit {
     }
     var xmlString = new XMLSerializer().serializeToString(xmlDocument);
 
-    xml2js.parseString(xmlString, function (err, result) {
-      var jsonString = JSON.stringify(result);
+    await xml2js.parseString(xmlString, function (err, result) {
       XmlModel.jsonObject = result;
     });
     let fileName = this.getCurrentImageName();
     let xmlFileName = fileName.slice(0, -3) + "xml";
     this.updatelocalXml(xmlFileName, XmlModel.jsonObject);
-    // this.updateCorrectedXml(this.fileName);
   }
 
 
@@ -1660,6 +1731,7 @@ export class ImageService implements OnInit {
                     return console.log(err);
                   } else {
                     console.log(response+"Documents deleted Successfully");
+                    return true;
                   }
               });
               }
@@ -1708,4 +1780,37 @@ export class ImageService implements OnInit {
     this.setDeleteFlag(false);
     this.deleteLastIndex = 0;
   }
+
+  openFileName(){
+    console.log("this.pouchImagesList.length inside openFileName: " + this.pouchImagesList.length);
+    this.btnImgArray.splice(0, this.btnImgArray.length);
+    for (let i = 0; i < this.pouchImagesList.length; i++) {
+      var btnImgEle = "<button  style=\"width: 100%; border: none;\"  class=\"btnImg\" value=\"" + this.pouchImagesList[i].pageName + "\"  id=\"" + this.pouchImagesList[i].pageName + "\">" + this.pouchImagesList[i].pageName + "</button>";
+      this.btnImgArray.push(btnImgEle);
+      this.btnImgArrayChange.emit(this.btnImgArray.slice());
+    }
+    console.log("images count inside btnImgArray: " + this.btnImgArray.length);
+    $(".sideBody").empty();
+    for (let i = 0; i < this.btnImgArray.length; i++) {
+      $(".sideBody").append(this.btnImgArray[i]);
+    }
+ }
+
+ async openPreview(){
+   console.log("this.pouchImagesList.length inside openPreview"+this.pouchImagesList.length);
+    this.btnImgArray.splice(0, this.btnImgArray.length);
+    for (let i = 0; i < this.pouchImagesList.length; i++) {
+      this.fileName = this.pouchImagesList[i].pageName;
+      console.log("openPreview fileName"+this.fileName);
+      var btnImgEle = "<button  style=\"width: 100%; height: 100px border: none;\"  class=\"btnImg\" value=\"" + this.pouchImagesList[i].pageName + "\"  id=\"" + this.pouchImagesList[i].pageName + "\"><img src=\""+this.pouchImagesList[i].pageThumbnail+"\" id=\"" + this.pouchImagesList[i].pageName + "\"></button>";
+      this.btnImgArray.push(btnImgEle);
+      this.btnImgArrayChange.emit(this.btnImgArray.slice());
+    }
+    console.log("images count inside btnImgArray: " + this.btnImgArray.length);
+    $(".sideBody").empty();
+    for (let i = 0; i < this.btnImgArray.length; i++) {
+      $(".sideBody").append(this.btnImgArray[i]);
+    }
+  }
+
 }

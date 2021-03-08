@@ -1,5 +1,5 @@
 var Cloudant = require('@cloudant/cloudant');
-var cloudant = new Cloudant({ url: process.env.NO_SQL_DB_URL });
+var cloudant = new Cloudant({ url: process.env.NO_SQL_DB_ADMIN_URL });
 
 
 // Check Database Existence
@@ -191,7 +191,7 @@ module.exports.findUser = async function (dbName, searchValue) {
     console.log("serach in findDocument", searchValue);
     db.find({
       'selector': {
-        email: {
+        name: {
           '$eq': searchValue
         }
       }
