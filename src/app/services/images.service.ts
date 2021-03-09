@@ -37,13 +37,13 @@ export class ImageService implements OnInit {
 
   }
 
-  images: Array<Images> = [];
-  localImages: Array<Images> = [];
+  // images: Array<Images> = [];
+  // localImages: Array<Images> = [];
   pouchImagesList: any = [];// This array will be used for storing imagesInfo of corresponding book from pouchDb
   private pouchImagesListUpdated = new Subject<{ pouchImagesList }>();
   currentBookDb;
   imgFileCount = 0;
-  private imagesUpdated = new Subject<{ localImages: Images[] }>();
+  // private imagesUpdated = new Subject<{ localImages: Images[] }>();
 
   fileName;
   public nextImages = false;
@@ -220,7 +220,7 @@ export class ImageService implements OnInit {
     let changedDoc = null;
     let changedIndex = null;
     console.log("id of change on handleChange of imagesService", change.id);
-    console.log("doc of change on handleChange of imagesService", change.doc);
+    // console.log("doc of change on handleChange of imagesService", change.doc);
     this.pouchImagesList.forEach((pouchImage: any, index) => {
       // console.log("pouchImage._id:",pouchImage._id);
       if (pouchImage._id === change.id) {
@@ -525,9 +525,9 @@ export class ImageService implements OnInit {
     }
   }
 
-  getImageUpdateListener() {
-    return this.imagesUpdated.asObservable();
-  }
+  // getImageUpdateListener() {
+  //   return this.imagesUpdated.asObservable();
+  // }
 
   getPouchImageUpdateListener() {
     return this.pouchImagesListUpdated.asObservable();
@@ -559,9 +559,9 @@ export class ImageService implements OnInit {
     return this.uploadMessage;
   }
 
-  getLocalImages() {
-    return this.localImages.slice();
-  }
+  // getLocalImages() {
+  //   return this.localImages.slice();
+  // }
 
   getPouchImagesList() {
     return this.pouchImagesList;
@@ -1501,10 +1501,13 @@ export class ImageService implements OnInit {
     this.clientpercent = this.percentage;
     this.blocksize()
   }
+
   unselectBlock() {
     this.obtainblock = false;
     $('img#imgToRead').selectAreas('destroy');
-
+    // console.log("empty the right side screen");
+    $(".textElementsDiv").not(':first').remove();
+    $(".textSpanDiv").empty();
   };
 
   async onSave() {

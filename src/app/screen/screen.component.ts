@@ -31,9 +31,9 @@ import { ActivatedRoute } from '@angular/router';
 export class ScreenComponent implements OnInit {
   opened: boolean;
   events: string[] = [];
-  private waveSub: Subscription;
+  // private waveSub: Subscription;
+  // localImages: Images[] = [];
   private imageSub: Subscription;
-  localImages: Images[] = [];
   pouchImages: any = [];
   imageList = "";
   displayarea: any;
@@ -321,40 +321,40 @@ export class ScreenComponent implements OnInit {
     });
 
     // can be removed as its implemented using pouchDb
-    this.waveSub = this.imageService
-      .getImageUpdateListener()
-      .subscribe(async (imageData: { localImages: Images[] }) => {
-        this.localImages = imageData.localImages;
-        const imageLength = this.localImages.length;
-        if (imageLength > 0) {
-          if (this.isDiv == true) {
-            $('.holderClass').remove();
-          }
-          this.isLoading = true;
-          this.ImageIs = true;
-          if (imageLength > 1) {
-            this.nextImage = false;
-            this.imageService.nextImageChange.emit(this.nextImage);
-          }
-          this.isLoading = false;
-          this.isLoadingfromServer = false;
-          if (this.localImages[0].dataUrl == "" || this.localImages[0].dataUrl == null) {
-            this.localImages[0].dataUrl = await this.imageService.loadArray(this.localImages[0].fileName);
-          }
-          this.localUrl = this.localImages[0].dataUrl;
-          this.fileName = this.localImages[0].fileName;
-          setTimeout(() => this.imageService.fitwidth(), 50);
-          setTimeout(() => this.setpercentage(), 60);
-        }
-        else {
-          $(".textElementsDiv").not(':first').remove();
-          $(".textSpanDiv").empty();
-          this.ImageIs = false;
-          this.fileName = "No files have been Uploaded";
-          this.localUrl = null;
-          this.imageService.buttonEnable()
-        }
-      });
+    // this.waveSub = this.imageService
+    //   .getImageUpdateListener()
+    //   .subscribe(async (imageData: { localImages: Images[] }) => {
+    //     this.localImages = imageData.localImages;
+    //     const imageLength = this.localImages.length;
+    //     if (imageLength > 0) {
+    //       if (this.isDiv == true) {
+    //         $('.holderClass').remove();
+    //       }
+    //       this.isLoading = true;
+    //       this.ImageIs = true;
+    //       if (imageLength > 1) {
+    //         this.nextImage = false;
+    //         this.imageService.nextImageChange.emit(this.nextImage);
+    //       }
+    //       this.isLoading = false;
+    //       this.isLoadingfromServer = false;
+    //       if (this.localImages[0].dataUrl == "" || this.localImages[0].dataUrl == null) {
+    //         this.localImages[0].dataUrl = await this.imageService.loadArray(this.localImages[0].fileName);
+    //       }
+    //       this.localUrl = this.localImages[0].dataUrl;
+    //       this.fileName = this.localImages[0].fileName;
+    //       setTimeout(() => this.imageService.fitwidth(), 50);
+    //       setTimeout(() => this.setpercentage(), 60);
+    //     }
+    //     else {
+    //       $(".textElementsDiv").not(':first').remove();
+    //       $(".textSpanDiv").empty();
+    //       this.ImageIs = false;
+    //       this.fileName = "No files have been Uploaded";
+    //       this.localUrl = null;
+    //       this.imageService.buttonEnable()
+    //     }
+    //   });
 
     this.imageService.urlChanged
       .subscribe(
@@ -491,17 +491,18 @@ export class ScreenComponent implements OnInit {
     // console.log("this.percentage after header in orginalsize", this.percentage);
   }
 
-  loadXMLDoc() {
-    this.localImages = this.imageService.getLocalImages();
-    if (this.localImages.length > 0) {
-      this.fileName = this.localImages[this.imageService.imgFileCount].fileName;
-      this.imageService.getXmlFileAsJson(this.fileName);
-    } else {
-      this.localImages = this.imageService.getLocalImages();
-      this.fileName = this.localImages[this.imageService.imgFileCount].fileName;
-      this.imageService.getXmlFileAsJson(this.fileName);
-    }
-  }
+  // can be removed as this function bypassed and unused
+  // loadXMLDoc() {
+  //   this.localImages = this.imageService.getLocalImages();
+  //   if (this.localImages.length > 0) {
+  //     this.fileName = this.localImages[this.imageService.imgFileCount].fileName;
+  //     this.imageService.getXmlFileAsJson(this.fileName);
+  //   } else {
+  //     this.localImages = this.imageService.getLocalImages();
+  //     this.fileName = this.localImages[this.imageService.imgFileCount].fileName;
+  //     this.imageService.getXmlFileAsJson(this.fileName);
+  //   }
+  // }
 
   blocksize() {
     if (this.percentage > 1) {
@@ -609,45 +610,46 @@ export class ScreenComponent implements OnInit {
     this.imageService.updateCorrectedXml(this.fileName);
   }
 
-  async downloadXml() {
-    console.log("in export")
-    this.localImages = this.imageService.getLocalImages();
-    console.log("image length in export " + this.localImages.length);
-    // var folderName = this.fileName.slice(0, -9);
-    var folderName = "XML_Files";
-    console.log("folder Name", folderName);
-    var zip = new JSZip();
-    let count = 0;
-    var folder = zip.folder(folderName);
-    for (let i = 0; i < this.localImages.length; i++) {
-      console.log("in export completed " + this.localImages[i].completed);
-      if (this.localImages[i].completed == "Y") {
-        var curFileName = this.localImages[i].fileName;
-        var curXmlFileName = curFileName.slice(0, -3) + 'xml';
-        console.log("curXmlFileName " + curXmlFileName);
-        //changes have to be made in file service to get the xml file from backend
-        await this.fileService.downloadFile(curXmlFileName).then(response => {
-          console.log("xml content while downloading", response.xmlData);
-          let blob: any = new Blob([response.xmlData], { type: 'text/xml' });
-          console.log("blob===" + blob);
-          console.log("this.localImages[i].fileName.slice(0, -3) + 'xml'", this.localImages[i].fileName.slice(0, -3) + 'xml');
-          folder.file(this.localImages[i].fileName.slice(0, -3) + 'xml', blob);
-        }), error => {
-          console.log("error: " + error);
-          alert(error);
-        };
-      }
-      count++;
-      console.log("count before if of onSave", count);
-      if (count === this.localImages.length) {
-        console.log("count inside if of onSave", count);
-        zip.generateAsync({ type: "blob" })
-          .then(function (content) {
-            fileSaver(content, folderName);
-          });
-      }
-    }
-  }
+  // this can be removed as another function is used for the same purpose
+  // async downloadXml() {
+  //   console.log("in export")
+  //   this.localImages = this.imageService.getLocalImages();
+  //   console.log("image length in export " + this.localImages.length);
+  //   // var folderName = this.fileName.slice(0, -9);
+  //   var folderName = "XML_Files";
+  //   console.log("folder Name", folderName);
+  //   var zip = new JSZip();
+  //   let count = 0;
+  //   var folder = zip.folder(folderName);
+  //   for (let i = 0; i < this.localImages.length; i++) {
+  //     console.log("in export completed " + this.localImages[i].completed);
+  //     if (this.localImages[i].completed == "Y") {
+  //       var curFileName = this.localImages[i].fileName;
+  //       var curXmlFileName = curFileName.slice(0, -3) + 'xml';
+  //       console.log("curXmlFileName " + curXmlFileName);
+  //       //changes have to be made in file service to get the xml file from backend
+  //       await this.fileService.downloadFile(curXmlFileName).then(response => {
+  //         console.log("xml content while downloading", response.xmlData);
+  //         let blob: any = new Blob([response.xmlData], { type: 'text/xml' });
+  //         console.log("blob===" + blob);
+  //         console.log("this.localImages[i].fileName.slice(0, -3) + 'xml'", this.localImages[i].fileName.slice(0, -3) + 'xml');
+  //         folder.file(this.localImages[i].fileName.slice(0, -3) + 'xml', blob);
+  //       }), error => {
+  //         console.log("error: " + error);
+  //         alert(error);
+  //       };
+  //     }
+  //     count++;
+  //     console.log("count before if of onSave", count);
+  //     if (count === this.localImages.length) {
+  //       console.log("count inside if of onSave", count);
+  //       zip.generateAsync({ type: "blob" })
+  //         .then(function (content) {
+  //           fileSaver(content, folderName);
+  //         });
+  //     }
+  //   }
+  // }
 
   async downloadXml2() {
     this.isDownloading = true;

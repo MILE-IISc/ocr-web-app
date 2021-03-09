@@ -1,10 +1,8 @@
-import { Component, EventEmitter, OnInit,Input, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, OnInit, Input, OnDestroy } from '@angular/core';
 import * as $ from 'jquery';
-import {ScreenComponent} from '../screen/screen.component';
-import {HeaderService} from '../services/header.service';
+import { HeaderService } from '../services/header.service';
 import { ImageService } from '../services/images.service';
 import { Images } from '../shared/images.model';
-// import { ViewerService } from '../services/viewer.service';
 declare var Tiff: any;
 import { AuthService } from "../auth/auth.service";
 import { Subscription } from "rxjs";
@@ -16,21 +14,21 @@ import { Subscription } from "rxjs";
 })
 export class HeaderComponent implements OnInit, OnDestroy {
 
-  value:string;
-  inputValue:String ;
-  isTiff=false;
+  value: string;
+  inputValue: String;
+  isTiff = false;
   nextImage = true;
-  multipleImage=true;
+  multipleImage = true;
   loaded = false;
   imgFileCount = 0;
   imgWidth;
-  images :Images[];
+  // images :Images[];
   display = 'none';
   nextImages = true;
   previousImages = true;
-  public element:any;
-  percentage:number;
-  isLoading =false;
+  public element: any;
+  percentage: number;
+  isLoading = false;
 
   // authenetication related
   userName: string;
@@ -39,7 +37,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private authListenerSubs: Subscription;
 
 
-  constructor(private authService: AuthService, private headerService : HeaderService,private imageService:ImageService) { }
+  constructor(private authService: AuthService, private headerService: HeaderService, private imageService: ImageService) { }
 
   onLogout() {
     this.authService.logout();
@@ -63,21 +61,21 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.isAdmin = this.authService.getIsAdmin();
       });
 
-    this.imageService.nextImageChange.subscribe( (nextImages: boolean) => {
-      console.log("nextImages inside footer: "+nextImages);
+    this.imageService.nextImageChange.subscribe((nextImages: boolean) => {
+      console.log("nextImages inside footer: " + nextImages);
       this.nextImages = nextImages;
-   });
+    });
 
-   this.imageService.previousImageChange.subscribe( (previousImages: boolean) => {
-    console.log("nextImages inside footer: "+previousImages);
-    this.previousImages = previousImages;
- });
+    this.imageService.previousImageChange.subscribe((previousImages: boolean) => {
+      console.log("nextImages inside footer: " + previousImages);
+      this.previousImages = previousImages;
+    });
 
- this.element=this.imageService.getDocumentId;
-    this.imageService.documentChange.subscribe( (element: boolean) => {
-      console.log("nextImages inside footer: "+element);
+    this.element = this.imageService.getDocumentId;
+    this.imageService.documentChange.subscribe((element: boolean) => {
+      console.log("nextImages inside footer: " + element);
       this.element = element;
-   });
+    });
 
   }
   selectedImage: string;
@@ -99,38 +97,24 @@ export class HeaderComponent implements OnInit, OnDestroy {
   //   }
   // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-  closeModalDialog(){
-    this.display='none';
-   }
-  openModalHelp(){
-    this.display='block';
+  closeModalDialog() {
+    this.display = 'none';
   }
 
+  openModalHelp() {
+    this.display = 'block';
+  }
 }
 
 
- $('.multi-level-dropdown .dropdown-submenu > a').on("mouseenter", function(e) {
+$('.multi-level-dropdown .dropdown-submenu > a').on("mouseenter", function (e) {
   var submenu = $(this);
   $('.multi-level-dropdown .dropdown-submenu .dropdown-menu').removeClass('show');
   submenu.next('.dropdown-menu').addClass('show');
   e.stopPropagation();
 });
 
-$('.multi-level-dropdown .dropdown').on("hidden.bs.dropdown", function() {
+$('.multi-level-dropdown .dropdown').on("hidden.bs.dropdown", function () {
   // hide any open menus when parent closes
   $('.multi-level-dropdown .dropdown-menu.show').removeClass('show');
 });
-
-

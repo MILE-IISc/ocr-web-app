@@ -1,7 +1,32 @@
 var Cloudant = require('@cloudant/cloudant');
-couchDbAdminUrl = "https://" + process.env.COUCH_DB_ADMIN_USERNAME + ":" + process.env.COUCH_DB_ADMIN_PASSWORD + "@" + process.env.COUCH_DB_HOST;
+var couchDbAdminUrl = "https://" + process.env.COUCH_DB_ADMIN_USERNAME + ":" + process.env.COUCH_DB_ADMIN_PASSWORD + "@" + process.env.COUCH_DB_HOST;
 var cloudant = new Cloudant({ url: couchDbAdminUrl });
 
+// Authenticate User
+module.exports.authenticateUser = async function (username, password) {
+  return new Promise((resolve, reject) => {
+    var cloudant1 = new Cloudant({ url: couchDbAdminUrl });
+    cloudant1.auth(username, password, (err, response) => {
+      if(err) {
+        if(err.statusCode == 401) {
+          console.log("authentication failed for reason",err.reason, "with statusCode:",err.statusCode);
+        } else {
+          console.log("authentication issue for reason",err.reason, "with statusCode:",err.statusCode);
+        }
+        console.log("calling resolve");
+        resolve(false);
+      } else {
+        if((response.ok == true) && (username == response.name)) {
+          console.log("authentication successfull response", response);
+          resolve(true);
+        } else {
+          console.log("authentication failed response", response);
+          resolve(false);
+        }
+      }
+    });
+  })
+}
 
 // Check Database Existence
 module.exports.checkDatabase = async function (dbName) {
