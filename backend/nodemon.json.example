@@ -1,13 +1,13 @@
 {
   "env": {
-    "MONGODB_ENDPOINT": "mongodb://<username>:<password>@<dbaas_provider_url>/<dbname>",
     "JWT_KEY": "SECRET_HASH_KEY_FOR_JSON_WEBTOKEN",
     "OBJECT_STORAGE_ENDPOINT": "s3.private.ap.cloud-object-storage.appdomain.cloud",
     "OBJECT_STORAGE_API_KEY_ID": "<apikey>",
     "OBJECT_STORAGE_IBM_AUTH_ENDPOINT": "https://iam.cloud.ibm.com/identity/token",
     "OBJECT_STORAGE_SERVICE_INSTANCE_ID": "crn:v1:bluemix:public:cloud-object-storage:global:a/<instance_id>::",
-    "NO_SQL_DB_ADMIN_URL": "https://<admin_username>:<admin_password>@<no_sql_db_base_url>",
-    "NO_SQL_DB_BASE_URL": "<no_sql_db_base_url>",
+    "COUCH_DB_HOST": "<couch_db_hostname_port>",
+    "COUCH_DB_ADMIN_USERNAME": "<couch_db_admin_username>",
+    "COUCH_DB_ADMIN_PASSWORD": "<couch_db_admin_password>",
     "RUN_OCR_ADDRESS": "http://<IP_ADDRESS>:<PORT>",
     "RUN_OCR_PORT": "<PORT>"
   }
