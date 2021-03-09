@@ -1,5 +1,40 @@
 /* @import "../node_modules/@angular/material/prebuilt-themes/indigo-pink.css"; */
 
+/* sideBody for file list & thumbnails starts here */
+.borderClass{
+  border-color: #ff0000 !important;
+  border-width:1px !important;
+  border-style: solid !important;
+}
+
+.viewDiv{
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+}
+
+.viewBtn1{
+  -webkit-box-flex: 1 1 auto;
+  -moz-box-flex:  1 1 auto;
+  -webkit-flex:  1 1 auto;
+  -ms-flex:  1 1 auto;
+  flex:  1 1 auto;
+  margin-right:5px;
+}
+
+.viewBtn2{
+  -webkit-box-flex: 1 1 auto;
+  -moz-box-flex:  1 1 auto;
+  -webkit-flex:  1 1 auto;
+  -ms-flex:  1 1 auto;
+  flex:  1 1 auto;
+  margin-right:5px;
+}
+
+/* sideBody for file list & thumbnails ends here */
+
 .cdk-overlay-pane.my-dialog {
   position:absolute!important;
 }
@@ -17,7 +52,7 @@
     top: 3em;
     bottom: 3em;
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch; 
+    -webkit-overflow-scrolling: touch;
   }
 
 .dialog{

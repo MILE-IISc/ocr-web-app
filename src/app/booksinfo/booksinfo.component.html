@@ -18,7 +18,9 @@
       <mat-icon>folder_open</mat-icon>
     </button>
   </mat-menu>
-
+  <!-- <div *ngIf="userIsAuthenticated">
+    <a mat-button routerLink="/auth/signup" routerLinkActive="mat-accent">Create User</a>
+  </div> -->
   <button mat-icon-button data-toggle="tooltip" title="Progress Info" (click)="openProgressDialog()">
     <mat-icon>donut_large</mat-icon>
   </button>
@@ -60,16 +62,16 @@
 
     <button height="100px" width="100px">
       <mat-spinner diameter="40" style="top:50%;left:50%;z-index:2;" *ngIf="isLoading"></mat-spinner>
-      <img *ngIf="!isLoading" height="300px" width="300px" [src]="book.dataUrl" id="book" value={{book.folderName}}>
+      <img *ngIf="!isLoading" height="300px" width="300px" [src]="book.bookThumbnailImage" id="book" value={{book.bookName}}>
     </button>
-    <p id="book" style="color:#023485;position :relative;padding-left:0px;font-size:20px;">{{book.folderName}}</p>
+    <p id="book" style="color:#023485;position :relative;padding-left:0px;font-size:20px;">{{book.bookName}}</p>
   </div>
 </div>
 
 <div id="menu">
   <div class="dropdown-content" (clickOutside)="closeMenu()">
-    <a (click)=" deleteBook()">Delete</a>
+    <a (click)="deleteBook()">Delete</a>
     <a> Rename</a>
-    <a (click)=" downloadXml2()"> Download Xml</a>
+    <a (click)="downloadXml2()"> Download Xml</a>
   </div>
 </div>

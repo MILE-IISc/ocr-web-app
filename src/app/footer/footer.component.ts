@@ -25,7 +25,6 @@ import { MatDialog } from '@angular/material/dialog';
 
 export class FooterComponent implements OnInit {
   title = 'Layout';
-  localImages: Images[] = [];
   value = 'horizontal';
   imagewidth;
   selectedImage: string;
@@ -61,9 +60,9 @@ export class FooterComponent implements OnInit {
       this.dialog.open(ModalContentComponent, {
         width: '700px',
         height: '1000px',
-  
+
       })
-  
+
 
 }
   ngOnInit(): void {

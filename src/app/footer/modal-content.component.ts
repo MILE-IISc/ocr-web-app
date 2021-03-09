@@ -25,12 +25,11 @@ export class ModalContentComponent implements OnInit {
   imgFileCount = 0;
   percentage;
   linecount = 0
-  localImages;
   count = 0;
   countChange = new EventEmitter<Number>();
   fileName
 
-  
+
 
   constructor(private dialogRef: MatDialogRef<ModalContentComponent>, private imageService: ImageService, private headerService: HeaderService) { }
 
@@ -51,7 +50,7 @@ export class ModalContentComponent implements OnInit {
             var words = line.word;
             for (var w = 0; w < words.length; w++) {
               var wordText = words[w]["$"].unicode;
-              
+
               var wordRowStart = words[w]["$"].rowStart;
               var wordRowEnd = words[w]["$"].rowEnd;
               var wordColStart = words[w]["$"].colStart;
@@ -60,7 +59,7 @@ export class ModalContentComponent implements OnInit {
               var lineNumber = line["$"].LineNumber;
               var wordwidth = wordColEnd - wordColStart + 1;
               var wordheight = wordRowEnd - wordRowStart + 1;
-              
+
               if (wordText != null) {
                 lineText += " " + wordText;
                 var unicode = words[w]["$"].unicode
@@ -81,7 +80,7 @@ export class ModalContentComponent implements OnInit {
 
     });
      this.setWord(this.count);
-  
+
   }
 
   setWord(count) {
@@ -114,14 +113,14 @@ export class ModalContentComponent implements OnInit {
     var wordBottom = (700 - (Bottom * 700) / parseFloat(srcheight)) + "px"
     var WordLeft = (Left * 500) / parseFloat(srcWidth) + "px"
     var WordRight =(500 - (Right * 500) / parseFloat(srcWidth)) + "px"
-  
+
     var clippi = WordTop + ' ' + WordRight + ' ' + wordBottom + ' ' + WordLeft;
     console.log("clippi",clippi)
     /* Example: clip away the element from the top, right, bottom, and left edges */
     img.style.clipPath = "inset(" + clippi + ")";
   }
 
-OnEnter(event) {    
+OnEnter(event) {
   // console.log("enter")
   this.nextWordCorrect();
   this.updateUnicode();
@@ -147,7 +146,7 @@ OnEnter(event) {
         console.log("blkLength",blk.length)
         for(var i=0;i<blk.length;i++){
           if(blk[i].line){
-            
+
           var lines = blk[i].line;
             for(var j=0;j<lines.length;j++){
               if(lines[j].word){
@@ -160,6 +159,6 @@ OnEnter(event) {
         }
         this.fileName = this.imageService.getCurrentImageName();
          this.imageService.updateCorrectedXml(this.fileName);
- 
+
      }
 }

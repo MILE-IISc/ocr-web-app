@@ -17,6 +17,9 @@ import * as xml2js from 'xml2js';
 import { MatDialog } from '@angular/material/dialog';
 import { ProgressDialogComponent } from '../screen/progress-dialog/progress-dialog.component';
 import { BookService } from './book.service';
+import { PouchService } from './pouch.service';
+import PouchDB from 'node_modules/pouchdb';
+import { promises } from 'dns';
 
 
 declare var Tiff: any;
@@ -28,16 +31,17 @@ export class ImageService implements OnInit {
 
   ngOnInit(): void {
     this.percentage = this.headerService.getpercentagevary();
-    this.headerService.percentageChange
-      .subscribe(
-        (percent: number) => {
-          this.percentage = percent;
-        });
+    this.headerService.percentageChange.subscribe((percent: number) => {
+      this.percentage = percent;
+    });
 
   }
 
   images: Array<Images> = [];
   localImages: Array<Images> = [];
+  pouchImagesList: any = [];// This array will be used for storing imagesInfo of corresponding book from pouchDb
+  private pouchImagesListUpdated = new Subject<{ pouchImagesList }>();
+  currentBookDb;
   imgFileCount = 0;
   private imagesUpdated = new Subject<{ localImages: Images[] }>();
 
@@ -48,7 +52,6 @@ export class ImageService implements OnInit {
   btnImgArrayChange = new EventEmitter<any>();
   nextImageChange = new EventEmitter<boolean>();
   isSelectBlockChange = new EventEmitter<boolean>();
-  displayChange = new EventEmitter<any>();
   nextValueChange = new EventEmitter<any>();
   previousImageChange = new EventEmitter<boolean>();
   documentChange = new EventEmitter<any>();
@@ -61,6 +64,7 @@ export class ImageService implements OnInit {
   angleChange = new EventEmitter<any>();
   bookNameChange = new EventEmitter<any>();
   ready = false;
+  localImagesDb: any;
 
   btnImgArray: any[] = [];
   public localUrl: any;
@@ -84,6 +88,7 @@ export class ImageService implements OnInit {
   isRunningOcrChange = new EventEmitter<any>();
   isLoadingFromServer = false;
   isLoadingFromServerChange = new EventEmitter<any>();
+  xmlUpdateChange = new EventEmitter<any>();
   progressInfos: ProgressInfo[] = [];
   runOcrAllFlag = false;
   deleteFlag = false;
@@ -98,7 +103,13 @@ export class ImageService implements OnInit {
   folderName = "";
   bookName = "";
 
-  constructor(private route: ActivatedRoute, rendererFactory: RendererFactory2, private http: HttpClient, private router: Router, private authService: AuthService, private headerService: HeaderService, @Inject(DOCUMENT) private document: Document, public dialog: MatDialog, private bookService: BookService) {
+  // pouchDb related declarations
+  uploadLocalBookDbInstance;
+  uploadRemoteBookDbInstance;
+  currentLocalBookDbInstance;
+  currentRemoteBookDbInstance;
+
+  constructor(private route: ActivatedRoute, rendererFactory: RendererFactory2, private http: HttpClient, private router: Router, private authService: AuthService, private headerService: HeaderService, @Inject(DOCUMENT) private document: Document, public dialog: MatDialog, private bookService: BookService, private pouchService: PouchService) {
     this.IMAGE_BACKEND_URL = this.authService.BACKEND_URL + "/api/image/";
     this.XML_BACKEND_URL = this.authService.BACKEND_URL + "/api/xml/";
     this.FOLDER_BACKEND_URL = this.authService.BACKEND_URL + "/api/folder/";
@@ -107,12 +118,12 @@ export class ImageService implements OnInit {
     this.renderer = rendererFactory.createRenderer(null, null);
   }
 
-  getLocalImages() {
-    return this.localImages.slice();
+  getCurrentImageName() {
+    return this.pouchImagesList[this.imgFileCount].pageName;
   }
 
-  getCurrentImageName() {
-    return this.localImages[this.imgFileCount].fileName;
+  getCurrentBookDb() {
+    return this.currentBookDb;
   }
 
   getBtnImages() {
@@ -131,101 +142,297 @@ export class ImageService implements OnInit {
     this.ResumeUploadEvent.emit();
   }
 
-  getbookName(){
+  getbookName() {
     return this.bookName;
   }
 
-  setBookName(bookName){
+  setBookName(bookName) {
     this.bookName = bookName;
   }
 
+  deleteBookDb(currentBookDb) {
+    console.log("No images in this Db so destroying currentBookDb in local and remote & deleting corresponding document in perUserDb");
+    this.currentRemoteBookDbInstance.destroy().then(() => {
+      console.log("remote bookDatabase destroyed",currentBookDb);
+      this.currentLocalBookDbInstance.destroy().then(async () => {
+        console.log("local bookDatabase destroyed",currentBookDb);
+        // Filling deletion List for xmlDoc and its revisions
+        var bookDbDocumentId = currentBookDb.replace("mile_book_db_", "");
+        let docs = [];
+        let bookDocumentWithRevs = await this.currentRemoteBookDbInstance.get(bookDbDocumentId, { revs: true, open_revs: 'all'}).then((document) => {
+          return document
+        }).catch((err) => {
+          console.log("Unable to retrieve the document for",bookDbDocumentId,"\nerror:" ,err);
+          console.log("error status", err.status);
+          if (err.status == "404") {
+            return "NOT_FOUND";
+          }
+        });
+        if(bookDocumentWithRevs != "NOT_FOUND") {
+          if (bookDocumentWithRevs.length > 0) {
+            for(let i = 0; i < bookDocumentWithRevs.length; i++) {
+              console.log("bookDocumentWithRevs["+i+"]:",bookDocumentWithRevs[i]);
+              console.log("bookDocumentWithRevs["+i+"]._id:",bookDocumentWithRevs[i]["ok"]._id);
+              let tempDeleteDoc = {_id : bookDocumentWithRevs[i]["ok"]._id, _rev: bookDocumentWithRevs[i]["ok"]._rev, _deleted : true };
+              docs.push(tempDeleteDoc);
+            }
+          }
+        }
+        console.log("docs to be deleted along with its revisions",docs);
+        if(docs.length > 0) {
+          let userDbDetails = await this.authService.getUserDbDetails();
+          let remoteUserDbInstance = await this.pouchService.createRemoteDbInstance(userDbDetails.dbUrl, userDbDetails.userDb, userDbDetails.userDbKey, userDbDetails.userDbPwd);
+          await this.pouchService.checkDbStatus(remoteUserDbInstance).then(status => {
+            console.log("status of remoteUserDbInstance of", userDbDetails.userDb, "is: ", status);
+          });
+          await remoteUserDbInstance.bulkDocs(docs, function(err, response) {
+            if (err) {
+                return console.log(err);
+            } else {
+                console.log(response+"Documents deleted Successfully");
+                this.router.navigate(["/booksdashboard"]);
+            }
+          });
+        }
+      }).catch((err) => {
+        console.log("error while destroying database",err);
+      });
+    }).catch((err) => {
+      console.log("error while destroying database",err);
+    });
+  }
+
+  async sortPouchImagesList(pouchImages) {
+    console.log("sorting images list");
+    return new Promise(async (resolve, reject) => {
+      await pouchImages.sort((a, b) => {
+        var x = a.pageName.toLowerCase();
+        var y = b.pageName.toLowerCase();
+        if (x < y) { return -1; }
+        if (x > y) { return 1; }
+        return 0;
+      });
+      resolve(pouchImages);
+    });
+  }
+
+  async handleChange(change) {
+    let changedDoc = null;
+    let changedIndex = null;
+    console.log("id of change on handleChange of imagesService", change.id);
+    console.log("doc of change on handleChange of imagesService", change.doc);
+    this.pouchImagesList.forEach((pouchImage: any, index) => {
+      // console.log("pouchImage._id:",pouchImage._id);
+      if (pouchImage._id === change.id) {
+        changedDoc = pouchImage;
+        changedIndex = index;
+      }
+    });
+
+    if(change.id == (change.id.slice(0, -3)+ "xml")) {
+      if(change.deleted) {
+        return;
+      }
+      this.onXml();
+      return;
+    }
+
+    console.log("change.deleted",change.deleted,"changedIndex",changedIndex);
+    //A document was deleted
+    if (change.deleted) {
+      console.log("removing the document from memory on change handler",change.id);
+      this.pouchImagesList.splice(changedIndex, 1);
+    }
+    else {
+      console.log("updating or adding document from memory on change handler",change.id);
+      if (changedDoc) { //A document was updated
+        this.pouchImagesList[changedIndex] = change.doc;
+      } else {       //A document was added
+          let fileName = change.id;
+          if(fileName.substr((fileName.lastIndexOf('.') + 1)) != "xml") {
+          this.pouchImagesList.push(change.doc);
+        }
+      }
+    }
+    if(this.pouchImagesList.length > 0) {
+      this.pouchImagesList = await this.sortPouchImagesList(this.pouchImagesList);
+      console.log("pouchImagesList length after handling changes",this.pouchImagesList.length);
+      this.pouchImagesListUpdated.next({
+        pouchImagesList: [...this.pouchImagesList]
+      });
+    } else {
+      console.log("================>\nPouchImagesList Length is 0\n<=================");
+      console.log("pouchImagesList length after handling changes",this.pouchImagesList.length);
+      this.pouchImagesListUpdated.next({
+        pouchImagesList: [...this.pouchImagesList]
+      });
+      // this.deleteBookDb(this.currentBookDb);
+    }
+  }
+
   async getServerImages() {
-    var bookName = this.route.snapshot.queryParams['data']
+    var bookName = this.route.snapshot.queryParams['data'];
     var folderName = bookName;
     const queryParams = `?folderName=${folderName}`;
+    let tempPouchImagesList = [];
 
-    console.log("enter get server from screen")
-    let promise = new Promise((resolve, reject) => {
-      this.http
-        .get<{ message: string; images: [] }>(
-          this.IMAGE_BACKEND_URL + queryParams
-        ).toPromise()
-        .then(responseData => {
-          const imageLength = responseData.images.length;
-          if (imageLength > 0) {
-            this.localImages = responseData.images;
-            console.log("message" + responseData.message);
-            console.log("server images length--" + this.localImages.length);
-            this.imagesUpdated.next({ localImages: [...this.localImages] });
-            this.onXml();
-          }
-          else {
-            this.isLoadingfromServer = false;
-            this.headerService.setloadingvalue(this.isLoadingfromServer);
-            console.log("message" + responseData.message);
-            this.localImages = responseData.images;
-            this.imagesUpdated.next({ localImages: [] });
-          }
-          resolve(this.localImages);
-        });
-
+    console.log("enter get server from screen");
+    return new Promise(async (resolve, reject) => {
+    // pouchDb usage starts here
+    // localUserDb Instance related
+    let books: any = [];
+    let userDbDetails = await this.authService.getUserDbDetails();
+    let localUserDbInstance = await this.pouchService.createPouchDbInstance(userDbDetails.userDb);
+    await this.pouchService.checkDbStatus(localUserDbInstance).then(status => {
+      console.log("status of localDb of", userDbDetails.userDb, "is: ", status);
     });
-    return promise;
+
+    await localUserDbInstance.allDocs({
+      include_docs: true
+    }).then(async (result) => {
+      books = [];
+      console.log("books Info from db", result.rows.length);
+      let docs = await result.rows.map((row) => {
+        books.push(row.doc);
+      });
+    }).catch((error) => {
+      console.log(error);
+    });
+
+    for (let i = 0; i < books.length; i++) {
+      if (books[i].bookName == bookName) {
+        this.currentBookDb = "mile_book_db_" + books[i]._id;
+      }
+    }
+
+    // local BookDb Instance related
+    this.currentLocalBookDbInstance = await this.pouchService.createPouchDbInstance(this.currentBookDb);
+    await this.pouchService.checkDbStatus(this.currentLocalBookDbInstance).then(status => {
+      console.log("status of localDb of", this.currentBookDb, "is: ", status);
+    });
+
+    await this.currentLocalBookDbInstance.allDocs({
+      include_docs: true
+    }).then(async (result) => {
+      this.pouchImagesList = [];
+      tempPouchImagesList = [];
+      console.log("tempPouchImagesList Info from db", result.rows.length);
+      let docs = await result.rows.map((row) => {
+        tempPouchImagesList.push(row.doc);
+      });
+    }).catch((error) => {
+      console.log(error);
+    });
+
+    await tempPouchImagesList.map(tempPouchImage => {
+      if(tempPouchImage && Object.keys(tempPouchImage).length === 0 && tempPouchImage.constructor === Object) {
+        console.log("empty file in tempPouchImage");
+      } else {
+        let fileName = tempPouchImage.pageName;
+        console.log("tempPouchImage",tempPouchImage.pageName);
+        if(fileName) {
+          if(fileName.substr((fileName.lastIndexOf('.') + 1)) != "xml") {
+            this.pouchImagesList.push(tempPouchImage);
+        }
+      }
+      }
+    });
+
+    // Initial checking of imageDetails in local currentBookDb and filling the same in memory
+    if (this.pouchImagesList.length > 0) {
+      console.log("this.pouchImagesList Length", this.pouchImagesList.length);
+      console.log("sending Initial bookDetails from Memory as its length is greater than 0");
+      this.pouchImagesList = await this.sortPouchImagesList(this.pouchImagesList);
+      this.pouchImagesListUpdated.next({
+        pouchImagesList: [...this.pouchImagesList]
+      });
+    }
+    else {
+      console.log("sending empty bookDetails from Memory as its length is not greater than 0");
+      this.pouchImagesListUpdated.next({
+        pouchImagesList: []
+      });
+    }
+
+    // remote BookDb Instance related
+    this.currentRemoteBookDbInstance = await this.pouchService.createRemoteDbInstance(userDbDetails.dbUrl, this.currentBookDb, userDbDetails.userDbKey, userDbDetails.userDbPwd);
+    await this.pouchService.checkDbStatus(this.currentRemoteBookDbInstance).then(status => {
+      console.log("status of remoteDb of", this.currentBookDb, "is: ", status);
+    });
+
+    // Based on localCurrentBookDb Instance changes, filling the memory
+    let options = {
+      live: true,
+      retry: true,
+      continuous: true
+    };
+
+    this.currentLocalBookDbInstance.changes({
+      live: true, since: 'now', include_docs: true
+    }).on('change', (change) => {
+      console.log("calling handleChanges on localDbInstance change event");
+      this.handleChange(change);
+    }).on('error', function (err) {
+      // handle error
+      console.log("info on changes error", err);
+    });
+    await this.currentLocalBookDbInstance.sync(this.currentRemoteBookDbInstance, options);
+    resolve(true);
+  });
   }
 
   getXmlFileAsJson(fileName: any) {
-    var bookName = this.route.snapshot.queryParams['data'];
-    var xmlFileName = fileName + "-" + bookName;
+    // var bookName = this.route.snapshot.queryParams['data'];
+    var xmlFileName = fileName;
     this.isRunningOcrChange.emit(true);
-    console.log("Running OCR on " + fileName)
-    const queryParams = `?fileName=${xmlFileName}&type=GET-OCR-XML`;
-    this.http.get<{ message: string; completed: string; xmlData: any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
-      this.localImages = this.getLocalImages();
-      if (this.localImages.length > 0) {
-        for (let i = 0; i < this.localImages.length; i++) {
-          if (this.localImages[i].fileName == fileName) {
-            console.log("name" + this.localImages[i].fileName);
-            this.localImages[i].completed = response.completed;
-            console.log("completed" + this.localImages[i].completed);
-          }
-        }
-      }
+    console.log("Running OCR on " + xmlFileName);
+    const queryParams = `?fileName=${xmlFileName}&bookDb=${this.currentBookDb}&type=GET-OCR-XML`;
+    this.http.get<{ message: string; completed: string }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
+      console.log("response on RUN-OCR",response);
+      // this.localImages = this.getLocalImages();
+      // if (this.localImages.length > 0) {
+      //   for (let i = 0; i < this.localImages.length; i++) {
+      //     if (this.localImages[i].fileName == fileName) {
+      //       console.log("name" + this.localImages[i].fileName);
+      //       this.localImages[i].completed = response.completed;
+      //       console.log("completed" + this.localImages[i].completed);
+      //     }
+      //   }
+      // }
       this.isRunningOcrChange.emit(false);
       this.ocrMessageChange.emit(response.message);
-      XmlModel.jsonObject = response.xmlData;
-      this.updateXmlModel(XmlModel.jsonObject);
+      // this.onXml();
+      // XmlModel.jsonObject = response.xmlData;
+      // this.updateXmlModel(XmlModel.jsonObject);
     });
   }
 
   getXmlFileAsJson2() {
     this.progressType = 'RUN_OCR';
-    this.localImages = this.getLocalImages();
-    if (this.localImages.length > 0) {
+    if (this.pouchImagesList.length > 0) {
       var runOcr = (x) => {
         if (x == 0) {
           this.uploadMessage = "";
           this.uploadMessageChange.emit(this.uploadMessage);
           this.progressInfos.splice(0, this.progressInfos.length);
           this.openProgressDialog();
-          for (let i = 0; i < this.localImages.length; i++) {
+          for (let i = 0; i < this.pouchImagesList.length; i++) {
             var status = 'Pending';
-            const progress = new ProgressInfo(this.localImages[i].fileName, status);
+            const progress = new ProgressInfo(this.pouchImagesList[i].pageName, status);
             this.progressInfos.push(progress);
             this.progressInfoChange.emit(this.progressInfos);
           }
         }
-        if (x < this.localImages.length) {
-          var bookName = this.route.snapshot.queryParams['data'];
-          let fileName = this.localImages[x].fileName;
-          var xmlFileName = fileName + "-" + bookName;
-          console.log("Running OCR on " + fileName);
+        if (x < this.pouchImagesList.length) {
+          // var bookName = this.route.snapshot.queryParams['data'];
+          let xmlFileName = this.pouchImagesList[x].pageName;
+          console.log("Running OCR on " + xmlFileName);
           this.progressInfos[x].value = 'Running';
           this.progressInfoChange.emit(this.progressInfos.slice());
-          const queryParams = `?fileName=${xmlFileName}&type=GET-OCR-XML-ALL`;
+          const queryParams = `?fileName=${xmlFileName}&bookDb=${this.currentBookDb}&type=GET-OCR-XML-ALL`;
           this.http.get<{ message: string; completed: string }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
             this.ocrMessageChange.emit(response.message);
             if (response.completed == 'Y') {
-              this.localImages[x].completed = response.completed;
               this.progressInfos[x].value = 'Completed';
               this.progressInfoChange.emit(this.progressInfos.slice());
             } else {
@@ -233,7 +440,7 @@ export class ImageService implements OnInit {
               this.progressInfoChange.emit(this.progressInfos.slice());
             }
             this.runOcrLastIndex = x;
-            if (this.runOcrLastIndex == (this.localImages.length - 1)) {
+            if (this.runOcrLastIndex == (this.pouchImagesList.length - 1)) {
               this.uploadMessage = "Run-OCR on all images is completed !!"
               this.uploadMessageChange.emit(this.uploadMessage);
               var btn = document.getElementById("pauseButton");
@@ -269,9 +476,12 @@ export class ImageService implements OnInit {
   }
 
   updateXmlModel(jsonObj) {
+    console.log("entered updateXmlModel");
     if (jsonObj && jsonObj['page']) {
+      console.log("page available");
       var blocks = [];
       if (jsonObj['page'].block) {
+        console.log("block available");
         blocks = jsonObj['page'].block;
       }
       if (jsonObj['page']["$"].rotationAngle) {
@@ -309,11 +519,18 @@ export class ImageService implements OnInit {
           }
         }
       }
+      this.xmlUpdateChange.emit(true);
+    } else {
+      console.log("page not available");
     }
   }
 
   getImageUpdateListener() {
     return this.imagesUpdated.asObservable();
+  }
+
+  getPouchImageUpdateListener() {
+    return this.pouchImagesListUpdated.asObservable();
   }
 
 
@@ -342,34 +559,98 @@ export class ImageService implements OnInit {
     return this.uploadMessage;
   }
 
-  async addImage(filesToBeUploaded, folderName) {
+  getLocalImages() {
+    return this.localImages.slice();
+  }
+
+  getPouchImagesList() {
+    return this.pouchImagesList;
+  }
+
+  async addImage(filesToBeUploaded, folderName, display) {
+    let sortedFilesList = [];
     this.folderName = folderName;
+    let bookDbName = "";
     this.progressType = 'UPLOAD_IMAGE';
-    const queryParams = `?folderName=${folderName}`;
-    this.updateFolderNameinDB(folderName);
-    if (filesToBeUploaded.length > 0) {
-      
+    let queryParams = "";
+
+    await this.updateFolderNameinDB(folderName).then(async (response: any) => {
+      bookDbName = response.bookDbName;
+      queryParams = `?bookDbName=${bookDbName}`;
+      let userDbDetails = this.authService.getUserDbDetails();
+      console.log("response on bookInfoUpdate bookDbName", bookDbName, "bookDbKey", response.bookDbKey);
+      console.log("userDbDetails from AuthService userDbKey", userDbDetails.userDbKey, "userDbPwd", userDbDetails.userDbPwd);
+
+      // local BookDb Instance related
+      this.uploadLocalBookDbInstance = await this.pouchService.createPouchDbInstance(bookDbName);
+      await this.pouchService.checkDbStatus(this.uploadLocalBookDbInstance).then(status => {
+        console.log("status of localDb of", bookDbName, "is: ", status);
+      });
+
+      // remote BookDb Instance related
+      this.uploadRemoteBookDbInstance = await this.pouchService.createRemoteDbInstance(userDbDetails.dbUrl, bookDbName, userDbDetails.userDbKey, userDbDetails.userDbPwd);
+      await this.pouchService.checkDbStatus(this.uploadRemoteBookDbInstance).then(status => {
+        console.log("status of remoteDb of", bookDbName, "is: ", status);
+      });
+
+      let options = {
+        live: true,
+        retry: true,
+        continuous: true
+      };
+
+      this.uploadLocalBookDbInstance.changes({
+        live: true, since: 'now', include_docs: true
+      }).on('change', (change) => {
+        console.log("calling handleChanges on localDbInstance change event");
+        // this.handleChange(change);
+      }).on('error', function (err) {
+        // handle error
+        console.log("info on changes error", err);
+      });
+      this.uploadLocalBookDbInstance.sync(this.uploadRemoteBookDbInstance, options);
+      console.log("localBookDb Instance sync executed");
+    });
+
+    for (let i = 0; i < filesToBeUploaded.length; i++) {
+      sortedFilesList.push(filesToBeUploaded[i]);
+    }
+    console.log("sortedFilesList.length", sortedFilesList.length);
+
+    console.log("sorting started with sortedFilesList.length", sortedFilesList.length);
+    sortedFilesList.sort((a, b) => {
+      var x = a.name.toLowerCase();
+      var y = b.name.toLowerCase();
+      if (x < y) { return -1; }
+      if (x > y) { return 1; }
+      return 0;
+    });
+    console.log("sorting completed with sortedFilesList.length", sortedFilesList.length);
+    console.log("sortedFilesList[0] after sorting", sortedFilesList[0]);
+    // return;
+    if (sortedFilesList.length > 0) {
+      console.log("after if condition of sortedFilesList.length > 0");
       var uploadImage = (x) => {
         if (x == 0) {
           this.progressInfos.splice(0, this.progressInfos.length);
           this.uploadMessage = "";
           this.uploadMessageChange.emit(this.uploadMessage);
           this.openProgressDialog();
-          for (let i = 0; i < filesToBeUploaded.length; i++) {
+          for (let i = 0; i < sortedFilesList.length; i++) {
             var status = 'Pending';
-            const progress = new ProgressInfo(filesToBeUploaded[i].name, status);
+            const progress = new ProgressInfo(sortedFilesList[i].name, status);
             this.progressInfos.push(progress);
             this.progressInfoChange.emit(this.progressInfos);
           }
         }
-        if (x < filesToBeUploaded.length) {
-          let fileName = filesToBeUploaded[x].name;
+        if (x < sortedFilesList.length) {
+          let fileName = sortedFilesList[x].name;
           this.progressInfos[x].value = 'Uploading';
           this.progressInfoChange.emit(this.progressInfos.slice());
 
           let imageData = new FormData();
           imageData.append("email", this.authService.userName);
-          var file = filesToBeUploaded[x];
+          var file = sortedFilesList[x];
           console.log("file name===" + file.name);
           imageData.append("image", file);
           this.http.post<{ message: string, uploaded: string }>(this.IMAGE_BACKEND_URL + queryParams, imageData).subscribe(async response => {
@@ -382,12 +663,23 @@ export class ImageService implements OnInit {
             }
             this.progressInfoChange.emit(this.progressInfos.slice());
             this.uploadImageLastIndex = x;
-            if (this.uploadImageLastIndex == (filesToBeUploaded.length - 1)) {
+            if (this.uploadImageLastIndex == (sortedFilesList.length - 1)) {
               this.uploadMessage = "Images Uploaded Successfully !!"
               this.uploadMessageChange.emit(this.uploadMessage);
               var btn = document.getElementById("pauseButton");
               btn.innerHTML = 'Ok';
-              this.bookService.getBooks();
+              this.uploadLocalBookDbInstance.close();
+              this.uploadRemoteBookDbInstance.close();
+              console.log("this.pouchImagesList.length",this.pouchImagesList.length);
+              console.log("calling updateBookThumbnail()");
+              await this.updateBookThumbnail(bookDbName);
+              if(display == "DISPLAY_BOOKS") {
+                console.log("calling getBooks()");
+                this.bookService.getBooks();
+              } else {
+                console.log("calling getServerImages()");
+                await this.getServerImages();
+              }
             }
             if (this.uploadImageFlag == true) {
               uploadImage(x + 1);
@@ -397,16 +689,8 @@ export class ImageService implements OnInit {
       }
 
       if (this.uploadImageFlag == false) {
-        await this.getServerImages();
-        console.log("server file count before post" + this.localImages.length);
-        console.log("filesToBeUploaded length", filesToBeUploaded.length);
-        if (this.localImages.length == 0) {
-          this.loadLocalImages(filesToBeUploaded, "NEW");
-        }
-        else {
-          this.loadLocalImages(filesToBeUploaded, "APPEND");
-        }
         this.uploadImageFlag = true;
+        console.log("invoking uploadImage(0) ");
         uploadImage(0);
       } else {
         uploadImage(this.uploadImageLastIndex);
@@ -415,16 +699,77 @@ export class ImageService implements OnInit {
 
   }
 
-  updateFolderNameinDB(folderName) {
-    let jsonData: any;
-    jsonData = {
-      user: this.authService.userName,
-      folderName: folderName
-    };
-    this.authService.userName
-    this.http.post<{ message: string, uploaded: string }>(this.FOLDER_BACKEND_URL, jsonData).subscribe(async response => {
-      console.log("response message after folder updated " + response.message);
+  async updateBookThumbnail(bookDbName: string) {
+    // localUserDb Instance related
+    let userDbDetails = await this.authService.getUserDbDetails();
+    let bookImages: any = [];
+    let tempLocalUserDbInstance = await this.pouchService.createPouchDbInstance(userDbDetails.userDb);
+    await this.pouchService.checkDbStatus(tempLocalUserDbInstance).then(status => {
+      console.log("status of localDb of", userDbDetails.userDb, "is: ", status);
     });
+
+    // local BookDb Instance related
+    let tempLocalbookDbInstance = await this.pouchService.createPouchDbInstance(bookDbName);
+    await this.pouchService.checkDbStatus(tempLocalbookDbInstance).then(status => {
+      console.log("status of localDb of", bookDbName, "is: ", status);
+    });
+    await tempLocalbookDbInstance.allDocs({
+      include_docs: true
+    }).then(async (result) => {
+      console.log("books Info from db", result.rows.length);
+      await result.rows.map((row) => {
+        bookImages.push(row.doc);
+      });
+    });
+    if(bookImages.length > 0) {
+      bookImages = await this.sortBookImagesList(bookImages);
+      let thumbnailImage = bookImages[0].pageThumbnail;
+      let bookDocumentId = bookDbName.replace('mile_book_db_', '');
+      let bookDocument = await tempLocalUserDbInstance.get(bookDocumentId).then((bookDocument) => {
+          console.log("bookDocument retrieved for updating thumbnail", bookDocument);
+          return bookDocument;
+        }).catch((err) => {
+          console.log("Unable to retrieve the document for",bookDocumentId);
+        });
+      bookDocument.bookThumbnailImage = thumbnailImage;
+      await tempLocalUserDbInstance.put(bookDocument).then((response) => {
+        console.log("bookThumbnail has been updated for", bookDocument.bookName, "with response", response);
+      }).catch((err) => {
+        console.log("error while updating bookThumbnail", err);
+      });
+      // emptying the bookImages List after its usage is completed and closing tempLocalbookDbInstance connection
+      bookImages = [];
+    }
+    tempLocalbookDbInstance.close();
+    tempLocalUserDbInstance.close();
+  }
+
+  async sortBookImagesList(books) {
+    return new Promise(async (resolve, reject) => {
+      await books.sort((a, b) => {
+        var x = a.pageName.toLowerCase();
+        var y = b.pageName.toLowerCase();
+        if (x < y) { return -1; }
+        if (x > y) { return 1; }
+        return 0;
+      });
+      resolve(books);
+    });
+  }
+
+  updateFolderNameinDB(folderName) {
+    return new Promise((resolve, reject) => {
+      let jsonData: any;
+      jsonData = {
+        user: this.authService.userName,
+        userDbName: this.authService.userDb,
+        folderName: folderName
+      };
+      this.http.post<{ message: string, bookDbName: string, bookDbKey: string }>(this.FOLDER_BACKEND_URL, jsonData).subscribe(async response => {
+        console.log("response message on book Db Creation", response.message, "bookDbName", response.bookDbName, "bookDbkey", response.bookDbKey);
+        resolve(response);
+      });
+    })
   }
 
   setUploadImageFlag(status) {
@@ -440,73 +785,110 @@ export class ImageService implements OnInit {
     this.uploadImageLastIndex = 0;
   }
 
-  async loadLocalImages(fileRead, type) {
-    if (type == "NEW") {
-      // this.localImages.splice(0, this.localImages.length);
-      this.localImages = [];
-    }
-    var filesCount = fileRead.length;
-    // console.log("file count" + filesCount);
-    for (let i = 0; i < filesCount; i++) {
-      var isImage = fileRead[i].type.includes("image");
-      if (isImage) {
-        // console.log("fileRead.type : " + fileRead[i].type);
-        // console.log("fileRead[" + i + "].name : " + fileRead[i].name);
-        let dataURL = await this.loadLocalImageData(fileRead, i);
-        const imgValue = new Images(i, fileRead[i].name, 'N', this.authService.userName, dataURL);
-        this.localImages.push(imgValue);
+  async saveImagesPouchDb(id, data, ETag, LastModified, revId) {
+    return new Promise((resolve, reject) => {
+      var imageform = {
+        _id: id,
+        name: id,
+        data: data,
+        ETag: ETag,
+        LastModified: LastModified,
+        _rev: revId
       }
-    }
-    this.localImages.sort((a, b) => {
-      var x = a.fileName.toLowerCase();
-      var y = b.fileName.toLowerCase();
-      if (x < y) { return -1; }
-      if (x > y) { return 1; }
-      return 0;
-    });
-    console.log("localImages Count after Upload", this.localImages.length);
-    this.imagesUpdated.next({ localImages: [...this.localImages] });
-    if (this.localImages.length > 1) {
-      this.nextImages = false;
-      this.nextImageChange.emit(this.nextImages);
-    }
-  }
-
-  async loadLocalImageData(fileRead: any, i: number) {
-    const result = await new Promise((resolve) => {
-      let reader = new FileReader();
-      if (fileRead[i].type == "image/tiff") {
-        reader.onload = (event: any) => {
-          var image = new Tiff({ buffer: event.target.result });
-          var canvas = image.toCanvas();
-          var img = convertCanvasToImage(canvas);
-          resolve(img.src);
+      this.localImagesDb = new PouchDB("mile_images_db", { revs_limit: 1, auto_compaction: true, skip_setup: true });
+      this.localImagesDb.put(imageform).then((result, error) => {
+        console.log("result", result);
+        console.log("error", error);
+        if (!error) {
+          console.log("Pouch form saved successfully");
         }
-        reader.readAsArrayBuffer(fileRead[i]);
-      } else {
-        reader.onload = (event: any) => {
-          resolve(event.target.result);
-        }
-        reader.readAsDataURL(fileRead[i]);
-      }
+        resolve(true);
+      });
     });
-    // console.log(result);
-    return result;
   }
-
 
   async loadArray(serverImage: any) {
+    // getting all docs in list
+    this.localImagesDb = new PouchDB("mile_images_db", { revs_limit: 1, auto_compaction: true, skip_setup: true });
+    this.localImagesDb.allDocs().then((result) => {
+      console.log("result.rows.length",result.rows.length);
+      for(let i = 0; i < result.rows.length; i++) {
+        console.log("id of doc "+i,result.rows[i].id);
+      }
+    });
     this.isLoadingFromServerChange.emit(true);
-    console.log("inside load array");
+    let jpegFile = serverImage;
     console.log("inside load array", serverImage);
+    let objectHeaderInfo: any = await this.getHeaderInfo(serverImage);
+    if (objectHeaderInfo != "") {
+      console.log("objectHeaderInfo for imagename", serverImage);
+      console.log("LastModified", objectHeaderInfo.LastModified);
+      console.log("ETag", objectHeaderInfo.ETag);
+      console.log("ContentType", objectHeaderInfo.ContentType);
+      if(serverImage.substr((serverImage.lastIndexOf('.') + 1)) == "tif") {
+        jpegFile = serverImage.slice(0, -3) + 'jpg';
+      }
+      let document = await this.localImagesDb.get(jpegFile).then(function (doc) {
+        return doc;
+      }).catch(function (err) {
+        console.log("error status", err.status);
+        if (err.status == "404") {
+          return "NOT_FOUND";
+        }
+      });
+
+      if (document == "NOT_FOUND") {
+        console.log("getting serverImageData for ",serverImage);
+        let imageData = await this.getServerImage(serverImage);
+        let status = await this.saveImagesPouchDb(jpegFile, imageData, objectHeaderInfo.ETag, objectHeaderInfo.LastModified, "");
+        console.log("saved image", jpegFile, "status", status);
+        console.log("returning data inside NOT_FOUND");
+        this.isLoadingFromServerChange.emit(false);
+        return imageData;
+      } else {
+        console.log("document from PouchDb for", document.name);
+        console.log("document.ETag", document.ETag);
+        console.log("document.LastModified", document.LastModified);
+        console.log("document.revId", document._rev);
+        if (jpegFile == document.name && document.ETag == objectHeaderInfo.ETag) {
+          console.log("date for both documents matches");
+          let pouchDbImageData = await this.localImagesDb.get(jpegFile);
+          this.isLoadingFromServerChange.emit(false);
+          return pouchDbImageData.data;
+        } else if (jpegFile == document.name && document.ETag != objectHeaderInfo.ETag) {
+          console.log("IbmCosObject ETag doesn't match with PouchDbObject ETag");
+          let data = await this.getServerImage(serverImage);
+          let status = await this.saveImagesPouchDb(jpegFile, data, objectHeaderInfo.ETag, objectHeaderInfo.LastModified, document._rev);
+          console.log("updated image", jpegFile, "status", status);
+          this.isLoadingFromServerChange.emit(false);
+          return data;
+        }
+      }
+    }
+  }
+
+  async getServerImage(serverImage) {
+    let promise = new Promise((resolve, reject) => {
+      var bookName = this.route.snapshot.queryParams['data'];
+      var folderName = bookName;
+      const queryParams = `?folderName=${folderName}&type=GET-DATA`;
+      this.http.get<{ message: string; json: any }>(this.IMAGE_BACKEND_URL + serverImage + queryParams).subscribe(responseData => {
+        resolve(responseData.json);
+      });
+    });
+    return promise;
+  }
+
+  async getHeaderInfo(serverImage: any) {
+    console.log("inside getHeaderInfo", serverImage);
 
     let promise = new Promise((resolve, reject) => {
       var user = this.authService.userName;
-      var bookName = this.route.snapshot.queryParams['data']
-      var folderName = bookName;
-      const queryParams = `?folderName=${folderName}`;
+      const queryParams = `?user=${user}&type=GET-HEADER`;
       this.http.get<{ message: string; json: any }>(this.IMAGE_BACKEND_URL + serverImage + queryParams).subscribe(responseData => {
-        this.isLoadingFromServerChange.emit(false);
+        if (responseData.json != "") {
+          console.log("got header info");
+        }
         resolve(responseData.json);
       });
     });
@@ -524,39 +906,41 @@ export class ImageService implements OnInit {
       XmlfileName: fileName.slice(0, -3) + 'xml',
       user: this.authService.userName
     };
-    this.http
-      .put<{ message: string, completed: string }>(this.XML_BACKEND_URL + queryParams, jsonData)
-      .subscribe(response => {
-        console.log("response message after correction " + response.message);
-        this.headerService.setloadmessage(response.message);
-        this.localImages = this.getLocalImages();
-        console.log("server image length in update " + this.localImages.length);
-        if (this.localImages.length > 0) {
-          for (let i = 0; i < this.localImages.length; i++) {
-            // console.log("jsonData.XmlfileName ", jsonData.XmlfileName, "this.localImages[" + i + "].fileName ", this.localImages[i].fileName);
-            if (this.localImages[i].fileName.slice(0, -3) + 'xml' == jsonData.XmlfileName) {
-              console.log("name" + this.localImages[i].fileName);
-              this.localImages[i].completed = response.completed;
-              console.log("completed" + this.localImages[i].completed);
-            }
-          }
-        } else {
-          for (let i = 0; i < this.localImages.length; i++) {
-            if (this.localImages[i].fileName.slice(0, -3) + 'xml' == jsonData.XmlfileName) {
-              console.log("name" + this.localImages[i].fileName);
-              this.localImages[i].completed = response.completed;
-              console.log("completed" + this.localImages[i].completed);
-            }
-          }
-        }
-      });
+    let xmlFileName = fileName.slice(0, -3) + 'xml'
+
+    this.updatelocalXml(xmlFileName, XmlModel.jsonObject);
+    this.onXml();
+    // this.http.put<{ message: string, completed: string }>(this.XML_BACKEND_URL + queryParams, jsonData).subscribe(response => {
+    //     console.log("response message after correction " + response.message);
+    //     this.headerService.setloadmessage(response.message);
+    //     this.localImages = this.getLocalImages();
+    //     console.log("server image length in update " + this.localImages.length);
+    //     if (this.localImages.length > 0) {
+    //       for (let i = 0; i < this.localImages.length; i++) {
+    //         // console.log("jsonData.XmlfileName ", jsonData.XmlfileName, "this.localImages[" + i + "].fileName ", this.localImages[i].fileName);
+    //         if (this.localImages[i].fileName.slice(0, -3) + 'xml' == jsonData.XmlfileName) {
+    //           console.log("name" + this.localImages[i].fileName);
+    //           this.localImages[i].completed = response.completed;
+    //           console.log("completed" + this.localImages[i].completed);
+    //         }
+    //       }
+    //     } else {
+    //       for (let i = 0; i < this.localImages.length; i++) {
+    //         if (this.localImages[i].fileName.slice(0, -3) + 'xml' == jsonData.XmlfileName) {
+    //           console.log("name" + this.localImages[i].fileName);
+    //           this.localImages[i].completed = response.completed;
+    //           console.log("completed" + this.localImages[i].completed);
+    //         }
+    //       }
+    //     }
+    //   });
   }
 
-  openModalDialog(images: Images[]) {
-    console.log("images count inside subscribe: " + images.length);
+  openModalDialog() {
+    console.log("images count inside subscribe: " + this.pouchImagesList.length);
     this.btnImgArray.splice(0, this.btnImgArray.length);
-    for (let i = 0; i < images.length; i++) {
-      var btnImgEle = "<button  style=\"width: 100%; border: none;\" (click)=\"openThisImage()\" class=\"btnImg\" value=\"" + images[i].fileName + "\"  id=\"" + images[i]._id + "\">" + images[i].fileName + "</button>";
+    for (let i = 0; i < this.pouchImagesList.length; i++) {
+      var btnImgEle = "<button  style=\"width: 100%; border: none;\" (click)=\"openThisImage()\" class=\"btnImg\" value=\"" + this.pouchImagesList[i].pageName + "\"  id=\"" + this.pouchImagesList[i]._id + "\">" + this.pouchImagesList[i].pageName + "</button>";
       // console.log("btnImgEle: " + btnImgEle);
       this.btnImgArray.push(btnImgEle);
       this.btnImgArrayChange.emit(this.btnImgArray.slice());
@@ -565,7 +949,6 @@ export class ImageService implements OnInit {
     $(".sideBody").empty();
     for (let i = 0; i < this.btnImgArray.length; i++) {
       $(".sideBody").append(this.btnImgArray[i]);
-
     }
   }
 
@@ -590,7 +973,6 @@ export class ImageService implements OnInit {
     this.isRunningOcrChange.emit(false);
     this.imgFileCount++;
     this.imageCountChange.emit(this.imgFileCount);
-    this.localImages = this.getLocalImages();
     if (this.obtainblock == true) {
       $('#imgToRead').selectAreas('reset');
     }
@@ -598,20 +980,14 @@ export class ImageService implements OnInit {
     $(".textElementsDiv").not(':first').remove();
     $(".textSpanDiv").empty();
 
-    this.localImages = this.getLocalImages();
-    // console.log("localImages count", this.localImages.length);
-    // console.log("index of image to be displayed", this.imgFileCount);
-    if (this.localImages[this.imgFileCount].dataUrl == null || this.localImages[this.imgFileCount].dataUrl == "") {
-      this.localImages[this.imgFileCount].dataUrl = await this.loadArray(this.localImages[this.imgFileCount].fileName);
-    }
-    this.localUrl = this.localImages[this.imgFileCount].dataUrl;
+    this.localUrl = await this.loadArray(this.pouchImagesList[this.imgFileCount].pageName);
     this.urlChanged.emit(this.localUrl.slice());
-    this.fileName = this.localImages[this.imgFileCount].fileName;
+    this.fileName = this.pouchImagesList[this.imgFileCount].pageName;
     this.fileNameChange.emit(this.fileName);
     // console.log("inside Next this.imgFileCount after incrementing: " + this.imgFileCount);
     this.onXml();
 
-    if (this.localImages.length - 1 == this.imgFileCount) {
+    if (this.pouchImagesList.length - 1 == this.imgFileCount) {
       this.nextImages = true;
       this.nextImageChange.emit(this.nextImages);
     }
@@ -631,20 +1007,13 @@ export class ImageService implements OnInit {
     // console.log("empty the right side screen");
     $(".textElementsDiv").not(':first').remove();
     $(".textSpanDiv").empty();
-
-    this.localImages = this.getLocalImages();
-    // console.log("localImages count", this.localImages.length);
-    // console.log("index of image to be displayed", this.imgFileCount);
-    if (this.localImages[this.imgFileCount].dataUrl == null || this.localImages[this.imgFileCount].dataUrl == "") {
-      this.localImages[this.imgFileCount].dataUrl = await this.loadArray(this.localImages[this.imgFileCount].fileName);
-    }
-    this.localUrl = this.localImages[this.imgFileCount].dataUrl;
+    this.localUrl = await this.loadArray(this.pouchImagesList[this.imgFileCount].pageName);
     this.urlChanged.emit(this.localUrl.slice());
-    this.fileName = this.localImages[this.imgFileCount].fileName;
+    this.fileName = this.pouchImagesList[this.imgFileCount].pageName;
     this.fileNameChange.emit(this.fileName);
     // console.log("inside Next this.imgFileCount after decrementing: " + this.imgFileCount);
     this.onXml();
-    if (this.localImages.length - 1 > this.imgFileCount) {
+    if (this.pouchImagesList.length - 1 > this.imgFileCount) {
       this.nextImages = false;
       this.nextImageChange.emit(this.nextImages);
     }
@@ -663,18 +1032,14 @@ export class ImageService implements OnInit {
     $(".textElementsDiv").not(':first').remove();
     $(".textSpanDiv").empty();
 
-    this.localImages = this.getLocalImages();
-    this.imgFileCount = this.localImages.length - 1;
+    this.imgFileCount = this.pouchImagesList.length - 1;
     this.imageCountChange.emit(this.imgFileCount);
-    if (this.localImages[this.imgFileCount].dataUrl == null || this.localImages[this.imgFileCount].dataUrl == "") {
-      this.localImages[this.imgFileCount].dataUrl = await this.loadArray(this.localImages[this.imgFileCount].fileName);
-    }
-    this.localUrl = this.localImages[this.imgFileCount].dataUrl;
+    this.localUrl = await this.loadArray(this.pouchImagesList[this.imgFileCount].pageName);
     this.urlChanged.emit(this.localUrl.slice());
-    this.fileName = this.localImages[this.imgFileCount].fileName;
+    this.fileName = this.pouchImagesList[this.imgFileCount].pageName;
     this.fileNameChange.emit(this.fileName);
     this.onXml();
-    if (this.localImages.length - 1 == this.imgFileCount) {
+    if (this.pouchImagesList.length - 1 == this.imgFileCount) {
       this.nextImages = true;
       this.nextImageChange.emit(this.nextImages);
       this.previousImages = false;
@@ -693,13 +1058,9 @@ export class ImageService implements OnInit {
     $(".textElementsDiv").not(':first').remove();
     $(".textSpanDiv").empty();
 
-    this.localImages = this.getLocalImages();
-    if (this.localImages[this.imgFileCount].dataUrl == null || this.localImages[this.imgFileCount].dataUrl == "") {
-      this.localImages[this.imgFileCount].dataUrl = await this.loadArray(this.localImages[this.imgFileCount].fileName);
-    }
-    this.localUrl = this.localImages[this.imgFileCount].dataUrl;
+    this.localUrl = await this.loadArray(this.pouchImagesList[this.imgFileCount].pageName);
     this.urlChanged.emit(this.localUrl.slice());
-    this.fileName = this.localImages[this.imgFileCount].fileName;
+    this.fileName = this.pouchImagesList[this.imgFileCount].pageName;
     this.fileNameChange.emit(this.fileName);
     this.onXml();
 
@@ -711,29 +1072,29 @@ export class ImageService implements OnInit {
     }
   }
 
-  buttonenable() {
+  buttonEnable() {
     this.isRunningOcrChange.emit(false);
-    if (this.localImages.length - 1 == 0) {
+    if (this.pouchImagesList.length - 1 == 0) {
       this.nextImages = true;
       this.nextImageChange.emit(this.nextImages);
       this.previousImages = true;
       this.previousImageChange.emit(this.previousImages);
     }
 
-    else if (this.localImages.length - 1 == this.imgFileCount) {
+    else if (this.pouchImagesList.length - 1 == this.imgFileCount) {
       this.nextImages = true;
       this.nextImageChange.emit(this.nextImages);
       this.previousImages = false;
       this.previousImageChange.emit(this.previousImages);
     }
 
-    else if ((this.localImages.length - 1 > 0) && (this.imgFileCount == 0)) {
+    else if ((this.pouchImagesList.length - 1 > 0) && (this.imgFileCount == 0)) {
       this.nextImages = false;
       this.nextImageChange.emit(this.nextImages);
       this.previousImages = true;
       this.previousImageChange.emit(this.previousImages);
     }
-    else if ((this.localImages.length - 1 > 0) && (this.localImages.length - 1 !== this.imgFileCount)) {
+    else if ((this.pouchImagesList.length - 1 > 0) && (this.pouchImagesList.length - 1 !== this.imgFileCount)) {
       this.nextImages = false;
       this.nextImageChange.emit(this.nextImages);
       this.previousImages = false;
@@ -743,41 +1104,36 @@ export class ImageService implements OnInit {
   }
 
   onXml() {
-    this.localImages = this.getLocalImages();
-    // console.log("localImages in onXml", this.localImages.length);
-    if (this.localImages.length > 0) {
-      // console.log("server image length " + this.localImages.length);
-      // console.log("image file count " + this.imgFileCount);
-      this.fileName = this.localImages[this.imgFileCount].fileName;
-      // console.log("completion status: ", this.localImages[this.imgFileCount].completed);
-      if (this.localImages[this.imgFileCount].completed == "Y") {
-        this.getFileAsJson(this.fileName);
+    console.log("entered onXml");
+      this.fileName = this.pouchImagesList[this.imgFileCount].pageName;
+      this.getFileAsJson(this.fileName);
+  }
+
+  async getFileAsJson(fileName: any) {
+    console.log("entered getFileAsJson");
+    let xmlFileName = fileName.slice(0, -3) + "xml";
+    let document = await this.currentLocalBookDbInstance.get(xmlFileName).then(function (doc) {
+      return doc;
+    }).catch(function (err) {
+      console.log("error status", err.status);
+      if (err.status == "404") {
+        return "NOT_FOUND";
       }
-    } else {
-      this.localImages = this.getLocalImages();
-      this.fileName = this.localImages[this.imgFileCount].fileName;
-      // console.log("completion status: ", this.localImages[this.imgFileCount].completed);
-      if (this.localImages[this.imgFileCount].completed == "Y") {
-        this.getFileAsJson(this.fileName);
-      }
+    });
+
+    console.log("empty the right side screen");
+    $(".textElementsDiv").not(':first').remove();
+    $(".textSpanDiv").empty();
+    if(document != "NOT_FOUND") {
+      console.log("document.data",document.data);
+      XmlModel.jsonObject = document.data;
+      this.retain(XmlModel.jsonObject);
+      this.updateXmlModel(XmlModel.jsonObject);
     }
   }
 
-  getFileAsJson(fileName: any) {
-    var bookName = this.route.snapshot.queryParams['data'];
-    var xmlFileName = fileName + "-" + bookName;
-    const queryParams = `?fileName=${xmlFileName}&type=GET-XML`;
-    this.http.get<{ message: string; xmlData: any }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
-      console.log("empty the right side screen");
-      $(".textElementsDiv").not(':first').remove();
-      $(".textSpanDiv").empty();
-      XmlModel.jsonObject = response.xmlData;
-      this.retain(XmlModel.jsonObject);
-      this.updateXmlModel(XmlModel.jsonObject);
-    });
-  }
-
   retain(jsonObj) {
+    console.log("inside retain this.obtainblock:",this.obtainblock);
     if (this.obtainblock == true) {
       let areaarray = [];
       // var jsonObj = JSON.parse(json);
@@ -1096,10 +1452,9 @@ export class ImageService implements OnInit {
       for (var i = 0; i < len; i++) {
         // console.log("elem[" + i + "]" + elems[i]);
         // console.log("elem[" + i + "]" + $('.select-areas-background-area').css("background"));
-        $('.select-areas-background-area').bind()
+        $('.select-areas-background-area').bind();
       }
     }
-
   }
 
 
@@ -1152,7 +1507,7 @@ export class ImageService implements OnInit {
 
   };
 
-  onSave() {
+  async onSave() {
     console.log("in xml save");
     var areas = $('img#imgToRead').selectAreas('areas');
     var prolog = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
@@ -1183,11 +1538,63 @@ export class ImageService implements OnInit {
     }
     var xmlString = new XMLSerializer().serializeToString(xmlDocument);
 
-    xml2js.parseString(xmlString, function (err, result) {
-      var jsonString = JSON.stringify(result);
+    await xml2js.parseString(xmlString, function (err, result) {
       XmlModel.jsonObject = result;
     });
-    this.updateCorrectedXml(this.fileName);
+    let fileName = this.getCurrentImageName();
+    let xmlFileName = fileName.slice(0, -3) + "xml";
+    this.updatelocalXml(xmlFileName, XmlModel.jsonObject);
+  }
+
+
+  async updatelocalXml(xmlFileName, xmlContent) {
+    let revId = "";
+    let xmlForm = {};
+    let document = await this.currentLocalBookDbInstance.get(xmlFileName).then(function (doc) {
+      return doc;
+    }).catch(function (err) {
+      console.log("error status", err.status);
+      if (err.status == "404") {
+        return "NOT_FOUND";
+      }
+    });
+
+    if (document == "NOT_FOUND") {
+      console.log("xmlFile was not available");
+    } else {
+      console.log("document from PouchDb for", document.name);
+      console.log("document.LastModified", document.LastModified);
+      console.log("document.revId", document._rev);
+      console.log("document.revId", document._id);
+      revId = document._rev;
+    }
+    let now = new Date();
+    let date = now.toUTCString();
+
+    console.log("date for LastModified",date,"revId for _rev",revId);
+    xmlForm = {
+      _id: xmlFileName,
+      pageName: xmlFileName,
+      data: xmlContent,
+      LastModified: date,
+      _rev: revId
+    }
+
+    await this.pouchService.checkDbStatus(this.currentLocalBookDbInstance).then(status => {
+      console.log("status of currentLocalBookDbInstance is", status);
+    });
+    this.currentLocalBookDbInstance.put(xmlForm).then((result, error) => {
+      console.log("result", result);
+      console.log("error", error);
+      if (!error) {
+        console.log("Xml Pouch form saved successfully");
+      }
+      return true;
+    });
+  }
+
+  setDeleteBookImagesList(bookDbName) {
+
   }
 
   setDeleteImagesList(list: any) {
@@ -1199,6 +1606,7 @@ export class ImageService implements OnInit {
     }
   }
 
+  // Unused. Check & Remove
   getDeleteImagesList(list: any) {
     return this.deleteImagesList;
   }
@@ -1206,7 +1614,7 @@ export class ImageService implements OnInit {
   deleteImages() {
     this.progressType = 'DELETE_IMAGES';
     if (this.deleteImagesList.length > 0) {
-      var deleteImage = (x) => {
+      var deleteImage = async (x) => {
         if (x == 0) {
           this.uploadMessage = "";
           this.uploadMessageChange.emit(this.uploadMessage);
@@ -1220,15 +1628,115 @@ export class ImageService implements OnInit {
           }
         }
         if (x < this.deleteImagesList.length) {
-          let name = this.deleteImagesList[x];
-          let bookName = this.getbookName();
-          let fileName = name + "-" + bookName;
+          let fileName = this.deleteImagesList[x];
+          let deleteDocument: any = {};
+          let deleteDocumentId = "";
           console.log("Deleting " + fileName);
           this.progressInfos[x].value = 'Deleting';
           this.progressInfoChange.emit(this.progressInfos.slice());
-          this.http.delete<{ message: string; completed: string }>(this.IMAGE_BACKEND_URL + fileName).subscribe(response => {
+          for(let i = 0; i < this.pouchImagesList.length; i++) {
+            if(this.pouchImagesList[i].pageName == fileName) {
+              deleteDocument = this.pouchImagesList[i];
+              deleteDocumentId = deleteDocument._id;
+              break;
+            }
+          }
+          let docs = [];
+          // Filling deletion List for imageDoc and its revisions
+          let imageDocumentWithRevs = await this.currentRemoteBookDbInstance.get(deleteDocumentId, { revs: true, open_revs: 'all'}).then((document) => {
+            return document
+          }).catch((err) => {
+            console.log("Unable to retrieve the document for",deleteDocument._id,"\nerror:" ,err);
+            console.log("error status", err.status);
+            if (err.status == "404") {
+              return "NOT_FOUND";
+            }
+          });
+          if(imageDocumentWithRevs != "NOT_FOUND") {
+            if (imageDocumentWithRevs.length > 0) {
+              for(let i = 0; i < imageDocumentWithRevs.length; i++) {
+                console.log("imageDocumentWithRevs["+i+"]:",imageDocumentWithRevs[i]);
+                console.log("imageDocumentWithRevs["+i+"]._id:",imageDocumentWithRevs[i]["ok"]._id);
+                let tempDeleteDoc = {_id : imageDocumentWithRevs[i]["ok"]._id, _rev: imageDocumentWithRevs[i]["ok"]._rev, _deleted : true };
+                docs.push(tempDeleteDoc);
+              }
+            }
+          }
+          // Filling deletion List for xmlDoc and its revisions
+          let xmlFileName = fileName.slice(0, -3) + "xml";
+          let xmlDocumentWithRevs = await this.currentRemoteBookDbInstance.get(xmlFileName, { revs: true, open_revs: 'all'}).then((document) => {
+            return document
+          }).catch((err) => {
+            console.log("Unable to retrieve the document for",deleteDocument._id,"\nerror:" ,err);
+            console.log("error status", err.status);
+            if (err.status == "404") {
+              return "NOT_FOUND";
+            }
+          });
+          if(xmlDocumentWithRevs != "NOT_FOUND") {
+            if (xmlDocumentWithRevs.length > 0) {
+              for(let i = 0; i < xmlDocumentWithRevs.length; i++) {
+                console.log("xmlDocumentWithRevs["+i+"]:",xmlDocumentWithRevs[i]);
+                console.log("xmlDocumentWithRevs["+i+"]._id:",xmlDocumentWithRevs[i]["ok"]._id);
+                let tempDeleteDoc = {_id : xmlDocumentWithRevs[i]["ok"]._id, _rev: xmlDocumentWithRevs[i]["ok"]._rev, _deleted : true };
+                docs.push(tempDeleteDoc);
+              }
+            }
+          }
+          console.log("docs to be deleted along with its revisions",docs);
+          if(docs.length > 0) {
+            await this.currentRemoteBookDbInstance.bulkDocs(docs, function(err, response) {
+              if (err) {
+                 return console.log(err);
+              } else {
+                 console.log(response+"Documents deleted Successfully");
+              }
+           });
+          }
+          // return;
+          const queryParams = `?documentId=${deleteDocumentId}&bookDbName=${this.currentBookDb}`;
+          this.http.delete<{ message: string; completed: string }>(this.IMAGE_BACKEND_URL + fileName + queryParams).subscribe( async response => {
             console.log("response on deletion", response.message);
             if (response.completed == 'Y') {
+              // Filling deletion List for imageFileDoc and its revisions
+              let bucketName = this.authService.getbucketName();
+              let deleteImageFile = deleteDocument.imageId;
+              docs = [];
+              deleteImageFile = deleteImageFile.substring((bucketName.length + 1));
+              this.localImagesDb = new PouchDB("mile_images_db", { revs_limit: 1, auto_compaction: true, skip_setup: true });
+              console.log("deleteDocument.imageId======>",deleteImageFile);
+              let imageFileDocumentWithRevs = await this.localImagesDb.get(deleteImageFile, { revs: true, open_revs: 'all'}).then((document) => {
+                return document
+              }).catch((err) => {
+                console.log("Unable to retrieve the document for",deleteDocument._id,"\nerror:" ,err);
+                console.log("error status", err.status);
+                if (err.status == "404") {
+                  return "NOT_FOUND";
+                }
+              });
+              if(imageFileDocumentWithRevs != "NOT_FOUND") {
+                if (imageFileDocumentWithRevs.length > 0) {
+                  for(let i = 0; i < imageFileDocumentWithRevs.length; i++) {
+                    console.log("imageFileDocumentWithRevs["+i+"]:",imageFileDocumentWithRevs[i]);
+                    console.log("imageFileDocumentWithRevs["+i+"]._id:",imageFileDocumentWithRevs[i]["ok"]._id);
+                    let tempDeleteDoc = {_id : imageFileDocumentWithRevs[i]["ok"]._id, _rev: imageFileDocumentWithRevs[i]["ok"]._rev, _deleted : true };
+                    docs.push(tempDeleteDoc);
+                  }
+                }
+              }
+              console.log("docs to be deleted along with its revisions",docs);
+              if(docs.length > 0) {
+                await this.localImagesDb.bulkDocs(docs, function(err, response) {
+                  if (err) {
+                    return console.log(err);
+                  } else {
+                    console.log(response+"Documents deleted Successfully");
+                    return true;
+                  }
+              });
+              }
+              // this.getServerImages();
+              //  PouchDb Document deletion ends here
               this.progressInfos[x].value = 'Deleted';
               this.progressInfoChange.emit(this.progressInfos.slice());
             } else {
@@ -1248,7 +1756,7 @@ export class ImageService implements OnInit {
 
           });
         } else {
-          this.getServerImages();
+          // this.getServerImages();
         }
       }
       if (this.deleteFlag == false) {
@@ -1272,11 +1780,37 @@ export class ImageService implements OnInit {
     this.setDeleteFlag(false);
     this.deleteLastIndex = 0;
   }
-}
 
-function convertCanvasToImage(canvas) {
-  console.log("In Tiff Image conversion");
-  var image = new Image();
-  image.src = canvas.toDataURL("image/png");
-  return image;
+  openFileName(){
+    console.log("this.pouchImagesList.length inside openFileName: " + this.pouchImagesList.length);
+    this.btnImgArray.splice(0, this.btnImgArray.length);
+    for (let i = 0; i < this.pouchImagesList.length; i++) {
+      var btnImgEle = "<button  style=\"width: 100%; border: none;\"  class=\"btnImg\" value=\"" + this.pouchImagesList[i].pageName + "\"  id=\"" + this.pouchImagesList[i].pageName + "\">" + this.pouchImagesList[i].pageName + "</button>";
+      this.btnImgArray.push(btnImgEle);
+      this.btnImgArrayChange.emit(this.btnImgArray.slice());
+    }
+    console.log("images count inside btnImgArray: " + this.btnImgArray.length);
+    $(".sideBody").empty();
+    for (let i = 0; i < this.btnImgArray.length; i++) {
+      $(".sideBody").append(this.btnImgArray[i]);
+    }
+ }
+
+ async openPreview(){
+   console.log("this.pouchImagesList.length inside openPreview"+this.pouchImagesList.length);
+    this.btnImgArray.splice(0, this.btnImgArray.length);
+    for (let i = 0; i < this.pouchImagesList.length; i++) {
+      this.fileName = this.pouchImagesList[i].pageName;
+      console.log("openPreview fileName"+this.fileName);
+      var btnImgEle = "<button  style=\"width: 100%; height: 100px border: none;\"  class=\"btnImg\" value=\"" + this.pouchImagesList[i].pageName + "\"  id=\"" + this.pouchImagesList[i].pageName + "\"><img src=\""+this.pouchImagesList[i].pageThumbnail+"\" id=\"" + this.pouchImagesList[i].pageName + "\"></button>";
+      this.btnImgArray.push(btnImgEle);
+      this.btnImgArrayChange.emit(this.btnImgArray.slice());
+    }
+    console.log("images count inside btnImgArray: " + this.btnImgArray.length);
+    $(".sideBody").empty();
+    for (let i = 0; i < this.btnImgArray.length; i++) {
+      $(".sideBody").append(this.btnImgArray[i]);
+    }
+  }
+
 }
