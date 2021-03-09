@@ -283,9 +283,14 @@ module.exports.findPage = async function (dbName, searchValue) {
 module.exports.insertDocument = async function (dbName, document) {
   return new Promise((resolve, reject) => {
     var db = cloudant.use(dbName);
-    db.insert(document).then((result) => {
-      // console.log("result", result);
-      resolve(result);
+    db.insert(document, (err, result) => {
+      if(err) {
+        console.log("err while inserting document",err.statusCode,"with reason",err.reason);
+        resolve(false);
+      } else {
+        console.log("result", result);
+        resolve(true);
+      }
     });
   });
 }

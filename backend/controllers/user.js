@@ -103,22 +103,31 @@ exports.createUser = async (req, res, next) => {
     console.log("Got Output from Cloudant find function on createUser");
     if (response.statusCode == 404) {
       console.log("User not found");
-      crypto.createHash('sha1').update(req.body.email).digest('hex').then(userIdHash => {
-        const clouadnt_user = {
-          _id: "org.couchdb.user:"+req.body.email,
-          userId: userIdHash,
-          name: req.body.email,
-          password: req.body.password,
-          role: req.body.role,
-          bucketName: ''
-        }
-        couch.insertDocument('_users',clouadnt_user).then((result) => {
-          // console.log("result", result);
+      var id = "org.couchdb.user:"+req.body.email;
+      var userIdHash = await crypto.createHash('sha1').update(req.body.email).digest('hex');
+      var userRoles = [];
+      userRoles.push(req.body.role);
+      const clouadnt_user = {
+        _id: id,
+        userId: userIdHash,
+        name: req.body.email,
+        password: req.body.password,
+        roles: userRoles,
+        bucketName: '',
+        password_scheme: 'simple',
+        type: "user"
+      }
+      couch.insertDocument('_users',clouadnt_user).then((status) => {
+        if (status == true) {
           res.status(201).json({
             message: "User created!",
             result: result
           });
-        });
+        } else {
+          res.status(500).json({
+            message: "Unable to create user"
+          });
+        }
       });
     } else {
       console.log("Please use different mail id as it already exists in Cloudant user db", response.data);
