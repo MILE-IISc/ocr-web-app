@@ -1,5 +1,6 @@
 var Cloudant = require('@cloudant/cloudant');
-var cloudant = new Cloudant({ url: process.env.NO_SQL_DB_ADMIN_URL });
+couchDbAdminUrl = "https://" + process.env.COUCH_DB_ADMIN_USERNAME + ":" + process.env.COUCH_DB_ADMIN_PASSWORD + "@" + process.env.COUCH_DB_HOST;
+var cloudant = new Cloudant({ url: couchDbAdminUrl });
 
 
 // Check Database Existence
