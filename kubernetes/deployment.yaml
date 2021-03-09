@@ -22,11 +22,6 @@ spec:
         - containerPort: 8080
         imagePullPolicy: Always
         env:
-        - name: MONGODB_ENDPOINT
-          valueFrom:
-            secretKeyRef:
-              name: mongosecret
-              key: endpoint
         - name: JWT_KEY
           valueFrom:
             secretKeyRef:
@@ -62,16 +57,21 @@ spec:
             secretKeyRef:
               name: ocrengine-secret
               key: port
-        - name: NO_SQL_DB_ADMIN_URL
+        - name: COUCH_DB_HOST
           valueFrom:
             secretKeyRef:
-              name: nosqldb-secret
-              key: noSqlDbAdminUrl
-        - name: NO_SQL_DB_BASE_URL
+              name: couchdb-secret
+              key: couchDbHost
+        - name: COUCH_DB_ADMIN_USERNAME
           valueFrom:
             secretKeyRef:
-              name: nosqldb-secret
-              key: noSqlDbBaseUrl
+              name: couchdb-secret
+              key: couchDbAdminUsername
+        - name: COUCH_DB_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: couchdb-secret
+              key: couchDbAdminPassword
 ---
 # Expose as service
 apiVersion: v1
