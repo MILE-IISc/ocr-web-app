@@ -120,8 +120,7 @@ exports.createUser = async (req, res, next) => {
       couch.insertDocument('_users',clouadnt_user).then((status) => {
         if (status == true) {
           res.status(201).json({
-            message: "User created!",
-            result: result
+            message: "User created!"
           });
         } else {
           res.status(500).json({
@@ -130,7 +129,7 @@ exports.createUser = async (req, res, next) => {
         }
       });
     } else {
-      console.log("Please use different mail id as it already exists in Cloudant user db", response.data);
+      console.log("Please use different mail id as it already exists");
       res.status(500).json({
         message: "User Id already exists. Please use different Id"
       });
