@@ -441,10 +441,10 @@ export class ImageService implements OnInit {
             }
             this.runOcrLastIndex = x;
             if (this.runOcrLastIndex == (this.pouchImagesList.length - 1)) {
-              this.uploadMessage = "Run-OCR on all images is completed !!"
+              this.uploadMessage = "Run-OCR on all images is completed"
               this.uploadMessageChange.emit(this.uploadMessage);
               var btn = document.getElementById("pauseButton");
-              btn.innerHTML = 'Ok';
+              btn.innerHTML = 'OK';
             }
             if (this.runOcrAllFlag == true) {
               runOcr(x + 1);
@@ -664,10 +664,10 @@ export class ImageService implements OnInit {
             this.progressInfoChange.emit(this.progressInfos.slice());
             this.uploadImageLastIndex = x;
             if (this.uploadImageLastIndex == (sortedFilesList.length - 1)) {
-              this.uploadMessage = "Images Uploaded Successfully !!"
+              this.uploadMessage = "Images Uploaded Successfully"
               this.uploadMessageChange.emit(this.uploadMessage);
               var btn = document.getElementById("pauseButton");
-              btn.innerHTML = 'Ok';
+              btn.innerHTML = 'OK';
               this.uploadLocalBookDbInstance.close();
               this.uploadRemoteBookDbInstance.close();
               console.log("this.pouchImagesList.length",this.pouchImagesList.length);
@@ -1751,7 +1751,7 @@ export class ImageService implements OnInit {
               this.uploadMessage = "Deletion of Images is successfull"
               this.uploadMessageChange.emit(this.uploadMessage);
               var btn = document.getElementById("pauseButton");
-              btn.innerHTML = 'Ok';
+              btn.innerHTML = 'OK';
             }
             if (this.deleteFlag == true) {
               deleteImage(x + 1);

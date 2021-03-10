@@ -5,6 +5,9 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
 <mat-toolbar color="primary">
+  <button mat-icon-button data-toggle="tooltip" title="home" style="margin-right:3px;" (click)="goToHomePage()">
+  <mat-icon>home</mat-icon>
+</button>
   <button mat-icon-button data-toggle="tooltip" title="Upload Images" style="margin-right:3px;"
     [matMenuTriggerFor]="upload">
     <mat-icon>cloud_upload</mat-icon>

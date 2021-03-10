@@ -20,7 +20,7 @@ import { FileService } from '../services/file.service';
 import { MatIconRegistry } from "@angular/material/icon";
 import { MatDialog } from '@angular/material/dialog';
 import { ThemePalette } from "@angular/material/core";
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-screen',
@@ -128,7 +128,7 @@ export class ScreenComponent implements OnInit {
     this.imageService.openPreview();
   }
 
-  constructor(private headerService: HeaderService, private imageService: ImageService, private changeDetection: ChangeDetectorRef,
+  constructor(private headerService: HeaderService, private imageService: ImageService, private changeDetection: ChangeDetectorRef, private router: Router,
     public authService: AuthService, private fileService: FileService, public dialog: MatDialog, private route: ActivatedRoute) { }
 
   onLogout() {
@@ -395,6 +395,11 @@ export class ScreenComponent implements OnInit {
       console.log("isRunning ocr in screen " + isRunningOcr);
       this.isRunningOcr = isRunningOcr;
     });
+  }
+
+  goToHomePage() {
+    console.log("clicked goToHomePage");
+    this.router.navigate(["/booksdashboard"]);
   }
 
   async openThisImage(event) {
