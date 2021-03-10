@@ -2,7 +2,6 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 var crypto = require('crypto');
 
-const User = require("../models/user");
 const couch = require("./couch");
 
 // User Login

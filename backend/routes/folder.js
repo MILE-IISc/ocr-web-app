@@ -1,5 +1,4 @@
 const authChecker = require("../middleware/auth-checker");
-const User = require("../models/user");
 const express = require("express");
 const router = express.Router();
 var path = require('path');
@@ -163,70 +162,43 @@ router.post("", authChecker, (req, res, next) => {
   }).catch((err) => {
     console.log("BookInfo Db Update failed", err);
   });
-
-  // User.findOne({ email: req.body.user }).then(user => {
-  //   if (!user) {
-  //     return res.status(401).json({
-  //       message: "Auth failed"
-  //     });
-  //   }
-  //   fetchedUser = user;
-  // }).then(() => {
-  //   User.findOneAndUpdate({ email: fetchedUser.email }, { $addToSet: { booksAssigned: folderName } }, { new: true })
-  //     .then(result => {
-  //       if (result.booksAssigned) {
-  //         res.status(200).json({
-  //           message: "Folder updated successfully",
-  //         });
-  //       } else {
-  //         res.status(200).json({ message: "Updation failed" });
-  //       }
-  //     })
-  //     .catch(error => {
-  //       res.status(500).json({
-  //         message: "User booksAssigned update failed !!!"
-  //       });
-  //     });
-  // });
 });
 
+// router.get("", (req, res, next) => {
+//   const mail = req.query.user;
+//   let fetchedUser;
+//   let books = [];
+//   User.findOne({ email: mail })
+//     .then(user => {
+//       if (!user) {
+//         return res.status(401).json({
+//           message: "Auth failed"
+//         });
+//       }
+//       fetchedUser = user;
+//       if (fetchedUser.booksAssigned.length > 0) {
+//         //getBucketContest --> array
+//         for (let i = 0; i < fetchedUser.booksAssigned.length; i++) {
+//           console.log("book name" + fetchedUser.booksAssigned[i]);
+//           // parse through that bucketcontentlist array fill the bookarray(will file name coreresponding to folders)
+//           const book = {
+//             folderName: fetchedUser.booksAssigned[i]
+//           };
+//           books.push(book);
+//         }
+//         res.status(200).json({
+//           message: "Books Available",
+//           book: books
+//         });
+//       } else {
+//         res.status(200).json({
+//           message: "No Books Are Available",
+//           book: books
+//         });
+//       }
 
-
-router.get("", (req, res, next) => {
-  const mail = req.query.user;
-  let fetchedUser;
-  let books = [];
-  User.findOne({ email: mail })
-    .then(user => {
-      if (!user) {
-        return res.status(401).json({
-          message: "Auth failed"
-        });
-      }
-      fetchedUser = user;
-      if (fetchedUser.booksAssigned.length > 0) {
-        //getBucketContest --> array
-        for (let i = 0; i < fetchedUser.booksAssigned.length; i++) {
-          console.log("book name" + fetchedUser.booksAssigned[i]);
-          // parse through that bucketcontentlist array fill the bookarray(will file name coreresponding to folders)
-          const book = {
-            folderName: fetchedUser.booksAssigned[i]
-          };
-          books.push(book);
-        }
-        res.status(200).json({
-          message: "Books Available",
-          book: books
-        });
-      } else {
-        res.status(200).json({
-          message: "No Books Are Available",
-          book: books
-        });
-      }
-
-    });
-});
+//     });
+// });
 
 router.get("/:folderName", authChecker, (req, res, next) => {
   const folderName = req.params.folderName;
@@ -306,25 +278,30 @@ router.get("/:folderName", authChecker, (req, res, next) => {
 
 router.delete("/:bookName", authChecker, (req, res, next) => {
   let bookName = req.params.bookName;
-  User.updateOne(
-    { $pull: { "booksAssigned": { $in: [bookName] } } }
-  ).then(result => {
-    if (result.nModified == 1) {
-      res.status(200).json({
-        message: "Book deleted successfully",
-        completed: "Y"
-      });
-    } else {
-      res.status(200).json({
-        message: "Deletion failed",
-        completed: "N"
-      });
-    }
-  }).catch(error => {
-    res.status(500).json({
-      message: "booksAssigned update failed !!!"
-    });
+  res.status(200).json({
+    message: "Deletion is yet to be implemented",
+    completed: "N"
   });
+  console.log("delete book",bookName);
+  // User.updateOne(
+  //   { $pull: { "booksAssigned": { $in: [bookName] } } }
+  // ).then(result => {
+  //   if (result.nModified == 1) {
+  //     res.status(200).json({
+  //       message: "Book deleted successfully",
+  //       completed: "Y"
+  //     });
+  //   } else {
+  //     res.status(200).json({
+  //       message: "Deletion failed",
+  //       completed: "N"
+  //     });
+  //   }
+  // }).catch(error => {
+  //   res.status(500).json({
+  //     message: "booksAssigned update failed !!!"
+  //   });
+  // });
 });
 
 module.exports = router;

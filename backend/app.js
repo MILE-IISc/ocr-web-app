@@ -1,7 +1,6 @@
 const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
-const mongoose = require("mongoose");
 
 const imageRoutes = require("./routes/image");
 const userRoutes = require("./routes/user");
@@ -10,17 +9,7 @@ const downloadXml = require("./routes/downloadXml");
 const folderRoutes = require("./routes/folder");
 
 const app = express();
-mongoose
-  .connect(process.env.MONGODB_ENDPOINT,
-  { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false, ssl:true, sslValidate: false})
-  .then(() => {
-    console.log("Connected to database!");
-  })
-  .catch((err) => {
-    console.log("Connection failed!");
-    console.log(err);
-  });
-
+console.log("app initiated");
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
