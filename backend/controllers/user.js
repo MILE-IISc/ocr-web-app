@@ -116,8 +116,8 @@ exports.createUser = async (req, res, next) => {
         password_scheme: 'simple',
         type: "user"
       }
-      couch.insertDocument('_users',clouadnt_user).then((status) => {
-        if (status == true) {
+      couch.insertDocument('_users',clouadnt_user).then((result) => {
+        if (result.ok == true) {
           res.status(201).json({
             message: "User created!"
           });

@@ -57,7 +57,7 @@ module.exports.createDatabase = async function (dbName) {
       if (err) {
         if (err.statusCode == 412) { // db already exists error -> err: { statusCode: 412, error: file_exists, .... }
           console.log("error on creation of database", err.statusCode, "error key", err.error);
-          resolve(true);
+          resolve(false);
         } else {
           console.log("error on creation of database", err.statusCode, "error key", err.error);
           resolve(false);
@@ -286,10 +286,11 @@ module.exports.insertDocument = async function (dbName, document) {
     db.insert(document, (err, result) => {
       if(err) {
         console.log("err while inserting document",err.statusCode,"with reason",err.reason);
-        resolve(false);
+        result.ok = false;
+        resolve(result);
       } else {
         console.log("result", result);
-        resolve(true);
+        resolve(result);
       }
     });
   });
