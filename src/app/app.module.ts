@@ -77,6 +77,7 @@ import { ModalContentComponent } from './footer/modal-content.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { BooksinfoComponent } from './booksinfo/booksinfo.component';
 import { PouchService } from '../app/services/pouch.service';
+import { InputDialogComponent } from './booksinfo/input-dialog/input-dialog.component';
 
 
 @NgModule({
@@ -94,7 +95,8 @@ import { PouchService } from '../app/services/pouch.service';
     ProgressDialogComponent,
     confirmationDialog,
     ModalContentComponent,
-    BooksinfoComponent
+    BooksinfoComponent,
+    InputDialogComponent
   ],
   exports: [
     MatIconModule

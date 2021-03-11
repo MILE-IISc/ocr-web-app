@@ -1,0 +1,12 @@
+<h1 mat-dialog-title>Renaming {{data.oldBookName}}</h1>
+<div mat-dialog-content>
+  <p>Enter the New Book Name</p>
+  <mat-form-field>
+    <mat-label>New Book Name</mat-label>
+    <input matInput [(ngModel)]="data.newBookName">
+  </mat-form-field>
+</div>
+<div mat-dialog-actions>
+  <button mat-button color=primary (click)="onNoClick()">No Thanks</button>
+  <button mat-button color=primary [mat-dialog-close]="data.newBookName" cdkFocusInitial>Ok</button>
+</div>

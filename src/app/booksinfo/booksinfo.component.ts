@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
+import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { ImageService } from '../services/images.service';
 import { Book } from '../shared/images.model';
 import { AuthService } from '../auth/auth.service';
@@ -11,6 +12,7 @@ import { FileService } from '../services/file.service';
 import * as fileSaver from 'file-saver';
 import { HttpClient } from '@angular/common/http';
 import { PouchService } from '../services/pouch.service';
+import { InputDialogComponent } from './input-dialog/input-dialog.component';
 
 @Component({
   selector: 'app-booksinfo',
@@ -29,11 +31,12 @@ export class BooksinfoComponent implements OnInit {
   folderName = "";
   filesToBeUploaded;
   bookName;
+  newBookName;
   isLoading = false;
   FOLDER_BACKEND_URL;
   isDownloading = false;
 
-  constructor(private imageService: ImageService, private router: Router, private fileService: FileService, private pouchService: PouchService,
+  constructor(private imageService: ImageService, private router: Router, private fileService: FileService, private pouchService: PouchService, public dialog: MatDialog,
     public authService: AuthService, private bookService: BookService, public _d: DomSanitizer, private http: HttpClient, private changeDetection: ChangeDetectorRef, private zone: NgZone) {
     this.FOLDER_BACKEND_URL = this.authService.BACKEND_URL + "/api/folder/";
   }
@@ -179,4 +182,28 @@ export class BooksinfoComponent implements OnInit {
     };
   }
 
+  renameBook(): void {
+    console.log("inside renameBook function");
+    this.newBookName = "";
+    const dialogRef = this.dialog.open(InputDialogComponent, {
+      width: '250px',
+      data: {oldBookName: this.bookName, newBookName: this.newBookName}
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed');
+      this.newBookName = result;
+      if(this.newBookName != null && this.newBookName.trim() != "") {
+        console.log("newbookName is",this.newBookName);
+        this.bookService.changeBookName(this.bookName, this.newBookName.trim());
+      } else {
+        console.log("newbookName is not entered");
+      }
+    });
+  }
+}
+
+export interface DialogData {
+  newBookName: string;
+  oldBookName: string;
 }

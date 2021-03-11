@@ -19,6 +19,8 @@ export class BookService {
   isLoadingChange = new EventEmitter<any>();
 
   // pouchDb & couchDb related declaration
+  localUserDbInstance;
+  remoteUserDbInstance;
   data;
 
   constructor(private http: HttpClient, private router: Router, private authService: AuthService, private pouchService: PouchService) {
@@ -77,12 +79,12 @@ export class BookService {
   async getBooks() {
     // localUserDb Instance related
     let userDbDetails = await this.authService.getUserDbDetails();
-    let localUserDbInstance = await this.pouchService.createPouchDbInstance(userDbDetails.userDb);
-    await this.pouchService.checkDbStatus(localUserDbInstance).then(status => {
+    this.localUserDbInstance = await this.pouchService.createPouchDbInstance(userDbDetails.userDb);
+    await this.pouchService.checkDbStatus(this.localUserDbInstance).then(status => {
       console.log("status of localDb of", userDbDetails.userDb, "is: ", status);
     });
 
-    await localUserDbInstance.allDocs({
+    await this.localUserDbInstance.allDocs({
       include_docs: true
     }).then(async (result) => {
       this.books = [];
@@ -111,8 +113,8 @@ export class BookService {
     }
 
     // remoteUserDb Instance related
-    let remoteUserDbInstance = await this.pouchService.createRemoteDbInstance(userDbDetails.dbUrl, userDbDetails.userDb, userDbDetails.userDbKey, userDbDetails.userDbPwd);
-    await this.pouchService.checkDbStatus(remoteUserDbInstance).then(status => {
+    this.remoteUserDbInstance = await this.pouchService.createRemoteDbInstance(userDbDetails.dbUrl, userDbDetails.userDb, userDbDetails.userDbKey, userDbDetails.userDbPwd);
+    await this.pouchService.checkDbStatus(this.remoteUserDbInstance).then(status => {
       console.log("status of remoteDb of", userDbDetails.userDb, "is: ", status);
     });
 
@@ -123,7 +125,7 @@ export class BookService {
       continuous: true
     };
 
-    localUserDbInstance.changes({
+    this.localUserDbInstance.changes({
       live: true, since: 'now', include_docs: true
     }).on('change', (change) => {
       console.log("calling handleChanges on localDbInstance change event");
@@ -132,11 +134,33 @@ export class BookService {
       // handle error
       console.log("info on changes error", err);
     });
-    localUserDbInstance.sync(remoteUserDbInstance, options);
+    this.localUserDbInstance.sync(this.remoteUserDbInstance, options);
+  }
+
+  async changeBookName(oldBookName, newBookName) {
+    console.log("Inside BookService - oldBookName",oldBookName,"newBookName",newBookName);
+    console.log("This.books.length",this.books.length);
+    let renameDocument;
+    if (this.books.length > 0) {
+      for(let i=0; i < this.books.length; i++) {
+        console.log("this.books[",i,"]",this.books[i]);
+        if(this.books[i].bookName == oldBookName) {
+          renameDocument = this.books[i];
+          break;
+        }
+      }
+      renameDocument.bookName = newBookName;
+      this.localUserDbInstance.put(renameDocument).then((result, error) => {
+        console.log("result", result);
+        console.log("error", error);
+        if (!error) {
+          console.log("Pouch form saved successfully");
+        }
+      });
+    }
   }
 
   getBookUpdateListener() {
     return this.booksUpdated.asObservable();
-
   }
 }
