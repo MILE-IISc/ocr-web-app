@@ -233,8 +233,10 @@ export class ImageService implements OnInit {
       if (change.deleted) {
         return;
       }
-      this.onXml();
-      return;
+      if(this.obtainblock == true) {
+        this.onXml();
+        return;
+      }
     }
 
     console.log("change.deleted", change.deleted, "changedIndex", changedIndex);
@@ -381,30 +383,25 @@ export class ImageService implements OnInit {
     });
   }
 
-  getXmlFileAsJson(fileName: any) {
+  async getXmlFileAsJson(fileName: any) {
     // var bookName = this.route.snapshot.queryParams['data'];
     var xmlFileName = fileName;
     this.isRunningOcrChange.emit(true);
     console.log("Running OCR on " + xmlFileName);
-    const queryParams = `?fileName=${xmlFileName}&bookDb=${this.currentBookDb}&type=GET-OCR-XML`;
-    this.http.get<{ message: string; completed: string }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
-      console.log("response on RUN-OCR", response);
-      // this.localImages = this.getLocalImages();
-      // if (this.localImages.length > 0) {
-      //   for (let i = 0; i < this.localImages.length; i++) {
-      //     if (this.localImages[i].fileName == fileName) {
-      //       console.log("name" + this.localImages[i].fileName);
-      //       this.localImages[i].completed = response.completed;
-      //       console.log("completed" + this.localImages[i].completed);
-      //     }
-      //   }
-      // }
-      this.isRunningOcrChange.emit(false);
-      this.ocrMessageChange.emit(response.message);
-      // this.onXml();
-      // XmlModel.jsonObject = response.xmlData;
-      // this.updateXmlModel(XmlModel.jsonObject);
-    });
+    let areasSelected = $('img#imgToRead').selectAreas('areas');
+    console.log("areasSelected.length",areasSelected.length);
+    if(areasSelected.length >= 1) {
+      await this.onSave();
+    }
+    setTimeout(() => {
+      this.obtainblock = true;
+      const queryParams = `?fileName=${xmlFileName}&bookDb=${this.currentBookDb}&type=GET-OCR-XML`;
+      this.http.get<{ message: string; completed: string }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
+        console.log("response on RUN-OCR", response);
+        this.isRunningOcrChange.emit(false);
+        this.ocrMessageChange.emit(response.message);
+      });
+    }, 2500);
   }
 
   getXmlFileAsJson2() {
@@ -1525,88 +1522,94 @@ export class ImageService implements OnInit {
   };
 
   async onSave() {
-    console.log("in xml save");
-    var areas = $('img#imgToRead').selectAreas('areas');
-    var prolog = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
-    var ns1 = 'http://mile.ee.iisc.ernet.in/schemas/ocr_output';
-    var xmlDocument = document.implementation.createDocument(null, "page", null);
-    xmlDocument.documentElement.setAttribute("xmlns", ns1);
-    if (this.angle != 0) {
-      xmlDocument.documentElement.setAttribute("rotationAngle", this.angle.toString());
-    }
-    for (let i = 0; i < areas.length; i++) {
-      var blockElem = xmlDocument.createElementNS(null, "block");
-      blockElem.setAttribute("type", "Text");
-      var blockNumberElems = $(".select-areas-blockNumber-area");
-      var blockNumber = document.getElementsByClassName('select-areas-blockNumber-area');
-      blockElem.setAttribute("BlockNumber", blockNumber[(blockNumberElems.length - 1) - i].innerHTML);
-      blockElem.setAttribute("SubType", "paragraphProse");
-      var y = ((areas[i].y * 100) / this.percentage).toString();
-      blockElem.setAttribute("rowStart", (Math.ceil(parseInt(y))).toString());
-      var height = ((areas[i].height * 100) / this.percentage);
-      var rowEnd = (height + parseFloat(y)).toString();
-      blockElem.setAttribute("rowEnd", (Math.ceil(parseInt(rowEnd))).toString());
-      var x = ((areas[i].x * 100) / this.percentage).toString();
-      blockElem.setAttribute("colStart", (Math.ceil(parseInt(x))).toString());
-      var width = ((areas[i].width * 100) / this.percentage);
-      var colEnd = (width + parseFloat(x)).toString();
-      blockElem.setAttribute("colEnd", (Math.ceil(parseInt(colEnd))).toString());
-      xmlDocument.documentElement.appendChild(blockElem);
-    }
-    var xmlString = new XMLSerializer().serializeToString(xmlDocument);
+    return new Promise(async (resolve, reject) => {
+      console.log("in xml save");
+      var areas = $('img#imgToRead').selectAreas('areas');
+      var prolog = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+      var ns1 = 'http://mile.ee.iisc.ernet.in/schemas/ocr_output';
+      var xmlDocument = document.implementation.createDocument(null, "page", null);
+      xmlDocument.documentElement.setAttribute("xmlns", ns1);
+      if (this.angle != 0) {
+        xmlDocument.documentElement.setAttribute("rotationAngle", this.angle.toString());
+      }
+      for (let i = 0; i < areas.length; i++) {
+        var blockElem = xmlDocument.createElementNS(null, "block");
+        blockElem.setAttribute("type", "Text");
+        var blockNumberElems = $(".select-areas-blockNumber-area");
+        var blockNumber = document.getElementsByClassName('select-areas-blockNumber-area');
+        blockElem.setAttribute("BlockNumber", blockNumber[(blockNumberElems.length - 1) - i].innerHTML);
+        blockElem.setAttribute("SubType", "paragraphProse");
+        var y = ((areas[i].y * 100) / this.percentage).toString();
+        blockElem.setAttribute("rowStart", (Math.ceil(parseInt(y))).toString());
+        var height = ((areas[i].height * 100) / this.percentage);
+        var rowEnd = (height + parseFloat(y)).toString();
+        blockElem.setAttribute("rowEnd", (Math.ceil(parseInt(rowEnd))).toString());
+        var x = ((areas[i].x * 100) / this.percentage).toString();
+        blockElem.setAttribute("colStart", (Math.ceil(parseInt(x))).toString());
+        var width = ((areas[i].width * 100) / this.percentage);
+        var colEnd = (width + parseFloat(x)).toString();
+        blockElem.setAttribute("colEnd", (Math.ceil(parseInt(colEnd))).toString());
+        xmlDocument.documentElement.appendChild(blockElem);
+      }
+      var xmlString = new XMLSerializer().serializeToString(xmlDocument);
 
-    await xml2js.parseString(xmlString, function (err, result) {
-      XmlModel.jsonObject = result;
+      await xml2js.parseString(xmlString, function (err, result) {
+        XmlModel.jsonObject = result;
+      });
+      let fileName = this.getCurrentImageName();
+      let xmlFileName = fileName.slice(0, -3) + "xml";
+      await this.updatelocalXml(xmlFileName, XmlModel.jsonObject);
+      resolve(true);
     });
-    let fileName = this.getCurrentImageName();
-    let xmlFileName = fileName.slice(0, -3) + "xml";
-    this.updatelocalXml(xmlFileName, XmlModel.jsonObject);
   }
 
 
   async updatelocalXml(xmlFileName, xmlContent) {
-    let revId = "";
-    let xmlForm = {};
-    let document = await this.currentLocalBookDbInstance.get(xmlFileName).then(function (doc) {
-      return doc;
-    }).catch(function (err) {
-      console.log("error status", err.status);
-      if (err.status == "404") {
-        return "NOT_FOUND";
+    return new Promise(async (resolve, reject) => {
+      let revId = "";
+      let xmlForm = {};
+      let document = await this.currentLocalBookDbInstance.get(xmlFileName).then(function (doc) {
+        return doc;
+      }).catch(function (err) {
+        console.log("error status", err.status);
+        if (err.status == "404") {
+          return "NOT_FOUND";
+        }
+      });
+
+      if (document == "NOT_FOUND") {
+        console.log("xmlFile was not available");
+      } else {
+        console.log("document from PouchDb for", document.name);
+        console.log("document.LastModified", document.LastModified);
+        console.log("document.revId", document._rev);
+        console.log("document.revId", document._id);
+        revId = document._rev;
       }
-    });
+      let now = new Date();
+      let date = now.toUTCString();
 
-    if (document == "NOT_FOUND") {
-      console.log("xmlFile was not available");
-    } else {
-      console.log("document from PouchDb for", document.name);
-      console.log("document.LastModified", document.LastModified);
-      console.log("document.revId", document._rev);
-      console.log("document.revId", document._id);
-      revId = document._rev;
-    }
-    let now = new Date();
-    let date = now.toUTCString();
-
-    console.log("date for LastModified", date, "revId for _rev", revId);
-    xmlForm = {
-      _id: xmlFileName,
-      pageName: xmlFileName,
-      data: xmlContent,
-      LastModified: date,
-      _rev: revId
-    }
-
-    await this.pouchService.checkDbStatus(this.currentLocalBookDbInstance).then(status => {
-      console.log("status of currentLocalBookDbInstance is", status);
-    });
-    this.currentLocalBookDbInstance.put(xmlForm).then((result, error) => {
-      console.log("result", result);
-      console.log("error", error);
-      if (!error) {
-        console.log("Xml Pouch form saved successfully");
+      console.log("date for LastModified", date, "revId for _rev", revId);
+      xmlForm = {
+        _id: xmlFileName,
+        pageName: xmlFileName,
+        data: xmlContent,
+        LastModified: date,
+        _rev: revId
       }
-      return true;
+
+      await this.pouchService.checkDbStatus(this.currentLocalBookDbInstance).then(status => {
+        console.log("status of currentLocalBookDbInstance is", status);
+      });
+      await this.currentLocalBookDbInstance.put(xmlForm).then((result, error) => {
+        console.log("result", result);
+        console.log("error", error);
+        if (!error) {
+          console.log("Xml Pouch form saved successfully");
+        }
+        return true;
+      });
+      resolve(true);
     });
   }
 

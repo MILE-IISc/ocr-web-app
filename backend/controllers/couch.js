@@ -286,6 +286,7 @@ module.exports.insertDocument = async function (dbName, document) {
     db.insert(document, (err, result) => {
       if(err) {
         console.log("err while inserting document",err.statusCode,"with reason",err.reason);
+        result = {}
         result.ok = false;
         resolve(result);
       } else {
