@@ -153,52 +153,52 @@ export class ImageService implements OnInit {
   deleteBookDb(currentBookDb) {
     console.log("No images in this Db so destroying currentBookDb in local and remote & deleting corresponding document in perUserDb");
     this.currentRemoteBookDbInstance.destroy().then(() => {
-      console.log("remote bookDatabase destroyed",currentBookDb);
+      console.log("remote bookDatabase destroyed", currentBookDb);
       this.currentLocalBookDbInstance.destroy().then(async () => {
-        console.log("local bookDatabase destroyed",currentBookDb);
+        console.log("local bookDatabase destroyed", currentBookDb);
         // Filling deletion List for xmlDoc and its revisions
         var bookDbDocumentId = currentBookDb.replace("mile_book_db_", "");
         let docs = [];
-        let bookDocumentWithRevs = await this.currentRemoteBookDbInstance.get(bookDbDocumentId, { revs: true, open_revs: 'all'}).then((document) => {
+        let bookDocumentWithRevs = await this.currentRemoteBookDbInstance.get(bookDbDocumentId, { revs: true, open_revs: 'all' }).then((document) => {
           return document
         }).catch((err) => {
-          console.log("Unable to retrieve the document for",bookDbDocumentId,"\nerror:" ,err);
+          console.log("Unable to retrieve the document for", bookDbDocumentId, "\nerror:", err);
           console.log("error status", err.status);
           if (err.status == "404") {
             return "NOT_FOUND";
           }
         });
-        if(bookDocumentWithRevs != "NOT_FOUND") {
+        if (bookDocumentWithRevs != "NOT_FOUND") {
           if (bookDocumentWithRevs.length > 0) {
-            for(let i = 0; i < bookDocumentWithRevs.length; i++) {
-              console.log("bookDocumentWithRevs["+i+"]:",bookDocumentWithRevs[i]);
-              console.log("bookDocumentWithRevs["+i+"]._id:",bookDocumentWithRevs[i]["ok"]._id);
-              let tempDeleteDoc = {_id : bookDocumentWithRevs[i]["ok"]._id, _rev: bookDocumentWithRevs[i]["ok"]._rev, _deleted : true };
+            for (let i = 0; i < bookDocumentWithRevs.length; i++) {
+              console.log("bookDocumentWithRevs[" + i + "]:", bookDocumentWithRevs[i]);
+              console.log("bookDocumentWithRevs[" + i + "]._id:", bookDocumentWithRevs[i]["ok"]._id);
+              let tempDeleteDoc = { _id: bookDocumentWithRevs[i]["ok"]._id, _rev: bookDocumentWithRevs[i]["ok"]._rev, _deleted: true };
               docs.push(tempDeleteDoc);
             }
           }
         }
-        console.log("docs to be deleted along with its revisions",docs);
-        if(docs.length > 0) {
+        console.log("docs to be deleted along with its revisions", docs);
+        if (docs.length > 0) {
           let userDbDetails = await this.authService.getUserDbDetails();
           let remoteUserDbInstance = await this.pouchService.createRemoteDbInstance(userDbDetails.dbUrl, userDbDetails.userDb, userDbDetails.userDbKey, userDbDetails.userDbPwd);
           await this.pouchService.checkDbStatus(remoteUserDbInstance).then(status => {
             console.log("status of remoteUserDbInstance of", userDbDetails.userDb, "is: ", status);
           });
-          await remoteUserDbInstance.bulkDocs(docs, function(err, response) {
+          await remoteUserDbInstance.bulkDocs(docs, function (err, response) {
             if (err) {
-                return console.log(err);
+              return console.log(err);
             } else {
-                console.log(response+"Documents deleted Successfully");
-                this.router.navigate(["/booksdashboard"]);
+              console.log(response + "Documents deleted Successfully");
+              this.router.navigate(["/booksdashboard"]);
             }
           });
         }
       }).catch((err) => {
-        console.log("error while destroying database",err);
+        console.log("error while destroying database", err);
       });
     }).catch((err) => {
-      console.log("error while destroying database",err);
+      console.log("error while destroying database", err);
     });
   }
 
@@ -229,40 +229,40 @@ export class ImageService implements OnInit {
       }
     });
 
-    if(change.id == (change.id.slice(0, -3)+ "xml")) {
-      if(change.deleted) {
+    if (change.id == (change.id.slice(0, -3) + "xml")) {
+      if (change.deleted) {
         return;
       }
       this.onXml();
       return;
     }
 
-    console.log("change.deleted",change.deleted,"changedIndex",changedIndex);
+    console.log("change.deleted", change.deleted, "changedIndex", changedIndex);
     //A document was deleted
     if (change.deleted) {
-      console.log("removing the document from memory on change handler",change.id);
+      console.log("removing the document from memory on change handler", change.id);
       this.pouchImagesList.splice(changedIndex, 1);
     }
     else {
-      console.log("updating or adding document from memory on change handler",change.id);
+      console.log("updating or adding document from memory on change handler", change.id);
       if (changedDoc) { //A document was updated
         this.pouchImagesList[changedIndex] = change.doc;
       } else {       //A document was added
-          let fileName = change.id;
-          if(fileName.substr((fileName.lastIndexOf('.') + 1)) != "xml") {
+        let fileName = change.id;
+        if (fileName.substr((fileName.lastIndexOf('.') + 1)) != "xml") {
           this.pouchImagesList.push(change.doc);
         }
       }
     }
-    if(this.pouchImagesList.length > 0) {
+    if (this.pouchImagesList.length > 0) {
       this.pouchImagesList = await this.sortPouchImagesList(this.pouchImagesList);
-      console.log("pouchImagesList length after handling changes",this.pouchImagesList.length);
+      console.log("pouchImagesList length after handling changes", this.pouchImagesList.length);
       this.pouchImagesListUpdated.next({
         pouchImagesList: [...this.pouchImagesList]
       });
     } else {
       console.log("================>\nPouchImagesList Length is 0\n<=================");
-      console.log("pouchImagesList length after handling changes",this.pouchImagesList.length);
+      console.log("pouchImagesList length after handling changes", this.pouchImagesList.length);
       this.pouchImagesListUpdated.next({
         pouchImagesList: [...this.pouchImagesList]
       });
@@ -278,107 +278,107 @@ export class ImageService implements OnInit {
 
     console.log("enter get server from screen");
     return new Promise(async (resolve, reject) => {
-    // pouchDb usage starts here
-    // localUserDb Instance related
-    let books: any = [];
-    let userDbDetails = await this.authService.getUserDbDetails();
-    let localUserDbInstance = await this.pouchService.createPouchDbInstance(userDbDetails.userDb);
-    await this.pouchService.checkDbStatus(localUserDbInstance).then(status => {
-      console.log("status of localDb of", userDbDetails.userDb, "is: ", status);
-    });
-
-    await localUserDbInstance.allDocs({
-      include_docs: true
-    }).then(async (result) => {
-      books = [];
-      console.log("books Info from db", result.rows.length);
-      let docs = await result.rows.map((row) => {
-        books.push(row.doc);
+      // pouchDb usage starts here
+      // localUserDb Instance related
+      let books: any = [];
+      let userDbDetails = await this.authService.getUserDbDetails();
+      let localUserDbInstance = await this.pouchService.createPouchDbInstance(userDbDetails.userDb);
+      await this.pouchService.checkDbStatus(localUserDbInstance).then(status => {
+        console.log("status of localDb of", userDbDetails.userDb, "is: ", status);
       });
-    }).catch((error) => {
-      console.log(error);
-    });
 
-    for (let i = 0; i < books.length; i++) {
-      if (books[i].bookName == bookName) {
-        this.currentBookDb = "mile_book_db_" + books[i]._id;
-      }
-    }
-
-    // local BookDb Instance related
-    this.currentLocalBookDbInstance = await this.pouchService.createPouchDbInstance(this.currentBookDb);
-    await this.pouchService.checkDbStatus(this.currentLocalBookDbInstance).then(status => {
-      console.log("status of localDb of", this.currentBookDb, "is: ", status);
-    });
-
-    await this.currentLocalBookDbInstance.allDocs({
-      include_docs: true
-    }).then(async (result) => {
-      this.pouchImagesList = [];
-      tempPouchImagesList = [];
-      console.log("tempPouchImagesList Info from db", result.rows.length);
-      let docs = await result.rows.map((row) => {
-        tempPouchImagesList.push(row.doc);
+      await localUserDbInstance.allDocs({
+        include_docs: true
+      }).then(async (result) => {
+        books = [];
+        console.log("books Info from db", result.rows.length);
+        let docs = await result.rows.map((row) => {
+          books.push(row.doc);
+        });
+      }).catch((error) => {
+        console.log(error);
       });
-    }).catch((error) => {
-      console.log(error);
-    });
 
-    await tempPouchImagesList.map(tempPouchImage => {
-      if(tempPouchImage && Object.keys(tempPouchImage).length === 0 && tempPouchImage.constructor === Object) {
-        console.log("empty file in tempPouchImage");
-      } else {
-        let fileName = tempPouchImage.pageName;
-        console.log("tempPouchImage",tempPouchImage.pageName);
-        if(fileName) {
-          if(fileName.substr((fileName.lastIndexOf('.') + 1)) != "xml") {
-            this.pouchImagesList.push(tempPouchImage);
+      for (let i = 0; i < books.length; i++) {
+        if (books[i].bookName == bookName) {
+          this.currentBookDb = "mile_book_db_" + books[i]._id;
         }
       }
+
+      // local BookDb Instance related
+      this.currentLocalBookDbInstance = await this.pouchService.createPouchDbInstance(this.currentBookDb);
+      await this.pouchService.checkDbStatus(this.currentLocalBookDbInstance).then(status => {
+        console.log("status of localDb of", this.currentBookDb, "is: ", status);
+      });
+
+      await this.currentLocalBookDbInstance.allDocs({
+        include_docs: true
+      }).then(async (result) => {
+        this.pouchImagesList = [];
+        tempPouchImagesList = [];
+        console.log("tempPouchImagesList Info from db", result.rows.length);
+        let docs = await result.rows.map((row) => {
+          tempPouchImagesList.push(row.doc);
+        });
+      }).catch((error) => {
+        console.log(error);
+      });
+
+      await tempPouchImagesList.map(tempPouchImage => {
+        if (tempPouchImage && Object.keys(tempPouchImage).length === 0 && tempPouchImage.constructor === Object) {
+          console.log("empty file in tempPouchImage");
+        } else {
+          let fileName = tempPouchImage.pageName;
+          console.log("tempPouchImage", tempPouchImage.pageName);
+          if (fileName) {
+            if (fileName.substr((fileName.lastIndexOf('.') + 1)) != "xml") {
+              this.pouchImagesList.push(tempPouchImage);
+            }
+          }
+        }
+      });
+
+      // Initial checking of imageDetails in local currentBookDb and filling the same in memory
+      if (this.pouchImagesList.length > 0) {
+        console.log("this.pouchImagesList Length", this.pouchImagesList.length);
+        console.log("sending Initial bookDetails from Memory as its length is greater than 0");
+        this.pouchImagesList = await this.sortPouchImagesList(this.pouchImagesList);
+        this.pouchImagesListUpdated.next({
+          pouchImagesList: [...this.pouchImagesList]
+        });
       }
-    });
+      else {
+        console.log("sending empty bookDetails from Memory as its length is not greater than 0");
+        this.pouchImagesListUpdated.next({
+          pouchImagesList: []
+        });
+      }
 
-    // Initial checking of imageDetails in local currentBookDb and filling the same in memory
-    if (this.pouchImagesList.length > 0) {
-      console.log("this.pouchImagesList Length", this.pouchImagesList.length);
-      console.log("sending Initial bookDetails from Memory as its length is greater than 0");
-      this.pouchImagesList = await this.sortPouchImagesList(this.pouchImagesList);
-      this.pouchImagesListUpdated.next({
-        pouchImagesList: [...this.pouchImagesList]
+      // remote BookDb Instance related
+      this.currentRemoteBookDbInstance = await this.pouchService.createRemoteDbInstance(userDbDetails.dbUrl, this.currentBookDb, userDbDetails.userDbKey, userDbDetails.userDbPwd);
+      await this.pouchService.checkDbStatus(this.currentRemoteBookDbInstance).then(status => {
+        console.log("status of remoteDb of", this.currentBookDb, "is: ", status);
       });
-    }
-    else {
-      console.log("sending empty bookDetails from Memory as its length is not greater than 0");
-      this.pouchImagesListUpdated.next({
-        pouchImagesList: []
+
+      // Based on localCurrentBookDb Instance changes, filling the memory
+      let options = {
+        live: true,
+        retry: true,
+        continuous: true
+      };
+
+      this.currentLocalBookDbInstance.changes({
+        live: true, since: 'now', include_docs: true
+      }).on('change', (change) => {
+        console.log("calling handleChanges on localDbInstance change event");
+        this.handleChange(change);
+      }).on('error', function (err) {
+        // handle error
+        console.log("info on changes error", err);
       });
-    }
-
-    // remote BookDb Instance related
-    this.currentRemoteBookDbInstance = await this.pouchService.createRemoteDbInstance(userDbDetails.dbUrl, this.currentBookDb, userDbDetails.userDbKey, userDbDetails.userDbPwd);
-    await this.pouchService.checkDbStatus(this.currentRemoteBookDbInstance).then(status => {
-      console.log("status of remoteDb of", this.currentBookDb, "is: ", status);
+      await this.currentLocalBookDbInstance.sync(this.currentRemoteBookDbInstance, options);
+      resolve(true);
     });
-
-    // Based on localCurrentBookDb Instance changes, filling the memory
-    let options = {
-      live: true,
-      retry: true,
-      continuous: true
-    };
-
-    this.currentLocalBookDbInstance.changes({
-      live: true, since: 'now', include_docs: true
-    }).on('change', (change) => {
-      console.log("calling handleChanges on localDbInstance change event");
-      this.handleChange(change);
-    }).on('error', function (err) {
-      // handle error
-      console.log("info on changes error", err);
-    });
-    await this.currentLocalBookDbInstance.sync(this.currentRemoteBookDbInstance, options);
-    resolve(true);
-  });
   }
 
   getXmlFileAsJson(fileName: any) {
@@ -388,7 +388,7 @@ export class ImageService implements OnInit {
     console.log("Running OCR on " + xmlFileName);
     const queryParams = `?fileName=${xmlFileName}&bookDb=${this.currentBookDb}&type=GET-OCR-XML`;
     this.http.get<{ message: string; completed: string }>(this.XML_BACKEND_URL + queryParams).subscribe(response => {
-      console.log("response on RUN-OCR",response);
+      console.log("response on RUN-OCR", response);
       // this.localImages = this.getLocalImages();
       // if (this.localImages.length > 0) {
       //   for (let i = 0; i < this.localImages.length; i++) {
@@ -567,50 +567,55 @@ export class ImageService implements OnInit {
     return this.pouchImagesList;
   }
 
+  async checkBookDbEntry(folderName) {
+    return new Promise(async (resolve, reject) => {
+      this.updateFolderNameinDB(folderName).then(async (response: any) => {
+        let bookDbName = response.bookDbName;
+
+        let userDbDetails = this.authService.getUserDbDetails();
+        console.log("response on bookInfoUpdate bookDbName", bookDbName, "bookDbKey", response.bookDbKey);
+        console.log("userDbDetails from AuthService userDbKey", userDbDetails.userDbKey, "userDbPwd", userDbDetails.userDbPwd);
+
+        // local BookDb Instance related
+        this.uploadLocalBookDbInstance = await this.pouchService.createPouchDbInstance(bookDbName);
+        await this.pouchService.checkDbStatus(this.uploadLocalBookDbInstance).then(status => {
+          console.log("status of localDb of", bookDbName, "is: ", status);
+        });
+
+        // remote BookDb Instance related
+        this.uploadRemoteBookDbInstance = await this.pouchService.createRemoteDbInstance(userDbDetails.dbUrl, bookDbName, userDbDetails.userDbKey, userDbDetails.userDbPwd);
+        await this.pouchService.checkDbStatus(this.uploadRemoteBookDbInstance).then(status => {
+          console.log("status of remoteDb of", bookDbName, "is: ", status);
+        });
+
+        let options = {
+          live: true,
+          retry: true,
+          continuous: true
+        };
+
+        this.uploadLocalBookDbInstance.changes({
+          live: true, since: 'now', include_docs: true
+        }).on('change', (change) => {
+          console.log("calling handleChanges on localDbInstance change event");
+          // this.handleChange(change);
+        }).on('error', function (err) {
+          // handle error
+          console.log("info on changes error", err);
+        });
+        this.uploadLocalBookDbInstance.sync(this.uploadRemoteBookDbInstance, options);
+        console.log("localBookDb Instance sync executed");
+        resolve(bookDbName);
+      });
+    });
+  }
+
   async addImage(filesToBeUploaded, folderName, display) {
     let sortedFilesList = [];
     this.folderName = folderName;
     let bookDbName = "";
     this.progressType = 'UPLOAD_IMAGE';
     let queryParams = "";
-
-    await this.updateFolderNameinDB(folderName).then(async (response: any) => {
-      bookDbName = response.bookDbName;
-      queryParams = `?bookDbName=${bookDbName}`;
-      let userDbDetails = this.authService.getUserDbDetails();
-      console.log("response on bookInfoUpdate bookDbName", bookDbName, "bookDbKey", response.bookDbKey);
-      console.log("userDbDetails from AuthService userDbKey", userDbDetails.userDbKey, "userDbPwd", userDbDetails.userDbPwd);
-
-      // local BookDb Instance related
-      this.uploadLocalBookDbInstance = await this.pouchService.createPouchDbInstance(bookDbName);
-      await this.pouchService.checkDbStatus(this.uploadLocalBookDbInstance).then(status => {
-        console.log("status of localDb of", bookDbName, "is: ", status);
-      });
-
-      // remote BookDb Instance related
-      this.uploadRemoteBookDbInstance = await this.pouchService.createRemoteDbInstance(userDbDetails.dbUrl, bookDbName, userDbDetails.userDbKey, userDbDetails.userDbPwd);
-      await this.pouchService.checkDbStatus(this.uploadRemoteBookDbInstance).then(status => {
-        console.log("status of remoteDb of", bookDbName, "is: ", status);
-      });
-
-      let options = {
-        live: true,
-        retry: true,
-        continuous: true
-      };
-
-      this.uploadLocalBookDbInstance.changes({
-        live: true, since: 'now', include_docs: true
-      }).on('change', (change) => {
-        console.log("calling handleChanges on localDbInstance change event");
-        // this.handleChange(change);
-      }).on('error', function (err) {
-        // handle error
-        console.log("info on changes error", err);
-      });
-      this.uploadLocalBookDbInstance.sync(this.uploadRemoteBookDbInstance, options);
-      console.log("localBookDb Instance sync executed");
-    });
 
     for (let i = 0; i < filesToBeUploaded.length; i++) {
       sortedFilesList.push(filesToBeUploaded[i]);
@@ -630,22 +635,31 @@ export class ImageService implements OnInit {
     // return;
     if (sortedFilesList.length > 0) {
       console.log("after if condition of sortedFilesList.length > 0");
-      var uploadImage = (x) => {
+      var uploadImage = async (x) => {
         if (x == 0) {
           this.progressInfos.splice(0, this.progressInfos.length);
           this.uploadMessage = "";
           this.uploadMessageChange.emit(this.uploadMessage);
           this.openProgressDialog();
+          const bookDbProgress = new ProgressInfo('Creating Entry for Book - ' + this.folderName, 'Pending');
+          this.progressInfos.push(bookDbProgress);
           for (let i = 0; i < sortedFilesList.length; i++) {
             var status = 'Pending';
             const progress = new ProgressInfo(sortedFilesList[i].name, status);
             this.progressInfos.push(progress);
             this.progressInfoChange.emit(this.progressInfos);
           }
+          await this.checkBookDbEntry(folderName).then((bookDb: string) => {
+            queryParams = `?bookDbName=${bookDb}`;
+            bookDbName = bookDb;
+            this.progressInfos[x].value = 'Success';
+            this.progressInfoChange.emit(this.progressInfos.slice());
+          }).catch(err => {
+            console.log("error while checking Book Db Entry",err);
+          });
         }
         if (x < sortedFilesList.length) {
-          let fileName = sortedFilesList[x].name;
-          this.progressInfos[x].value = 'Uploading';
+          this.progressInfos[x+1].value = 'Uploading';
           this.progressInfoChange.emit(this.progressInfos.slice());
 
           let imageData = new FormData();
@@ -657,9 +671,9 @@ export class ImageService implements OnInit {
             this.invalidMessage = response.message;
             this.invalidMessageChange.emit(this.invalidMessage);
             if (response.uploaded == "Y") {
-              this.progressInfos[x].value = 'Uploaded';
+              this.progressInfos[x+1].value = 'Uploaded';
             } else {
-              this.progressInfos[x].value = 'Failed';
+              this.progressInfos[x+1].value = 'Failed';
             }
             this.progressInfoChange.emit(this.progressInfos.slice());
             this.uploadImageLastIndex = x;
@@ -670,10 +684,10 @@ export class ImageService implements OnInit {
               btn.innerHTML = 'OK';
               this.uploadLocalBookDbInstance.close();
               this.uploadRemoteBookDbInstance.close();
-              console.log("this.pouchImagesList.length",this.pouchImagesList.length);
+              console.log("this.pouchImagesList.length", this.pouchImagesList.length);
               console.log("calling updateBookThumbnail()");
               await this.updateBookThumbnail(bookDbName);
-              if(display == "DISPLAY_BOOKS") {
+              if (display == "DISPLAY_BOOKS") {
                 console.log("calling getBooks()");
                 this.bookService.getBooks();
               } else {
@@ -721,16 +735,16 @@ export class ImageService implements OnInit {
         bookImages.push(row.doc);
       });
     });
-    if(bookImages.length > 0) {
+    if (bookImages.length > 0) {
       bookImages = await this.sortBookImagesList(bookImages);
       let thumbnailImage = bookImages[0].pageThumbnail;
       let bookDocumentId = bookDbName.replace('mile_book_db_', '');
       let bookDocument = await tempLocalUserDbInstance.get(bookDocumentId).then((bookDocument) => {
-          console.log("bookDocument retrieved for updating thumbnail", bookDocument);
-          return bookDocument;
-        }).catch((err) => {
-          console.log("Unable to retrieve the document for",bookDocumentId);
-        });
+        console.log("bookDocument retrieved for updating thumbnail", bookDocument);
+        return bookDocument;
+      }).catch((err) => {
+        console.log("Unable to retrieve the document for", bookDocumentId);
+      });
       bookDocument.bookThumbnailImage = thumbnailImage;
       await tempLocalUserDbInstance.put(bookDocument).then((response) => {
         console.log("bookThumbnail has been updated for", bookDocument.bookName, "with response", response);
@@ -811,9 +825,9 @@ export class ImageService implements OnInit {
     // getting all docs in list
     this.localImagesDb = new PouchDB("mile_images_db", { revs_limit: 1, auto_compaction: true, skip_setup: true });
     this.localImagesDb.allDocs().then((result) => {
-      console.log("result.rows.length",result.rows.length);
-      for(let i = 0; i < result.rows.length; i++) {
-        console.log("id of doc "+i,result.rows[i].id);
+      console.log("result.rows.length", result.rows.length);
+      for (let i = 0; i < result.rows.length; i++) {
+        console.log("id of doc " + i, result.rows[i].id);
       }
     });
     this.isLoadingFromServerChange.emit(true);
@@ -825,7 +839,7 @@ export class ImageService implements OnInit {
       console.log("LastModified", objectHeaderInfo.LastModified);
       console.log("ETag", objectHeaderInfo.ETag);
       console.log("ContentType", objectHeaderInfo.ContentType);
-      if(serverImage.substr((serverImage.lastIndexOf('.') + 1)) == "tif") {
+      if (serverImage.substr((serverImage.lastIndexOf('.') + 1)) == "tif") {
         jpegFile = serverImage.slice(0, -3) + 'jpg';
       }
       let document = await this.localImagesDb.get(jpegFile).then(function (doc) {
@@ -838,7 +852,7 @@ export class ImageService implements OnInit {
       });
 
       if (document == "NOT_FOUND") {
-        console.log("getting serverImageData for ",serverImage);
+        console.log("getting serverImageData for ", serverImage);
         let imageData = await this.getServerImage(serverImage);
         let status = await this.saveImagesPouchDb(jpegFile, imageData, objectHeaderInfo.ETag, objectHeaderInfo.LastModified, "");
         console.log("saved image", jpegFile, "status", status);
@@ -1105,8 +1119,8 @@ export class ImageService implements OnInit {
 
   onXml() {
     console.log("entered onXml");
-      this.fileName = this.pouchImagesList[this.imgFileCount].pageName;
-      this.getFileAsJson(this.fileName);
+    this.fileName = this.pouchImagesList[this.imgFileCount].pageName;
+    this.getFileAsJson(this.fileName);
   }
 
   async getFileAsJson(fileName: any) {
@@ -1124,8 +1138,8 @@ export class ImageService implements OnInit {
     console.log("empty the right side screen");
     $(".textElementsDiv").not(':first').remove();
     $(".textSpanDiv").empty();
-    if(document != "NOT_FOUND") {
-      console.log("document.data",document.data);
+    if (document != "NOT_FOUND") {
+      console.log("document.data", document.data);
       XmlModel.jsonObject = document.data;
       this.retain(XmlModel.jsonObject);
       this.updateXmlModel(XmlModel.jsonObject);
@@ -1133,7 +1147,7 @@ export class ImageService implements OnInit {
   }
 
   retain(jsonObj) {
-    console.log("inside retain this.obtainblock:",this.obtainblock);
+    console.log("inside retain this.obtainblock:", this.obtainblock);
     if (this.obtainblock == true) {
       let areaarray = [];
       // var jsonObj = JSON.parse(json);
@@ -1574,7 +1588,7 @@ export class ImageService implements OnInit {
     let now = new Date();
     let date = now.toUTCString();
 
-    console.log("date for LastModified",date,"revId for _rev",revId);
+    console.log("date for LastModified", date, "revId for _rev", revId);
     xmlForm = {
       _id: xmlFileName,
       pageName: xmlFileName,
@@ -1637,8 +1651,8 @@ export class ImageService implements OnInit {
           console.log("Deleting " + fileName);
           this.progressInfos[x].value = 'Deleting';
           this.progressInfoChange.emit(this.progressInfos.slice());
-          for(let i = 0; i < this.pouchImagesList.length; i++) {
-            if(this.pouchImagesList[i].pageName == fileName) {
+          for (let i = 0; i < this.pouchImagesList.length; i++) {
+            if (this.pouchImagesList[i].pageName == fileName) {
               deleteDocument = this.pouchImagesList[i];
               deleteDocumentId = deleteDocument._id;
               break;
@@ -1646,59 +1660,59 @@ export class ImageService implements OnInit {
           }
           let docs = [];
           // Filling deletion List for imageDoc and its revisions
-          let imageDocumentWithRevs = await this.currentRemoteBookDbInstance.get(deleteDocumentId, { revs: true, open_revs: 'all'}).then((document) => {
+          let imageDocumentWithRevs = await this.currentRemoteBookDbInstance.get(deleteDocumentId, { revs: true, open_revs: 'all' }).then((document) => {
             return document
           }).catch((err) => {
-            console.log("Unable to retrieve the document for",deleteDocument._id,"\nerror:" ,err);
+            console.log("Unable to retrieve the document for", deleteDocument._id, "\nerror:", err);
             console.log("error status", err.status);
             if (err.status == "404") {
               return "NOT_FOUND";
             }
           });
-          if(imageDocumentWithRevs != "NOT_FOUND") {
+          if (imageDocumentWithRevs != "NOT_FOUND") {
             if (imageDocumentWithRevs.length > 0) {
-              for(let i = 0; i < imageDocumentWithRevs.length; i++) {
-                console.log("imageDocumentWithRevs["+i+"]:",imageDocumentWithRevs[i]);
-                console.log("imageDocumentWithRevs["+i+"]._id:",imageDocumentWithRevs[i]["ok"]._id);
-                let tempDeleteDoc = {_id : imageDocumentWithRevs[i]["ok"]._id, _rev: imageDocumentWithRevs[i]["ok"]._rev, _deleted : true };
+              for (let i = 0; i < imageDocumentWithRevs.length; i++) {
+                console.log("imageDocumentWithRevs[" + i + "]:", imageDocumentWithRevs[i]);
+                console.log("imageDocumentWithRevs[" + i + "]._id:", imageDocumentWithRevs[i]["ok"]._id);
+                let tempDeleteDoc = { _id: imageDocumentWithRevs[i]["ok"]._id, _rev: imageDocumentWithRevs[i]["ok"]._rev, _deleted: true };
                 docs.push(tempDeleteDoc);
               }
             }
           }
           // Filling deletion List for xmlDoc and its revisions
           let xmlFileName = fileName.slice(0, -3) + "xml";
-          let xmlDocumentWithRevs = await this.currentRemoteBookDbInstance.get(xmlFileName, { revs: true, open_revs: 'all'}).then((document) => {
+          let xmlDocumentWithRevs = await this.currentRemoteBookDbInstance.get(xmlFileName, { revs: true, open_revs: 'all' }).then((document) => {
             return document
           }).catch((err) => {
-            console.log("Unable to retrieve the document for",deleteDocument._id,"\nerror:" ,err);
+            console.log("Unable to retrieve the document for", deleteDocument._id, "\nerror:", err);
             console.log("error status", err.status);
             if (err.status == "404") {
               return "NOT_FOUND";
             }
           });
-          if(xmlDocumentWithRevs != "NOT_FOUND") {
+          if (xmlDocumentWithRevs != "NOT_FOUND") {
             if (xmlDocumentWithRevs.length > 0) {
-              for(let i = 0; i < xmlDocumentWithRevs.length; i++) {
-                console.log("xmlDocumentWithRevs["+i+"]:",xmlDocumentWithRevs[i]);
-                console.log("xmlDocumentWithRevs["+i+"]._id:",xmlDocumentWithRevs[i]["ok"]._id);
-                let tempDeleteDoc = {_id : xmlDocumentWithRevs[i]["ok"]._id, _rev: xmlDocumentWithRevs[i]["ok"]._rev, _deleted : true };
+              for (let i = 0; i < xmlDocumentWithRevs.length; i++) {
+                console.log("xmlDocumentWithRevs[" + i + "]:", xmlDocumentWithRevs[i]);
+                console.log("xmlDocumentWithRevs[" + i + "]._id:", xmlDocumentWithRevs[i]["ok"]._id);
+                let tempDeleteDoc = { _id: xmlDocumentWithRevs[i]["ok"]._id, _rev: xmlDocumentWithRevs[i]["ok"]._rev, _deleted: true };
                 docs.push(tempDeleteDoc);
               }
             }
           }
-          console.log("docs to be deleted along with its revisions",docs);
-          if(docs.length > 0) {
-            await this.currentRemoteBookDbInstance.bulkDocs(docs, function(err, response) {
+          console.log("docs to be deleted along with its revisions", docs);
+          if (docs.length > 0) {
+            await this.currentRemoteBookDbInstance.bulkDocs(docs, function (err, response) {
               if (err) {
-                 return console.log(err);
+                return console.log(err);
               } else {
-                 console.log(response+"Documents deleted Successfully");
+                console.log(response + "Documents deleted Successfully");
               }
-           });
+            });
           }
           // return;
           const queryParams = `?documentId=${deleteDocumentId}&bookDbName=${this.currentBookDb}`;
-          this.http.delete<{ message: string; completed: string }>(this.IMAGE_BACKEND_URL + fileName + queryParams).subscribe( async response => {
+          this.http.delete<{ message: string; completed: string }>(this.IMAGE_BACKEND_URL + fileName + queryParams).subscribe(async response => {
             console.log("response on deletion", response.message);
             if (response.completed == 'Y') {
               // Filling deletion List for imageFileDoc and its revisions
@@ -1707,36 +1721,36 @@ export class ImageService implements OnInit {
               docs = [];
               deleteImageFile = deleteImageFile.substring((bucketName.length + 1));
               this.localImagesDb = new PouchDB("mile_images_db", { revs_limit: 1, auto_compaction: true, skip_setup: true });
-              console.log("deleteDocument.imageId======>",deleteImageFile);
-              let imageFileDocumentWithRevs = await this.localImagesDb.get(deleteImageFile, { revs: true, open_revs: 'all'}).then((document) => {
+              console.log("deleteDocument.imageId======>", deleteImageFile);
+              let imageFileDocumentWithRevs = await this.localImagesDb.get(deleteImageFile, { revs: true, open_revs: 'all' }).then((document) => {
                 return document
               }).catch((err) => {
-                console.log("Unable to retrieve the document for",deleteDocument._id,"\nerror:" ,err);
+                console.log("Unable to retrieve the document for", deleteDocument._id, "\nerror:", err);
                 console.log("error status", err.status);
                 if (err.status == "404") {
                   return "NOT_FOUND";
                 }
               });
-              if(imageFileDocumentWithRevs != "NOT_FOUND") {
+              if (imageFileDocumentWithRevs != "NOT_FOUND") {
                 if (imageFileDocumentWithRevs.length > 0) {
-                  for(let i = 0; i < imageFileDocumentWithRevs.length; i++) {
-                    console.log("imageFileDocumentWithRevs["+i+"]:",imageFileDocumentWithRevs[i]);
-                    console.log("imageFileDocumentWithRevs["+i+"]._id:",imageFileDocumentWithRevs[i]["ok"]._id);
-                    let tempDeleteDoc = {_id : imageFileDocumentWithRevs[i]["ok"]._id, _rev: imageFileDocumentWithRevs[i]["ok"]._rev, _deleted : true };
+                  for (let i = 0; i < imageFileDocumentWithRevs.length; i++) {
+                    console.log("imageFileDocumentWithRevs[" + i + "]:", imageFileDocumentWithRevs[i]);
+                    console.log("imageFileDocumentWithRevs[" + i + "]._id:", imageFileDocumentWithRevs[i]["ok"]._id);
+                    let tempDeleteDoc = { _id: imageFileDocumentWithRevs[i]["ok"]._id, _rev: imageFileDocumentWithRevs[i]["ok"]._rev, _deleted: true };
                     docs.push(tempDeleteDoc);
                   }
                 }
               }
-              console.log("docs to be deleted along with its revisions",docs);
-              if(docs.length > 0) {
-                await this.localImagesDb.bulkDocs(docs, function(err, response) {
+              console.log("docs to be deleted along with its revisions", docs);
+              if (docs.length > 0) {
+                await this.localImagesDb.bulkDocs(docs, function (err, response) {
                   if (err) {
                     return console.log(err);
                   } else {
-                    console.log(response+"Documents deleted Successfully");
+                    console.log(response + "Documents deleted Successfully");
                     return true;
                   }
-              });
+                });
               }
               // this.getServerImages();
               //  PouchDb Document deletion ends here
@@ -1784,7 +1798,7 @@ export class ImageService implements OnInit {
     this.deleteLastIndex = 0;
   }
 
-  openFileName(){
+  openFileName() {
     console.log("this.pouchImagesList.length inside openFileName: " + this.pouchImagesList.length);
     this.btnImgArray.splice(0, this.btnImgArray.length);
     for (let i = 0; i < this.pouchImagesList.length; i++) {
@@ -1797,15 +1811,15 @@ export class ImageService implements OnInit {
     for (let i = 0; i < this.btnImgArray.length; i++) {
       $(".sideBody").append(this.btnImgArray[i]);
     }
- }
+  }
 
- async openPreview(){
-   console.log("this.pouchImagesList.length inside openPreview"+this.pouchImagesList.length);
+  async openPreview() {
+    console.log("this.pouchImagesList.length inside openPreview" + this.pouchImagesList.length);
     this.btnImgArray.splice(0, this.btnImgArray.length);
     for (let i = 0; i < this.pouchImagesList.length; i++) {
       this.fileName = this.pouchImagesList[i].pageName;
-      console.log("openPreview fileName"+this.fileName);
-      var btnImgEle = "<button  style=\"width: 100%; height: 100px border: none;\"  class=\"btnImg\" value=\"" + this.pouchImagesList[i].pageName + "\"  id=\"" + this.pouchImagesList[i].pageName + "\"><img src=\""+this.pouchImagesList[i].pageThumbnail+"\" id=\"" + this.pouchImagesList[i].pageName + "\"></button>";
+      console.log("openPreview fileName" + this.fileName);
+      var btnImgEle = "<button  style=\"width: 100%; height: 100px border: none;\"  class=\"btnImg\" value=\"" + this.pouchImagesList[i].pageName + "\"  id=\"" + this.pouchImagesList[i].pageName + "\"><img src=\"" + this.pouchImagesList[i].pageThumbnail + "\" id=\"" + this.pouchImagesList[i].pageName + "\"></button>";
       this.btnImgArray.push(btnImgEle);
       this.btnImgArrayChange.emit(this.btnImgArray.slice());
     }
