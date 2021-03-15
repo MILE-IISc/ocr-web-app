@@ -965,7 +965,7 @@ export class ImageService implements OnInit {
 
   openProgressDialog() {
     const dialogRef = this.dialog.open(ProgressDialogComponent, {
-      disableClose: false,
+      disableClose: true,
       height: '500px',
       width: '500px',
       panelClass: 'my-dialog'
