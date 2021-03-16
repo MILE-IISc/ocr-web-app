@@ -2,6 +2,7 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ImageService } from 'src/app/services/images.service';
 import { ProgressInfo } from "src/app/shared/images.model";
+import * as $ from 'jquery';
 
 @Component({
   selector: 'app-progress-dialog',
@@ -14,12 +15,15 @@ export class ProgressDialogComponent implements OnInit {
   resume = false;
   uploadMessage = "";
   closeDialog = false;
+
   constructor(private imageService: ImageService, public dialog: MatDialog) { }
 
   progressInfos: ProgressInfo[] = [];
 
   ngOnInit() {
     this.progressInfos = this.imageService.getProgressInfos();
+    // $("#cancelButton").show();
+    // $("#closeButton").show();
     this.imageService.progressInfoChange.subscribe((progressInfos: ProgressInfo[]) => {
       this.progressInfos = progressInfos;
     });

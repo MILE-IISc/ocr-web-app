@@ -63,6 +63,8 @@ export class ImageService implements OnInit {
   uploadMessageChange = new EventEmitter<any>();
   angleChange = new EventEmitter<any>();
   bookNameChange = new EventEmitter<any>();
+  uploadBookDbName;
+  uploadQueryParams;
   ready = false;
   localImagesDb: any;
 
@@ -221,6 +223,20 @@ export class ImageService implements OnInit {
     let changedIndex = null;
     console.log("id of change on handleChange of imagesService", change.id);
     // console.log("doc of change on handleChange of imagesService", change.doc);
+    if (change.id.substr(change.id.length - 3) == "xml") {
+      if (change.deleted) {
+        return;
+      }
+      let currentFile = this.getCurrentImageName();
+      currentFile = currentFile.slice(0,-3) + "xml";
+      if(this.obtainblock == true && currentFile == change.id) {
+        console.log("inside obtain block for ", change.id);
+        this.onXml();
+        return;
+      }
+      return;
+    }
+
     this.pouchImagesList.forEach((pouchImage: any, index) => {
       // console.log("pouchImage._id:",pouchImage._id);
       if (pouchImage._id === change.id) {
@@ -228,16 +244,6 @@ export class ImageService implements OnInit {
         changedIndex = index;
       }
     });
-
-    if (change.id == (change.id.slice(0, -3) + "xml")) {
-      if (change.deleted) {
-        return;
-      }
-      if(this.obtainblock == true) {
-        this.onXml();
-        return;
-      }
-    }
 
     console.log("change.deleted", change.deleted, "changedIndex", changedIndex);
     //A document was deleted
@@ -256,6 +262,7 @@ export class ImageService implements OnInit {
         }
       }
     }
+
     if (this.pouchImagesList.length > 0) {
       this.pouchImagesList = await this.sortPouchImagesList(this.pouchImagesList);
       console.log("pouchImagesList length after handling changes", this.pouchImagesList.length);
@@ -442,6 +449,8 @@ export class ImageService implements OnInit {
               this.uploadMessageChange.emit(this.uploadMessage);
               var btn = document.getElementById("pauseButton");
               btn.innerHTML = 'OK';
+              $("#cancelButton").hide();
+              $("#closeButton").hide();
             }
             if (this.runOcrAllFlag == true) {
               runOcr(x + 1);
@@ -449,12 +458,13 @@ export class ImageService implements OnInit {
           });
         }
       }
-
+      console.log("this.runOcrAllFlag",this.runOcrAllFlag);
+      console.log("this.runOcrLastIndex",this.runOcrLastIndex);
       if (this.runOcrAllFlag == false) {
         this.runOcrAllFlag = true;
         runOcr(0);
       } else {
-        runOcr(this.runOcrLastIndex);
+        runOcr(this.runOcrLastIndex+1);
       }
     }
   }
@@ -474,51 +484,54 @@ export class ImageService implements OnInit {
 
   updateXmlModel(jsonObj) {
     console.log("entered updateXmlModel");
-    if (jsonObj && jsonObj['page']) {
-      console.log("page available");
-      var blocks = [];
-      if (jsonObj['page'].block) {
-        console.log("block available");
-        blocks = jsonObj['page'].block;
-      }
-      if (jsonObj['page']["$"].rotationAngle) {
-        console.log("rotation angle " + jsonObj['page']["$"].rotationAngle)
-        this.angle = jsonObj['page']["$"].rotationAngle;
-        this.angleChange.emit(this.angle);
-      }
-      for (var b = 0; b < blocks.length; b++) {
-        var block = blocks[b];
-        if (block.line) {
-          var lines = block.line;
-          for (var l = 0; l < lines.length; l++) {
-            var line = lines[l];
-            if (line.word) {
-              var lineText = "";
-              var words = line.word;
-              for (var w = 0; w < words.length; w++) {
-                var wordText = words[w]["$"].unicode;
-                if (wordText != null) {
-                  lineText += " " + wordText;
+    XmlModel.textArray.splice(0, XmlModel.textArray.length);
+    this.xmlUpdateChange.emit(true);
+    if(this.obtainblock == true) {
+      if (jsonObj && jsonObj['page']) {
+        console.log("page available");
+        var blocks = [];
+        if (jsonObj['page'].block) {
+          console.log("block available");
+          blocks = jsonObj['page'].block;
+        }
+        if (jsonObj['page']["$"].rotationAngle) {
+          console.log("rotation angle " + jsonObj['page']["$"].rotationAngle)
+          this.angle = jsonObj['page']["$"].rotationAngle;
+          this.angleChange.emit(this.angle);
+        }
+        for (var b = 0; b < blocks.length; b++) {
+          var block = blocks[b];
+          if (block.line) {
+            var lines = block.line;
+            for (var l = 0; l < lines.length; l++) {
+              var line = lines[l];
+              if (line.word) {
+                var lineText = "";
+                var words = line.word;
+                for (var w = 0; w < words.length; w++) {
+                  var wordText = words[w]["$"].unicode;
+                  if (wordText != null) {
+                    lineText += " " + wordText;
+                  }
                 }
+                var lineRowStart = line["$"].rowStart;
+                var lineRowEnd = line["$"].rowEnd;
+                var lineColStart = line["$"].colStart;
+                var lineColEnd = line["$"].colEnd;
+                var lineNumber = line["$"].LineNumber;
+                var blockNumber = block["$"].BlockNumber;
+                var lineWidth = lineColEnd - lineColStart + 1;
+                var lineHeight = lineRowEnd - lineRowStart + 1;
+                var lineInfo = new XmlModel(lineText, lineRowStart, lineRowEnd, lineColStart, lineColEnd, lineWidth, lineHeight, lineNumber, blockNumber);
+                XmlModel.textArray.push(lineInfo);
               }
-              var lineRowStart = line["$"].rowStart;
-              var lineRowEnd = line["$"].rowEnd;
-              var lineColStart = line["$"].colStart;
-              var lineColEnd = line["$"].colEnd;
-              var lineNumber = line["$"].LineNumber;
-              var blockNumber = block["$"].BlockNumber;
-              var lineWidth = lineColEnd - lineColStart + 1;
-              var lineHeight = lineRowEnd - lineRowStart + 1;
-              var lineInfo = new XmlModel(lineText, lineRowStart, lineRowEnd, lineColStart, lineColEnd, lineWidth, lineHeight, lineNumber, blockNumber);
-              XmlModel.textArray.push(lineInfo);
-              XmlModel.textArray.slice(0, XmlModel.textArray.length);
             }
           }
         }
+        this.xmlUpdateChange.emit(true);
+      } else {
+        console.log("page not available");
       }
-      this.xmlUpdateChange.emit(true);
-    } else {
-      console.log("page not available");
     }
   }
 
@@ -610,9 +623,7 @@ export class ImageService implements OnInit {
   async addImage(filesToBeUploaded, folderName, display) {
     let sortedFilesList = [];
     this.folderName = folderName;
-    let bookDbName = "";
     this.progressType = 'UPLOAD_IMAGE';
-    let queryParams = "";
 
     for (let i = 0; i < filesToBeUploaded.length; i++) {
       sortedFilesList.push(filesToBeUploaded[i]);
@@ -647,8 +658,8 @@ export class ImageService implements OnInit {
             this.progressInfoChange.emit(this.progressInfos);
           }
           await this.checkBookDbEntry(folderName).then((bookDb: string) => {
-            queryParams = `?bookDbName=${bookDb}`;
-            bookDbName = bookDb;
+            this.uploadQueryParams = `?bookDbName=${bookDb}`;
+            this.uploadBookDbName = bookDb;
             this.progressInfos[x].value = 'Success';
             this.progressInfoChange.emit(this.progressInfos.slice());
           }).catch(err => {
@@ -664,7 +675,7 @@ export class ImageService implements OnInit {
           var file = sortedFilesList[x];
           console.log("file name===" + file.name);
           imageData.append("image", file);
-          this.http.post<{ message: string, uploaded: string }>(this.IMAGE_BACKEND_URL + queryParams, imageData).subscribe(async response => {
+          this.http.post<{ message: string, uploaded: string }>(this.IMAGE_BACKEND_URL + this.uploadQueryParams, imageData).subscribe(async response => {
             this.invalidMessage = response.message;
             this.invalidMessageChange.emit(this.invalidMessage);
             if (response.uploaded == "Y") {
@@ -679,11 +690,15 @@ export class ImageService implements OnInit {
               this.uploadMessageChange.emit(this.uploadMessage);
               var btn = document.getElementById("pauseButton");
               btn.innerHTML = 'OK';
-              this.uploadLocalBookDbInstance.close();
-              this.uploadRemoteBookDbInstance.close();
-              console.log("this.pouchImagesList.length", this.pouchImagesList.length);
-              console.log("calling updateBookThumbnail()");
-              await this.updateBookThumbnail(bookDbName);
+              $("#cancelButton").hide();
+              $("#closeButton").hide();
+              // this.uploadLocalBookDbInstance.close();
+              // this.uploadRemoteBookDbInstance.close();
+              console.log("this.pouchImagesList.length after Images Uploaded Successfully", this.pouchImagesList.length);
+              // await this.getServerImages();
+              // console.log("this.pouchImagesList.length after calling getServerImages", this.pouchImagesList.length);
+              // console.log("calling updateBookThumbnail()");
+              // await this.updateBookThumbnail(bookDbName);
               if (display == "DISPLAY_BOOKS") {
                 console.log("calling getBooks()");
                 this.bookService.getBooks();
@@ -699,12 +714,14 @@ export class ImageService implements OnInit {
         }
       }
 
+      console.log("this.uploadImageFlag",this.uploadImageFlag);
+      console.log("this.uploadImageLastIndex",this.uploadImageLastIndex);
       if (this.uploadImageFlag == false) {
         this.uploadImageFlag = true;
         console.log("invoking uploadImage(0) ");
         uploadImage(0);
       } else {
-        uploadImage(this.uploadImageLastIndex);
+        uploadImage(this.uploadImageLastIndex+1);
       }
     }
 
@@ -794,6 +811,8 @@ export class ImageService implements OnInit {
   stopUploadImage() {
     this.setUploadImageFlag(false);
     this.uploadImageLastIndex = 0;
+    this.progressInfos.splice(0, this.progressInfos.length);
+    this.progressInfoChange.emit(this.progressInfos);
   }
 
   async saveImagesPouchDb(id, data, ETag, LastModified, revId) {
@@ -977,6 +996,9 @@ export class ImageService implements OnInit {
   }
 
   closeProgressDialog() {
+    if ( this.progressType == 'UPLOAD_IMAGE') {
+      this.stopUploadImage();
+    }
     this.dialog.closeAll();
   }
 
@@ -988,8 +1010,8 @@ export class ImageService implements OnInit {
       $('#imgToRead').selectAreas('reset');
     }
     // console.log("empty the right side screen");
-    $(".textElementsDiv").not(':first').remove();
-    $(".textSpanDiv").empty();
+    // $(".textElementsDiv").not(':first').remove();
+    // $(".textSpanDiv").empty();
 
     this.localUrl = await this.loadArray(this.pouchImagesList[this.imgFileCount].pageName);
     this.urlChanged.emit(this.localUrl.slice());
@@ -1016,8 +1038,8 @@ export class ImageService implements OnInit {
       $('#imgToRead').selectAreas('reset');
     }
     // console.log("empty the right side screen");
-    $(".textElementsDiv").not(':first').remove();
-    $(".textSpanDiv").empty();
+    // $(".textElementsDiv").not(':first').remove();
+    // $(".textSpanDiv").empty();
     this.localUrl = await this.loadArray(this.pouchImagesList[this.imgFileCount].pageName);
     this.urlChanged.emit(this.localUrl.slice());
     this.fileName = this.pouchImagesList[this.imgFileCount].pageName;
@@ -1040,8 +1062,8 @@ export class ImageService implements OnInit {
       $('#imgToRead').selectAreas('reset');
     }
     // console.log("empty the right side screen");
-    $(".textElementsDiv").not(':first').remove();
-    $(".textSpanDiv").empty();
+    // $(".textElementsDiv").not(':first').remove();
+    // $(".textSpanDiv").empty();
 
     this.imgFileCount = this.pouchImagesList.length - 1;
     this.imageCountChange.emit(this.imgFileCount);
@@ -1066,8 +1088,8 @@ export class ImageService implements OnInit {
       $('#imgToRead').selectAreas('reset');
     }
     // console.log("empty the right side screen");
-    $(".textElementsDiv").not(':first').remove();
-    $(".textSpanDiv").empty();
+    // $(".textElementsDiv").not(':first').remove();
+    // $(".textSpanDiv").empty();
 
     this.localUrl = await this.loadArray(this.pouchImagesList[this.imgFileCount].pageName);
     this.urlChanged.emit(this.localUrl.slice());
@@ -1132,14 +1154,17 @@ export class ImageService implements OnInit {
       }
     });
 
-    console.log("empty the right side screen");
-    $(".textElementsDiv").not(':first').remove();
-    $(".textSpanDiv").empty();
+    // console.log("empty the right side screen");
+    // $(".textElementsDiv").not(':first').remove();
+    // $(".textSpanDiv").empty();
     if (document != "NOT_FOUND") {
       console.log("document.data", document.data);
       XmlModel.jsonObject = document.data;
       this.retain(XmlModel.jsonObject);
       this.updateXmlModel(XmlModel.jsonObject);
+    } else {
+      XmlModel.textArray.splice(0, XmlModel.textArray.length);
+      this.xmlUpdateChange.emit(true);
     }
   }
 
@@ -1517,8 +1542,10 @@ export class ImageService implements OnInit {
     this.obtainblock = false;
     $('img#imgToRead').selectAreas('destroy');
     // console.log("empty the right side screen");
-    $(".textElementsDiv").not(':first').remove();
-    $(".textSpanDiv").empty();
+    // $(".textElementsDiv").not(':first').remove();
+    // $(".textSpanDiv").empty();
+    XmlModel.textArray.splice(0, XmlModel.textArray.length);
+    this.xmlUpdateChange.emit(true);
   };
 
   async onSave() {
@@ -1769,6 +1796,8 @@ export class ImageService implements OnInit {
               this.uploadMessageChange.emit(this.uploadMessage);
               var btn = document.getElementById("pauseButton");
               btn.innerHTML = 'OK';
+              $("#cancelButton").hide();
+              $("#closeButton").hide();
             }
             if (this.deleteFlag == true) {
               deleteImage(x + 1);
@@ -1783,7 +1812,7 @@ export class ImageService implements OnInit {
         this.deleteFlag = true;
         deleteImage(0);
       } else {
-        deleteImage(this.deleteLastIndex);
+        deleteImage(this.deleteLastIndex+1);
       }
     }
   }

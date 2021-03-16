@@ -279,6 +279,28 @@ module.exports.findPage = async function (dbName, searchValue) {
   });
 }
 
+// Find Document By Id
+module.exports.findById = async function (dbName, searchValue) {
+  return new Promise((resolve, reject) => {
+    var db = cloudant.use(dbName);
+    // dbSearchKey = `"` + searchKey + `"`;
+    console.log("search in findBook", searchValue);
+    db.find({
+      'selector': {
+        _id: {
+          '$eq': searchValue
+        }
+      }
+    }).then((documents) => {
+      console.log("documents", documents.docs.length);
+      resolve({ documents, statusCode: (documents.docs.length > 0) ? 200 : 404 });
+    }).catch((err) => {
+      console.log("error while logging from cloudant", err);
+      reject(err);
+    });
+  });
+}
+
 // Insert Document into Database
 module.exports.insertDocument = async function (dbName, document) {
   return new Promise((resolve, reject) => {
