@@ -158,73 +158,109 @@ async function deleteImage(filePath) {
 router.post("",
   authChecker,
   multer({ storage: storage }).single("image"),
-  (req, res, next) => {
+  async function (req, res, next) {
     const mail = req.body.email;
     const bookDbName = req.query.bookDbName;
-    console.log("inside post email ", mail, "bookDbName", bookDbName);
+    const userDbName = "mile_user_db_" + req.userData.userId;
+    const bookName = req.query.bookDbName.replace('mile_book_db_','');;
+    console.log("inside post email ", mail, "bookDbName", bookDbName, "userId",req.userData.userId);
     bucketName = req.userData.bucketName;
     console.log("bucketName inside post images ", bucketName);
     let originalImage = req.file.originalname;
     let tiffToJpgImage = req.file.originalname;
+    let tiffToJpgImagePath = './images/' + mail + '/' + req.file.originalname;
     let originalImagePath = './images/' + mail + '/' + req.file.originalname;
     if (res.statusCode === 200 && req.file) {
       console.log("multer upload response", res.statusCode);
-      Jimp.read(originalImagePath).then(async (file) => {
         console.log("req.file.mimetype", req.file.mimetype);
         // console.log("file width", file.getWidth());
         if (req.file.mimetype == "image/tiff") {
+          jpegFile = await Jimp.read(originalImagePath).then(async (file) => {
+            return file;
+          })
           tiffToJpgImage = originalImage.slice(0, -3) + 'jpg';
-          const tiffToJpgImagePath = './images/' + mail + "/" + tiffToJpgImage;
-          await file
+          tiffToJpgImagePath = './images/' + mail + "/" + tiffToJpgImage;
+          await jpegFile
             .quality(75)
             .writeAsync(tiffToJpgImagePath).then(async () => {
               console.log("file is ready for", mail, tiffToJpgImagePath);
-              // console.log("image content retrieved and converted");
-              console.log("calling multiPartUpload for", tiffToJpgImagePath);
-              await multiPartUpload(bucketName, tiffToJpgImage, tiffToJpgImagePath).then(async (status) => {
-                console.log("multuipart upload completed for", tiffToJpgImagePath, "with status", status);
-                await deleteImage(tiffToJpgImagePath).then((status) => {
-                  console.log("deleted Image", tiffToJpgImagePath, "with status", status);
+              await multiPartUpload(bucketName, originalImage, originalImagePath).then(async (status) => {
+                console.log("multuipart upload completed for", originalImagePath, "with status", status);
+                await deleteImage(originalImagePath).then((status) => {
+                  console.log("deleted Image", originalImagePath, "with status", status, "and sending back successful response");
                 });
               });
+            })
+          .catch((err) => {
+            console.log("error while reading, converting & uploading image:", err);
+            res.status(200).json({
+              message: req.file.originalname + " Image upload failed" + invalid,
+              uploaded: "N"
             });
+            invalid = "";
+            resolve(false);
+          });
         }
-        await file
-          .resize(100, 100)
+        // console.log("tiffStatus after if tiff condition",tiffStatus);
+        console.log("tiffToJpgImagePath after if tiff condition",tiffToJpgImagePath);
+        Jimp.read(tiffToJpgImagePath).then(async (jpegFile) => {
+          await jpegFile
+          .quality(25)
+          .resize(128, 128)
           .getBase64Async(Jimp.MIME_JPEG).then(async (thumbnailBase64) => {
             console.log("thumbnailBase64 created");
-            console.log("calling multiPartUpload for", originalImagePath);
-            await multiPartUpload(bucketName, originalImage, originalImagePath).then(async (status) => {
-              console.log("multuipart upload completed for", originalImagePath, "with status", status);
-              await couch.findPage(bookDbName, originalImage).then(async (response) => {
-                console.log("Got Output from find document for bookName", originalImage, "in", bookDbName, "no. of documents", response.documents.docs.length);
+            console.log("calling multiPartUpload for", tiffToJpgImagePath);
+            await multiPartUpload(bucketName, tiffToJpgImage, tiffToJpgImagePath).then(async (status) => {
+              console.log("multuipart upload completed for", tiffToJpgImagePath, "with status", status);
+              await couch.findById(userDbName, bookName).then(async (response) => {
                 if (response.statusCode == 404) {
-                  pageDocument = {
-                    pageName: originalImage,
-                    pageThumbnail: thumbnailBase64,
-                    rawImageId: bucketName+"/"+originalImage,
-                    imageId: bucketName+"/"+tiffToJpgImage
-                  };
+                  console.log("Book Document not available. Send error response.");
                 } else {
                   if(response.documents.docs.length == 1) {
-                    pageDocument = response.documents.docs[0];
-                    pageDocument.pageThumbnail = thumbnailBase64;
-                    pageDocument.rawImageId = bucketName+"/"+originalImage;
-                    pageDocument.imageId = bucketName+"/"+tiffToJpgImage;
-                    // console.log("pageDocument from bookDb after conversion",pageDocument);
+                    bookDocument = response.documents.docs[0];
+                    if(bookDocument.bookThumbnailImage == "") {
+                      bookDocument.bookThumbnailImage = thumbnailBase64;
+                    }
+                    await couch.insertDocument(userDbName, bookDocument).then((result) => {
+                      console.log("insert page Document result", result);
+                      if (result.ok == true) {
+                        console.log("book document has been updated in user database", userDbName);
+                      } else {
+                        console.log("Inserting page document to bookDb failed");
+                      }
+                    });
                   }
                 }
-                await couch.insertDocument(bookDbName, pageDocument).then((result) => {
-                  console.log("insert page Document result", result);
-                  if (result.ok == true) {
-                    console.log("page document has been inserted into database", bookDbName);
+                await couch.findPage(bookDbName, originalImage).then(async (response) => {
+                  console.log("Got Output from find document for pageName", originalImage, "in", bookDbName, "no. of documents", response.documents.docs.length);
+                  if (response.statusCode == 404) {
+                    pageDocument = {
+                      pageName: originalImage,
+                      pageThumbnail: thumbnailBase64,
+                      rawImageId: bucketName+"/"+originalImage,
+                      imageId: bucketName+"/"+tiffToJpgImage
+                    };
                   } else {
-                    console.log("Inserting page document to bookDb failed");
+                    if(response.documents.docs.length == 1) {
+                      pageDocument = response.documents.docs[0];
+                      pageDocument.pageThumbnail = thumbnailBase64;
+                      pageDocument.rawImageId = bucketName+"/"+originalImage;
+                      pageDocument.imageId = bucketName+"/"+tiffToJpgImage;
+                      // console.log("pageDocument from bookDb after conversion",pageDocument);
+                    }
                   }
+                  await couch.insertDocument(bookDbName, pageDocument).then((result) => {
+                    console.log("insert page Document result", result);
+                    if (result.ok == true) {
+                      console.log("page document has been inserted into database", bookDbName);
+                    } else {
+                      console.log("Inserting page document to bookDb failed");
+                    }
+                  });
                 });
               });
-              await deleteImage(originalImagePath).then((status) => {
-                console.log("deleted Image", originalImagePath, "with status", status, "and sending back successful response");
+              await deleteImage(tiffToJpgImagePath).then((status) => {
+                console.log("deleted Image", tiffToJpgImagePath, "with status", status, "and sending back successful response");
                 res.status(201).json({
                   message: req.file.originalname + " Image uploaded successfully" + invalid,
                   uploaded: "Y"
@@ -233,14 +269,7 @@ router.post("",
               });
             });
           });
-      }).catch((err) => {
-        console.log("error while reading, converting & uploading image:", err);
-        res.status(200).json({
-          message: req.file.originalname + " Image upload failed" + invalid,
-          uploaded: "N"
         });
-        invalid = "";
-      });
     }
     else {
       console.log("error in filelist  " + err);

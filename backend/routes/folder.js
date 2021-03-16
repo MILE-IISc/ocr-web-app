@@ -106,7 +106,7 @@ router.post("", authChecker, (req, res, next) => {
       });
     } else {
       await couch.findBook(perUserDb, folderName).then(async (response) => {
-        console.log("Got Output from find document for bookName", folderName, "in", perUserDb, "documents", response.documents.docs);
+        console.log("Got Output from find document for bookName", folderName, "in", perUserDb, "documents", response.documents.docs.length);
         if (response.statusCode == 404) {
           // inserting new document as bookName doesn't exists in perUserDb
           await couch.insertDocument(perUserDb, bookInfo).then((result) => {
