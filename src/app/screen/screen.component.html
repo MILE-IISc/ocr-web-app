@@ -14,7 +14,7 @@
   </button>
   <mat-menu #upload="matMenu">
     <input #fileUpload type="file" (click)="fileUpload.value = null" (change)="importFile($event)" style="display:none"
-      accept="image/*">
+      accept="image/tiff,image/jpeg,image/png">
     <button mat-icon-button data-toggle="tooltip" (click)="fileUpload.click()" title="Upload Image"
       style=" margin-right:3px;">
       <mat-icon>text_snippet</mat-icon>
@@ -144,8 +144,8 @@
   <as-split-area  class="split2" [size]=size3 style="overflow-x: auto; overflow-y: auto;"
     (scroll)="updatescroll(scrollOne, scrollTwo)" #scrollTwo>
     <!-- (ctrls)="showTooltip()" -->
-    <mat-spinner *ngIf="isDownloading"></mat-spinner>
-    <div id="image" class="textElementsDiv" [style.position]="'relative'" *ngIf="!isDownloading">
+    <mat-spinner style="top:30%;left:50%;z-index:2;" *ngIf="isDownloading"></mat-spinner>
+    <div id="image" class="textElementsDiv" [style.position]="'relative'">
       <span *ngFor="let text of words;let i = index" class="textSpanDiv">
         <input class="text_input" id="{{text.lineNumber}}" value="{{text.unicode}}"
           [style.width.px]="text.txtwidth*(this.percentage/100)" [style.position]="'absolute'" [style.border]="'none'" [style.font-weight]= "550"
