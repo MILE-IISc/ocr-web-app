@@ -83,6 +83,8 @@ export class BooksinfoComponent implements OnInit {
   navtoscreen(event) {
     this.obtainbookname(event);
     var ele = event.target.value;
+    console.log("bookName in navToScreen",ele);
+    console.log("this.bookName set in imageServices from obtainbookName",this.bookName);
     let navigationExtras: NavigationExtras = {
       queryParams: {
         "data": ele,
@@ -116,9 +118,9 @@ export class BooksinfoComponent implements OnInit {
     this.imageService.addImage(this.filesToBeUploaded, this.bookName, "DISPLAY_BOOKS");
   }
 
-  openProgressDialog() {
-    this.imageService.openProgressDialog();
-  }
+  // openProgressDialog() {
+  //   this.imageService.openProgressDialog();
+  // }
   onLogout() {
     this.authService.logout();
   }

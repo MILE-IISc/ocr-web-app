@@ -696,9 +696,9 @@ export class ScreenComponent implements OnInit {
     this.callOne = !this.callOne;
   };
 
-  openProgressDialog() {
-    this.imageService.openProgressDialog();
-  }
+  // openProgressDialog() {
+  //   this.imageService.openProgressDialog();
+  // }
 }
 
 @Component({
