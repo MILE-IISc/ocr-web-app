@@ -186,9 +186,13 @@ router.get("", authChecker, (req, res, next) => {
                 completed: "N"
               });
             } else {
+              // console.log("got Tiff imageData");
               xmlJsonObject["page"]["imageData"] = imgContent;
+              // console.log("initiating xmlBuilder");
               const builder = new xml2js.Builder();
+              // console.log("initiated xmlBuilder");
               xmlContent = builder.buildObject(xmlJsonObject);
+              // console.log("posting OCR request");
               request.post({
                 url: process.env.RUN_OCR_ADDRESS,
                 port: process.env.RUN_OCR_PORT,
@@ -198,7 +202,14 @@ router.get("", authChecker, (req, res, next) => {
                 },
                 body: xmlContent
               }, function (error, response, body) {
-                if (response.statusCode == 200) {
+                if (error) {
+                  console.log("Error occurred while running the OCR: ", error);
+                  var statusCode = req.query.type == "GET-OCR-XML" ? 500 : 200;
+                  res.status(statusCode).json({
+                    message: "Internal server error occurred while running the OCR: " + error.code,
+                    completed: "N"
+                  });
+                } else if (error == null && response.statusCode == 200) {
                   // console.log("response body on RUN-OCR",body);
                   xml2js.parseString(body, async function (err, result) {
                     console.log("xml2js.parseString result after RUN-OCR",result);
@@ -228,36 +239,11 @@ router.get("", authChecker, (req, res, next) => {
                       completed: "Y"
                     });
                   });
-                  // doCreateObject(bucketName, xmlFileName, body).then(() => {
-                  //   if (req.query.type == "GET-OCR-XML") {
-                  //     xml2js.parseString(body, function (err, result) {
-                  //       console.log("xml2js.parseString result after RUN-OCR",result);
-                  //       res.status(201).json({
-                  //         message: "OCR completed on " + req.query.fileName,
-                  //         completed: "Y",
-                  //         xmlData: result
-                  //       });
-                  //     });
-                  //   } else {
-                  //     res.status(201).json({
-                  //       message: "OCR completed on " + req.query.fileName,
-                  //       completed: "Y"
-                  //     });
-                  //   }
-                  // }).catch((error) => {
-                  //   console.log("Error while saving XML to COS: ", error);
-                  //   var statusCode = req.query.type == "GET-OCR-XML" ? 500 : 200;
-                  //   res.status(statusCode).json({
-                  //     message: "Internal server error - Failed to save OCR XML to object storage: " + error,
-                  //     xmlData: "",
-                  //     completed: "N"
-                  //   });
-                  // });
                 } else {
-                  console.log("Error occurred while running the OCR: ", error);
+                  console.log("Got non 200 response code", response.statusCode,"response.statusMessage", response.statusMessage);
                   var statusCode = req.query.type == "GET-OCR-XML" ? 500 : 200;
                   res.status(statusCode).json({
-                    message: "Internal server error occurred while running the OCR: " + error,
+                    message: "Internal server error occurred while running the OCR: " + response.statusMessage,
                     completed: "N"
                   });
                 }
