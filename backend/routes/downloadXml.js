@@ -13,11 +13,11 @@ const couch = require("../controllers/couch");
 function getXmlConvertToAltoAndAddToZip(bookDbName, fileName, folder) {
   return new Promise(async (resolve, reject) => {
     await couch.findPage(bookDbName, fileName).then(async (response) => {
-      console.log("Got Output from find document for pageName", fileName, "in", bookDbName, "no. of documents", response.documents.docs.length);
       if (response.statusCode == 404) {
         console.log("Document not available in Couch for",fileName);
         resolve(false);
       } else {
+        console.log("Got Output from find document for pageName", fileName, "in", bookDbName, "no. of documents", response.documents.docs.length);
         if(response.documents.docs.length == 1) {
           pageDocument = response.documents.docs[0];
           xmlJsonObject = pageDocument.data;

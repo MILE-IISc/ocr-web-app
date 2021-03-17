@@ -252,7 +252,7 @@ module.exports.findBook = async function (dbName, searchValue) {
       resolve({ documents, statusCode: (documents.docs.length > 0) ? 200 : 404 });
     }).catch((err) => {
       console.log("error while logging from cloudant", err);
-      reject(err);
+      resolve({ documents, statusCode: 404 });
     });
   });
 }
@@ -274,7 +274,7 @@ module.exports.findPage = async function (dbName, searchValue) {
       resolve({ documents, statusCode: (documents.docs.length > 0) ? 200 : 404 });
     }).catch((err) => {
       console.log("error while logging from cloudant", err);
-      reject(err);
+      resolve({ documents, statusCode: 404 });
     });
   });
 }
@@ -296,7 +296,7 @@ module.exports.findById = async function (dbName, searchValue) {
       resolve({ documents, statusCode: (documents.docs.length > 0) ? 200 : 404 });
     }).catch((err) => {
       console.log("error while logging from cloudant", err);
-      reject(err);
+      resolve({ documents, statusCode: 404 });
     });
   });
 }

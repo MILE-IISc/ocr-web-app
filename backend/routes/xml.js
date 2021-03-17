@@ -153,9 +153,8 @@ router.get("", authChecker, (req, res, next) => {
         });
       } else {
         await couch.findPage(currentBookDb, xmlFileName).then(async (response) => {
-          console.log("Got Output from find document for pageName", xmlFileName, "in", currentBookDb, "no. of documents", response.documents.docs.length);
           if (response.statusCode == 404) {
-            console.log("documnet not found. So, setting default page xml");
+            console.log("document not found. So, setting default page xml");
             xmlJsonObject = {
               "page": {
                "$": {
@@ -164,6 +163,7 @@ router.get("", authChecker, (req, res, next) => {
               }
             }
           } else {
+            console.log("Got Output from find document for pageName", xmlFileName, "in", currentBookDb, "no. of documents", response.documents.docs.length);
             if(response.documents.docs.length == 1) {
               pageDocument = response.documents.docs[0];
               console.log("pageDocument",pageDocument);

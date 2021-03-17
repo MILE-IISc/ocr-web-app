@@ -215,6 +215,11 @@ router.post("",
               await couch.findById(userDbName, bookName).then(async (response) => {
                 if (response.statusCode == 404) {
                   console.log("Book Document not available. Send error response.");
+                  res.status(200).json({
+                    message: req.file.originalname + " Image upload failed " + invalid,
+                    uploaded: "N"
+                  });
+                  invalid = "";
                 } else {
                   if(response.documents.docs.length == 1) {
                     bookDocument = response.documents.docs[0];
@@ -232,8 +237,8 @@ router.post("",
                   }
                 }
                 await couch.findPage(bookDbName, originalImage).then(async (response) => {
-                  console.log("Got Output from find document for pageName", originalImage, "in", bookDbName, "no. of documents", response.documents.docs.length);
                   if (response.statusCode == 404) {
+                    console.log("document not found. So, setting default pageDocument");
                     pageDocument = {
                       pageName: originalImage,
                       pageThumbnail: thumbnailBase64,
@@ -241,6 +246,7 @@ router.post("",
                       imageId: bucketName+"/"+tiffToJpgImage
                     };
                   } else {
+                    console.log("Got Output from find document for pageName", originalImage, "in", bookDbName, "no. of documents", response.documents.docs.length);
                     if(response.documents.docs.length == 1) {
                       pageDocument = response.documents.docs[0];
                       pageDocument.pageThumbnail = thumbnailBase64;
