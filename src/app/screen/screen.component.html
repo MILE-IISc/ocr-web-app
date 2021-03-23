@@ -14,7 +14,7 @@
   </button>
   <mat-menu #upload="matMenu">
     <input #fileUpload type="file" (click)="fileUpload.value = null" (change)="importFile($event)" style="display:none"
-      accept="image/tiff,image/jpeg,image/png">
+      accept="image/*">
     <button mat-icon-button data-toggle="tooltip" (click)="fileUpload.click()" title="Upload Image"
       style=" margin-right:3px;">
       <mat-icon>text_snippet</mat-icon>
