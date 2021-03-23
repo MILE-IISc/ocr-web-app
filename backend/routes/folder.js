@@ -8,10 +8,10 @@ const cloudStorage = require('ibm-cos-sdk');
 const bucketFilesList = [];
 
 var config = {
+  accessKeyId: process.env.OBJECT_STORAGE_ACCESS_KEY_ID,
+  secretAccessKey: process.env.OBJECT_STORAGE_SECRET_ACCESS_KEY,
   endpoint: process.env.OBJECT_STORAGE_ENDPOINT,
-  apiKeyId: process.env.OBJECT_STORAGE_API_KEY_ID,
-  ibmAuthEndpoint: process.env.OBJECT_STORAGE_IBM_AUTH_ENDPOINT,
-  serviceInstanceId: process.env.OBJECT_STORAGE_SERVICE_INSTANCE_ID,
+  s3ForcePathStyle: true, // needed with minio?
 };
 
 var cos = new cloudStorage.S3(config);
@@ -91,6 +91,8 @@ function getBucketContents(bucketName) {
 router.post("", authChecker, (req, res, next) => {
   let folderName = req.body.folderName;
   let perUserDb = req.body.userDbName;
+  let userName = req.userData.email;
+  console.log("req.userData.email in folder.js post",userName);
   let bookDb = "";
   bookInfo = {
     "bookName": folderName,
@@ -136,24 +138,17 @@ router.post("", authChecker, (req, res, next) => {
               console.log(err);
             });
           }
-          couch.getDbSecurity(perUserDb).then((dbSecurity) => {
-            securityInfo = {};
-            console.log("dbSecurity from userDb in folder.js", dbSecurity);
-            if (Object.keys(dbSecurity).length == 1) {
-              securityInfo = dbSecurity;
-            }
-            couch.copyDbSecurity(bookDb, securityInfo).then((access) => {
-              console.log("permission granted successfully for bookDb:", bookDb, "with key:", access.key, "with password:", access.password);
-              console.log("Sending book database creation response");
-              res.status(201).json({
-                message: "bookInfo added!",
-                bookDbName: bookDb,
-                bookDbKey: access.key
-              });
-            }).catch((err) => {
-              console.log("error while replicating security config from perUserDb to bookDb", err);
+          couch.setDbSecurity(bookDb, userName).then((status) => {
+            console.log("permission granted successfully for bookDb:", bookDb, "with status:", status);
+            console.log("Sending book database creation response");
+            res.status(201).json({
+              message: "bookInfo added!",
+              bookDbName: bookDb,
+              bookDbKey: userName
             });
-          })
+          }).catch((err) => {
+            console.log("error while replicating security config from perUserDb to bookDb", err);
+          });
         }).catch((err) => {
           console.log("error while granting permission for userdb", err);
         });

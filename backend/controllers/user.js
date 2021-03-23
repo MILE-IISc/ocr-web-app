@@ -41,28 +41,31 @@ exports.userLogin = async (req, res, next) => {
                 }
                   securityInfo = {};
                   securityInfo[userInfo.name] = ['_admin', '_replicator', '_reader', '_writer'];
-                  couch.setDbSecurity(perUserDb, securityInfo).then(async (access) => {
-                    console.log("permission granted successfully for userdb", access.key, "password",access.password);
+                  couch.setDbSecurity(perUserDb, userInfo.name).then(async (status) => {
+                    console.log("permission granted successfully for userdb", status);
                     await couch.getAllDocsMetaData(perUserDb).then(async (result) => {
                       console.log("got all docsMetada for ",perUserDb);
                       if(result.rows.length > 0) {
                         for(i = 0; i < result.rows.length; i++) {
                           console.log("documentId for ",i,":",result.rows[i].id);
                           bookDb = "mile_book_db_"+result.rows[i].id;
-                          securityInfo = {};
-                          securityInfo[access.key] = ['_admin', '_replicator', '_reader', '_writer'];
-                          await couch.copyDbSecurity(bookDb, securityInfo).then((access) => {
+                          await couch.setDbSecurity(bookDb, userInfo.name).then((access) => {
                             console.log("granted permission for",bookDb,"to key",access.key);
                           });
                         }
                       }
                     });
                     const token = jwt.sign(
-                      { email: userInfo.email, userId: userInfo.userId },
+                      { email: userInfo.name, userId: userInfo.userId },
                       process.env.JWT_KEY,
                       { expiresIn: "365d" }
                     );
                     console.log("Sending login successful response");
+                    if (process.env.COUCH_DB_PROVIDER == "IBM_CLOUDANT") {
+                      couchDbAdminUrl = "https://" + encodeURIComponent(userInfo.name) + ":" + encodeURIComponent(password) + "@" + process.env.COUCH_DB_HOST;
+                    } else {
+                      couchDbAdminUrl = "http://" + encodeURIComponent(userInfo.name) + ":" + encodeURIComponent(password) + "@" + process.env.COUCH_DB_HOST;
+                    }
                     res.status(200).json({
                       token: token,
                       expiresIn: 31536000,
@@ -70,7 +73,7 @@ exports.userLogin = async (req, res, next) => {
                       email: userInfo.name,
                       role: userInfo.roles[0],
                       bucketName: userInfo.bucketName,
-                      dbUrl: process.env.COUCH_DB_HOST,
+                      dbUrl: couchDbAdminUrl,
                       userDb: perUserDb,
                       userDbKey: userInfo.name,
                       userDbPwd: password

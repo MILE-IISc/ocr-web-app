@@ -1,5 +1,11 @@
 var Cloudant = require('@cloudant/cloudant');
-var couchDbAdminUrl = "https://" + process.env.COUCH_DB_ADMIN_USERNAME + ":" + process.env.COUCH_DB_ADMIN_PASSWORD + "@" + process.env.COUCH_DB_HOST;
+
+if (process.env.COUCH_DB_PROVIDER == "IBM_CLOUDANT") {
+  var couchDbAdminUrl = "https://" + process.env.COUCH_DB_ADMIN_USERNAME + ":" + process.env.COUCH_DB_ADMIN_PASSWORD + "@" + process.env.COUCH_DB_HOST;
+} else {
+  var couchDbAdminUrl = "http://" + process.env.COUCH_DB_ADMIN_USERNAME + ":" + process.env.COUCH_DB_ADMIN_PASSWORD + "@" + process.env.COUCH_DB_HOST;
+}
+console.log("couchDbAdminUrl used: ",couchDbAdminUrl);
 var cloudant = new Cloudant({ url: couchDbAdminUrl });
 
 // Authenticate User
@@ -8,6 +14,7 @@ module.exports.authenticateUser = async function (username, password) {
     var cloudant1 = new Cloudant({ url: couchDbAdminUrl });
     cloudant1.auth(username, password, (err, response) => {
       if(err) {
+        console.log("err while authentication",err);
         if(err.statusCode == 401) {
           console.log("authentication failed for reason",err.reason, "with statusCode:",err.statusCode);
         } else {
@@ -110,38 +117,37 @@ module.exports.getDbSecurity = async function (dbName) {
   });
 }
 
-module.exports.setDbSecurity = async function (dbName, securityInfo) {
+module.exports.setDbSecurity = async function (dbName, userName) {
   return new Promise(async (resolve, reject) => {
-    var database = cloudant.db.use(dbName);
-    var security = {};
-    var apiKeyValuePair = {};
-    if (Object.keys(securityInfo).length == 1) {
-      security = securityInfo;
-      securityKeyArray = Object.keys(securityInfo);
-      apiKeyValuePair.key = securityKeyArray[0];
-      apiKeyValuePair.password = "";
-      console.log("apiKeyValuePair.key", apiKeyValuePair.key, "apiKeyValuePair.value", apiKeyValuePair.password);
+    if(process.env.COUCH_DB_PROVIDER == "IBM_CLOUDANT") {
+      securityInfo =  { "cloudant": {}};
+      securityInfo.cloudant[userName] = [ '_replicator', '_reader', '_writer', '_admin' ];
+      console.log("securityInfo",securityInfo);
+      await cloudant.request({db: dbName, method: 'put', path: '/_security', body: securityInfo
+      }, (err, result) => {
+        if(err) {
+          console.log("error on setting security",err);
+          resolve(false);
+        } else {
+          console.log("result on setting security",result);
+          resolve(true);
+        }
+      });
     } else {
-      await generateApiKey().then((apiKeyValue) => {
-        console.log("got response from  generate api key function");
-        // Setting security for database
-        security[apiKeyValue.key] = ['_admin', '_replicator', '_reader', '_writer'];
-        apiKeyValuePair = apiKeyValue;
-      }).catch((err) => {
-        console.log("error while generating api key", err);
+      await cloudant.request({db: dbName, method: 'put', path: '/_security', body:
+        {
+          admins:  { names: [userName], roles: ["_admin"] },
+        }
+      }, (err, result) => {
+        if(err) {
+          console.log("error on setting security",err);
+          resolve(false);
+        } else {
+          console.log("result on setting security",result);
+          resolve(true);
+        }
       });
     }
-    database.set_security(security, function (err, result) {
-      if (err) {
-        // throw er;
-        console.log("error while setting permission for userdb", err);
-        resolve(false);
-      }
-      console.log('Set security for', dbName, "with key", apiKeyValuePair.key, "with password", apiKeyValuePair.password);
-      console.log(result);
-      let access = { "key": apiKeyValuePair.key, "password": apiKeyValuePair.password };
-      resolve(access);
-    });
   });
 }
 

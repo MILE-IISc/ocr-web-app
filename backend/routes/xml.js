@@ -12,12 +12,11 @@ const authChecker = require("../middleware/auth-checker");
 const couch = require('../controllers/couch');
 
 const cloudStorage = require('ibm-cos-sdk');
-// const bucket = process.env.OBJECT_STORAGE_BUCKET;
 var config = {
+  accessKeyId: process.env.OBJECT_STORAGE_ACCESS_KEY_ID,
+  secretAccessKey: process.env.OBJECT_STORAGE_SECRET_ACCESS_KEY,
   endpoint: process.env.OBJECT_STORAGE_ENDPOINT,
-  apiKeyId: process.env.OBJECT_STORAGE_API_KEY_ID,
-  ibmAuthEndpoint: process.env.OBJECT_STORAGE_IBM_AUTH_ENDPOINT,
-  serviceInstanceId: process.env.OBJECT_STORAGE_SERVICE_INSTANCE_ID,
+  s3ForcePathStyle: true, // needed with minio?
 };
 
 var cos = new cloudStorage.S3(config);

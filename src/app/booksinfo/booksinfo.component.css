@@ -1,38 +1,38 @@
 #menu {
     position: fixed;
-    display: none; 
-    width: fit-content; 
-    height: fit-content; 
+    display: none;
+    width: fit-content;
+    height: fit-content;
     background-color: none;
     z-index: 5;
     cursor: pointer;
   }
-  
+
   ::ng-deep .menu button {
     background-color: #4CAF50;
-    border: 1px solid green; 
-    color: white; 
+    border: 1px solid green;
+    color: white;
     padding: 0px !important;
-    cursor: pointer; 
+    cursor: pointer;
     display: inline-block;
     outline: none;
     margin: 0px !important;
     border-width: solid;
   }
-  
+
   button[disabled] {
     filter: blur(1px);
     cursor: not-allowed;
   }
-  
+
   input.playLoop {
-    width: 30px; 
+    width: 30px;
     height: 30px;
     vertical-align: middle;
   }
-  
+
   /* Split Screen Related */
-  
+
   ::ng-deep .as-split-gutter-icon {
       background-image: none !important;
       background-color: teal;
@@ -40,28 +40,28 @@
       opacity: 0.3;
       width: 3px !important;
   }
-  
+
   .height-max {
       height: calc(100vh);
   }
-  
+
   /* Wave Listing Related */
-  
+
   ::ng-deep .btn-group button {
-      color: white; 
+      color: white;
       padding: 10px 30px;
-      cursor: pointer; 
-      width: 100%; 
+      cursor: pointer;
+      width: 100%;
       display: block;
       word-break: break-all;
       padding-right: 60px;
     }
-  
+
   .btn-group {
       padding-bottom: 5px;
   }
-  
-  
+
+
   /* Wave Viewer Component Related */
   ::ng-deep .textgrid-segment {
       color: black;
@@ -74,19 +74,19 @@
     text-overflow: ellipsis;
     font-size: 32px;
   }
-  
+
   .gap{
     height:50px;
   }
-  
+
   .heading-border{
     border-left: 1px solid;
   }
-  
+
   .right-border{
     border-right:1px solid;
   }
-  
+
   ::ng-deep #textgrid-overflow {
     position: relative;
     left: 0px;
@@ -94,18 +94,18 @@
     width: initial;
     overflow: hidden;
   }
-  
+
   ::ng-deep .textgrid-overflow  {
     overflow: hidden;
     white-space: nowrap;
     font-size: 32px;
   }
-  
-  
-  ::ng-deep #textgrid-resize { 
+
+
+  ::ng-deep #textgrid-resize {
     width: inherit;
   }
-  
+
   #textgrid-outside {
     display: block;
     position: relative;
@@ -113,41 +113,41 @@
     padding-right: 40px;
     padding-top: 20px;
   }
-  
+
   ::ng-deep .textgrid-tier {
     position: relative;
     overflow: hidden;
     text-align: left;
   }
-  
+
   ::ng-deep .textgrid-tier ::ng-deep .textgrid-segment {
     display: inline-block;
   }
-  
+
   #waveform{
     padding-left: 100px;
     padding-right: 40px;
   }
-  
+
   #waveform-timeline{
     padding-left: 100px;
     padding-right: 40px;
   }
-  
-  
+
+
   /*----Angular-----*/
-  
+
   /* button {
       margin-left: 16px;
       margin-top: 16px;
   } */
-  
+
   /*---------General.CSS-----------*/
-  
+
   .serif{
       font-family: serif;
   }
-  
+
   .large-font{
       font-size: 22px;
   }
@@ -167,15 +167,15 @@
     z-index: 500;
     cursor: pointer;
   }
-  
+
   .dropdown-submenu:hover>.dropdown-menu {
     display: block;
   }
-  
+
   .filler {
     flex: 1 auto;
   }
-  
+
   .dropdown-submenu>a:after {
     display: block;
     content: " ";
@@ -189,7 +189,7 @@
     margin-top: 5px;
     margin-right: -10px;
   }
-  
+
   .dropdown-content {
     /* display: none; */
     position: relative;
@@ -199,11 +199,11 @@
     padding: 12px 16px;
     /* z-index: 1;  */
   }
-  
+
   .sideBar:hover {
     font-size: large;
   }
-  
+
   .dropdown-content a {
     color: black;
     /* padding: 12px 16px; */
@@ -213,13 +213,35 @@
     padding-bottom: 0px;
     padding-top: 0px
   }
-  
+
   .dropdown-content a:hover {
     background-color: #f1f1f1
   }
-  
+
   .dropdown-submenu:hover>.dropdown-menu {
     display: block;
   }
-  
-  
+
+  /*  SnackBar message */
+
+  #snackbar {
+    visibility: hidden;
+    min-width: 250px;
+    margin-left: -125px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 2px;
+    padding: 16px;
+    position: fixed;
+    z-index: 1;
+    left: 50%;
+    bottom: 30px;
+    font-size: 17px;
+  }
+
+  #snackbar.show {
+    visibility: visible;
+    -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+  }

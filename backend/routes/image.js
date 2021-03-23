@@ -24,11 +24,12 @@ var invalid = "";
 const cloudStorage = require('ibm-cos-sdk');
 const multerS3 = require('multer-s3');
 bucket = "";
+
 var config = {
+  accessKeyId: process.env.OBJECT_STORAGE_ACCESS_KEY_ID,
+  secretAccessKey: process.env.OBJECT_STORAGE_SECRET_ACCESS_KEY,
   endpoint: process.env.OBJECT_STORAGE_ENDPOINT,
-  apiKeyId: process.env.OBJECT_STORAGE_API_KEY_ID,
-  ibmAuthEndpoint: process.env.OBJECT_STORAGE_IBM_AUTH_ENDPOINT,
-  serviceInstanceId: process.env.OBJECT_STORAGE_SERVICE_INSTANCE_ID,
+  s3ForcePathStyle: true, // needed with minio?
 };
 
 var cos = new cloudStorage.S3(config);
@@ -78,16 +79,16 @@ function getBucketContents(bucketName) {
     });
 }
 
-// const fileFilter = (req, file, cb) => {
-//   const isValid = MIME_TYPE_MAP[file.mimetype];
-//   if (isValid) {
-//     invalid = ""
-//     cb(null, true);
-//   } else {
-//     invalid = "And invalid file types were skipped. "
-//     cb(null, false);
-//   }
-// }
+const fileFilter = (req, file, cb) => {
+  const isValid = MIME_TYPE_MAP[file.mimetype];
+  if (isValid) {
+    invalid = ""
+    cb(null, true);
+  } else {
+    invalid = "And invalid file types were skipped. "
+    cb(null, false);
+  }
+}
 
 // var upload = multer({
 //   fileFilter,
@@ -111,20 +112,12 @@ function getBucketContents(bucketName) {
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // const isValid = MIME_TYPE_MAP[file.mimetype];
-    // console.log("file name "+file.originalname);
-    // console.log("book name "+bookName);
     const image_wav_dir = './images/' + req.body.email + '/'
-    // let error = new Error("Invalid mime type");
     var fs = require('fs');
     let dir = image_wav_dir;
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-
-    // if (isValid) {
-    //   error = null;
-    // }
 
     cb(null, dir);
   },
@@ -157,21 +150,24 @@ async function deleteImage(filePath) {
 
 router.post("",
   authChecker,
-  multer({ storage: storage }).single("image"),
+  multer({ storage: storage, fileFilter: fileFilter }).single("image"),
   async function (req, res, next) {
     const mail = req.body.email;
     const bookDbName = req.query.bookDbName;
     const userDbName = "mile_user_db_" + req.userData.userId;
-    const bookName = req.query.bookDbName.replace('mile_book_db_','');;
-    console.log("inside post email ", mail, "bookDbName", bookDbName, "userId",req.userData.userId);
+    const bookName = req.query.bookDbName.replace('mile_book_db_', '');;
+    console.log("inside post email ", mail, "bookDbName", bookDbName, "userId", req.userData.userId);
     bucketName = req.userData.bucketName;
     console.log("bucketName inside post images ", bucketName);
-    let originalImage = req.file.originalname;
-    let tiffToJpgImage = req.file.originalname;
-    let tiffToJpgImagePath = './images/' + mail + '/' + req.file.originalname;
-    let originalImagePath = './images/' + mail + '/' + req.file.originalname;
-    if (res.statusCode === 200 && req.file) {
-      console.log("multer upload response", res.statusCode);
+    console.log("multer upload response", res.statusCode);
+    // console.log("multer upload response", req);
+    if (req.file) {
+      console.log("file stored succesfully");
+      let originalImage = req.file.originalname;
+      let tiffToJpgImage = req.file.originalname;
+      let tiffToJpgImagePath = './images/' + mail + '/' + req.file.originalname;
+      let originalImagePath = './images/' + mail + '/' + req.file.originalname;
+      if (res.statusCode === 200) {
         console.log("req.file.mimetype", req.file.mimetype);
         // console.log("file width", file.getWidth());
         if (req.file.mimetype == "image/tiff") {
@@ -191,18 +187,18 @@ router.post("",
                 });
               });
             })
-          .catch((err) => {
-            console.log("error while reading, converting & uploading image:", err);
-            res.status(200).json({
-              message: req.file.originalname + " Image upload failed" + invalid,
-              uploaded: "N"
+            .catch((err) => {
+              console.log("error while reading, converting & uploading image:", err);
+              res.status(200).json({
+                message: req.file.originalname + " Image upload failed" + invalid,
+                uploaded: "N"
+              });
+              invalid = "";
+              resolve(false);
             });
-            invalid = "";
-            resolve(false);
-          });
         }
         // console.log("tiffStatus after if tiff condition",tiffStatus);
-        console.log("tiffToJpgImagePath after if tiff condition",tiffToJpgImagePath);
+        console.log("tiffToJpgImagePath after if tiff condition", tiffToJpgImagePath);
         Jimp.read(tiffToJpgImagePath).then(async (jpegFile) => {
           await jpegFile
           .quality(25)
@@ -221,9 +217,9 @@ router.post("",
                   });
                   invalid = "";
                 } else {
-                  if(response.documents.docs.length == 1) {
+                  if (response.documents.docs.length == 1) {
                     bookDocument = response.documents.docs[0];
-                    if(bookDocument.bookThumbnailImage == "") {
+                    if (bookDocument.bookThumbnailImage == "") {
                       bookDocument.bookThumbnailImage = thumbnailBase64;
                     }
                     await couch.insertDocument(userDbName, bookDocument).then((result) => {
@@ -242,16 +238,16 @@ router.post("",
                     pageDocument = {
                       pageName: originalImage,
                       pageThumbnail: thumbnailBase64,
-                      rawImageId: bucketName+"/"+originalImage,
-                      imageId: bucketName+"/"+tiffToJpgImage
+                      rawImageId: bucketName + "/" + originalImage,
+                      imageId: bucketName + "/" + tiffToJpgImage
                     };
                   } else {
                     console.log("Got Output from find document for pageName", originalImage, "in", bookDbName, "no. of documents", response.documents.docs.length);
-                    if(response.documents.docs.length == 1) {
+                    if (response.documents.docs.length == 1) {
                       pageDocument = response.documents.docs[0];
                       pageDocument.pageThumbnail = thumbnailBase64;
-                      pageDocument.rawImageId = bucketName+"/"+originalImage;
-                      pageDocument.imageId = bucketName+"/"+tiffToJpgImage;
+                      pageDocument.rawImageId = bucketName + "/" + originalImage;
+                      pageDocument.imageId = bucketName + "/" + tiffToJpgImage;
                       // console.log("pageDocument from bookDb after conversion",pageDocument);
                     }
                   }
@@ -276,11 +272,19 @@ router.post("",
             });
           });
         });
-    }
-    else {
-      console.log("error in filelist  " + err);
+      }
+      else {
+        console.log("error in filelist  " + err);
+        res.status(200).json({
+          message: req.file.originalname + " Image upload failed " + invalid,
+          uploaded: "N"
+        });
+        invalid = "";
+      }
+    } else {
+      console.log("Invalid MIME Type");
       res.status(200).json({
-        message: req.file.originalname + " Image upload failed " + invalid,
+        message: " Image upload failed " + invalid,
         uploaded: "N"
       });
       invalid = "";
@@ -392,7 +396,7 @@ function getItemHeader(bucketName, itemName) {
   .then((data) => {
     if (data != null) {
       console.log(`Retrieved HEAD for item: ${itemName} from bucket: ${bucketName}`);
-      console.log("header data inside getItemheader",JSON.stringify(data, null, 4));
+      console.log("header data inside getItemheader", JSON.stringify(data, null, 4));
       return data;
     }
   })
@@ -432,7 +436,7 @@ router.get("/:fileName", authChecker, (req, res, next) => {
   }
   bucketName = req.userData.bucketName;
   console.log("bucketName inside get specific Image ", bucketName);
-  if (type == "GET-HEADER" ) {
+  if (type == "GET-HEADER") {
     getItemHeader(bucketName, jpegFile).then((data) => {
       if (data == "The specified key does not exists in bucket") {
         console.log("error while retrieving image header info:", data);
@@ -471,7 +475,7 @@ router.delete("/:fileName", authChecker, (req, res, next) => {
   const filesToBeDeleted = [];
   const documentId = req.query.documentId;
   const bookDbName = req.query.bookDbName;
-  console.log("documentId in delete",documentId);
+  console.log("documentId in delete", documentId);
   filesToBeDeleted.push(req.params.fileName);
   fileName = req.params.fileName;
   if (path.extname(fileName).toLowerCase() == ".tif") {

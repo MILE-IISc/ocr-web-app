@@ -28,8 +28,8 @@ export class PouchService implements OnInit {
     console.log("_couchDbKey",_couchDbKey,"_couchDbPwd",_couchDbPwd,"couchBaseUrl",_dbUrl,"_couchDbName",_couchDbName);
     // '4c43dd2b-f41e-41ba-af80-88696a524541-bluemix.cloudantnosqldb.appdomain.cloud';
     let res = encodeURIComponent(_couchDbKey);
-    this.couchDbUrl = `https://${res}:${_couchDbPwd}@${_dbUrl}/${_couchDbName}`;
-    this.remoteDbInstance = new PouchDB(this.couchDbUrl, { revs_limit: 1, auto_compaction: true, skip_setup: true });
+    this.couchDbUrl = `${_dbUrl}/${_couchDbName}`;
+    this.remoteDbInstance = new PouchDB(this.couchDbUrl, { revs_limit: 1, auto_compaction: true, skip_setup: true, adapter: 'http' });
     return this.remoteDbInstance;
   }
 

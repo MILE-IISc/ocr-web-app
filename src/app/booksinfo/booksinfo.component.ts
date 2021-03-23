@@ -35,6 +35,7 @@ export class BooksinfoComponent implements OnInit {
   isLoading = false;
   FOLDER_BACKEND_URL;
   isDownloading = false;
+  message;
 
   constructor(private imageService: ImageService, private router: Router, private fileService: FileService, private pouchService: PouchService, public dialog: MatDialog,
     public authService: AuthService, private bookService: BookService, public _d: DomSanitizer, private http: HttpClient, private changeDetection: ChangeDetectorRef, private zone: NgZone) {
@@ -78,6 +79,23 @@ export class BooksinfoComponent implements OnInit {
     this.imageService.ResumeUploadEvent.subscribe(() => {
       this.invokeUploadImage();
     });
+
+    this.imageService.invalidMessageChange
+    .subscribe(
+      (message: string) => {
+        console.log("message in booksDashboard======== " + message);
+        this.message = message;
+        if (this.message != "") {
+          var x = document.getElementById("snackbar");
+          console.log("x in screen " + x);
+          if (x != null) {
+            x.className = "show";
+            setTimeout(() => {
+              x.className = x.className.replace("show", "");
+            }, 2000);
+          }
+        }
+      });
   }
 
   navtoscreen(event) {
