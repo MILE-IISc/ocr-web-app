@@ -1,13 +1,13 @@
 {
   "env": {
     "JWT_KEY": "SECRET_HASH_KEY_FOR_JSON_WEBTOKEN",
-    "OBJECT_STORAGE_ENDPOINT": "s3.private.ap.cloud-object-storage.appdomain.cloud",
-    "OBJECT_STORAGE_API_KEY_ID": "<apikey>",
-    "OBJECT_STORAGE_IBM_AUTH_ENDPOINT": "https://iam.cloud.ibm.com/identity/token",
-    "OBJECT_STORAGE_SERVICE_INSTANCE_ID": "crn:v1:bluemix:public:cloud-object-storage:global:a/<instance_id>::",
+    "OBJECT_STORAGE_ENDPOINT": "<object_storage_endpoint>",
+    "OBJECT_STORAGE_ACCESS_KEY_ID": "<object_storage_access_key_id>",
+    "OBJECT_STORAGE_SECRET_ACCESS_KEY": "<object_storage_secret_access_key>",
     "COUCH_DB_HOST": "<couch_db_hostname_port>",
     "COUCH_DB_ADMIN_USERNAME": "<couch_db_admin_username>",
     "COUCH_DB_ADMIN_PASSWORD": "<couch_db_admin_password>",
+    "COUCH_DB_PROVIDER": "<couch_db_provider>",
     "RUN_OCR_ADDRESS": "http://<IP_ADDRESS>:<PORT>",
     "RUN_OCR_PORT": "<PORT>"
   }
