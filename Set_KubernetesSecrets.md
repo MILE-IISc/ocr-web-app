@@ -32,5 +32,5 @@ $ echo "IBM_CLOUDANT" >> couchDbProvider
 Use `kubectl create secret` to create the Kubernete secrets
 ```
 $ cd ..
-$ kubectl create secret generic couchdb-secret --from-file=./couchdb-secret
+$ kubectl create secret generic couchdb-secret --from-file=./couchdb
 ```
