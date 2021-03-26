@@ -7,7 +7,7 @@ $ docker run -dp 9000:9000 -e "MINIO_ROOT_USER=<minio_admin_username>" -e "MINIO
 
 ## a) UI Interface for MinIO:
  - Open http://localhost:9000 in your browser.
- - Login using the `<minio_admin_username>` & `<minio_admin_password>` which  and then create a bucket using the UI interface. And this bucket name will be used in configuring user_info
+ - Login using the `<minio_admin_username>` & `<minio_admin_password>` which  and then create a bucket using the UI interface. And this bucket name will be used in configuring user_info in couch db (in step 2c)
 
 
 # 2. Setup Apache CouchDB
