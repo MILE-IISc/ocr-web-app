@@ -70,12 +70,14 @@ node                                 14.15.3-alpine3.11                         
 Create a text file by name `ocr-web-app.env` containing the credentials needed to connect to the other needed services: MongoDB, Object Storage and OCR Engine.
 ```
 $ cat .\ocr-web-app.env
-MONGODB_ENDPOINT=mongodb://<username>:<password>@<dbaas_provider_url>/<dbname>
 JWT_KEY=<jwt-secret-key>
-OBJECT_STORAGE_ENDPOINT=s3.che01.cloud-object-storage.appdomain.cloud
-OBJECT_STORAGE_API_KEY_ID=<api-key>
-OBJECT_STORAGE_IBM_AUTH_ENDPOINT=https://iam.cloud.ibm.com/identity/token
-OBJECT_STORAGE_SERVICE_INSTANCE_ID=crn:v1:bluemix:public:cloud-object-storage:global:a/<instance_id>::
+OBJECT_STORAGE_ENDPOINT=s3.ap.cloud-object-storage.appdomain.cloud
+OBJECT_STORAGE_ACCESS_KEY_ID=<object_storage_access_key_id>
+OBJECT_STORAGE_SECRET_ACCESS_KEY=<object_storage_secret_access_key>
+COUCH_DB_HOST=<couch_db_hostname_port>
+COUCH_DB_ADMIN_USERNAME=<couch_db_admin_username>
+COUCH_DB_ADMIN_PASSWORD=<couch_db_admin_password>
+COUCH_DB_PROVIDER=IBM_CLOUDANT
 RUN_OCR_ADDRESS=http://<ip-address-of-OCR-REST-API>:9080/
 RUN_OCR_PORT=9080
 ```
