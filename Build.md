@@ -1,6 +1,15 @@
 # Build and deploy OCR Web App as Docker Container
 
-## 1. Build docker image
+## 1. To setup object store
+Images required for OCR web app is stored in object store. It can either be setup locally using MinIO or in IBM COS in IBM cloud
+And data is stored in Apache CouchDB when setup is done locally and in IBM cloudant in IBM cloud
+
+To setup Minio and Apache CouchDB on your local environment follow instructions in [Setup_MinIO_ApacheCouchDB.md](Setup_MinIO_ApacheCouchDB.md)
+
+## 2. Setup OCR Engine
+To setup OCR engine, follow instructions [here](https://github.com/MILE-IISc/MILE-OCR-Engine/blob/master/Build.md)
+
+## 3. Build docker image
 
 Trigger build using `docker build` command
 ```
@@ -65,7 +74,7 @@ node                                 14.15.3-alpine3.11                         
 
 ```
 
-## 2. Set environment variables
+## 4. Set environment variables
 
 Create a text file by name `ocr-web-app.env` containing the information needed to connect to the other needed services: CouchDB, Object Storage and OCR Engine.
 ```
@@ -95,7 +104,7 @@ RUN_OCR_ADDRESS=http://192.168.0.52:9080/
 RUN_OCR_PORT=9080
 ```
 
-## 3. Run the docker
+## 5. Run the docker
 
 Start the `OCR Web App` using `docker run` command:
 ```
@@ -109,7 +118,7 @@ CONTAINER ID        IMAGE               COMMAND                  CREATED        
 ac6c63d9cd06        ocr-web-app         "docker-entrypoint.s…"   10 seconds ago      Up 8 seconds              0.0.0.0:8080->8080/tcp   iisc-ocr-web-app
 ```
 
-## 4. Launch OCR Web App
+## 6. Launch OCR Web App
 
 Open http://localhost:8080/ in your browser.
 
