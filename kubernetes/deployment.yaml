@@ -32,21 +32,16 @@ spec:
             secretKeyRef:
               name: objectstorage-secret
               key: endpoint
-        - name: OBJECT_STORAGE_API_KEY_ID
+        - name: OBJECT_STORAGE_ACCESS_KEY_ID
           valueFrom:
             secretKeyRef:
               name: objectstorage-secret
-              key: apiKeyId
-        - name: OBJECT_STORAGE_IBM_AUTH_ENDPOINT
+              key: accessKeyId
+        - name: OBJECT_STORAGE_SECRET_ACCESS_KEY
           valueFrom:
             secretKeyRef:
               name: objectstorage-secret
-              key: ibmAuthEndpoint
-        - name: OBJECT_STORAGE_SERVICE_INSTANCE_ID
-          valueFrom:
-            secretKeyRef:
-              name: objectstorage-secret
-              key: serviceInstanceId
+              key: secretAccessKey
         - name: RUN_OCR_ADDRESS
           valueFrom:
             secretKeyRef:
@@ -72,6 +67,11 @@ spec:
             secretKeyRef:
               name: couchdb-secret
               key: couchDbAdminPassword
+        - name: COUCH_DB_PROVIDER
+          valueFrom:
+            secretKeyRef:
+              name: couchdb-secret
+              key: couchDbProvider
 ---
 # Expose as service
 apiVersion: v1
