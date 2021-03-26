@@ -1,4 +1,4 @@
-# 1. Setup MinIO
+# 1. Setup [MinIO](https://min.io/) 
 
 ```
 $ docker run -dp 9000:9000 -e "MINIO_ROOT_USER=<minio_admin_username>" -e "MINIO_ROOT_PASSWORD=<minio_admin_password>" --name iisc-minio-s3-bucket minio/minio server /minioS3bucket
@@ -15,14 +15,17 @@ $ docker run -dp 9000:9000 -e "MINIO_ROOT_USER=<minio_admin_username>" -e "MINIO
 ```
 $ docker run -d -p 5984:5984 -e COUCHDB_USER=<couchdb_admin_username> -e COUCHDB_PASSWORD=<couchdb_admin_password> --name my-couchdb couchdb:3
 ```
-## a) To enable cors to couchDb running in docker container
+
+## a) To enable cors to CouchDb using GUI Interface for CouchDb:
+ - Open http://localhost:5984/_utils/index.html#login in your browser. And login using the `<couchdb_admin_username>` & `<couchdb_admin_password>`
+ - Enable CORS using UI interface by choosing settings and then CORS. Then click Enable CORS and check All domains(*) or you can follow 2b to enable CORS
+
+
+## b) To enable cors to CouchDb using CLI,
   ```
 $ npm i -D add-cors-to-couchdb
-$(npm bin)/add-cors-to-couchdb http://<local_ip_address>:5984 -u <admin_username> -p <admin_password>
+$ (npm bin)/add-cors-to-couchdb http://<local_ip_address>:5984 -u <admin_username> -p <admin_password>
 ```
-
-## b) UI Interface for couchDb:
- - Open http://localhost:5984/_utils/index.html#login in your browser. And login using the `<couchdb_admin_username>` & `<couchdb_admin_password>`
 
 ## c) Create ocr-web-app login id
  - Now we have to create `"_users"` database and insert a user document in that database using UI interface or using the commands below,
@@ -31,7 +34,7 @@ $ curl -v -X PUT "http://<admin_username>:<admin_password>@<local_ip_address>:59
 
 $ export OCR_USER_NAME=<user_login_id> #should be of the form user@domain.com (ex:ocr@gmail.com)
 
-$ curl -v -X POST -H 'Content-Type: application/json' "http://<couchdb_admin_username>:<couchdb_admin_password>@<local_ip_address>:5984/_users" --data-binary '{"_id": "org.couchdb.user:'$USER_NAME'","name": "'$USER_NAME'","roles": ["admin"],"type": "user","password":"admin123","bucketName":"ocr-data","userId": "'$(echo $USER_NAME|sha1sum|awk '{print $1}')'"}'
+$ curl -v -X POST -H 'Content-Type: application/json' "http://<couchdb_admin_username>:<couchdb_admin_password>@<local_ip_address>:5984/_users" --data-binary '{"_id": "org.couchdb.user:'$USER_NAME'","name": "'$USER_NAME'","roles": ["admin"],"type": "user","password":"<ocr_login_password>","bucketName":"<bucketName>","userId": "'$(echo $USER_NAME|sha1sum|awk '{print $1}')'"}'
 
 ```
 
