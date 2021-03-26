@@ -13,7 +13,7 @@ ibmcloud ks cluster config --cluster <clusterID>
 kubectl config current-context
 ```
 
-[create Secret using kubectl command](https://kubernetes.io/docs/tasks/configmap-secret/managing-secret-using-kubectl/)
+4. [create Secret using kubectl command](https://kubernetes.io/docs/tasks/configmap-secret/managing-secret-using-kubectl/)
 ```
 kubectl.exe create secret --help
 ```
