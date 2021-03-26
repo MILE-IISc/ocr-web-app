@@ -67,9 +67,8 @@ node                                 14.15.3-alpine3.11                         
 
 ## 2. Set environment variables
 
-Create a text file by name `ocr-web-app.env` containing the credentials needed to connect to the other needed services: MongoDB, Object Storage and OCR Engine.
+Create a text file by name `ocr-web-app.env` containing the information needed to connect to the other needed services: CouchDB, Object Storage and OCR Engine.
 ```
-$ cat .\ocr-web-app.env
 JWT_KEY=<jwt-secret-key>
 OBJECT_STORAGE_ENDPOINT=s3.ap.cloud-object-storage.appdomain.cloud
 OBJECT_STORAGE_ACCESS_KEY_ID=<object_storage_access_key_id>
@@ -79,6 +78,20 @@ COUCH_DB_ADMIN_USERNAME=<couch_db_admin_username>
 COUCH_DB_ADMIN_PASSWORD=<couch_db_admin_password>
 COUCH_DB_PROVIDER=IBM_CLOUDANT
 RUN_OCR_ADDRESS=http://<ip-address-of-OCR-REST-API>:9080/
+RUN_OCR_PORT=9080
+```
+Example:
+```
+$ cat .\ocr-web-app.env
+JWT_KEY=somesecret
+OBJECT_STORAGE_ENDPOINT=http://192.168.0.52:9000
+OBJECT_STORAGE_ACCESS_KEY_ID=admin
+OBJECT_STORAGE_SECRET_ACCESS_KEY=admin123
+COUCH_DB_HOST=192.168.0.52:5984
+COUCH_DB_ADMIN_USERNAME=admin
+COUCH_DB_ADMIN_PASSWORD=admin123
+COUCH_DB_PROVIDER=APACHE_COUCHDB
+RUN_OCR_ADDRESS=http://192.168.0.52:9080/
 RUN_OCR_PORT=9080
 ```
 
