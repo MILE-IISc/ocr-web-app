@@ -1,6 +1,15 @@
 # Build and deploy OCR Web App as Docker Container
 
-## 1. Build docker image
+## 1. To setup object store
+Images required for OCR web app is stored in object store. It can either be setup locally using MinIO or in IBM COS in IBM cloud
+And data is stored in Apache CouchDB when setup is done locally and in IBM cloudant in IBM cloud
+
+To setup Minio and Apache CouchDB on your local environment follow instructions in [Setup_MinIO_ApacheCouchDB.md](Setup_MinIO_ApacheCouchDB.md)
+
+## 2. Setup OCR Engine
+To setup OCR engine, follow instructions [here](https://github.com/MILE-IISc/MILE-OCR-API)
+
+## 3. Build docker image
 
 Trigger build using `docker build` command
 ```
@@ -65,11 +74,10 @@ node                                 14.15.3-alpine3.11                         
 
 ```
 
-## 2. Set environment variables
+## 4. Set environment variables
 
-Create a text file by name `ocr-web-app.env` containing the credentials needed to connect to the other needed services: MongoDB, Object Storage and OCR Engine.
+Create a text file by name `ocr-web-app.env` containing the information needed to connect to the other needed services: CouchDB, Object Storage and OCR Engine.
 ```
-$ cat .\ocr-web-app.env
 JWT_KEY=<jwt-secret-key>
 OBJECT_STORAGE_ENDPOINT=s3.ap.cloud-object-storage.appdomain.cloud
 OBJECT_STORAGE_ACCESS_KEY_ID=<object_storage_access_key_id>
@@ -81,8 +89,22 @@ COUCH_DB_PROVIDER=IBM_CLOUDANT
 RUN_OCR_ADDRESS=http://<ip-address-of-OCR-REST-API>:9080/
 RUN_OCR_PORT=9080
 ```
+Example:
+```
+$ cat .\ocr-web-app.env
+JWT_KEY=somesecret
+OBJECT_STORAGE_ENDPOINT=http://192.168.0.52:9000
+OBJECT_STORAGE_ACCESS_KEY_ID=admin
+OBJECT_STORAGE_SECRET_ACCESS_KEY=admin123
+COUCH_DB_HOST=192.168.0.52:5984
+COUCH_DB_ADMIN_USERNAME=admin
+COUCH_DB_ADMIN_PASSWORD=admin123
+COUCH_DB_PROVIDER=APACHE_COUCHDB
+RUN_OCR_ADDRESS=http://192.168.0.52:9080/
+RUN_OCR_PORT=9080
+```
 
-## 3. Run the docker
+## 5. Run the docker
 
 Start the `OCR Web App` using `docker run` command:
 ```
@@ -96,7 +118,7 @@ CONTAINER ID        IMAGE               COMMAND                  CREATED        
 ac6c63d9cd06        ocr-web-app         "docker-entrypoint.s…"   10 seconds ago      Up 8 seconds              0.0.0.0:8080->8080/tcp   iisc-ocr-web-app
 ```
 
-## 4. Launch OCR Web App
+## 6. Launch OCR Web App
 
 Open http://localhost:8080/ in your browser.
 
