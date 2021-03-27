@@ -49,8 +49,8 @@ exports.userLogin = async (req, res, next) => {
                         for(i = 0; i < result.rows.length; i++) {
                           console.log("documentId for ",i,":",result.rows[i].id);
                           bookDb = "mile_book_db_"+result.rows[i].id;
-                          await couch.setDbSecurity(bookDb, userInfo.name).then((access) => {
-                            console.log("granted permission for",bookDb,"to key",access.key);
+                          await couch.setDbSecurity(bookDb, userInfo.name).then((status) => {
+                            console.log("granted permission for",bookDb,"with status",status);
                           });
                         }
                       }
