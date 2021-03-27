@@ -7,7 +7,7 @@ And data is stored in Apache CouchDB when setup is done locally and in IBM cloud
 To setup Minio and Apache CouchDB on your local environment follow instructions in [Setup_MinIO_ApacheCouchDB.md](Setup_MinIO_ApacheCouchDB.md)
 
 ## 2. Setup OCR Engine
-To setup OCR engine, follow instructions [here](https://github.com/MILE-IISc/MILE-OCR-Engine/blob/master/Build.md)
+To setup OCR engine, follow instructions [here](https://github.com/MILE-IISc/MILE-OCR-API)
 
 ## 3. Build docker image
 
