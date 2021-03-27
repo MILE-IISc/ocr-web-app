@@ -38,7 +38,4 @@ $ curl -v -X POST -H 'Content-Type: application/json' "http://<couchdb_admin_use
 
 ```
 
-## d) Assign `APACHE_COUCHDB` to the environment variable `COUCH_DB_PROVIDER`  as we are using couchDb. If we are using IBM Cloudant set it as  `IBM_CLOUDANT`
-
-
-After successful completion, configure the environment variables in `ocr-web-app.env` file which will be used while invoking ocr-web-app
+## d) After successful completion, assign `APACHE_COUCHDB` to the environment variable `COUCH_DB_PROVIDER`  as we are using couchDb. If we are using IBM Cloudant set it as `IBM_CLOUDANT` in `ocr-web-app.env` file which will be used while invoking ocr-web-app
