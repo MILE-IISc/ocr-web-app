@@ -45,13 +45,13 @@
  - Click Account(displayed with head icon) and then Click `CORS`. If CORS is disabled, click `Enable CORS` and check mark `All domains ( * )` to avoid CORS policy issue.
 
  - Now we have to create `"_users"` database and insert a user document in that database using UI interface or using the credentials(in step B9) and using the commands below,
-  ```
-$ curl -v -X PUT "http://<username>:<password>@<host>:5984/_users"
-
-$ export OCR_USER_NAME=<user_login_id> #should be of the form user@domain.com (ex:ocr@gmail.com)
-
-$ curl -v -X POST -H 'Content-Type: application/json' "http://<username>:<password>@<host>:5984/_users" --data-binary '{"_id": "org.couchdb.user:'$USER_NAME'","name": "'$USER_NAME'","roles": ["admin"],"type": "user","password":"<ocr_login_password>","bucketName":"<bucketName>","userId": "'$(echo $USER_NAME|sha1sum|awk '{print $1}')'"}'
-
-```
+ 
+    ```
+      $ curl -v -X PUT "https://<username>:<password>@<host>/_users"
+      
+      $ export OCR_USER_NAME=<user_login_id> #should be of the form user@domain.com (ex:ocr@gmail.com)
+      
+      $ curl -v -X POST -H 'Content-Type: application/json' "https://<username>:<password>@<host>/_users" --data-binary '{"_id": "org.couchdb.user:'$USER_NAME'","name": "'$USER_NAME'","roles": ["admin"],"type": "user","password":"<ocr_login_password>","bucketName":"<bucketName>","userId": "'$(echo $USER_NAME|sha1sum|awk '{print $1}')'"}'
+     ```
 
  ## After successful completion, assign `IBM_CLOUDANT` to the environment variable `COUCH_DB_PROVIDER` as we are using IBM Cloudant. If we are using CouchDb set it as `APACHE_COUCHDB` which will be used while invoking ocr-web-app
