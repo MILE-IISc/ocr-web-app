@@ -34,7 +34,7 @@ $ curl -v -X PUT "http://<admin_username>:<admin_password>@<local_ip_address>:59
 
 $ export OCR_USER_NAME=<user_login_id> #should be of the form user@domain.com (ex:ocr@gmail.com)
 
-$ curl -v -X POST -H 'Content-Type: application/json' "http://<couchdb_admin_username>:<couchdb_admin_password>@<local_ip_address>:5984/_users" --data-binary '{"_id": "org.couchdb.user:'$USER_NAME'","name": "'$USER_NAME'","roles": ["admin"],"type": "user","password":"<ocr_login_password>","bucketName":"<bucketName>","userId": "'$(echo $USER_NAME|sha1sum|awk '{print $1}')'"}'
+$ curl -v -X POST -H 'Content-Type: application/json' "http://<couchdb_admin_username>:<couchdb_admin_password>@<local_ip_address>:5984/_users" --data-binary '{"_id": "org.couchdb.user:'$OCR_USER_NAME'","name": "'$OCR_USER_NAME'","roles": ["admin"],"type": "user","password":"<ocr_login_password>","bucketName":"<bucketName>","userId": "'$(echo $OCR_USER_NAME|sha1sum|awk '{print $1}')'"}'
 
 ```
 
