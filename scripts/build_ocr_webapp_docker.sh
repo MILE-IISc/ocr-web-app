@@ -1,3 +1,3 @@
 cd ..
 git pull
-docker build -t ocr-web-app .
+docker build -t mile-ocr-web-app .
