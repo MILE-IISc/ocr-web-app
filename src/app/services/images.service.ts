@@ -86,7 +86,7 @@ export class ImageService implements OnInit {
   public angle: number = 0;
   private renderer: Renderer2;
   public clientpercent;
-  obtainblock = false;
+  obtainblock = true;
   isRunningOcrChange = new EventEmitter<any>();
   isLoadingFromServer = false;
   isLoadingFromServerChange = new EventEmitter<any>();
