@@ -162,17 +162,19 @@ router.get("", authChecker, (req, res, next) => {
               }
             }
           } else {
-            console.log("Got Output from find document for pageName", xmlFileName, "in", currentBookDb, "no. of documents", response.documents.docs.length);
-            if(response.documents.docs.length == 1) {
-              pageDocument = response.documents.docs[0];
-              console.log("pageDocument",pageDocument);
-              xmlJsonObject = pageDocument.data;
-            } else {
-              console.log("Multiple XML documents found in book database", currentBookDb);
+            console.log("Got Output from find document for pageName", xmlFileName, "in", currentBookDb);
+            pageDocument = response.document;
+            console.log("pageDocument", pageDocument);
+            xmlJsonObject = pageDocument.data;
+            if (xmlJsonObject.hasOwnProperty('page') && 
+                xmlJsonObject.page.hasOwnProperty('block') && xmlJsonObject.page.block.length > 0 &&
+                xmlJsonObject.page.block[0].hasOwnProperty('line') && xmlJsonObject.page.block[0].line.length > 0) {
+              console.log("OCR has already been run on ", req.query.fileName);
               res.status(200).json({
-                message: "Multiple XML documents found in book database",
-                completed: "N"
+                message: "OCR has already been run on " + req.query.fileName,
+                completed: "Y"
               });
+              return;
             }
           }
           console.log("xmlContent in RUN-OCR",xmlJsonObject);

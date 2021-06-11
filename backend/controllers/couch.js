@@ -269,18 +269,11 @@ module.exports.findPage = async function (dbName, searchValue) {
     var db = cloudant.use(dbName);
     // dbSearchKey = `"` + searchKey + `"`;
     console.log("search in findBook", searchValue);
-    db.find({
-      'selector': {
-        pageName: {
-          '$eq': searchValue
-        }
-      }
-    }).then((documents) => {
-      console.log("documents", documents.docs.length);
-      resolve({ documents, statusCode: (documents.docs.length > 0) ? 200 : 404 });
+    db.get(searchValue).then((document) => {
+      resolve({ document, statusCode: 200 });
     }).catch((err) => {
       console.log("error while logging from cloudant", err);
-      resolve({ documents, statusCode: 404 });
+      resolve({ document, statusCode: 404 });
     });
   });
 }
