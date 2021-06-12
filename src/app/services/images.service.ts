@@ -78,6 +78,7 @@ export class ImageService implements OnInit {
   xmlFileName;
   IMAGE_BACKEND_URL;
   XML_BACKEND_URL;
+  DOWNLOAD_XML_URL;
   FOLDER_BACKEND_URL;
   invalidMessage;
   value: string;
@@ -104,6 +105,8 @@ export class ImageService implements OnInit {
   uploadMessage = "";
   folderName = "";
   bookName = "";
+  downloadXmlAllFlag = false;
+  downloadXmlLastIndex = 0;
 
   // pouchDb related declarations
   uploadLocalBookDbInstance;
@@ -114,6 +117,7 @@ export class ImageService implements OnInit {
   constructor(private route: ActivatedRoute, rendererFactory: RendererFactory2, private http: HttpClient, private router: Router, private authService: AuthService, private headerService: HeaderService, @Inject(DOCUMENT) private document: Document, public dialog: MatDialog, private bookService: BookService, private pouchService: PouchService) {
     this.IMAGE_BACKEND_URL = this.authService.BACKEND_URL + "/api/image/";
     this.XML_BACKEND_URL = this.authService.BACKEND_URL + "/api/xml/";
+    this.DOWNLOAD_XML_URL = this.authService.BACKEND_URL + "/api/downloadXml/toAlto/";
     this.FOLDER_BACKEND_URL = this.authService.BACKEND_URL + "/api/folder/";
     console.log("IMAGE_BACKEND_URL " + this.IMAGE_BACKEND_URL);
     console.log("XML_BACKEND_URL " + this.XML_BACKEND_URL);
@@ -469,6 +473,67 @@ export class ImageService implements OnInit {
     }
   }
 
+  downloadXmlFiles() {
+    this.progressType = 'DOWNLOAD_XML';
+    if (this.pouchImagesList.length > 0) {
+      var convertToAltoXml = (x) => {
+        if (x == 0) {
+          this.uploadMessage = "";
+          this.uploadMessageChange.emit(this.uploadMessage);
+          this.progressInfos.splice(0, this.progressInfos.length);
+          this.openProgressDialog();
+          for (let i = 0; i < this.pouchImagesList.length; i++) {
+            var status = 'Pending';
+            const progress = new ProgressInfo(this.pouchImagesList[i].pageName, status);
+            this.progressInfos.push(progress);
+            this.progressInfoChange.emit(this.progressInfos);
+          }
+        }
+        if (x < this.pouchImagesList.length) {
+          // var bookName = this.route.snapshot.queryParams['data'];
+          let imageFileName = this.pouchImagesList[x].pageName;
+          let xmlFileName = imageFileName.substr(0, imageFileName.lastIndexOf(".")) + ".xml";
+          console.log("Converting " + xmlFileName + " to ALTO XML...");
+          this.progressInfos[x].value = 'Converting';
+          this.progressInfoChange.emit(this.progressInfos.slice());
+          const queryParams = `?xmlFileName=${xmlFileName}&bookDbName=${this.currentBookDb}`;
+          this.http.get(this.DOWNLOAD_XML_URL + queryParams, {responseType: 'text'}).subscribe(response => {
+            if (response === null) {
+              console.log("Error while getting Alto XML file from server.");
+              this.progressInfos[x].value = 'Failed';
+              this.progressInfoChange.emit(this.progressInfos.slice());
+            } else {
+              console.log(response);
+              // this.ocrMessageChange.emit(response.message);
+              this.progressInfos[x].value = 'Completed';
+              this.progressInfoChange.emit(this.progressInfos.slice());
+            }
+            this.downloadXmlLastIndex = x;
+            if (this.downloadXmlLastIndex == (this.pouchImagesList.length - 1)) {
+              this.uploadMessage = "Downloaded ALTO XML for all the images"
+              this.uploadMessageChange.emit(this.uploadMessage);
+              var btn = document.getElementById("pauseButton");
+              btn.innerHTML = 'OK';
+              $("#cancelButton").hide();
+              $("#closeButton").hide();
+            }
+            if (this.downloadXmlAllFlag == true) {
+              convertToAltoXml(x + 1);
+            }
+          });
+        }
+      }
+      console.log("this.downloadXmlAllFlag", this.downloadXmlAllFlag);
+      console.log("this.downloadXmlLastIndex", this.downloadXmlLastIndex);
+      if (this.downloadXmlAllFlag == false) {
+        this.downloadXmlAllFlag = true;
+        convertToAltoXml(0);
+      } else {
+        convertToAltoXml(this.downloadXmlLastIndex+1);
+      }
+    }
+  }
+
   setRunOcrAllFlag(status) {
     this.runOcrAllFlag = status;
   }
@@ -480,6 +545,19 @@ export class ImageService implements OnInit {
   stopRunOcrOnAll() {
     this.setRunOcrAllFlag(false);
     this.runOcrLastIndex = 0;
+  }
+
+  setDownloadXmlAllFlag(status) {
+    this.downloadXmlAllFlag = status;
+  }
+
+  getDownloadXmlAllFlag() {
+    return this.downloadXmlAllFlag;
+  }
+
+  stopDownloadXmlOnAll() {
+    this.setDownloadXmlAllFlag(false);
+    this.downloadXmlLastIndex = 0;
   }
 
   updateXmlModel(jsonObj) {

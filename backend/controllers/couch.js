@@ -272,7 +272,7 @@ module.exports.findPage = async function (dbName, searchValue) {
     db.get(searchValue).then((document) => {
       resolve({ document, statusCode: 200 });
     }).catch((err) => {
-      console.log("error while logging from cloudant", err);
+      console.log("Error while getting the document from CouchDB: ", err);
       resolve({ err, statusCode: 404 });
     });
   });

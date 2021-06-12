@@ -51,6 +51,63 @@ function getXmlConvertToAltoAndAddToZip(bookDbName, fileName, folder) {
   });
 }
 
+function getXmlAndConvertToAlto(bookDbName, fileName) {
+  return new Promise(async (resolve, reject) => {
+    await couch.findPage(bookDbName, fileName).then(async (response) => {
+      if (response.statusCode == 404) {
+        console.log("Document not available in Couch for",fileName);
+        reject(false);
+      } else {
+        console.log("Got Output from find document for pageName", fileName, "in", bookDbName);
+        pageDocument = response.document;
+        xmlJsonObject = pageDocument.data;
+        const builder = new xml2js.Builder();
+        xmlContent = await builder.buildObject(xmlJsonObject);
+        if (xmlContent != null) {
+          console.log(`Fetched XML: ${fileName} from CouchDb. Converting it to ALTO XML ...`);
+          request.post({
+            url: process.env.RUN_OCR_ADDRESS + "/convert",
+            port: process.env.RUN_OCR_PORT,
+            method: "POST",
+            headers: {
+              'Content-Type': 'application/xml',
+            },
+            body: xmlContent
+          }, function (error, response, body) {
+            if (response.statusCode == 200) {
+              console.log(`Converted ${fileName} to ALTO XML`);
+              resolve(body);
+            } else {
+              console.log("Error while converting to ALTO XML: " + error);
+              reject(false);
+            }
+          });
+        } else {
+          reject(false);
+        }
+      }
+    });
+  });
+}
+
+router.get("/toAlto", authChecker, async (req, res, next) => {
+  bucketName = req.userData.bucketName;
+  const bookDbName = req.query.bookDbName;
+  const xmlFileName = req.query.xmlFileName;
+  console.log('toAlto called for file:', xmlFileName);
+  getXmlAndConvertToAlto(bookDbName, xmlFileName)
+  .then((data) => {
+    console.log("saved xml file");
+    res.type('application/xml');
+    res.status(200);
+    res.send(data);
+  }).catch((e) => {
+    console.log('toAlto failed. Sending 204 to client.')
+    res.status(204);
+    res.send();
+  });
+});
+
 router.get("", authChecker, async (req, res, next) => {
   bucketName = req.userData.bucketName;
   const bookDbName = req.query.bookDbName;

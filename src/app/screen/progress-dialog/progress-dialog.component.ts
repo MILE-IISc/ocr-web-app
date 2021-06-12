@@ -52,9 +52,10 @@ export class ProgressDialogComponent implements OnInit {
           this.imageService.setRunOcrAllFlag(false);
         } else if(progressType == 'DELETE_IMAGES'){
           this.imageService.setDeleteFlag(false);
+        } else if(progressType == 'DOWNLOAD_XML') {
+          this.imageService.setDownloadXmlAllFlag(false);
         }
-      }
-      else if (this.resume == true) {
+      } else if (this.resume == true) {
         this.resume = true;
         btn.innerHTML = 'Pause';
         let progressType = this.imageService.getProgressType();
@@ -64,9 +65,12 @@ export class ProgressDialogComponent implements OnInit {
         } else if (progressType == 'RUN_OCR') {
           this.imageService.setRunOcrAllFlag(true);
           this.imageService.getXmlFileAsJson2();
-        }else if(progressType == 'DELETE_IMAGES'){
+        } else if(progressType == 'DELETE_IMAGES') {
           this.imageService.setDeleteFlag(true);
           this.imageService.deleteImages();
+        } else if(progressType == 'DOWNLOAD_XML') {
+          this.imageService.setDownloadXmlAllFlag(true);
+          this.imageService.downloadXmlFiles();
         }
       }
       this.resume = !this.resume;
@@ -103,16 +107,19 @@ export class confirmationDialog implements OnInit {
     let progressType = this.imageService.getProgressType();
     // console.log("progressType|"+progressType+"|");
     if (progressType == 'UPLOAD_IMAGE') {
-      this.header = "Terminate Upload Image Operation";
+      this.header = "Stop Upload Image Operation";
       this.dialogInfo = "Confirm whether to cancel upload of rest of the images. Are you sure you want to continue? ";
       // console.log("dialog header", this.header,"dialog message",this.dialogInfo);
     } else if (progressType == 'RUN_OCR') {
-      this.header = "Terminate RUN-OCR Operation";
+      this.header = "Stop RUN-OCR Operation";
       this.dialogInfo = "Confirm whether to cancel running OCR on rest of the pages. Are you sure you want to continue? ";
       // console.log("dialog header", this.header,"dialog message",this.dialogInfo);
     } else if(progressType =='DELETE_IMAGES'){
-      this.header = "Terminate Deelete Operation";
+      this.header = "Stop Delete Operation";
       this.dialogInfo = "Confirm whether to delete rest of the images. Are you sure you want to continue? ";
+    } else if(progressType =='DOWNLOAD_XML'){
+      this.header = "Stop Download XML Operation";
+      this.dialogInfo = "Are you sure you want to stop downloading XML files? ";
     }
   }
 
@@ -125,6 +132,8 @@ export class confirmationDialog implements OnInit {
       this.imageService.stopRunOcrOnAll();
     } else if(progressType == 'DELETE_IMAGES'){
       this.imageService.stopDeletion();
+    } else if(progressType == 'DOWNLOAD_XML'){
+      this.imageService.stopDownloadXmlOnAll();
     }
   }
 }

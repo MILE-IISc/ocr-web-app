@@ -656,7 +656,7 @@ export class ScreenComponent implements OnInit {
   //   }
   // }
 
-  async downloadXml2() {
+  async downloadXml2_old() {
     this.isDownloading = true;
     let currentBookDb = this.imageService.getCurrentBookDb();
     let bookName = this.route.snapshot.queryParams['data'];
@@ -667,6 +667,10 @@ export class ScreenComponent implements OnInit {
       console.log("Error while getting ZIP of XML files from server: " + error);
       alert(error);
     };
+  }
+
+  async downloadXml2() {
+    this.imageService.downloadXmlFiles();
   }
 
 
