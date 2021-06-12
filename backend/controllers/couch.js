@@ -273,7 +273,7 @@ module.exports.findPage = async function (dbName, searchValue) {
       resolve({ document, statusCode: 200 });
     }).catch((err) => {
       console.log("error while logging from cloudant", err);
-      resolve({ document, statusCode: 404 });
+      resolve({ err, statusCode: 404 });
     });
   });
 }
