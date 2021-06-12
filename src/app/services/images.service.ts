@@ -20,7 +20,8 @@ import { BookService } from './book.service';
 import { PouchService } from './pouch.service';
 import PouchDB from 'node_modules/pouchdb';
 import { promises } from 'dns';
-
+import * as JSZip from 'jszip';
+import * as fileSaver from 'file-saver';
 
 declare var Tiff: any;
 declare var $: any;
@@ -107,6 +108,8 @@ export class ImageService implements OnInit {
   bookName = "";
   downloadXmlAllFlag = false;
   downloadXmlLastIndex = 0;
+  zip;
+  folder;
 
   // pouchDb related declarations
   uploadLocalBookDbInstance;
@@ -488,6 +491,8 @@ export class ImageService implements OnInit {
             this.progressInfos.push(progress);
             this.progressInfoChange.emit(this.progressInfos);
           }
+          this.zip = new JSZip();
+          this.folder = this.zip.folder(this.bookName + "_xml_files");
         }
         if (x < this.pouchImagesList.length) {
           // var bookName = this.route.snapshot.queryParams['data'];
@@ -507,6 +512,7 @@ export class ImageService implements OnInit {
               // this.ocrMessageChange.emit(response.message);
               this.progressInfos[x].value = 'Completed';
               this.progressInfoChange.emit(this.progressInfos.slice());
+              this.folder.file(xmlFileName, response);
             }
             this.downloadXmlLastIndex = x;
             if (this.downloadXmlLastIndex == (this.pouchImagesList.length - 1)) {
@@ -516,6 +522,7 @@ export class ImageService implements OnInit {
               btn.innerHTML = 'OK';
               $("#cancelButton").hide();
               $("#closeButton").hide();
+              this.createZip();
             }
             if (this.downloadXmlAllFlag == true) {
               convertToAltoXml(x + 1);
@@ -533,6 +540,14 @@ export class ImageService implements OnInit {
       }
     }
   }
+
+  createZip() {
+    console.log(`Processed all XML files. Creating zip file now.`);
+    var zipFileName = this.bookName + '_xml_files.zip';
+    this.zip.generateAsync({type:"blob"}).then(function (blob) {
+      fileSaver(blob, zipFileName);
+    });
+  };
 
   setRunOcrAllFlag(status) {
     this.runOcrAllFlag = status;
