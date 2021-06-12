@@ -8,8 +8,7 @@ COPY backend ./backend
 
 RUN npm install
 
-RUN npm install -g @angular/cli@10.0.8
-RUN ng build --prod
+RUN npm run build-prod
 
 COPY README.md ./
 RUN npm install -g marked
