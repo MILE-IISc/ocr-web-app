@@ -17,36 +17,34 @@ function getXmlConvertToAltoAndAddToZip(bookDbName, fileName, folder) {
         console.log("Document not available in Couch for",fileName);
         resolve(false);
       } else {
-        console.log("Got Output from find document for pageName", fileName, "in", bookDbName, "no. of documents", response.documents.docs.length);
-        if(response.documents.docs.length == 1) {
-          pageDocument = response.documents.docs[0];
-          xmlJsonObject = pageDocument.data;
-          const builder = new xml2js.Builder();
-          xmlContent = await builder.buildObject(xmlJsonObject);
-          if (xmlContent != null) {
-            console.log(`Fetched XML: ${fileName} from CouchDb. Converting it to ALTO XML ...`);
-            request.post({
-              url: process.env.RUN_OCR_ADDRESS + "/convert",
-              port: process.env.RUN_OCR_PORT,
-              method: "POST",
-              headers: {
-                'Content-Type': 'application/xml',
-              },
-              body: xmlContent
-            }, function (error, response, body) {
-              if (response.statusCode == 200) {
-                console.log(`Converted ${fileName} to ALTO XML`);
-                folder.file(fileName, body);
-                console.log(`Added ${fileName} to ZIP folder`);
-                resolve(true);
-              } else {
-                console.log("Error while converting to ALTO XML: " + error);
-                resolve(false);
-              }
-            });
-          } else {
-            resolve(false);
-          }
+        console.log("Got Output from find document for pageName", fileName, "in", bookDbName);
+        pageDocument = response.document;
+        xmlJsonObject = pageDocument.data;
+        const builder = new xml2js.Builder();
+        xmlContent = await builder.buildObject(xmlJsonObject);
+        if (xmlContent != null) {
+          console.log(`Fetched XML: ${fileName} from CouchDb. Converting it to ALTO XML ...`);
+          request.post({
+            url: process.env.RUN_OCR_ADDRESS + "/convert",
+            port: process.env.RUN_OCR_PORT,
+            method: "POST",
+            headers: {
+              'Content-Type': 'application/xml',
+            },
+            body: xmlContent
+          }, function (error, response, body) {
+            if (response.statusCode == 200) {
+              console.log(`Converted ${fileName} to ALTO XML`);
+              folder.file(fileName, body);
+              console.log(`Added ${fileName} to ZIP folder`);
+              resolve(true);
+            } else {
+              console.log("Error while converting to ALTO XML: " + error);
+              resolve(false);
+            }
+          });
+        } else {
+          resolve(false);
         }
       }
     });
