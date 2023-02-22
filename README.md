@@ -1,8 +1,11 @@
 # MILE IISc - Kannada OCR Web App
+
+Note: Please [build](Build.md) and host the OCR Web App on your hardware before following the usage instructions below.
+
 ## Instructions to use the OCR Web App
 
-- Hit the MILE IISc OCR Web App URL: [OCR Web App](http://169.38.86.211:8080)
-- Log in with the Email and the Password provided.
+- Hit the OCR Web App URL
+- Log in with the Email and the Password configured.
 
 <img src="./docs/LogIn.jpg" width="800"/>
 
